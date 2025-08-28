@@ -50,20 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBGrKYtV60m4uqqyv8PmedRne_sCEhcz2E',
-    appId: '1:1097896663671:android:bb0da2feb80c407daa4472',
-    messagingSenderId: '1097896663671',
-    projectId: 'al-huruf',
-    storageBucket: 'al-huruf.firebasestorage.app',
+    apiKey: 'AIzaSyBPDg3HGHnx7qdjiayJOsBZg4GTPciPEOM',
+    appId: '1:638398407864:android:56b1480b60445e197ec04d',
+    messagingSenderId: '638398407864',
+    projectId: 'calora-a00fa',
+    storageBucket: 'calora-a00fa.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBUo3pm4Tf3RZEN77wrwrAmhMk9y-xixPA',
-    appId: '1:1097896663671:ios:30e3771204f31cb1aa4472',
-    messagingSenderId: '1097896663671',
-    projectId: 'al-huruf',
-    storageBucket: 'al-huruf.firebasestorage.app',
-    iosClientId: '1097896663671-2lvgr1p0r986373vouofudcak76out24.apps.googleusercontent.com',
-    iosBundleId: 'com.alhuruf.arabic.quran.tajweed',
+    apiKey: 'AIzaSyBuoIHEPqpGiMBm7ReZeLyEg4CPZJ-xPN8',
+    appId: '1:638398407864:ios:e27e248f22facf587ec04d',
+    messagingSenderId: '638398407864',
+    projectId: 'calora-a00fa',
+    storageBucket: 'calora-a00fa.firebasestorage.app',
+    iosBundleId: 'ai.calora.calora',
   );
+
 }
