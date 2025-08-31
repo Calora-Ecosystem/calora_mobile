@@ -1,4 +1,4 @@
-import 'package:calora/domain/repo/auth_repo.dart';
+import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';

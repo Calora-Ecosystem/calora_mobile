@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:calora/data/api/auth_api.dart';
-import 'package:calora/data/store/auth_store.dart';
+import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/model/token/token.dart';
 import 'package:calora/domain/model/verification/verification.dart';
-import 'package:calora/domain/repo/auth_repo.dart';
+import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_app_installations/firebase_app_installations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
