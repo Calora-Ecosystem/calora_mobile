@@ -1,5 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/language%20/select/management/select_language_management.dart';
 import 'package:calora/presentation/language%20/select/management/select_language_manager.dart';
 import 'package:calora/widgets/builder/language_item_builder.dart';
@@ -29,33 +33,46 @@ class SelectLanguagePage
   @override
   Widget builder(context, manager, state) {
     return Scaffold(
-      body: Container(
-        constraints: BoxConstraints.expand(),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Assets.icons.background.image(fit: BoxFit.fill),
-            ),
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Center(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Spacer(),
                     Assets.icons.iconCalora.svg(),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 64,),
+                    'Select the language'.text(16, 20, 500),
+                    SizedBox(height: 16,),
                     LanguageWidget(
                       languages: manager.state.languages,
                       selectedLanguage: manager.state.selectedLanguage,
                       onLanguageSelected: (data) {},
                     ),
+                    SizedBox(height: 64,),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Button(
+                        onPressed: _openAuthPage,
+                        child: Strings.doContinue
+                            .text(16, 20, 500)
+                            .c(context.colors.textWhite),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  void _openAuthPage() {}
 }

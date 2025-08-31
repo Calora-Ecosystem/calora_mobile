@@ -16,20 +16,19 @@ class LanguageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: languages.length,
-        itemBuilder: (context, index) {
-          final language = languages[index];
-          final isSelected = selectedLanguage == language;
-
-          return LanguageItem(
-            language: language,
-            isChecked: isSelected,
-            onTap: (data) => onLanguageSelected(data),
-          );
-        },
-      ),
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: languages.length,
+      itemBuilder: (context, index) {
+        final language = languages[index];
+        final isSelected = selectedLanguage == language;
+        return LanguageItem(
+          language: language,
+          isChecked: isSelected,
+          onTap: (data) => onLanguageSelected(data),
+        );
+      },
     );
   }
 }

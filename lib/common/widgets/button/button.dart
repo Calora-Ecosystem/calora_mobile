@@ -7,6 +7,7 @@ class Button extends StatelessWidget {
   const Button({
     super.key,
     this.text,
+    this.textColor,
     this.child,
     this.onPressed,
     this.enabled = true,
@@ -15,6 +16,7 @@ class Button extends StatelessWidget {
   });
 
   final String? text;
+  final Color? textColor;
   final Widget? child;
   final VoidCallback? onPressed;
   final bool enabled;

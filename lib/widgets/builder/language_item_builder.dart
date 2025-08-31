@@ -51,11 +51,11 @@ class LanguageItem extends StatelessWidget {
   Widget _currentText(Language language, BuildContext context) {
     switch (language) {
       case Language.EN:
-        return language.name.text(16, 16, 300).c(context.colors.textStrong);
+        return language.name.text(16, 20, 400).c(context.colors.textStrong);
       case Language.RU:
-        return language.name.text(16, 16, 300).c(context.colors.textStrong);
+        return language.name.text(16, 20, 400).c(context.colors.textStrong);
       case Language.UZ:
-        return language.name.text(16, 16, 300).c(context.colors.textStrong);
+        return language.name.text(16, 20, 400).c(context.colors.textStrong);
     }
   }
 
