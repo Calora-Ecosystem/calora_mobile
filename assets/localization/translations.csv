@@ -5,5 +5,13 @@ or,yoki,yoki,yoki
 continueWithApple,Apple orqali davom etish,Apple orqali davom etish,Apple orqali davom etish
 continueWithGoogle,Google orqali davom etish,Google orqali davom etish,Google orqali davom etish
 termsOfUse,"Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman","Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman","Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman"
-resend,Qayta yuborish,Qayta yuborish,Qayta yuborish
-select_language,Select the language,Tilni tanlang,Tilni tanlang
+resend,Qayta yuborish,Qayta yuborish,Отправить повторно
+select_language,Select the language,Tilni tanlang,Выберите язык
+changing_lifestyle,Lifestyle change,Hayot tarzini o’zgartirish,Изменение образа жизни
+changing_lifestyle_desc,Don't delay changing your lifestyle. Take your first step today.,Hayot tarzini o‘zgartirishni kechiktirma. Bugun birinchi qadamingni qo‘y.,Не откладывайте изменение образа жизни. Сделайте первый шаг уже сегодня.
+healthy_eating,Healthy eating,Sog’lom ovqatlanish,Здоровое питание
+healthy_eating_desc,"It's now easy to track what you eat every day. Just open your phone, turn on the camera - we'll count it all. ","Har kuni nima yeyotganingni nazorat qilish endi oson. Telefoningni och, kamerani yoq – biz hammasini hisoblab beramiz","Теперь легко отслеживать, что вы едите каждый день. Просто откройте телефон, включите камеру — мы всё посчитаем."
+enough_day,30 days is enough for change,30 kun o‘zgarish uchun yetarli,30 дней достаточно для изменений
+enough_day_desc,"Workout at home, join the 30-day challenge, and see the results for yourself.","Uyda mashq qil, 30 kunlik challenge’ga qo‘shil va natijani o‘zing ko‘r.","Тренируйтесь дома, присоединяйтесь к 30-дневному марафону и оцените результаты сами."
+daily_water_norm,Daily water intake is very important!,Kunlik suv normasi bu juda muhim !,Ежедневное потребление воды очень важно!
+daily_water_norm_desc,"Don't forget to drink water, we'll count your steps. While we remind you, you just keep going.","Suv ichishni unutib qo‘yma, qadamlaringni ham sanaymiz. Biz eslatar ekanmiz, sen faqat davom et.","Не забывайте пить воду, мы будем считать ваши шаги. Пока мы напоминаем, просто продолжайте идти."

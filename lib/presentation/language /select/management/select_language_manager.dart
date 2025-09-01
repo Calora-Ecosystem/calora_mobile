@@ -14,22 +14,18 @@ class SelectLanguageManager
   final CommonRepo _commonRepo;
 
   void setSelectedLanguage(Language language) {
-    log("ResultSelectedLanguage->${language}");
     _commonRepo.setSelectedLanguage(language);
     emit(state.copyWith(selectedLanguage: language));
   }
 
   void getSelectedLanguage() async {
     await _commonRepo.getSelectedLanguage().handle(
-      onStart: () => {log("OnStart")},
+      onStart: () => {},
       onData: (data) => {
-        log("OnEach->$data"),
         emit(state.copyWith(languages: _languages, selectedLanguage: data)),
       },
-      onDone: () => {log("OnDone")},
-      onError: (error) {
-        log("Error->$error");
-      },
+      onDone: () => {},
+      onError: (error) {},
     );
   }
 

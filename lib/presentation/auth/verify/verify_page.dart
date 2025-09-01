@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/verify/verify_code_widget.dart';
@@ -53,7 +54,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       width: double.infinity,
                       child: Button(
                         loading: state.loading,
-                        onPressed: () {},
+                        onPressed: () {
+                          _openOnboardingPage(context);
+                        },
                         child: Strings.doContinue
                             .text(16, 20, 500)
                             .c(context.colors.textWhite),
@@ -67,5 +70,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
         ],
       ),
     );
+  }
+
+  void _openOnboardingPage(BuildContext context) {
+    context.router.push(OnboardingRoute());
   }
 }

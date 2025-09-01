@@ -12,4 +12,6 @@ class DefaultThemeColors {
   final accentSub = Color(0xFF46A758);
   final backgroundBase = Color(0xFFFFFFFF);
   final strokeSoft = Color(0xFFF0F0F0);
+  final accentSoft = Color(0xFF94CE9A);
+  final accentWhite = Color(0xFFFBFEFB);
 }
