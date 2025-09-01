@@ -18,7 +18,6 @@ class LanguageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log("ResultLanguage->${languages.length}");
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

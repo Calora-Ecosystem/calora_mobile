@@ -49,7 +49,7 @@ class SelectLanguagePage
                   children: [
                     Assets.icons.iconCalora.svg(),
                     SizedBox(height: 64),
-                    'Select the language'.text(16, 20, 500),
+                    Strings.selectLanguage.text(16, 20, 500),
                     SizedBox(height: 16),
                     LanguageWidget(
                       languages: manager.state.languages,
@@ -63,7 +63,7 @@ class SelectLanguagePage
                       width: double.infinity,
                       child: Button(
                         onPressed: () {
-                          // _openAuthPage(context);
+                          _openAuthPage(context);
                         },
                         child: Strings.doContinue
                             .text(16, 20, 500)

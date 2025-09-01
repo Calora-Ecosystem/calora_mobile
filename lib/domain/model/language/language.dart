@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -8,8 +10,8 @@ enum Language {
 
   static Language fromName(String name) {
     return Language.values.firstWhere(
-          (element) => element.name == name.toUpperCase(),
-      orElse: () => Language.EN, // default fallback
+      (element) => element.name == name,
+      orElse: () => Language.UZ,
     );
   }
 

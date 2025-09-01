@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/language/language.dart';
