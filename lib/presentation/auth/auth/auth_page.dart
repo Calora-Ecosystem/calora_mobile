@@ -23,7 +23,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
   void listener(context, manager, effect) {
     effect.when(
       verify: (verification) {
-        context.router.push(VerifyRoute());
+        context.router.push(VerifyRoute(email: verification.email ?? ""));
       },
     );
   }
@@ -53,7 +53,10 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                     width: double.infinity,
                     child: Button(
                       loading: state.loading,
-                      onPressed: manager.login,
+                      onPressed: () {
+                        // manager.login,manager
+                        _openVerifyPage(context, "");
+                      },
                       text: Strings.doContinue,
                     ),
                   ),
@@ -136,5 +139,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
         ],
       ),
     );
+  }
+
+  void _openVerifyPage(BuildContext context, String email) {
+    context.pushRoute(VerifyRoute(email: email));
   }
 }

@@ -41,7 +41,9 @@ class SelectLanguagePage
             child: Assets.icons.background.image(fit: BoxFit.fill),
           ),
           SafeArea(
-            child: Padding(
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Center(
                 child: Column(

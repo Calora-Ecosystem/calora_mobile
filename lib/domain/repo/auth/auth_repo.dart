@@ -6,4 +6,6 @@ abstract class AuthRepo {
   Future<Verification> login(String email);
 
   Future<void> verify(Verification verification, String code);
+
+  Future<void> resendVerifyCode();
 }

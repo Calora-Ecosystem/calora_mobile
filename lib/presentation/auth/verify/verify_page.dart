@@ -1,4 +1,10 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/verify/verify_code_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -7,16 +13,59 @@ import 'management/verify_manager.dart';
 
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
-  const VerifyPage({super.key});
-  
+  final String email;
+
+  VerifyPage({super.key, required this.email});
+
   @override
-  void init(context, manager) {}
-  
+  void init(context, manager) {
+    manager.setUserEmail(email);
+  }
+
   @override
   void listener(context, manager, effect) {}
 
   @override
   Widget builder(context, manager, state) {
-    return Scaffold();
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
+          SafeArea(
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Assets.icons.iconCalora.svg(),
+                    SizedBox(height: 32),
+                    VerifyCodeWidget(
+                      resend: () {},
+                      resultCode: (data) {},
+                      isStartTime: state.isStartTime,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Button(
+                        loading: state.loading,
+                        onPressed: () {},
+                        child: Strings.doContinue
+                            .text(16, 20, 500)
+                            .c(context.colors.textWhite),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -66,4 +66,7 @@ class AuthRepoImpl extends AuthRepo {
     final token = Token.fromJson(response.data['content']);
     await _store.token.set(token);
   }
+
+  @override
+  Future<void> resendVerifyCode() async {}
 }

@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:calora/domain/model/language/language.dart';
-import 'package:calora/widgets/builder/language_item_builder.dart';
+import 'package:calora/widgets/builder/language/language_item_builder.dart';
 import 'package:flutter/cupertino.dart';
 
 class LanguageWidget extends StatelessWidget {
