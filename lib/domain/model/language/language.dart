@@ -6,6 +6,13 @@ enum Language {
   EN,
   RU;
 
+  static Language fromName(String name) {
+    return Language.values.firstWhere(
+          (element) => element.name == name.toUpperCase(),
+      orElse: () => Language.EN, // default fallback
+    );
+  }
+
   static Language from(BuildContext context) {
     return Language.values.firstWhere(
       (element) => element.locale.languageCode == context.locale.languageCode,

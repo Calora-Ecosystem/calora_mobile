@@ -2,12 +2,14 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/language%20/select/management/select_language_management.dart';
 import 'package:calora/presentation/language%20/select/management/select_language_manager.dart';
-import 'package:calora/widgets/builder/language_item_builder.dart';
 import 'package:calora/widgets/language/language_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -46,19 +48,23 @@ class SelectLanguagePage
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Assets.icons.iconCalora.svg(),
-                    SizedBox(height: 64,),
+                    SizedBox(height: 64),
                     'Select the language'.text(16, 20, 500),
-                    SizedBox(height: 16,),
+                    SizedBox(height: 16),
                     LanguageWidget(
                       languages: manager.state.languages,
                       selectedLanguage: manager.state.selectedLanguage,
-                      onLanguageSelected: (data) {},
+                      onLanguageSelected: (data) {
+                        _saveSelectedLanguage(data, context, manager);
+                      },
                     ),
-                    SizedBox(height: 64,),
+                    SizedBox(height: 64),
                     SizedBox(
                       width: double.infinity,
                       child: Button(
-                        onPressed: _openAuthPage,
+                        onPressed: () {
+                          // _openAuthPage(context);
+                        },
                         child: Strings.doContinue
                             .text(16, 20, 500)
                             .c(context.colors.textWhite),
@@ -74,5 +80,12 @@ class SelectLanguagePage
     );
   }
 
-  void _openAuthPage() {}
+  void _saveSelectedLanguage(Language language, BuildContext context, manager) {
+    manager.setSelectedLanguage(language);
+    EasyLocalization.of(context)?.setLocale(language.locale);
+  }
+
+  void _openAuthPage(BuildContext context) {
+    context.router.push(AuthRoute());
+  }
 }

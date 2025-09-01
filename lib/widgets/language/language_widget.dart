@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/widgets/builder/language_item_builder.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,6 +18,7 @@ class LanguageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log("ResultLanguage->${languages.length}");
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

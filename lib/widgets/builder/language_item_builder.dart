@@ -39,8 +39,10 @@ class LanguageItem extends StatelessWidget {
           child: Row(
             children: [
               _languageIcon(language, context),
-              SizedBox(width: 12,),
-              _currentText(language, context),
+              SizedBox(width: 12),
+              Expanded(child: _currentText(language, context)),
+              SizedBox(width: 12),
+              isChecked ? Assets.icons.icSingleCheck.svg():const SizedBox(),
             ],
           ),
         ),

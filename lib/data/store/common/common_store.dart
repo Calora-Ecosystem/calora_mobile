@@ -10,6 +10,6 @@ class CommonStore {
     'language',
     serialize: (value) => value == null ? null : jsonEncode(value.name),
     deserialize: (value) =>
-        value == null ? null : Language.values.byName(jsonDecode(value)),
+        value == null ? null : Language.fromName(jsonDecode(value)),
   );
 }
