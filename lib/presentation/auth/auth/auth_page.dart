@@ -39,9 +39,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
+              child: ListView(
                 children: [
-                  const Spacer(),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                   Assets.icons.iconCalora.svg(),
                   const SizedBox(height: 32),
                   TextField(
