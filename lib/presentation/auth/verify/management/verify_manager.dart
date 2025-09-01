@@ -18,7 +18,18 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
     _email = value;
   }
 
-  void resend() {}
+  void resend() {
+    authRepo.resendVerifyCode().handle(
+      onStart: () {
+        emit(state.copyWith(isStartTime: true));
+      },
+      onData: (data) {},
+      onError: (error) {
+        emit(state.copyWith(isStartTime: false));
+      },
+      onDone: () {},
+    );
+  }
 
   void verify(String code) {
     authRepo
@@ -31,13 +42,9 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
           code,
         )
         .handle(
-          onStart: () {
-            emit(state.copyWith(isStartTime: true));
-          },
+          onStart: () {},
           onData: (data) {},
-          onError: (error) {
-            emit(state.copyWith(isStartTime: false));
-          },
+          onError: (error) {},
           onDone: () {},
         );
   }

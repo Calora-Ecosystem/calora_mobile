@@ -75,7 +75,8 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
             ? isActive
                   ? InkWell(
                       onTap: () {
-                        widget.resend();
+                        _handleResend();
+                        // widget.resend();
                       },
                       child: Align(
                         alignment: Alignment.centerLeft,
