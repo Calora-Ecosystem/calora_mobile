@@ -6,4 +6,6 @@ abstract class CommonRepo{
 
   Future<Language> getSelectedLanguage();
 
+  Future<bool> isLogin();
+
 }

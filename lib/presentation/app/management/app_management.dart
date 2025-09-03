@@ -6,6 +6,7 @@ part 'app_management.freezed.dart';
 @freezed
 abstract class AppState with _$AppState {
   const factory AppState({
+    @Default(false) bool isLogin,
     Language? language,
   }) = _AppState;
 }

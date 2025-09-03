@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -16,7 +19,9 @@ import 'management/app_manager.dart';
 
 @RoutePage()
 class App extends Managed<AppManager, AppState, AppEffect> {
-  const App({super.key});
+  App({super.key});
+
+  final _appRouter = AppRouter();
 
   @override
   Widget builder(context, manager, state) {
@@ -57,5 +62,15 @@ class App extends Managed<AppManager, AppState, AppEffect> {
         },
       ),
     );
+  }
+
+  PageRouteInfo _initialRoute(bool isLogin) {
+    return SelectLanguageRoute();
+
+    // if (isLogin) {
+    //   return InputNameRoute();
+    // } else {
+    //   return SelectLanguageRoute();
+    // }
   }
 }

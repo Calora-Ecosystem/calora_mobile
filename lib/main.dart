@@ -10,5 +10,5 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await EasyLocalization.ensureInitialized();
   await configureDependencies();
-  runApp(const App());
+  runApp(App());
 }
