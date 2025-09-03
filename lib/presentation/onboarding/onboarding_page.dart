@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/domain/model/onboarding/onboarding.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/indicator/page_indicator.dart';
@@ -53,7 +54,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                       InkWell(
                         onTap: () {
-                          // Add your close logic here
+                          _openAuthPage(context);
                         },
                         child: Container(
                           padding: EdgeInsets.all(8),
@@ -132,5 +133,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
         Expanded(child: image),
       ],
     );
+  }
+
+  void _openAuthPage(BuildContext context) {
+    context.router.replace(AuthRoute());
   }
 }
