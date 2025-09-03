@@ -54,7 +54,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                       InkWell(
                         onTap: () {
-                          _openAuthPage(context);
+                          _openAuthPage();
                         },
                         child: Container(
                           padding: EdgeInsets.all(8),
@@ -135,7 +135,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  void _openAuthPage(BuildContext context) {
+  void _openAuthPage() {
     context.router.replace(AuthRoute());
   }
 }

@@ -65,7 +65,7 @@ class SelectLanguagePage
                       width: double.infinity,
                       child: Button(
                         onPressed: () {
-                          _openAuthPage(context);
+                          _openOnboarding(context);
                         },
                         child: Strings.doContinue
                             .text(16, 20, 500)
@@ -87,7 +87,7 @@ class SelectLanguagePage
     EasyLocalization.of(context)?.setLocale(language.locale);
   }
 
-  void _openAuthPage(BuildContext context) {
-    context.router.push(AuthRoute());
+  void _openOnboarding(BuildContext context) {
+    context.router.replace(OnboardingRoute());
   }
 }

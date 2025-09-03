@@ -55,7 +55,6 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       child: Button(
                         loading: state.loading,
                         onPressed: () {
-                          _openOnboardingPage(context);
                         },
                         child: Strings.doContinue
                             .text(16, 20, 500)
@@ -72,7 +71,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     );
   }
 
-  void _openOnboardingPage(BuildContext context) {
-    context.router.push(OnboardingRoute());
+  void _openInputNamePage(BuildContext context) {
+    context.router.replace(InputNameRoute());
   }
 }

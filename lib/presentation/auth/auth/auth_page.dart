@@ -53,10 +53,8 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                     width: double.infinity,
                     child: Button(
                       loading: state.loading,
-                      onPressed: () {
-                        // manager.login,manager
-                        _openVerifyPage(context, "");
-                      },
+                      onPressed: manager.login,
+                      // _openVerifyPage(context, "");
                       text: Strings.doContinue,
                     ),
                   ),
