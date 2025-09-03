@@ -12,39 +12,49 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
 
   VerifyManager(this.authRepo) : super(const VerifyState());
 
-  String _email = "";
+  Verification _verification = Verification();
 
-  void setUserEmail(String value) {
-    _email = value;
+  String _verificationCode = "";
+
+  void setVerification(Verification value) {
+    _verification = value;
+  }
+
+  void setVerificationCode(String code) {
+    this._verificationCode = code;
   }
 
   void resend() {
-    authRepo.resendVerifyCode().handle(
-      onStart: () {
-        emit(state.copyWith(isStartTime: true));
-      },
-      onData: (data) {},
-      onError: (error) {
-        emit(state.copyWith(isStartTime: false));
-      },
-      onDone: () {},
-    );
+    authRepo
+        .login(_verification.email ?? "")
+        .handle(
+          onStart: () {
+            emit(state.copyWith(isStartTime: false, loading: true));
+          },
+          onData: (data) {
+            _verification = data.copyWith(email: _verification.email);
+            emit(state.copyWith(isStartTime: true, loading: false));
+          },
+          onError: (error) {
+            emit(state.copyWith(isStartTime: false, loading: false));
+          },
+          onDone: () {},
+        );
   }
 
-  void verify(String code) {
+  void verify() {
     authRepo
-        .verify(
-          Verification(
-            verificationCode: code,
-            email: _email,
-            expireDate: DateTime.now(),
-          ),
-          code,
-        )
+        .verify(_verification, _verificationCode)
         .handle(
-          onStart: () {},
-          onData: (data) {},
-          onError: (error) {},
+          onStart: () {
+            emit(state.copyWith(loading: true, isStartTime: false));
+          },
+          onData: (data) {
+            publish(VerifyEffect());
+          },
+          onError: (error) {
+            emit(state.copyWith(loading: false, isStartTime: false));
+          },
           onDone: () {},
         );
   }

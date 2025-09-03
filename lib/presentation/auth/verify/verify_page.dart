@@ -4,6 +4,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/verify/verify_code_widget.dart';
 import 'package:flutter/material.dart';
@@ -14,17 +15,21 @@ import 'management/verify_manager.dart';
 
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
-  final String email;
+  final Verification verification;
 
-  VerifyPage({super.key, required this.email});
+  VerifyPage({super.key, required this.verification});
 
   @override
   void init(context, manager) {
-    manager.setUserEmail(email);
+    manager.setVerification(verification);
   }
 
   @override
-  void listener(context, manager, effect) {}
+  void listener(context, manager, effect) {
+    effect.when(() {
+      _openInputNamePage(context);
+    });
+  }
 
   @override
   Widget builder(context, manager, state) {
@@ -47,15 +52,16 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                     SizedBox(height: 32),
                     VerifyCodeWidget(
                       resend: () {},
-                      resultCode: (data) {},
+                      resultCode: (data) {
+                        manager.setVerificationCode(data);
+                      },
                       isStartTime: state.isStartTime,
                     ),
                     SizedBox(
                       width: double.infinity,
                       child: Button(
                         loading: state.loading,
-                        onPressed: () {
-                        },
+                        onPressed: manager.verify,
                         child: Strings.doContinue
                             .text(16, 20, 500)
                             .c(context.colors.textWhite),

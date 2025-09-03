@@ -29,7 +29,9 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
   @override
   void initState() {
     super.initState();
-    _startTimer();
+    if (widget.isStartTime) {
+      _startTimer();
+    }
   }
 
   @override
@@ -39,6 +41,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
     return Column(
       children: [
         Container(
+          width: double.infinity,
           decoration: BoxDecoration(
             color: context.colors.backgroundBase,
             borderRadius: BorderRadius.circular(12),
@@ -46,15 +49,14 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
           ),
           child: PinCodeTextField(
             appContext: context,
-            length: 4,
+            length: 6,
             keyboardType: TextInputType.number,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             // Even spacing
             pinTheme: PinTheme(
-              fieldHeight: 48,
+              fieldHeight: 36,
               fieldWidth: 18,
               fieldOuterPadding: EdgeInsets.symmetric(
-                horizontal: 24,
                 vertical: 10,
               ),
               activeFillColor: context.colors.backgroundBase,
@@ -71,32 +73,27 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
           ),
         ),
         SizedBox(height: 16), // Added spacing
-        widget.isStartTime
-            ? isActive
-                  ? InkWell(
-                      onTap: () {
-                        _handleResend();
-                        // widget.resend();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Strings.resend
-                            .text(14, 20, 500)
-                            .c(context.colors.accentSub),
-                      ),
-                    )
-                  : Row(
-                      children: [
-                        Strings.resend
-                            .text(14, 20, 500)
-                            .c(context.colors.textSub),
-                        SizedBox(width: 4),
-                        "${_formatDuration(_remainingTime)} "
-                            .text(14, 20, 500)
-                            .c(context.colors.textStrong),
-                      ],
-                    )
-            : Container(),
+        isActive
+            ? InkWell(
+                onTap: () {
+                  widget.resend();
+                },
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Strings.resend
+                      .text(14, 20, 500)
+                      .c(context.colors.accentSub),
+                ),
+              )
+            : Row(
+                children: [
+                  Strings.resend.text(14, 20, 500).c(context.colors.textSub),
+                  SizedBox(width: 4),
+                  "${_formatDuration(_remainingTime)} "
+                      .text(14, 20, 500)
+                      .c(context.colors.textStrong),
+                ],
+              ),
         SizedBox(height: 32), // Added spacing
       ],
     );

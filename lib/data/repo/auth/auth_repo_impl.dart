@@ -65,6 +65,7 @@ class AuthRepoImpl extends AuthRepo {
 
     final token = Token.fromJson(response.data['content']);
     await _store.token.set(token);
+    await _store.isLogin.set(true);
   }
 
   @override
