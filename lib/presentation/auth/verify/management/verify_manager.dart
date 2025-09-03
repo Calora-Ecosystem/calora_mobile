@@ -29,14 +29,14 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
         .login(_verification.email ?? "")
         .handle(
           onStart: () {
-            emit(state.copyWith(isStartTime: false, loading: true));
+            emit(state.copyWith(loading: true));
           },
           onData: (data) {
             _verification = data.copyWith(email: _verification.email);
-            emit(state.copyWith(isStartTime: true, loading: false));
+            emit(state.copyWith(loading: false));
           },
           onError: (error) {
-            emit(state.copyWith(isStartTime: false, loading: false));
+            emit(state.copyWith(loading: false));
           },
           onDone: () {},
         );
@@ -47,13 +47,13 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
         .verify(_verification, _verificationCode)
         .handle(
           onStart: () {
-            emit(state.copyWith(loading: true, isStartTime: false));
+            emit(state.copyWith(loading: true));
           },
           onData: (data) {
             publish(VerifyEffect());
           },
           onError: (error) {
-            emit(state.copyWith(loading: false, isStartTime: false));
+            emit(state.copyWith(loading: false));
           },
           onDone: () {},
         );

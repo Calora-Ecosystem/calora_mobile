@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -51,11 +53,10 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                     Assets.icons.iconCalora.svg(),
                     SizedBox(height: 32),
                     VerifyCodeWidget(
-                      resend: () {},
+                      resend: manager.resend,
                       resultCode: (data) {
                         manager.setVerificationCode(data);
                       },
-                      isStartTime: state.isStartTime,
                     ),
                     SizedBox(
                       width: double.infinity,

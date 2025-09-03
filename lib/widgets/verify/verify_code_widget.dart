@@ -10,12 +10,10 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 class VerifyCodeWidget extends StatefulWidget {
   final Function(String) resultCode;
   final Function() resend;
-  final bool isStartTime;
 
   VerifyCodeWidget({
     required this.resend,
     required this.resultCode,
-    required this.isStartTime,
   });
 
   @override
@@ -29,9 +27,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.isStartTime) {
       _startTimer();
-    }
   }
 
   @override
@@ -56,9 +52,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
             pinTheme: PinTheme(
               fieldHeight: 36,
               fieldWidth: 18,
-              fieldOuterPadding: EdgeInsets.symmetric(
-                vertical: 10,
-              ),
+              fieldOuterPadding: EdgeInsets.symmetric(vertical: 10),
               activeFillColor: context.colors.backgroundBase,
               activeColor: Colors.transparent,
               selectedFillColor: context.colors.backgroundBase,
@@ -77,6 +71,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
             ? InkWell(
                 onTap: () {
                   widget.resend();
+                  _handleResend();
                 },
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -106,6 +101,8 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
   }
 
   void _startTimer() {
+    _timer?.cancel();
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         setState(() {
