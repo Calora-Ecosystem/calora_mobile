@@ -16,6 +16,6 @@ class AuthStore {
   final isLogin = BaseStore<bool?>(
     'isLogin',
     serialize: (value) => jsonEncode(value),
-    deserialize: (value) => value as bool?,
+    deserialize: (value) => bool.tryParse(value??"false"),
   );
 }

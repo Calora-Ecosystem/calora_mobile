@@ -18,17 +18,10 @@ class AppManager extends Manager<AppState, AppEffect> {
   }
 
   Future<void> isLogin() => commonRepo.isLogin().handle(
-    onError: (error) {
-      log("OnError->$error");
-
-    },
-    onDone: () {
-      log("OnDone");
-
-    },
+    onError: (error) {},
+    onDone: () {},
     onData: (data) {
-      log("OnData");
-
+      log("ResultOnData->$data");
       emit(state.copyWith(isLogin: data));
     },
     onStart: () {},

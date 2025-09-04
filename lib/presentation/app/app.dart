@@ -24,6 +24,12 @@ class App extends Managed<AppManager, AppState, AppEffect> {
   final _appRouter = AppRouter();
 
   @override
+  void init(BuildContext context, AppManager manager) {
+    super.init(context, manager);
+    manager.isLogin();
+  }
+
+  @override
   Widget builder(context, manager, state) {
     return EasyLocalization(
       supportedLocales: Strings.supportedLocales,
@@ -65,12 +71,11 @@ class App extends Managed<AppManager, AppState, AppEffect> {
   }
 
   PageRouteInfo _initialRoute(bool isLogin) {
-    return SelectLanguageRoute();
-
-    // if (isLogin) {
-    //   return InputNameRoute();
-    // } else {
-    //   return SelectLanguageRoute();
-    // }
+    // return SelectLanguageRoute();
+    if (isLogin) {
+      return InputNameRoute();
+    } else {
+      return SelectLanguageRoute();
+    }
   }
 }
