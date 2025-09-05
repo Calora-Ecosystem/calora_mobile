@@ -83,7 +83,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             message: Strings.changingLifestyleDesc,
                           ),
                           context,
-                          Assets.icons.icOboardingDrinkingBoy.image(),
+                          Assets.icons.icOnboardingDrinkingBoy.image(),
                         ),
                         _pageItem(
                           Onboarding(
@@ -99,7 +99,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             message: Strings.enoughDayDesc,
                           ),
                           context,
-                          Assets.icons.icOboardingEngagingBoy.image(),
+                          Assets.icons.icOnboardingEngagingBoy.image(),
                         ),
                         _pageItem(
                           Onboarding(

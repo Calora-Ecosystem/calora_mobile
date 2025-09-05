@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/flavor/flavor_config.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -26,7 +26,6 @@ class App extends Managed<AppManager, AppState, AppEffect> {
   @override
   void init(BuildContext context, AppManager manager) {
     super.init(context, manager);
-    manager.isLogin();
   }
 
   @override
@@ -47,7 +46,10 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: context.theme,
-              routerConfig: getIt<AppRouter>().config(),
+              routerConfig: _appRouter.config(
+                deepLinkBuilder: (_) =>
+                    DeepLink([_initialRoute()]),
+              ),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
                 return MediaQuery(
@@ -70,8 +72,9 @@ class App extends Managed<AppManager, AppState, AppEffect> {
     );
   }
 
-  PageRouteInfo _initialRoute(bool isLogin) {
-    // return SelectLanguageRoute();
+  PageRouteInfo _initialRoute() {
+    bool isLogin = FlavorConfig.isLogin;
+
     if (isLogin) {
       return InputNameRoute();
     } else {

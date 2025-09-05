@@ -9,21 +9,9 @@ import 'app_management.dart';
 
 @injectable
 class AppManager extends Manager<AppState, AppEffect> {
-  final CommonRepo commonRepo;
-
-  AppManager(this.commonRepo) : super(const AppState());
+  AppManager() : super(const AppState());
 
   void select(Language language) {
     emit(state.copyWith(language: language));
   }
-
-  Future<void> isLogin() => commonRepo.isLogin().handle(
-    onError: (error) {},
-    onDone: () {},
-    onData: (data) {
-      log("ResultOnData->$data");
-      emit(state.copyWith(isLogin: data));
-    },
-    onStart: () {},
-  );
 }
