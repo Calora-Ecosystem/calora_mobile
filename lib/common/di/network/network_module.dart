@@ -1,5 +1,7 @@
 import 'package:alice_dio/alice_dio_adapter.dart';
-import 'package:calora/common/di/network/error_interceptor.dart';
+import 'package:calora/common/di/network/interceptor/error_interceptor.dart';
+import 'package:calora/common/di/network/interceptor/access_token_interceptor.dart';
+import 'package:calora/common/di/network/interceptor/language_interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -13,8 +15,13 @@ abstract class NetworkModule {
     BaseOptions baseOptions,
     PrettyDioLogger logger,
     ErrorInterceptor errorInterceptor,
+    LanguageInterceptor languageInterceptor,
+   AccessTokenInterceptor accessTokenInterceptor,
   ) {
     final dio = Dio(baseOptions);
+
+    dio.interceptors.add(languageInterceptor);
+    dio.interceptors.add(accessTokenInterceptor);
 
     if (kDebugMode) {
       dio.interceptors.add(logger);

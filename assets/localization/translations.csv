@@ -15,3 +15,30 @@ enough_day,30 days is enough for change,30 kun o‘zgarish uchun yetarli,30 дн
 enough_day_desc,"Workout at home, join the 30-day challenge, and see the results for yourself.","Uyda mashq qil, 30 kunlik challenge’ga qo‘shil va natijani o‘zing ko‘r.","Тренируйтесь дома, присоединяйтесь к 30-дневному марафону и оцените результаты сами."
 daily_water_norm,Daily water intake is very important!,Kunlik suv normasi bu juda muhim !,Ежедневное потребление воды очень важно!
 daily_water_norm_desc,"Don't forget to drink water, we'll count your steps. While we remind you, you just keep going.","Suv ichishni unutib qo‘yma, qadamlaringni ham sanaymiz. Biz eslatar ekanmiz, sen faqat davom et.","Не забывайте пить воду, мы будем считать ваши шаги. Пока мы напоминаем, просто продолжайте идти."
+we_have_questions,We have a few questions for you !,Sizga bir neshta savollarimiz bor !,У нас есть к вам несколько вопросов !
+what_is_your_name,What is your name ?,Ismingiz nima ?,Как вас зовут ?
+what_is_your_gender,What is your gender ?,Jinsingiz nima ?,Ваш пол ?
+male,Male,Erkak kishi,Мужской
+famale,Female,Ayol kishi,Женщина
+choose_your_goals,Choose your goals ?,Maqsadlaringizni tanlang ?,Выберите свои цели ?
+weight_loss,Weight loss,Vazn yo'qotish (ozish),Потеря веса
+maintaining_body,Maintaining the body in its current state,Tanani xozirgi xolatda saqlash,Поддержание тела в его текущем состоянии
+muscle_development,Muscle development,Mushaklarni rivojlantirish,Развитие мышц
+previous,Previous,Oldingi,Предыдущий
+next,Next,Keyingi,Следующий
+when_where_you_born,When were you born ?,Qachon tug’ilgansiz ?,Когда вы родились ?
+day,Day,Kun,День
+month,Month,Oy,Месяц
+year,Year,Yil,Год
+what_is_your_height,What is your height ?,Bo’yingizni o‘lchami qancha ?,Какой у вас рост ?
+how_many_kilograms,How many kilograms do you weigh ?,Vazningiz necha kilogram ?,Сколько килограммов вы весите ?
+weight_change,How much did you aim to change your weight ?,Vazningizni qanchaga o’zgartirishni maqsad qildingiz ?,Насколько вы стремились изменить свой вес ?
+active_per_day,How much time do you spend being active per day ?,Kunlik qancha vaqt aktiv harakatda bo‘lasiz ?,Сколько времени в день вы тратите на активную деятельность?
+planning_daily_schedule,We are planning your daily schedule...,Biz sizning kunlik rejangizni tuzayabmiz...,Мы планируем ваш ежедневный график...
+analyzing_activity_level,We are analyzing your activity level...,Faollig darajangizni tahlil qilayabmiz...,Мы анализируем ваш уровень активности...
+smart_reminder_plan,Configuring Smart Reminder Plan...,Smart eslatma rejasi sozlanmoqda ...,Настройка плана умных напоминаний...
+home,Home,Uy,Дом
+calories,Calories,Kaloriya,Калории
+course,Course,Kurs,Курс
+steps,Steps,Qadamlar,Шаги
+profile,Profile,Profil,Профиль

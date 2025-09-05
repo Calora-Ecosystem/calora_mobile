@@ -1,3 +1,4 @@
+import 'package:calora/common/gen/fonts.gen.dart';
 import 'package:flutter/material.dart';
 
 extension TextStringExtensions on String? {
@@ -12,6 +13,7 @@ extension TextStringExtensions on String? {
           fontSize: size,
           height: height / size,
           fontWeight: FontWeight.values[weight ~/ 100 - 1],
+          fontFamily: FontFamily.inter
         ),
       );
 }

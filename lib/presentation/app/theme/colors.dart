@@ -14,4 +14,5 @@ class DefaultThemeColors {
   final strokeSoft = Color(0xFFF0F0F0);
   final accentSoft = Color(0xFF94CE9A);
   final accentWhite = Color(0xFFFBFEFB);
+  final iconSub = Color(0xFF646464);
 }

@@ -1,0 +1,142 @@
+import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:management/management.dart';
+
+@RoutePage()
+class DashboardPage
+    extends Managed<DashboardManager, DashboardState, DashboardEffect> {
+  const DashboardPage({super.key});
+
+  @override
+  void init(context, manager) {}
+
+  @override
+  Widget builder(context, manager, state) {
+    return AutoTabsRouter(
+      routes: [
+        HomeRoute(),
+        CaloriesRoute(),
+        CourseRoute(),
+        StepsRoute(),
+        ProfileRoute(),
+      ],
+      builder: (context, child) {
+        final tabsRouter = AutoTabsRouter.of(context);
+        return Scaffold(
+          body: child,
+          bottomNavigationBar: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              BottomNavigationBar(
+                unselectedLabelStyle: TextStyle(
+                  fontSize: 10,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w500,
+                  color: context.colors.textSub,
+                ),
+                selectedLabelStyle: TextStyle(
+                  fontSize: 10,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w500,
+                  color: context.colors.accentSub,
+                ),
+                type: BottomNavigationBarType.fixed,
+                items: [
+                  _buildBottomNavigationBarItem(
+                    icon: Assets.icons.icHome.svg(
+                      colorFilter: ColorFilter.mode(
+                        tabsRouter.activeIndex == 0
+                            ? context.colors.accentSub
+                            : context.colors.textSub,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    title: Strings.home,
+                    context: context,
+                  ),
+                  _buildBottomNavigationBarItem(
+                    icon: Assets.icons.icCalories.svg(
+                      colorFilter: ColorFilter.mode(
+                        tabsRouter.activeIndex == 1
+                            ? context.colors.accentSub
+                            : context.colors.textSub,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    title: Strings.calories,
+                    context: context,
+                  ),
+                  _buildBottomNavigationBarItem(
+                    icon: Assets.icons.icVideoPlayer.svg(
+                      colorFilter: ColorFilter.mode(
+                        tabsRouter.activeIndex == 2
+                            ? context.colors.accentSub
+                            : context.colors.textSub,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    title: Strings.course,
+                    context: context,
+                  ),
+                  _buildBottomNavigationBarItem(
+                    icon: Assets.icons.icFootwear.svg(
+                      colorFilter: ColorFilter.mode(
+                        tabsRouter.activeIndex == 3
+                            ? context.colors.accentSub
+                            : context.colors.textSub,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    title: Strings.steps,
+                    context: context,
+                  ),
+                  _buildBottomNavigationBarItem(
+                    icon: Assets.icons.icPersonNeutral.svg(
+                      colorFilter: ColorFilter.mode(
+                        tabsRouter.activeIndex == 4
+                            ? context.colors.accentSub
+                            : context.colors.textSub,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    title: Strings.profile,
+                    context: context,
+                  ),
+                ],
+                currentIndex: tabsRouter.activeIndex,
+                selectedItemColor: context.colors.accentSub,
+                unselectedItemColor: context.colors.iconSub,
+                selectedFontSize: 10,
+                onTap: (index) {
+                  tabsRouter.setActiveIndex(index);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  BottomNavigationBarItem _buildBottomNavigationBarItem({
+    required SvgPicture icon,
+    required String title,
+    required BuildContext context,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [icon],
+      ),
+      label: title,
+    );
+  }
+}
