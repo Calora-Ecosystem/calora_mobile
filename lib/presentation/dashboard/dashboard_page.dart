@@ -38,11 +38,13 @@ class DashboardPage
               BottomNavigationBar(
                 unselectedLabelStyle: TextStyle(
                   fontSize: 10,
+                  fontFamily: 'Inter',
                   fontWeight: FontWeight.w500,
                   color: context.colors.textSub,
                 ),
                 selectedLabelStyle: TextStyle(
                   fontSize: 10,
+                  fontFamily: 'Inter',
                   fontWeight: FontWeight.w500,
                   color: context.colors.accentSub,
                 ),
