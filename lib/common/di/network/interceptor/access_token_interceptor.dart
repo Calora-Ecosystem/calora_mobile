@@ -14,7 +14,7 @@ class AccessTokenInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     final result = await authStore.token.call();
-    options.headers['Access-Token'] = result?.accessToken ?? "";
+    options.headers['Bearer'] = result?.accessToken ?? "";
     handler.next(options);
   }
 }
