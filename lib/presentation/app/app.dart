@@ -76,7 +76,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
     bool isLogin = FlavorConfig.isLogin;
 
     if (isLogin) {
-      return InputNameRoute();
+      return DashboardRoute();
     } else {
       return SelectLanguageRoute();
     }
