@@ -123,7 +123,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                             fontSize: 14,
                             height: 18 / 14,
                             fontWeight: FontWeight.w500,
-                            color: context.colors.neutralSecondary,
+                            color: context.colors.neutral600Secondary,
                           ),
                         ),
                       ),

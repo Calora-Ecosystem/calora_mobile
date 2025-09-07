@@ -3,7 +3,11 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:auto_route/annotations.dart';
+import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometr_service.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/tab/tab_bar_item_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -50,14 +54,54 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
+            child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill),
           ),
           SafeArea(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Center(child: Text("Coming soon")),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: AlignmentGeometry.centerLeft,
+                    child: Strings.steps.text(32, 36, 700),
+                  ),
+                  SizedBox(height: 12),
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: context.colors.accentWhite,
+                      // Moved color inside decoration
+                      borderRadius: BorderRadius.all(Radius.circular(14)),
+                    ),
+                    child: DefaultTabController(
+                      length: 3,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(14)),
+                        ),
+                        child: TabBar(
+                          indicatorPadding: EdgeInsets.all(2),
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          dividerColor: Colors.transparent,
+                          indicator:
+                          BoxDecoration(
+                            color: context.colors.backgroundElevation,
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                          labelColor: context.colors.neutral900Primary,
+                          unselectedLabelColor:
+                              context.colors.neutral600Secondary,
+                          tabs: [
+                            TabBarItemWidget(name: Strings.daily),
+                            TabBarItemWidget(name: Strings.weekly),
+                            TabBarItemWidget(name: Strings.monthly),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
