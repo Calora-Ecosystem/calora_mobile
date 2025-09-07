@@ -42,3 +42,15 @@ calories,Calories,Kaloriya,Калории
 course,Course,Kurs,Курс
 steps,Steps,Qadamlar,Шаги
 profile,Profile,Profil,Профиль
+finish,Conclusion,Yakunlash,Заключение
+daily ,Daily,Kunlik,Ежедневно
+weekly,Weekly,Haftalik,Еженедельно
+monthly,Monthly,Oylik,Ежемесячно
+on_time,On time,Vaqtda,Вовремя
+distance_in_km,Distance in km,Km masofaga,Расстояние в км
+calorie,Calorie,Kaloriya,Калории
+min_activity,Minimum activity,Minimal aktivlik,Минимальная активность
+low_activity,Low activity,Kam aktivlik,Низкая активность
+average_activity,Average activity,O'rtacha aktivlik,Средняя активность
+high_activity,High activity,Yuqori aktivlik,Высокая активность
+very_high_activity,Very high activity,Juda yuqori aktivlik,Очень высокая активность

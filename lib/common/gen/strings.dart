@@ -9,18 +9,9 @@ part 'strings.g.dart';
 
 @SheetLocalization(
   docId: '12OIaFbGqovuAgHEcXFADUXPb5AqlyGASLpP3kHyFQtU',
-  version: 9,
+  version: 12,
   outDir: 'assets/localization',
   outName: 'translations.csv',
-  preservedKeywords: [
-    'few',
-    'many',
-    'one',
-    'other',
-    'two',
-    'zero',
-    'male',
-    'female',
-  ],
+  preservedKeywords: ['few', 'many', 'one', 'other', 'two', 'zero', 'male', 'female'],
 )
 class _Strings {}

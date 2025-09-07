@@ -5,11 +5,12 @@ import 'package:calora/common/router/app_router.gr.dart';
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
-    AutoRoute(page: SelectLanguageRoute.page, initial: true),
+    AutoRoute(page: SelectLanguageRoute.page),
     AutoRoute(page: OnboardingRoute.page),
     AutoRoute(page: AuthRoute.page),
     AutoRoute(page: VerifyRoute.page),
-    AutoRoute(page: InputNameRoute.page),
+    AutoRoute(page: QuestionsRoute.page, initial: true),
+    AutoRoute(page: CalculateRoute.page),
     AutoRoute(page: CaloriesRoute.page),
     AutoRoute(page: CourseRoute.page),
     AutoRoute(
