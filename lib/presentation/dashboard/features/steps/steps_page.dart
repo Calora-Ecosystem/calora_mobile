@@ -7,17 +7,13 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometr_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/podium/podium_widget.dart';
 import 'package:calora/widgets/tab/tab_bar_item_widget.dart';
 import 'package:calora/widgets/track%20/fitness_track_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:pedometer/pedometer.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:permission_handler/permission_handler.dart' as AppSettings;
-import 'package:auto_route/annotations.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
@@ -106,6 +102,13 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                     onClickForward: () {},
                     onClickMoreVert: () {},
                     onClickPause: () {},
+                  ),
+                  Center(
+                    child: PodiumWidget(
+                      firstPosition: Text("Winner 1"),
+                      secondPosition: Text("Winner 2"),
+                      thirdPosition: Text("Winner 3"),
+                    ),
                   ),
                 ],
               ),

@@ -32,7 +32,7 @@ class LanguageItem extends StatelessWidget {
             border: Border.all(
               width: 1,
               color: isChecked
-                  ? context.colors.strokeAccent
+                  ? context.colors.accentSub
                   : context.colors.strokeSoft,
             ),
           ),
