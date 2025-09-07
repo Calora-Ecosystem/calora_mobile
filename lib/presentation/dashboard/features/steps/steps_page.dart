@@ -8,6 +8,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometr_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/tab/tab_bar_item_widget.dart';
+import 'package:calora/widgets/track%20/fitness_track_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -83,8 +84,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                           indicatorPadding: EdgeInsets.all(2),
                           indicatorSize: TabBarIndicatorSize.tab,
                           dividerColor: Colors.transparent,
-                          indicator:
-                          BoxDecoration(
+                          indicator: BoxDecoration(
                             color: context.colors.backgroundElevation,
                             borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
@@ -99,6 +99,13 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                         ),
                       ),
                     ),
+                  ),
+                  SizedBox(height: 16),
+                  FitnessTrackWidget(
+                    onClickBackward: () {},
+                    onClickForward: () {},
+                    onClickMoreVert: () {},
+                    onClickPause: () {},
                   ),
                 ],
               ),
