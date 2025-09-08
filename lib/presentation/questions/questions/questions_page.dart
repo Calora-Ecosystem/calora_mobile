@@ -108,7 +108,7 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
   }) {
     final colors = context.colors;
     final bgColor = isPrimary
-        ? (enabled ? colors.strokeAccent : colors.accentWhite)
+        ? (enabled ? colors.neutral600Secondary : colors.accentWhite)
         : colors.accentWhite;
     final textColor = isPrimary ? (enabled ? Colors.white : Colors.black) : Colors.black;
     return GestureDetector(
