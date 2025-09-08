@@ -17,4 +17,9 @@ class DefaultThemeColors {
   final commonBackground = Color(0xFFF2F3F7);
   final modalBackground = Color(0xFFD1D3D9);
   final iconSub = Color(0xFF646464);
+  final progressBackground = Color(0xFFE6F4FE);
+  final blueAccent = Color(0xFF0090FF);
+  final neutralPrimary = Color(0xFF202327);
+  final iconSoft = Color(0xFFBBBBBB);
+  final strokeSub = Color(0xFFD9D9D9);
 }

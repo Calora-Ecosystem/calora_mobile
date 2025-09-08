@@ -1,13 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/widgets/questions/question_progress_widget.dart';
-import 'package:calora/widgets/questions/questions_body_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import '../../../common/gen/assets.gen.dart';
 import '../../../common/gen/strings.dart';
+import '../../../widgets/steps/actions_bottom_sheet.dart';
 import 'management/questions_management.dart';
 import 'management/questions_manager.dart';
 
@@ -34,7 +32,7 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          // Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
@@ -43,9 +41,21 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                 children: [
                   Column(
                     children: [
-                      QuestionProgressWidget(current: state.currentIndex + 1, total: 8),
-                      const SizedBox(height: 16),
-                      QuestionsBodyWidget(),
+                      ElevatedButton(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                            ),
+                            builder: (context) => const ActionsBottomSheet(),
+                          );
+                        },
+                        child: Text('data'),
+                      ),
+                      // QuestionProgressWidget(current: state.currentIndex + 1, total: 8),
+                      // const SizedBox(height: 16),
+                      // QuestionsBodyWidget(),
                     ],
                   ),
                   _buildNavigationButtons(context, manager, state, 8, currentAnswer != null),

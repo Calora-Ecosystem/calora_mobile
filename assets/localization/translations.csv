@@ -54,3 +54,13 @@ low_activity,Low activity,Kam aktivlik,Низкая активность
 average_activity,Average activity,O'rtacha aktivlik,Средняя активность
 high_activity,High activity,Yuqori aktivlik,Высокая активность
 very_high_activity,Very high activity,Juda yuqori aktivlik,Очень высокая активность
+goal,Goal,Maqsad,Цель
+weekly_results,Weekly results,Haftalik natijalar,Еженедельные результаты
+avarage,Average,O'rtacha,Средний
+total,Total,Jami,Общий
+compared_to_last_week,Compared to last week,O'tgan haftaga nisbatan,По сравнению с прошлой неделей
+monthly_results,Monthly results,Oylik natijalar,Ежемесячные результаты
+compared_to_last_month,Compared to last month,O'tgan oyga nisbatan,По сравнению с прошлым месяцем
+in_km_distance,In km distance,Km masofa ,В км расстояние
+calories,Calories,Kaloriya,Калории
+on_time,On time,Vaqtda,Вовремя
