@@ -55,7 +55,7 @@ class _PurposesWidgetState extends State<PurposesWidget> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 26),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? context.colors.strokeAccent : Colors.transparent,
+            color: isSelected ? context.colors.neutral600Secondary : Colors.transparent,
             width: 1,
           ),
           color: context.colors.commonBackground,

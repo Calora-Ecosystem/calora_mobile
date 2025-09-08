@@ -32,14 +32,14 @@ class _GenderWidgetState extends State<GenderWidget> {
           gender: Strings.male,
           icon: Assets.icons.male.svg(),
           label: Strings.male,
-          borderColor: context.colors.strokeAccent,
+          borderColor: context.colors.neutral600Secondary,
         ),
         const SizedBox(width: 8),
         genderButton(
           gender: Strings.famale,
           icon: Assets.icons.female.svg(),
           label: Strings.famale,
-          borderColor: context.colors.strokeAccent,
+          borderColor: context.colors.neutral600Secondary,
         ),
       ],
     );

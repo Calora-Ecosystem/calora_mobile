@@ -64,7 +64,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       Expanded(
                         child: Container(
                           height: 1,
-                          color: context.colors.strokeAccent,
+                          color: context.colors.accentSub,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -73,7 +73,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       Expanded(
                         child: Container(
                           height: 1,
-                          color: context.colors.strokeAccent,
+                          color: context.colors.accentSub,
                         ),
                       ),
                     ],
@@ -123,7 +123,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                             fontSize: 14,
                             height: 18 / 14,
                             fontWeight: FontWeight.w500,
-                            color: context.colors.neutralSecondary,
+                            color: context.colors.neutral600Secondary,
                           ),
                         ),
                       ),

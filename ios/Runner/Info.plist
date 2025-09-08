@@ -47,5 +47,15 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+	    <key>NSMotionUsageDescription</key>
+        <string>This app needs access to motion and fitness data to track your steps</string>
+        <key>NSHealthShareUsageDescription</key>
+        <string>This app needs access to health data to track your steps</string>
+        <key>NSHealthUpdateUsageDescription</key>
+        <string>This app needs to update health data for step counting</string>
+        <key>UIBackgroundModes</key>
+        <array>
+            <string>processing</string>
+        </array>
 	</dict>
 </plist>

@@ -66,11 +66,11 @@ class App extends Managed<AppManager, AppState, AppEffect> {
 
   PageRouteInfo _initialRoute() {
     bool isLogin = FlavorConfig.isLogin;
-    return QuestionsRoute();
-    //   if (isLogin) {
-    //     return QuestionsRoute();
-    //   } else {
-    //     return SelectLanguageRoute();
-    //   }
+
+    if (isLogin) {
+      return DashboardRoute();
+    } else {
+      return DashboardRoute();
+    }
   }
 }
