@@ -1,67 +1,33 @@
 import 'dart:math';
 
 import 'package:calora/domain/model/questions/questions.dart';
+import 'package:calora/domain/model/questions/questions_request.dart';
+import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import '../../../../domain/repo/questions/questions_repo.dart';
 import 'questions_management.dart';
 
 @injectable
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
   final QuestionsRepo _repo;
-  QuestionsManager(this._repo) : super(QuestionsState());
 
-  void setAnswer({
-    String? name,
-    String? gender,
-    List<int>? purposeIds,
-    DateTime? birthDate,
-    double? height,
-    double? weight,
-    double? bmi,
-    double? targetWeight,
-    String? activityHours,
-    String? photo,
-    String? language,
-  }) {
-    final currentProfile = state.answers ?? QuestionsModel();
+  QuestionsManager(this._repo) : super(const QuestionsState());
 
-    final updatedProfile = currentProfile.copyWith(
-      name: name ?? currentProfile.name,
-      gender: gender ?? currentProfile.gender,
-      purposeIds: purposeIds ?? currentProfile.purposeIds,
-      birthDate: birthDate ?? currentProfile.birthDate,
-      height: height ?? currentProfile.height,
-      weight: weight ?? currentProfile.weight,
-      targetWeight: targetWeight ?? currentProfile.targetWeight,
-      activityHours: activityHours ?? currentProfile.activityHours,
-    );
-
-    emit(state.copyWith(answers: updatedProfile));
-  }
-
-  bool getButtonStatus() {
-    switch (state.currentIndex) {
-      case 0:
-        // log("${state.answers?.name.trim()}");
-        return state.answers?.name?.trim().isNotEmpty ?? false;
-      case 1:
-        return state.answers?.gender?.trim().isNotEmpty ?? false;
-      case 2:
-        return state.answers?.purposeIds?.isNotEmpty ?? false;
-      case 3:
-        return state.answers?.birthDate != null;
-      case 4:
-        return state.answers?.height != null;
-      case 5:
-        return state.answers?.weight != null;
-      case 6:
-        return state.answers?.targetWeight != null;
-      case 7:
-        return state.answers?.activityHours?.trim().isNotEmpty ?? false;
-    }
-    return false;
+  void setAnswer(Questions model) {
+    final updated =
+        state.answers?.copyWith(
+          name: model.name ?? state.answers?.name,
+          gender: model.gender ?? state.answers?.gender,
+          purposeIds: model.purposeIds ?? state.answers?.purposeIds,
+          birthDate: model.birthDate ?? state.answers?.birthDate,
+          height: model.height ?? state.answers?.height,
+          weight: model.weight ?? state.answers?.weight,
+          targetWeight: model.targetWeight ?? state.answers?.targetWeight,
+          activityHours: model.activityHours ?? state.answers?.activityHours,
+        ) ??
+        model;
+    emit(state.copyWith(answers: updated));
   }
 
   void next() {
@@ -74,16 +40,39 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
     }
   }
 
-  Future<void> finish() async {
-    var profile = state.answers;
-    if (profile == null) {
-      emit(state.copyWith());
-      return;
-    }
-    if (profile.height == null && profile.weight == null) {
-      final bmi = profile.weight! / pow(profile.height!, 2);
-      await _repo.sendAnswers(profile.copyWith(bmi: bmi));
-    }
-    print("Final Profile: ${profile}");
+  Future<void> finish() {
+    final profile = state.answers;
+    if (profile == null) return Future.value();
+
+    final bmi = (profile.height != null && profile.weight != null)
+        ? profile.weight! / pow(profile.height! / 100, 2)
+        : null;
+
+    final request = QuestionsRequest(
+      name: profile.name,
+      gender: profile.gender,
+      purposeIds: profile.purposeIds,
+      birthDate: profile.birthDate,
+      height: profile.height,
+      weight: profile.weight,
+      targetWeight: profile.targetWeight,
+      activityHours: profile.activityHours,
+      bmi: bmi,
+    );
+
+    return _repo
+        .sendAnswers(request)
+        .handle(
+          onStart: () {
+            emit(state);
+          },
+          onData: (_) {
+            emit(state);
+          },
+          onError: (error) {
+            emit(state);
+          },
+          onDone: () {},
+        );
   }
 }

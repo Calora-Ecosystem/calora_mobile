@@ -1,5 +1,5 @@
-import 'package:calora/domain/model/questions/questions.dart';
+import 'package:calora/domain/model/questions/questions_request.dart';
 
 abstract class QuestionsRepo {
-  Future<void> sendAnswers(QuestionsModel answers);
+  Future<void> sendAnswers(QuestionsRequest answers);
 }

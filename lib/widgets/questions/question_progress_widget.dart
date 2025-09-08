@@ -3,11 +3,11 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-class QuestionProgress extends StatelessWidget {
+class QuestionProgressWidget extends StatelessWidget {
   final int current;
   final int total;
 
-  const QuestionProgress({super.key, required this.current, required this.total});
+  const QuestionProgressWidget({super.key, required this.current, required this.total});
 
   @override
   Widget build(BuildContext context) {

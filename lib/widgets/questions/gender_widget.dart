@@ -5,25 +5,44 @@ import 'package:flutter/material.dart';
 
 import '../../../common/gen/assets.gen.dart';
 
-class Gender extends StatefulWidget {
-  final ValueChanged<String>? onGenderSelected;
+class GenderWidget extends StatefulWidget {
+  final Function(String)? onGenderSelected;
 
-  const Gender({super.key, this.onGenderSelected});
+  const GenderWidget({super.key, this.onGenderSelected});
 
   @override
-  State<Gender> createState() => _GenderState();
+  State<GenderWidget> createState() => _GenderWidgetState();
 }
 
-class _GenderState extends State<Gender> {
+class _GenderWidgetState extends State<GenderWidget> {
   String? selected;
 
   void _selectGender(String gender) {
     setState(() {
       selected = gender;
     });
-    if (widget.onGenderSelected != null) {
-      widget.onGenderSelected!(gender);
-    }
+    widget.onGenderSelected?.call(gender);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        genderButton(
+          gender: Strings.male,
+          icon: Assets.icons.male.svg(),
+          label: Strings.male,
+          borderColor: context.colors.strokeAccent,
+        ),
+        const SizedBox(width: 8),
+        genderButton(
+          gender: Strings.famale,
+          icon: Assets.icons.female.svg(),
+          label: Strings.famale,
+          borderColor: context.colors.strokeAccent,
+        ),
+      ],
+    );
   }
 
   Widget genderButton({
@@ -46,27 +65,6 @@ class _GenderState extends State<Gender> {
           child: Row(children: [icon, const SizedBox(width: 8), label.text(14, 18, 500)]),
         ),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        genderButton(
-          gender: "male",
-          icon: Assets.icons.male.svg(),
-          label: Strings.male,
-          borderColor: context.colors.strokeAccent,
-        ),
-        const SizedBox(width: 8),
-        genderButton(
-          gender: "female",
-          icon: Assets.icons.female.svg(),
-          label: Strings.famale,
-          borderColor: context.colors.strokeAccent,
-        ),
-      ],
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/widgets/questions/question_progress.dart';
-import 'package:calora/widgets/questions/questions_body.dart';
+import 'package:calora/widgets/questions/question_progress_widget.dart';
+import 'package:calora/widgets/questions/questions_body_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -17,21 +17,19 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
 
   @override
   Widget builder(BuildContext context, QuestionsManager manager, QuestionsState state) {
-    final total = 8;
-
     final profile = state.answers;
 
-    final answers = [
-      profile?.name,
-      profile?.gender,
-      profile?.purposeIds,
-      profile?.birthDate,
-      profile?.height,
-      profile?.weight,
-      profile?.targetWeight,
-      profile?.activityHours,
-    ];
-    final currentAnswer = answers[state.currentIndex];
+    final currentAnswer = switch (state.currentIndex) {
+      0 => profile?.name,
+      1 => profile?.gender,
+      2 => profile?.purposeIds,
+      3 => profile?.birthDate,
+      4 => profile?.height,
+      5 => profile?.weight,
+      6 => profile?.targetWeight,
+      7 => profile?.activityHours,
+      _ => null,
+    };
 
     return Scaffold(
       body: Stack(
@@ -45,48 +43,59 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                 children: [
                   Column(
                     children: [
-                      QuestionProgress(current: state.currentIndex + 1, total: total),
+                      QuestionProgressWidget(current: state.currentIndex + 1, total: 8),
                       const SizedBox(height: 16),
-                      QuestionsBody(),
+                      QuestionsBodyWidget(),
                     ],
                   ),
-                  Row(
-                    children: [
-                      if (state.currentIndex > 0)
-                        Expanded(
-                          child: _buildButton(
-                            context,
-                            Strings.previous,
-                            onTap: manager.back,
-                            enabled: manager.getButtonStatus(),
-                          ),
-                        ),
-                      if (state.currentIndex > 0) const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildButton(
-                          context,
-                          state.currentIndex == total - 1 ? Strings.finish : Strings.next,
-                          enabled: manager.getButtonStatus(),
-                          onTap: currentAnswer != null
-                              ? () {
-                                  if (state.currentIndex == total - 1) {
-                                    manager.finish();
-                                  } else {
-                                    manager.next();
-                                  }
-                                }
-                              : null,
-                          isPrimary: true,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildNavigationButtons(context, manager, state, 8, currentAnswer != null),
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildNavigationButtons(
+    BuildContext context,
+    QuestionsManager manager,
+    QuestionsState state,
+    int total,
+    bool isAnswerProvided,
+  ) {
+    final isLast = state.currentIndex == total - 1;
+    final hasPrevious = state.currentIndex > 0;
+
+    return Row(
+      children: [
+        Expanded(
+          flex: hasPrevious ? 1 : 0,
+          child: hasPrevious
+              ? _buildButton(context, Strings.previous, onTap: manager.back, enabled: true)
+              : const SizedBox.shrink(),
+        ),
+        hasPrevious ? const SizedBox(width: 12) : const SizedBox.shrink(),
+        Expanded(
+          flex: hasPrevious ? 1 : 2,
+          child: _buildButton(
+            context,
+            isLast ? Strings.finish : Strings.next,
+            enabled: isAnswerProvided,
+            onTap: isAnswerProvided
+                ? () {
+                    if (isLast) {
+                      manager.finish();
+                    } else {
+                      manager.next();
+                    }
+                  }
+                : null,
+            isPrimary: true,
+          ),
+        ),
+      ],
     );
   }
 
@@ -101,9 +110,7 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
     final bgColor = isPrimary
         ? (enabled ? colors.strokeAccent : colors.accentWhite)
         : colors.accentWhite;
-
     final textColor = isPrimary ? (enabled ? Colors.white : Colors.black) : Colors.black;
-
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(

@@ -7,7 +7,7 @@ part 'questions_management.freezed.dart';
 @freezed
 abstract class QuestionsState with _$QuestionsState {
   const factory QuestionsState({
-    @Default(QuestionsModel()) QuestionsModel? answers,
+    @Default(Questions()) Questions? answers,
     @Default(0) int currentIndex,
   }) = _QuestionsState;
 }

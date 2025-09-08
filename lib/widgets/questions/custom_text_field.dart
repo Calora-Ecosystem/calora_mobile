@@ -4,37 +4,39 @@ import 'package:flutter/material.dart';
 class CustomTextField extends StatefulWidget {
   final String? hintText;
   final TextInputType? keyboardType;
-  final ValueChanged<String>? onChanged;
-  final TextEditingController controller;
+  final Function(String) onChanged;
 
-  const CustomTextField({
-    super.key,
-    this.hintText,
-    this.keyboardType,
-    this.onChanged,
-    required this.controller,
-  });
+  const CustomTextField({super.key, this.hintText, this.keyboardType, required this.onChanged});
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
   @override
   void dispose() {
-    widget.controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
     return TextField(
-      controller: widget.controller,
+      controller: _controller,
       keyboardType: widget.keyboardType ?? TextInputType.text,
       textAlign: TextAlign.center,
-      onChanged: widget.onChanged,
+      onChanged: (value) {
+        widget.onChanged?.call(value.trim());
+      },
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: TextStyle(

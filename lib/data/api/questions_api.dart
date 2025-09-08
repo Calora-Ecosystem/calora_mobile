@@ -1,4 +1,4 @@
-import 'package:calora/domain/model/questions/questions.dart';
+import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
@@ -8,20 +8,8 @@ class QuestionsApi {
 
   QuestionsApi(this._dio);
 
-  Future<Response?> sendAnswers(QuestionsModel answers) async {
-    try {
-      final data = answers.toJson();
-      print('Sending answers: $data');
-      final response = await _dio.post('users/extras', data: data);
-      print('Response: ${response.data}');
-
-      return response;
-    } on DioException catch (e) {
-      print('Dio error: ${e.response?.data ?? e.message}');
-      return null;
-    } catch (e) {
-      print('Unexpected error: $e');
-      return null;
-    }
+  Future<Response> sendAnswers(QuestionsRequest request) async {
+    final data = request.toJson();
+    return _dio.post('users/extras', data: data);
   }
 }

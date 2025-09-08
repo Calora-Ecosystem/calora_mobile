@@ -3,16 +3,16 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class DatePickerScreen extends StatefulWidget {
+class DatePickerWidget extends StatefulWidget {
   final ValueChanged<DateTime>? onDateChanged;
 
-  const DatePickerScreen({super.key, this.onDateChanged});
+  const DatePickerWidget({super.key, this.onDateChanged});
 
   @override
-  _DatePickerScreenState createState() => _DatePickerScreenState();
+  _DatePickerWidgetState createState() => _DatePickerWidgetState();
 }
 
-class _DatePickerScreenState extends State<DatePickerScreen> {
+class _DatePickerWidgetState extends State<DatePickerWidget> {
   DateTime? _selectedDate;
 
   void _showDatePicker(BuildContext ctx) {
