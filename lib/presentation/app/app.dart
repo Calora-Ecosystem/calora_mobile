@@ -1,13 +1,11 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/flavor/flavor_config.dart';
-import 'package:calora/common/router/app_router.gr.dart';
-import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/display/display_widget.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_localization_loader/easy_localization_loader.dart';
 import 'package:flutter/material.dart';
@@ -46,10 +44,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: context.theme,
-              routerConfig: _appRouter.config(
-                deepLinkBuilder: (_) =>
-                    DeepLink([_initialRoute()]),
-              ),
+              routerConfig: _appRouter.config(deepLinkBuilder: (_) => DeepLink([_initialRoute()])),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
                 return MediaQuery(
@@ -59,10 +54,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
                       maxScaleFactor: 1.2,
                     ),
                   ),
-                  child: DisplayWidget(
-                    key: ValueKey(state.language),
-                    child: child!,
-                  ),
+                  child: DisplayWidget(key: ValueKey(state.language), child: child!),
                 );
               },
             ),
@@ -74,11 +66,11 @@ class App extends Managed<AppManager, AppState, AppEffect> {
 
   PageRouteInfo _initialRoute() {
     bool isLogin = FlavorConfig.isLogin;
-
-    if (isLogin) {
-      return InputNameRoute();
-    } else {
-      return SelectLanguageRoute();
-    }
+    return QuestionsRoute();
+    //   if (isLogin) {
+    //     return QuestionsRoute();
+    //   } else {
+    //     return SelectLanguageRoute();
+    //   }
   }
 }
