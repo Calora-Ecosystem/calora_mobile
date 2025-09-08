@@ -8,7 +8,7 @@ class AuthApi {
   AuthApi(this._dio);
 
   Future<Response> register(String email, String name) {
-    final data = {'email': email, 'name': name};
+    final data = {'email': email, 'questions': name};
     return _dio.post('auth/register', data: data);
   }
 
@@ -28,7 +28,7 @@ class AuthApi {
       'email': email,
       'verificationCode': verificationCode,
       'code': code,
-      'deviceInfo': {'key': key, 'name': name, 'fcmToken': fcmToken},
+      'deviceInfo': {'key': key, 'questions': name, 'fcmToken': fcmToken},
     };
     return _dio.post('auth/sign-in', data: data);
   }

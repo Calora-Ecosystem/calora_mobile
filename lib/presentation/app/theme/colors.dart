@@ -18,6 +18,8 @@ class DefaultThemeColors {
   final accentSoft = Color(0xFF94CE9A);
   final accentWhite = Color(0xFFFBFEFB);
   final accentGreenWhite = Color(0xFFEBF3ED);
+  final commonBackground = Color(0xFFF2F3F7);
+  final modalBackground = Color(0xFFD1D3D9);
   final iconSub = Color(0xFF646464);
   final accentDisabled =Color(0xFFE9F6E9);
 }

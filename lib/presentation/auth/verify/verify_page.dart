@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -38,9 +36,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -63,9 +59,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       child: Button(
                         loading: state.loading,
                         onPressed: manager.verify,
-                        child: Strings.doContinue
-                            .text(16, 20, 500)
-                            .c(context.colors.textWhite),
+                        child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
                       ),
                     ),
                   ],
@@ -79,6 +73,6 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   }
 
   void _openInputNamePage(BuildContext context) {
-    context.router.replace(InputNameRoute());
+    context.router.replace(QuestionsRoute());
   }
 }

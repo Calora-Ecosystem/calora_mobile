@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:calora/data/api/auth_api.dart';
@@ -21,6 +22,7 @@ class AuthRepoImpl extends AuthRepo {
   Future<Verification> login(String email) async {
     final response = await _api.login(email);
     final verification = Verification.fromJson(response.data['content']);
+    log(verification.toString());
     return verification.copyWith(email: email);
   }
 
