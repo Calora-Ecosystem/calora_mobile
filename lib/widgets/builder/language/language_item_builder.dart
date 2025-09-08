@@ -4,12 +4,12 @@ import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-class LanguageItem extends StatelessWidget {
+class LanguageItemBuilder extends StatelessWidget {
   final Language language;
   final bool isChecked;
   final Function(Language) onTap;
 
-  LanguageItem({
+  LanguageItemBuilder({
     required this.language,
     required this.isChecked,
     required this.onTap,

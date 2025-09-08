@@ -25,7 +25,7 @@ class LanguageWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         final language = languages[index];
         final isSelected = selectedLanguage == language;
-        return LanguageItem(
+        return LanguageItemBuilder(
           language: language,
           isChecked: isSelected,
           onTap: (data) => onLanguageSelected(data),
