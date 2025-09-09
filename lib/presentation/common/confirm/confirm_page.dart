@@ -4,11 +4,11 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-class ConfirmDialog extends StatelessWidget {
+class ConfirmPage extends StatelessWidget {
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
 
-  const ConfirmDialog({super.key, required this.onConfirm, required this.onCancel});
+  const ConfirmPage({super.key, required this.onConfirm, required this.onCancel});
 
   @override
   Widget build(BuildContext context) {

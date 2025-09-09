@@ -1,22 +1,27 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/widgets/questions/question_progress_widget.dart';
 import 'package:calora/widgets/questions/questions_body_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 import '../../../common/gen/strings.dart';
-import '../../../widgets/steps/actions_bottom_sheet_widget.dart';
 import 'management/questions_management.dart';
 import 'management/questions_manager.dart';
 
 @RoutePage()
-class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
+class QuestionsPage
+    extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
   QuestionsPage({super.key});
 
   @override
-  Widget builder(BuildContext context, QuestionsManager manager, QuestionsState state) {
+  Widget builder(
+    BuildContext context,
+    QuestionsManager manager,
+    QuestionsState state,
+  ) {
     final profile = state.answers;
 
     final currentAnswer = switch (state.currentIndex) {
@@ -45,22 +50,25 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                            ),
-                            builder: (context) => const ActionsBottomSheetWidget(),
-                          );
+                          showActionsSheet(context);
                         },
                         child: Text('data'),
                       ),
-                      QuestionProgressWidget(current: state.currentIndex + 1, total: 8),
+                      QuestionProgressWidget(
+                        current: state.currentIndex + 1,
+                        total: 8,
+                      ),
                       const SizedBox(height: 16),
                       QuestionsBodyWidget(),
                     ],
                   ),
-                  _buildNavigationButtons(context, manager, state, 8, currentAnswer != null),
+                  _buildNavigationButtons(
+                    context,
+                    manager,
+                    state,
+                    8,
+                    currentAnswer != null,
+                  ),
                 ],
               ),
             ),
@@ -85,7 +93,12 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
         Expanded(
           flex: hasPrevious ? 1 : 0,
           child: hasPrevious
-              ? _buildButton(context, Strings.previous, onTap: manager.back, enabled: true)
+              ? _buildButton(
+                  context,
+                  Strings.previous,
+                  onTap: manager.back,
+                  enabled: true,
+                )
               : const SizedBox.shrink(),
         ),
         hasPrevious ? const SizedBox(width: 12) : const SizedBox.shrink(),
@@ -122,14 +135,32 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
     final bgColor = isPrimary
         ? (enabled ? colors.neutral600Secondary : colors.accentWhite)
         : colors.accentWhite;
-    final textColor = isPrimary ? (enabled ? Colors.white : Colors.black) : Colors.black;
+    final textColor = isPrimary
+        ? (enabled ? Colors.white : Colors.black)
+        : Colors.black;
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
-        child: text.text(16, 20, 500).c(textColor).copyWith(textAlign: TextAlign.center),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: text
+            .text(16, 20, 500)
+            .c(textColor)
+            .copyWith(textAlign: TextAlign.center),
       ),
+    );
+  }
+
+  void showActionsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => const ActionsPage(),
     );
   }
 }

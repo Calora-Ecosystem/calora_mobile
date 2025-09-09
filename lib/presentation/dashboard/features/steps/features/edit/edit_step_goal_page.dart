@@ -4,17 +4,21 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-class StepGoalBottomSheet extends StatefulWidget {
+class EditStepGoalPage extends StatefulWidget {
   final int initialValue;
   final ValueChanged<int> onSave;
 
-  const StepGoalBottomSheet({super.key, required this.initialValue, required this.onSave});
+  const EditStepGoalPage({
+    super.key,
+    required this.initialValue,
+    required this.onSave,
+  });
 
   @override
-  State<StepGoalBottomSheet> createState() => _StepGoalBottomSheetState();
+  State<EditStepGoalPage> createState() => _EditStepGoalPageState();
 }
 
-class _StepGoalBottomSheetState extends State<StepGoalBottomSheet> {
+class _EditStepGoalPageState extends State<EditStepGoalPage> {
   late FixedExtentScrollController _controller;
   late int _selectedValue;
 
@@ -28,7 +32,9 @@ class _StepGoalBottomSheetState extends State<StepGoalBottomSheet> {
   void initState() {
     super.initState();
     _selectedValue = widget.initialValue;
-    _controller = FixedExtentScrollController(initialItem: (_selectedValue ~/ 1000) - 1);
+    _controller = FixedExtentScrollController(
+      initialItem: (_selectedValue ~/ 1000) - 1,
+    );
   }
 
   @override
@@ -53,7 +59,9 @@ class _StepGoalBottomSheetState extends State<StepGoalBottomSheet> {
           SizedBox(height: 12),
           Align(
             alignment: AlignmentGeometry.topLeft,
-            child: Strings.stepsToSetAGoal.text(20, 24, 700).c(context.colors.textStrong),
+            child: Strings.stepsToSetAGoal
+                .text(20, 24, 700)
+                .c(context.colors.textStrong),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -78,22 +86,33 @@ class _StepGoalBottomSheetState extends State<StepGoalBottomSheet> {
 
                   if (isSelected) {
                     gradient = LinearGradient(
-                      colors: [context.colors.defaultText, context.colors.defaultText],
+                      colors: [
+                        context.colors.defaultText,
+                        context.colors.defaultText,
+                      ],
                     );
                   } else if (isAbove) {
                     gradient = LinearGradient(
-                      colors: [context.colors.white, context.colors.defaultText],
+                      colors: [
+                        context.colors.white,
+                        context.colors.defaultText,
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     );
                   } else if (isBelow) {
                     gradient = LinearGradient(
-                      colors: [context.colors.defaultText, context.colors.white],
+                      colors: [
+                        context.colors.defaultText,
+                        context.colors.white,
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     );
                   } else {
-                    gradient = LinearGradient(colors: [Colors.grey, Colors.grey]);
+                    gradient = LinearGradient(
+                      colors: [Colors.grey, Colors.grey],
+                    );
                   }
                   return Center(
                     child: value

@@ -2,7 +2,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/domain/model/steps/leaderboard.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/widgets/steps/avatar_with_flag_widget.dart';
+import 'package:calora/widgets/avatar/flag/avatar_with_flag_widget.dart';
 import 'package:flutter/material.dart';
 
 class LeaderboardWidget extends StatelessWidget {

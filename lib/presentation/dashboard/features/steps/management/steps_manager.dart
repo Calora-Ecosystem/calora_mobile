@@ -4,7 +4,7 @@ import 'package:management/management.dart';
 
 @injectable
 class StepsManager extends Manager<StepsState, StepsEffect> {
-
   StepsManager() : super(const StepsState());
 
+  void getWinners() async {}
 }

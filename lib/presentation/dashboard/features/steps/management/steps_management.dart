@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/winner/winner.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'steps_management.freezed.dart';
@@ -6,7 +7,8 @@ part 'steps_management.freezed.dart';
 abstract class StepsState with _$StepsState {
   const factory StepsState({
     @Default(0) int stepCount,
-}) = _StepsState;
+    @Default([]) List<Winner> winners,
+  }) = _StepsState;
 }
 
 @freezed

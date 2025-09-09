@@ -2,7 +2,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/widgets/steps/steps_goal_bottomSheet_widget.dart';
+import 'package:calora/presentation/dashboard/features/steps/features/edit/edit_step_goal_page.dart';
 import 'package:calora/widgets/steps/steps_indicator_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +13,7 @@ class FitnessTrackWidget extends StatefulWidget {
     required this.onClickBackward,
     required this.onClickPause,
     required this.onClickMoreVert,
+    required this.onClickEditStepGoal,
     this.selectedDate,
   });
 
@@ -20,6 +21,7 @@ class FitnessTrackWidget extends StatefulWidget {
   final Function() onClickBackward;
   final Function() onClickPause;
   final Function() onClickMoreVert;
+  final Function() onClickEditStepGoal;
   final DateTime? selectedDate;
 
   @override
@@ -28,6 +30,7 @@ class FitnessTrackWidget extends StatefulWidget {
 
 class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
   int goal = 100000;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -57,7 +60,9 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                     children: [
                       "Bugun".text(14, 16, 400).c(context.colors.textWhite),
                       SizedBox(height: 4),
-                      "7- sentabr".text(14, 16, 400).c(context.colors.textWhite),
+                      "7- sentabr"
+                          .text(14, 16, 400)
+                          .c(context.colors.textWhite),
                     ],
                   ),
                   InkWell(
@@ -83,7 +88,11 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                       children: [
                         InkWell(
                           onTap: widget.onClickPause,
-                          child: SizedBox(height: 18, width: 18, child: Assets.icons.icPause.svg()),
+                          child: SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: Assets.icons.icPause.svg(),
+                          ),
                         ),
                         InkWell(
                           onTap: widget.onClickMoreVert,
@@ -100,19 +109,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                       current: 5000,
                       goal: goal,
                       onEditTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (_) => StepGoalBottomSheet(
-                            initialValue: 16000,
-                            onSave: (value) {
-                              setState(() {
-                                goal = value;
-                              });
-                            },
-                          ),
-                        );
+                        widget.onClickEditStepGoal();
                       },
                     ),
                     const SizedBox(height: 12),
@@ -124,9 +121,13 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                           children: [
                             Assets.icons.icStopwatch.svg(),
                             SizedBox(height: 4),
-                            '0 S'.text(16, 20, 500).c(context.colors.textStrong),
+                            '0 S'
+                                .text(16, 20, 500)
+                                .c(context.colors.textStrong),
                             SizedBox(height: 2),
-                            Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
+                            Strings.onTime
+                                .text(14, 20, 400)
+                                .c(context.colors.textSub),
                           ],
                         ),
                         Column(
@@ -136,7 +137,9 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                             SizedBox(height: 4),
                             '0'.text(16, 20, 500).c(context.colors.textStrong),
                             SizedBox(height: 2),
-                            Strings.distanceInKm.text(14, 20, 400).c(context.colors.textSub),
+                            Strings.distanceInKm
+                                .text(14, 20, 400)
+                                .c(context.colors.textSub),
                           ],
                         ),
                         Column(
@@ -146,7 +149,9 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                             SizedBox(height: 4),
                             '0'.text(16, 20, 500).c(context.colors.textStrong),
                             SizedBox(height: 2),
-                            Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
+                            Strings.calorie
+                                .text(14, 20, 400)
+                                .c(context.colors.textSub),
                           ],
                         ),
                       ],

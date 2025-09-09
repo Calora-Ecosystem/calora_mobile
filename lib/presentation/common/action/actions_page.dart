@@ -4,12 +4,12 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-class ActionsBottomSheetWidget extends StatelessWidget {
+class ActionsPage extends StatelessWidget {
   final VoidCallback? onTapDelete;
   final VoidCallback? onTapShare;
   final VoidCallback? onTapShareApp;
 
-  const ActionsBottomSheetWidget({
+  const ActionsPage({
     super.key,
     this.onTapDelete,
     this.onTapShare,
