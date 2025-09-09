@@ -1,19 +1,21 @@
-import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometr_service.dart';
+import 'package:calora/domain/model/steps/leaderboard.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/widgets/podium/podium_widget.dart';
-import 'package:calora/widgets/tab/tab_bar_item_widget.dart';
-import 'package:calora/widgets/track%20/fitness_track_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
+import 'package:calora/widgets/podium/podium_widget.dart';
+import 'package:calora/widgets/steps/actions_bottom_sheet_widget.dart';
+import 'package:calora/widgets/steps/confirm_dialog_widget.dart';
+import 'package:calora/widgets/steps/leaderboard_widget.dart';
+import 'package:calora/widgets/tab/tab_bar_item_widget.dart';
+import 'package:calora/widgets/track/fitness_track_widget.dart';
+import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
@@ -50,9 +52,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -85,8 +85,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                             borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
                           labelColor: context.colors.neutral900Primary,
-                          unselectedLabelColor:
-                              context.colors.neutral600Secondary,
+                          unselectedLabelColor: context.colors.neutral600Secondary,
                           tabs: [
                             TabBarItemWidget(name: Strings.daily),
                             TabBarItemWidget(name: Strings.weekly),
@@ -100,7 +99,24 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                   FitnessTrackWidget(
                     onClickBackward: () {},
                     onClickForward: () {},
-                    onClickMoreVert: () {},
+                    onClickMoreVert: () {
+                      showModalBottomSheet(
+                        context: context,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                        ),
+                        builder: (context) => ActionsBottomSheetWidget(
+                          onTapDelete: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => ConfirmDialog(onConfirm: () {}, onCancel: () {}),
+                            );
+                          },
+                          onTapShare: () {},
+                          onTapShareApp: () {},
+                        ),
+                      );
+                    },
                     onClickPause: () {},
                   ),
                   Center(
@@ -108,6 +124,43 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                       firstPosition: Text("Winner 1"),
                       secondPosition: Text("Winner 2"),
                       thirdPosition: Text("Winner 3"),
+                    ),
+                  ),
+                  Expanded(
+                    child: LeaderboardWidget(
+                      users: [
+                        UserStat(
+                          name: "Eshniyoz",
+                          initials: "ES",
+                          talks: 140,
+                          scoreText: "59 030 steps",
+                        ),
+                        UserStat(
+                          name: "Bekniyoz",
+                          initials: "BS",
+                          talks: 129,
+                          scoreText: "53 030 steps",
+                        ),
+                        UserStat(
+                          name: "Jasur",
+                          initials: "EJ",
+                          talks: 121,
+                          scoreText: "52 943 steps",
+                        ),
+                        UserStat(
+                          name: "Siz",
+                          initials: "AB",
+                          talks: 119,
+                          scoreText: "52 430 steps",
+                          isMe: true,
+                        ),
+                        UserStat(
+                          name: "Abdurashid",
+                          initials: "MA",
+                          talks: 119,
+                          scoreText: "1,046 steps",
+                        ),
+                      ],
                     ),
                   ),
                 ],
