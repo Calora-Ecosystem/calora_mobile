@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 
 class WinnerItemBuilder extends StatelessWidget {
   final UserStat userStat;
+  final bool isWinner;
 
-  WinnerItemBuilder({super.key, required this.userStat});
+  WinnerItemBuilder({super.key, required this.userStat, required this.isWinner});
 
   @override
   Widget build(BuildContext context) {
@@ -16,28 +17,27 @@ class WinnerItemBuilder extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        AvatarWithFlagWidget(
-          initials: userStat.getInitials(),
-          flagAsset: Assets.icons.circleFlag.svg(),
+        SizedBox(height: 12),
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            AvatarWithFlagWidget(
+              initials: userStat.getInitials(),
+              flagAsset: Assets.icons.circleFlag.svg(),
+            ),
+            if (isWinner) Positioned(top: -10, right: -4, child: Assets.icons.crown.svg()),
+          ],
         ),
         SizedBox(height: 8),
-        Flexible(
-          child: userStat.firstName
-              .text(16, 20, 500)
-              .c(context.colors.neutral900Primary),
-        ),
+        userStat.firstName.text(16, 20, 500).c(context.colors.neutral900Primary),
         SizedBox(height: 8),
         Container(
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             color: context.colors.backgroundElevation6,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: userStat.prettySteps
-                .text(12, 16, 500)
-                .c(context.colors.neutral900Primary),
-          ),
+          child: userStat.prettySteps.text(12, 16, 500).c(context.colors.neutral900Primary),
         ),
       ],
     );
