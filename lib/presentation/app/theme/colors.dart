@@ -15,6 +15,7 @@ class DefaultThemeColors {
   final backgroundBase = Color(0xFFFFFFFF);
   final strokeSoft = Color(0xFFF0F0F0);
   final backgroundElevation = Color(0xFFF2F3F7);
+  final backgroundElevation6 = Color(0xF000000);
   final accentSoft = Color(0xFF94CE9A);
   final accentWhite = Color(0xFFFBFEFB);
   final accentGreenWhite = Color(0xFFEBF3ED);

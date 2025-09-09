@@ -5,8 +5,6 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometr_service.dart';
-import 'package:calora/domain/model/steps/leaderboard.dart';
-import 'package:calora/domain/model/winner/winner.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
@@ -29,6 +27,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   @override
   void init(context, manager) {
+    manager.fetchUserStates();
     _initializePedometerService();
   }
 
@@ -108,71 +107,32 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                   ),
                   SizedBox(height: 16),
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          FitnessTrackWidget(
-                            onClickBackward: () {},
-                            onClickForward: () {},
-                            onClickMoreVert: () {
-                              _showActionsSheet(context);
-                            },
-                            onClickPause: () {},
-                            onClickEditStepGoal: () {
-                              _showEditStepGoalSheet(context);
-                            },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        FitnessTrackWidget(
+                          onClickBackward: () {},
+                          onClickForward: () {},
+                          onClickMoreVert: () {
+                            _showActionsSheet(context);
+                          },
+                          onClickPause: () {},
+                          onClickEditStepGoal: () {
+                            _showEditStepGoalSheet(context);
+                          },
+                        ),
+                        PodiumWidget(
+                          firstPosition: Text("winner1"),
+                          secondPosition:  Text("winner2"),
+                          thirdPosition:  Text("winner3"),
+                        ),
+                        SizedBox(height: 2),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: LeaderboardWidget(users: state.userStates),
                           ),
-                          Center(
-                            child: PodiumWidget(
-                              firstPosition: WinnerItemBuilder(
-                                winner: Winner(
-                                  firstName: "Nurbek",
-                                  lastName: "Nurxonov",
-                                  stepCount: 100,
-                                ),
-                              ),
-                              secondPosition: Text("Winner 2"),
-                              thirdPosition: Text("Winner 3"),
-                            ),
-                          ),
-                          LeaderboardWidget(
-                            users: [
-                              UserStat(
-                                name: "Eshniyoz",
-                                initials: "ES",
-                                talks: 140,
-                                scoreText: "59 030 steps",
-                              ),
-                              UserStat(
-                                name: "Bekniyoz",
-                                initials: "BS",
-                                talks: 129,
-                                scoreText: "53 030 steps",
-                              ),
-                              UserStat(
-                                name: "Jasur",
-                                initials: "EJ",
-                                talks: 121,
-                                scoreText: "52 943 steps",
-                              ),
-                              UserStat(
-                                name: "Siz",
-                                initials: "AB",
-                                talks: 119,
-                                scoreText: "52 430 steps",
-                                isMe: true,
-                              ),
-                              UserStat(
-                                name: "Abdurashid",
-                                initials: "MA",
-                                talks: 119,
-                                scoreText: "1,046 steps",
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

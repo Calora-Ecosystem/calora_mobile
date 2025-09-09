@@ -1,6 +1,6 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
-import 'package:calora/domain/model/steps/leaderboard.dart';
+import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/avatar/flag/avatar_with_flag_widget.dart';
 import 'package:flutter/material.dart';
@@ -26,24 +26,34 @@ class LeaderboardWidget extends StatelessWidget {
           return Column(
             children: [
               ListTile(
-                leading: (index + 4).toString().text(16, 20, 500).c(context.colors.neutralPrimary),
+                leading: (index + 4)
+                    .toString()
+                    .text(16, 20, 500)
+                    .c(context.colors.neutralPrimary),
                 title: Row(
                   children: [
-                    AvatarWithFlagWidget(initials: 'EH', flagAsset: Assets.icons.circleFlag.svg()),
+                    AvatarWithFlagWidget(
+                      initials: user.getInitials(),
+                      flagAsset: Assets.icons.circleFlag.svg(),
+                    ),
                     const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        users[index].name.text(16, 20, 500).c(context.colors.neutralPrimary),
+                        user.firstName
+                            .text(16, 20, 500)
+                            .c(context.colors.neutralPrimary),
                         const SizedBox(height: 8),
-                        (users[index].talks.toString() + ' talks')
+                        (user.talks.toString() + ' talks')
                             .text(12, 16, 500)
                             .c(context.colors.textSub),
                       ],
                     ),
                   ],
                 ),
-                trailing: user.scoreText.text(12, 16, 500).c(context.colors.neutralPrimary),
+                trailing: user.prettySteps
+                    .text(12, 16, 500)
+                    .c(context.colors.neutralPrimary),
               ),
             ],
           );

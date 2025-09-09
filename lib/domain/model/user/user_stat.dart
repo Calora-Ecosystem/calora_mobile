@@ -1,12 +1,16 @@
-class Winner {
+class UserStat {
   final String firstName;
   final String lastName;
   final int stepCount;
+  final int talks;
+  final bool isMe;
 
-  Winner({
+  UserStat({
     required this.firstName,
     required this.lastName,
     required this.stepCount,
+    required this.talks,
+    this.isMe = false,
   });
 
   String getInitials() {
@@ -15,4 +19,6 @@ class Winner {
     if (lastName.isEmpty) return firstName[0];
     return '${firstName[0].toUpperCase()}${lastName[0].toUpperCase()}';
   }
+
+  String get prettySteps => "$stepCount";
 }
