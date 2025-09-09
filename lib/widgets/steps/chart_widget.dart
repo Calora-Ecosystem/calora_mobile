@@ -1,4 +1,5 @@
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ class ChartWidget extends StatelessWidget {
   final ChartType type;
   final List<double> primaryValues;
   final double total;
-  final double? target; // maqsad chizig‘i
+  final double? target;
 
   const ChartWidget({
     super.key,
@@ -21,12 +22,12 @@ class ChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // O‘rtacha qiymatni hisoblaymiz
-    final average = primaryValues.isEmpty
-        ? 0
-        : primaryValues.reduce((a, b) => a + b) / primaryValues.length;
+    if (primaryValues.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    // eng katta qiymatni topamiz va 10% qo‘shamiz
+    final average = primaryValues.reduce((a, b) => a + b) / primaryValues.length;
+
     final maxValue = [
       ...primaryValues,
       if (target != null) target!,
@@ -35,93 +36,51 @@ class ChartWidget extends StatelessWidget {
     final maxY = maxValue * 1.1;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              type == ChartType.monthly ? "Oylik natijalar" : "Haftalik natijalar",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-
+        (type == ChartType.monthly ? Strings.monthlyResults : Strings.weeklyResults)
+            .text(14, 18, 600)
+            .c(context.colors.neutralPrimary),
+        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Column(
-              children: [
-                Text(
-                  average.toStringAsFixed(0),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const Text("O'rtacha"),
-              ],
-            ),
-            Column(
-              children: [
-                Text(
-                  total.toStringAsFixed(0),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const Text("Jami"),
-              ],
-            ),
+            _buildStat(context, average.toStringAsFixed(0), Strings.avarage),
+            _buildStat(context, total.toStringAsFixed(0), Strings.total),
           ],
         ),
-        const SizedBox(height: 16),
-
+        const SizedBox(height: 12),
         SizedBox(
           height: type == ChartType.monthly ? 220 : 160,
           child: BarChart(
             BarChartData(
-              alignment: BarChartAlignment.spaceAround,
+              alignment: type == ChartType.monthly
+                  ? BarChartAlignment.spaceBetween
+                  : BarChartAlignment.spaceAround,
               maxY: maxY,
               borderData: FlBorderData(show: false),
               gridData: FlGridData(
                 show: true,
                 drawHorizontalLine: true,
-                drawVerticalLine: false,
+                drawVerticalLine: true,
+                getDrawingVerticalLine: (value) =>
+                    FlLine(color: const Color(0xFFF0F0F0), strokeWidth: 2, dashArray: [2, 2]),
                 getDrawingHorizontalLine: (value) =>
-                    FlLine(color: context.colors.neutralSecondary.withOpacity(0.2), strokeWidth: 1),
+                    FlLine(color: const Color(0xFFF0F0F0), strokeWidth: 2, dashArray: [2, 2]),
               ),
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: 40,
-                    getTitlesWidget: (value, meta) {
-                      return Text(
-                        _formatNumber(value),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.neutralPrimary,
-                        ),
-                      );
-                    },
+                    reservedSize: 35,
+                    getTitlesWidget: (value, meta) =>
+                        _formatNumber(value).text(10, 16, 400).c(context.colors.neutralPrimary),
                   ),
                 ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      if (type == ChartType.monthly) {
-                        final day = value.toInt() + 1;
-                        if ([7, 14, 21, 28].contains(day)) {
-                          return day.toString().text(14, 16, 400).c(context.colors.neutralPrimary);
-                        }
-                        return const SizedBox();
-                      } else {
-                        const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-                        if (value.toInt() >= 0 && value.toInt() < days.length) {
-                          return days[value.toInt()]
-                              .text(14, 16, 400)
-                              .c(context.colors.neutralPrimary);
-                        }
-                        return const SizedBox();
-                      }
-                    },
+                    getTitlesWidget: (value, meta) => _buildBottomTitle(context, value.toInt()),
                   ),
                 ),
                 rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -130,11 +89,15 @@ class ChartWidget extends StatelessWidget {
               barTouchData: BarTouchData(
                 enabled: true,
                 touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (group) => Colors.black87,
+                  getTooltipColor: (_) => context.colors.primarySolid,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
                       rod.toY.toStringAsFixed(0),
-                      const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      TextStyle(
+                        color: context.colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     );
                   },
                 ),
@@ -142,20 +105,23 @@ class ChartWidget extends StatelessWidget {
               extraLinesData: ExtraLinesData(
                 horizontalLines: [
                   if (target != null)
-                    HorizontalLine(y: target!, color: context.colors.iconSoft, strokeWidth: 1.5),
+                    HorizontalLine(
+                      y: target!,
+                      color: context.colors.iconSoft,
+                      strokeWidth: 1.5,
+                      dashArray: null,
+                    ),
                 ],
               ),
-              barGroups: primaryValues.asMap().entries.map((e) {
-                final index = e.key;
-                final value = e.value;
-
-                final barColor = (target != null && value < target!)
+              barGroups: primaryValues.asMap().entries.map((entry) {
+                final index = entry.key;
+                final value = entry.value;
+                final barColor = target != null && value < target!
                     ? context.colors.textSub
                     : context.colors.blueAccent;
 
                 return BarChartGroupData(
                   x: index,
-                  barsSpace: 2,
                   barRods: [
                     BarChartRodData(
                       toY: value,
@@ -171,6 +137,31 @@ class ChartWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildStat(BuildContext context, String value, String label) {
+    return Column(
+      children: [
+        value.text(20, 24, 600).c(context.colors.neutralPrimary),
+        label.text(14, 16, 400).c(context.colors.textSub),
+      ],
+    );
+  }
+
+  Widget _buildBottomTitle(BuildContext context, int index) {
+    if (type == ChartType.monthly) {
+      final day = index + 1;
+      if ([7, 14, 21, 28].contains(day)) {
+        return day.toString().text(14, 16, 400).c(context.colors.neutralPrimary);
+      }
+      return const SizedBox();
+    } else {
+      const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+      if (index >= 0 && index < days.length) {
+        return days[index].text(14, 16, 400).c(context.colors.neutralPrimary);
+      }
+      return const SizedBox();
+    }
   }
 
   String _formatNumber(double value) {
