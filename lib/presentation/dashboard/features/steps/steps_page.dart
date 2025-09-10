@@ -55,10 +55,17 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 16),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 16,
+              ),
               child: Column(
                 children: [
                   Align(
@@ -88,7 +95,8 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                             borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
                           labelColor: context.colors.neutral900Primary,
-                          unselectedLabelColor: context.colors.neutral600Secondary,
+                          unselectedLabelColor:
+                              context.colors.neutral600Secondary,
                           tabs: [
                             TabBarItemWidget(name: Strings.daily),
                             TabBarItemWidget(name: Strings.weekly),
@@ -117,19 +125,17 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                           ),
                           PodiumWidget(
                             firstPosition: WinnerItemBuilder(
-                              isWinner: true,
-                              userStat: UserStat(
-                                firstName: 'Lola',
-                                lastName: 'Lazizov',
-                                talks: 160,
-                                stepCount: 120000,
-                              ),
+                              userStat: state.userStates[0],
                             ),
-                            secondPosition: Text("winner2"),
-                            thirdPosition: Text("winner3"),
+                            secondPosition: WinnerItemBuilder(
+                              userStat: state.userStates[1],
+                            ),
+                            thirdPosition: WinnerItemBuilder(
+                              userStat: state.userStates[2],
+                            ),
                           ),
                           SizedBox(height: 2),
-                          LeaderboardWidget(users: state.userStates),
+                          LeaderboardWidget(users: state.getUserStates()),
                         ],
                       ),
                     ),

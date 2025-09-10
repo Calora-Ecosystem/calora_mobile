@@ -4,6 +4,7 @@ class UserStat {
   final int stepCount;
   final int talks;
   final bool isMe;
+  final bool isWinner;
 
   UserStat({
     required this.firstName,
@@ -11,6 +12,7 @@ class UserStat {
     required this.stepCount,
     required this.talks,
     this.isMe = false,
+    this.isWinner = false,
   });
 
   String getInitials() {

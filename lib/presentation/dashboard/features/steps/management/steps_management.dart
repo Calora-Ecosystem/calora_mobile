@@ -16,9 +16,8 @@ abstract class StepsState with _$StepsState {
     if (userStates.length <= 3) {
       return [];
     }
-    return userStates.sublist(3);
+    return userStates.sublist(3, userStates.length);
   }
-
 }
 
 @freezed

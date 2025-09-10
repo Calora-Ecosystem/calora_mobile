@@ -14,6 +14,7 @@ class StepRepoImpl extends StepRepo {
       firstName: "Lolaxon",
       lastName: "Ahmedov",
       talks: 159,
+      isWinner: true,
       stepCount: 104943,
     ),
     UserStat(
