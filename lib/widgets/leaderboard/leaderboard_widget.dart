@@ -19,6 +19,7 @@ class LeaderboardWidget extends StatelessWidget {
       ),
       child: ListView.builder(
         shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         itemCount: users.length,
         itemBuilder: (context, index) {
           final user = users[index];

@@ -100,40 +100,38 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                   ),
                   SizedBox(height: 16),
                   Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        FitnessTrackWidget(
-                          onClickBackward: () {},
-                          onClickForward: () {},
-                          onClickMoreVert: () {
-                            _showActionsSheet(context);
-                          },
-                          onClickPause: () {},
-                          onClickEditStepGoal: () {
-                            _showEditStepGoalSheet(context);
-                          },
-                        ),
-                        PodiumWidget(
-                          firstPosition: WinnerItemBuilder(
-                            isWinner: true,
-                            userStat: UserStat(
-                              firstName: 'Lola',
-                              lastName: 'Lazizov',
-                              talks: 160,
-                              stepCount: 120000,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          FitnessTrackWidget(
+                            onClickBackward: () {},
+                            onClickForward: () {},
+                            onClickMoreVert: () {
+                              _showActionsSheet(context);
+                            },
+                            onClickPause: () {},
+                            onClickEditStepGoal: () {
+                              _showEditStepGoalSheet(context);
+                            },
+                          ),
+                          PodiumWidget(
+                            firstPosition: WinnerItemBuilder(
+                              isWinner: true,
+                              userStat: UserStat(
+                                firstName: 'Lola',
+                                lastName: 'Lazizov',
+                                talks: 160,
+                                stepCount: 120000,
+                              ),
                             ),
+                            secondPosition: Text("winner2"),
+                            thirdPosition: Text("winner3"),
                           ),
-                          secondPosition: Text("winner2"),
-                          thirdPosition: Text("winner3"),
-                        ),
-                        SizedBox(height: 2),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: LeaderboardWidget(users: state.userStates),
-                          ),
-                        ),
-                      ],
+                          SizedBox(height: 2),
+                          LeaderboardWidget(users: state.userStates),
+                        ],
+                      ),
                     ),
                   ),
                 ],
