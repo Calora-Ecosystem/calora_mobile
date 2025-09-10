@@ -6,13 +6,12 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/language/select/management/select_language_management.dart';
+import 'package:calora/presentation/language/select/management/select_language_manager.dart';
 import 'package:calora/widgets/language/language_widget.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'management/select_language_management.dart';
-import 'management/select_language_manager.dart';
 
 @RoutePage()
 class SelectLanguagePage

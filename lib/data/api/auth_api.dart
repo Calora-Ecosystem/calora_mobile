@@ -26,7 +26,10 @@ class AuthApi {
   }) {
     final data = {
       'email': email,
-      'verificationCode': verificationCode,
+      'content': {
+        'verificationCode': verificationCode,
+        'expireDate': DateTime.now().add(const Duration(minutes: 5)),
+      },
       'code': code,
       'deviceInfo': {'key': key, 'questions': name, 'fcmToken': fcmToken},
     };

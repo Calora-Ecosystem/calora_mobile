@@ -4,9 +4,7 @@ part 'verify_management.freezed.dart';
 
 @freezed
 abstract class VerifyState with _$VerifyState {
-  const factory VerifyState({
-    @Default(false) bool loading,
-  }) = _VerifyState;
+  const factory VerifyState({@Default(false) bool loading}) = _VerifyState;
 }
 
 @freezed
