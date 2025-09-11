@@ -26,12 +26,9 @@ class AuthApi {
   }) {
     final data = {
       'email': email,
-      'content': {
-        'verificationCode': verificationCode,
-        'expireDate': DateTime.now().add(const Duration(minutes: 5)),
-      },
+      'verificationCode': verificationCode,
       'code': code,
-      'deviceInfo': {'key': key, 'questions': name, 'fcmToken': fcmToken},
+      'deviceInfo': {'key': key, 'name': name, 'fcmToken': fcmToken},
     };
     return _dio.post('auth/sign-in', data: data);
   }
