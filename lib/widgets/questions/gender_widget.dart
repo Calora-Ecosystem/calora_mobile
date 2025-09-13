@@ -62,7 +62,13 @@ class _GenderWidgetState extends State<GenderWidget> {
             color: context.colors.commonBackground,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Row(children: [icon, const SizedBox(width: 8), label.text(14, 18, 500)]),
+          child: Row(
+            children: [
+              icon,
+              const SizedBox(width: 8),
+              Expanded(child: label.text(14, 18, 500)),
+            ],
+          ),
         ),
       ),
     );
