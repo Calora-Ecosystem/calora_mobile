@@ -8,7 +8,7 @@ class PodiumWidget extends StatelessWidget {
     required this.secondPosition,
     required this.thirdPosition,
     this.height = 70,
-    this.width = 110,
+    this.width = 100,
     this.horizontalSpacing = 3,
     this.firstRankingText = "1",
     this.secondRankingText = "2",

@@ -53,7 +53,7 @@ class QuestionProgressWidget extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
                       color: index < current
-                          ? context.colors.neutral600Secondary
+                          ? context.colors.accentSoft
                           : context.colors.strokeSoft,
                     ),
                   ),

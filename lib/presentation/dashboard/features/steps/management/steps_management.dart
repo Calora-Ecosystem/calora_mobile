@@ -7,6 +7,8 @@ part 'steps_management.freezed.dart';
 abstract class StepsState with _$StepsState {
   const factory StepsState({
     @Default(0) int stepCount,
+    @Default(0) int metrics,
+    @Default(0) int statsTotal,
     @Default([]) List<UserStat> userStates,
   }) = _StepsState;
 

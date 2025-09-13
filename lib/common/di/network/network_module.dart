@@ -23,11 +23,8 @@ abstract class NetworkModule {
     final dio = Dio(baseOptions);
 
     dio.interceptors.add(languageInterceptor);
-    authStore.token.call().then((token) {
-      if (token != null) {
-        dio.interceptors.add(accessTokenInterceptor);
-      }
-    });
+
+    dio.interceptors.add(accessTokenInterceptor);
 
     if (kDebugMode) {
       dio.interceptors.add(logger);

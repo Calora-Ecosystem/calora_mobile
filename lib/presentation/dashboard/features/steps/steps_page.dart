@@ -5,7 +5,6 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometr_service.dart';
-import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
@@ -29,6 +28,8 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   @override
   void init(context, manager) {
     manager.fetchUserStates();
+    manager.getSteps();
+    manager.getUserMetrics();
     _initializePedometerService();
   }
 
@@ -52,36 +53,29 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   @override
   Widget builder(context, manager, state) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: 16,
-              ),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: AlignmentGeometry.centerLeft,
-                    child: Strings.steps.text(32, 36, 700),
-                  ),
-                  SizedBox(height: 12),
-                  Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: context.colors.accentWhite,
-                      // Moved color inside decoration
-                      borderRadius: BorderRadius.all(Radius.circular(14)),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 16),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: AlignmentGeometry.centerLeft,
+                      child: Strings.steps.text(32, 36, 700),
                     ),
-                    child: DefaultTabController(
-                      length: 3,
+                    SizedBox(height: 12),
+                    Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: context.colors.accentWhite,
+                        // Moved color inside decoration
+                        borderRadius: BorderRadius.all(Radius.circular(14)),
+                      ),
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(14)),
@@ -95,8 +89,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                             borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
                           labelColor: context.colors.neutral900Primary,
-                          unselectedLabelColor:
-                              context.colors.neutral600Secondary,
+                          unselectedLabelColor: context.colors.neutral600Secondary,
                           tabs: [
                             TabBarItemWidget(name: Strings.daily),
                             TabBarItemWidget(name: Strings.weekly),
@@ -105,46 +98,49 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          FitnessTrackWidget(
-                            onClickBackward: () {},
-                            onClickForward: () {},
-                            onClickMoreVert: () {
-                              _showActionsSheet(context);
-                            },
-                            onClickPause: () {},
-                            onClickEditStepGoal: () {
-                              _showEditStepGoalSheet(context);
-                            },
-                          ),
-                          PodiumWidget(
-                            firstPosition: WinnerItemBuilder(
-                              userStat: state.userStates[0],
+                    SizedBox(height: 16),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            FitnessTrackWidget(
+                              distance: state.metrics,
+                              steps: state.stepCount,
+                              onClickBackward: () {},
+                              onClickForward: () {},
+                              onClickMoreVert: () {
+                                _showActionsSheet(context);
+                              },
+                              onClickPause: () {},
+                              onClickEditStepGoal: () {
+                                _showEditStepGoalSheet(context);
+                              },
                             ),
-                            secondPosition: WinnerItemBuilder(
-                              userStat: state.userStates[1],
+                            PodiumWidget(
+                              firstPosition: state.userStates.isNotEmpty
+                                  ? WinnerItemBuilder(userStat: state.userStates[0])
+                                  : const SizedBox.shrink(),
+                              secondPosition: state.userStates.isNotEmpty
+                                  ? WinnerItemBuilder(userStat: state.userStates[1])
+                                  : const SizedBox.shrink(),
+                              thirdPosition: state.userStates.isNotEmpty
+                                  ? WinnerItemBuilder(userStat: state.userStates[2])
+                                  : const SizedBox.shrink(),
                             ),
-                            thirdPosition: WinnerItemBuilder(
-                              userStat: state.userStates[2],
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          LeaderboardWidget(users: state.getUserStates()),
-                        ],
+
+                            SizedBox(height: 2),
+                            LeaderboardWidget(users: state.getUserStates()),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

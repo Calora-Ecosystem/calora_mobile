@@ -9,12 +9,9 @@ class AccessTokenInterceptor extends Interceptor {
   AccessTokenInterceptor(this.authStore);
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final result = await authStore.token.call();
-    options.headers['Bearer'] = result?.accessToken ?? "";
+    options.headers['Authorization'] = 'Bearer ${result?.accessToken}';
     handler.next(options);
   }
 }
