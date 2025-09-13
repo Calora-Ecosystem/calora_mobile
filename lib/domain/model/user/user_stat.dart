@@ -1,3 +1,5 @@
+import 'package:calora/common/extensions/number_extension/number_extension.dart';
+
 class UserStat {
   final String firstName;
   final String lastName;
@@ -22,5 +24,7 @@ class UserStat {
     return '${firstName[0].toUpperCase()}${lastName[0].toUpperCase()}';
   }
 
-  String get prettySteps => "$stepCount";
+  String get prettySteps => "${stepCount.toPrettyFormat()}";
+
+  String get prettyTalks => "${talks.toPrettyFormat()}";
 }
