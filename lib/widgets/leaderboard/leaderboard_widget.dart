@@ -27,7 +27,10 @@ class LeaderboardWidget extends StatelessWidget {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 24),
-                leading: (index + 4).toString().text(16, 20, 500).c(context.colors.neutralPrimary),
+                leading: (index + 4)
+                    .toString()
+                    .text(16, 20, 500)
+                    .c(context.colors.neutralPrimary),
                 title: Row(
                   children: [
                     AvatarWithFlagWidget(
@@ -38,16 +41,20 @@ class LeaderboardWidget extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        user.firstName.text(16, 20, 500).c(context.colors.neutralPrimary),
+                        user.firstName
+                            .text(16, 20, 500)
+                            .c(context.colors.neutralPrimary),
                         const SizedBox(height: 8),
-                        (user.talks.toString() + ' talks')
+                        ("${user.prettyTalks} talks")
                             .text(12, 16, 500)
                             .c(context.colors.textSub),
                       ],
                     ),
                   ],
                 ),
-                trailing: user.prettySteps.text(12, 16, 500).c(context.colors.neutralPrimary),
+                trailing: user.prettySteps
+                    .text(12, 16, 500)
+                    .c(context.colors.neutralPrimary),
               ),
             ],
           );

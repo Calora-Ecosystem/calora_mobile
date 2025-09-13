@@ -24,5 +24,7 @@ class UserStat {
     return '${firstName[0].toUpperCase()}${lastName[0].toUpperCase()}';
   }
 
-  String get prettySteps => "${stepCount.toPrettyFormat}";
+  String get prettySteps => "${stepCount.toPrettyFormat()}";
+
+  String get prettyTalks => "${talks.toPrettyFormat()}";
 }
