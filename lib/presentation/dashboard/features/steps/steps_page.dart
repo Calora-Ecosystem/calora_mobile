@@ -35,16 +35,16 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.fetchUserStates();
     manager.getSteps();
     manager.getUserMetrics();
-    initHealthDataService();
-    // _initializeHealthyService();
+    // initHealthDataService();
+    _initializeHealthyService();
     // _initializePedometerService();
   }
 
   void _initializeHealthyService() async {
     await _healthStepService.initialize();
-    await Future.delayed(Duration(seconds: 2));
-    int steps = await _healthStepService.fetchTodaySteps();
 
+    // Get steps with comprehensive error handling
+    final steps = await _healthStepService.getStepsWithFallback();
     log("StepsPagesStepCount->$steps");
   }
 

@@ -56,4 +56,6 @@ flutter {
 dependencies {
     // For AGP 7.4+
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("androidx.health.connect:connect-client:1.2.0-alpha01")
+
 }
