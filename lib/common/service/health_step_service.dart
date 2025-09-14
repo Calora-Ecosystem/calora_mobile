@@ -227,22 +227,50 @@ class HealthStepService {
         return 0;
       }
 
+      // Ensure proper time components - VERY IMPORTANT!
+      DateTime adjustedStartDate = DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+      );
+      DateTime adjustedEndDate = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+        23,
+        59,
+        59,
+      );
+
+      log(
+        "HealthStep - Querying steps from $adjustedStartDate to $adjustedEndDate",
+      );
+
       List<HealthDataPoint> stepsData = await health.getHealthDataFromTypes(
         types: _stepDataTypes,
-        startTime: startDate,
-        endTime: endDate,
+        startTime: adjustedStartDate,
+        endTime: adjustedEndDate,
+        recordingMethodsToFilter: [RecordingMethod.automatic],
       );
+
+      log("HealthStep - Found ${stepsData.length} data points");
 
       int totalSteps = 0;
       for (var dataPoint in stepsData) {
         if (dataPoint.value is NumericHealthValue) {
-          totalSteps += (dataPoint.value as NumericHealthValue).numericValue
+          int stepValue = (dataPoint.value as NumericHealthValue).numericValue
               .toInt();
+          totalSteps += stepValue;
+          log(
+            "HealthStep - Data point: $stepValue steps at ${dataPoint.dateFrom} - ${dataPoint.dateTo}",
+          );
+        } else {
+          log("HealthStep - Non-numeric value: ${dataPoint.value}");
         }
       }
 
       log(
-        "HealthStep - Total steps from ${startDate.day}/${startDate.month} to ${endDate.day}/${endDate.month}: $totalSteps",
+        "HealthStep - Total steps from ${startDate.day}/${startDate.month}/${startDate.year} to ${endDate.day}/${endDate.month}/${endDate.year}: $totalSteps",
       );
       return totalSteps;
     } catch (e) {
@@ -348,5 +376,35 @@ class HealthStepService {
       log("HealthStep - Error in getStepsWithFallback: $e");
       return 0;
     }
+  }
+
+  // Fetch step data from the past 24 hours
+  Future<void> fetchPast24HoursData() async {
+    try {
+      final now = DateTime.now();
+      final yesterday = now.subtract(const Duration(hours: 24));
+
+      // Fetch health data from the past 24 hours
+      List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
+        startTime: yesterday,
+        endTime: now,
+        types: _stepDataTypes,
+      );
+
+      // Filter step data
+      List<HealthDataPoint> stepData = healthData
+          .where((point) => point.type == HealthDataType.STEPS)
+          .toList();
+
+      // Calculate total steps
+      int totalSteps = 0;
+      for (var point in stepData) {
+        if (point.value is NumericHealthValue) {
+          totalSteps += (point.value as NumericHealthValue).numericValue
+              .toInt();
+        }
+      }
+      log("HealthStep Step->$totalSteps");
+    } catch (e) {}
   }
 }

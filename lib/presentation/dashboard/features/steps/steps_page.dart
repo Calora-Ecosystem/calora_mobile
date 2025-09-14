@@ -41,7 +41,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   }
 
   void _initializeHealthyService() async {
+    final now = DateTime.now();
+    final yesterday = now.subtract(const Duration(hours: 24));
     await _healthStepService.initialize();
+    await _healthStepService.getTotalStepsInRange(yesterday, now);
 
     // Get steps with comprehensive error handling
     final steps = await _healthStepService.getStepsWithFallback();
@@ -86,7 +89,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     // Get hourly breakdown
     final hourlyData = await healthDataService.getHourlyStepData();
     log("HealthDataHourly->$hourlyData");
-
   }
 
   @override
