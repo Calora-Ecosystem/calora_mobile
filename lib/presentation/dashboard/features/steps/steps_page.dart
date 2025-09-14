@@ -4,6 +4,9 @@ import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/health_data_service.dart';
+import 'package:calora/common/service/health_step_service.dart'
+    show HealthStepService;
 import 'package:calora/common/service/pedometr_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
@@ -24,13 +27,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   StepsPage({super.key});
 
   late PedometerService _pedometerService;
+  late HealthStepService _healthStepService = HealthStepService();
+  late HealthDataService healthDataService;
 
   @override
   void init(context, manager) {
     manager.fetchUserStates();
     manager.getSteps();
     manager.getUserMetrics();
-    _initializePedometerService();
+    initHealthDataService();
+    // _initializeHealthyService();
+    // _initializePedometerService();
+  }
+
+  void _initializeHealthyService() async {
+    await _healthStepService.initialize();
+    await Future.delayed(Duration(seconds: 2));
+    int steps = await _healthStepService.fetchTodaySteps();
+
+    log("StepsPagesStepCount->$steps");
   }
 
   void _initializePedometerService() async {
@@ -51,6 +66,29 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     await _pedometerService.initialize();
   }
 
+  void initHealthDataService() async {
+    healthDataService = HealthDataService(
+      onStepCountUpdate: (data) {
+        log("HealthDataStepCount->$data");
+      },
+      onHistoricalDataUpdate: (data) {
+        log("HealthDataServiceDataUpdate->$data");
+      },
+      onPermissionUpdate: (data) {
+        log("HealthDataPermissionData->$data");
+      },
+      onError: (error) {
+        log("HealthDataPermissionError->$error");
+      },
+    );
+    await healthDataService.initialize();
+
+    // Get hourly breakdown
+    final hourlyData = await healthDataService.getHourlyStepData();
+    log("HealthDataHourly->$hourlyData");
+
+  }
+
   @override
   Widget builder(context, manager, state) {
     return DefaultTabController(
@@ -58,10 +96,20 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       child: Scaffold(
         body: Stack(
           children: [
-            Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
+            Positioned.fill(
+              child: Image.asset(
+                Assets.icons.background.path,
+                fit: BoxFit.fill,
+              ),
+            ),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 16),
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: 16,
+                ),
                 child: Column(
                   children: [
                     Align(
@@ -89,7 +137,8 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                             borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
                           labelColor: context.colors.neutral900Primary,
-                          unselectedLabelColor: context.colors.neutral600Secondary,
+                          unselectedLabelColor:
+                              context.colors.neutral600Secondary,
                           tabs: [
                             TabBarItemWidget(name: Strings.daily),
                             TabBarItemWidget(name: Strings.weekly),
@@ -119,13 +168,19 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                             ),
                             PodiumWidget(
                               firstPosition: state.userStates.isNotEmpty
-                                  ? WinnerItemBuilder(userStat: state.userStates[0])
+                                  ? WinnerItemBuilder(
+                                      userStat: state.userStates[0],
+                                    )
                                   : const SizedBox.shrink(),
                               secondPosition: state.userStates.isNotEmpty
-                                  ? WinnerItemBuilder(userStat: state.userStates[1])
+                                  ? WinnerItemBuilder(
+                                      userStat: state.userStates[1],
+                                    )
                                   : const SizedBox.shrink(),
                               thirdPosition: state.userStates.isNotEmpty
-                                  ? WinnerItemBuilder(userStat: state.userStates[2])
+                                  ? WinnerItemBuilder(
+                                      userStat: state.userStates[2],
+                                    )
                                   : const SizedBox.shrink(),
                             ),
 

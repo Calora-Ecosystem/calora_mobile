@@ -22,8 +22,6 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<int> getUserMetrics() async {
     final response = await _stepsApi.getUserMetrics();
-    log('metrics total::::::::' + response.toString());
-
     return response;
   }
 

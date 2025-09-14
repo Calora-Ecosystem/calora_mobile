@@ -27,7 +27,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo.getUserMetrics().handle(
       onStart: () {},
       onData: (data) {
-        log('metrics data::::::' + data.toString());
         emit(state.copyWith(metrics: data));
       },
       onDone: () {},

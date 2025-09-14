@@ -31,39 +31,58 @@ class PedometerService {
   // Initialize the pedometer service
   Future<void> initialize() async {
     try {
-      final granted = await _checkActivityRecognitionPermission();
+      final granted = await _checkPhysicalActivityPermission();
       _permissionGranted = granted;
       onPermissionUpdate(granted);
 
       if (granted) {
         await _checkPedometerAvailability();
       } else {
-        onError('Permission not granted');
+        onError('Physical activity permission not granted');
       }
     } catch (e) {
       onError('Initialization failed: ${e.toString()}');
     }
   }
 
-  // Check and request permission
-  Future<bool> _checkActivityRecognitionPermission() async {
+  // Check and request physical activity permission (for past 24 hours data access)
+  Future<bool> _checkPhysicalActivityPermission() async {
     try {
       if (Platform.isAndroid) {
-        var status = await Permission.activityRecognition.status;
-        if (!status.isGranted) {
-          status = await Permission.activityRecognition.request();
+        // Request multiple permissions for comprehensive access
+        Map<Permission, PermissionStatus> permissions = await [
+          Permission.activityRecognition,
+          Permission.sensors,
+        ].request();
+
+        // Check if activity recognition is granted (main permission for step counting)
+        bool activityRecognitionGranted = permissions[Permission.activityRecognition]?.isGranted ?? false;
+        bool sensorsGranted = permissions[Permission.sensors]?.isGranted ?? false;
+
+        if (kDebugMode) {
+          print('Activity Recognition Permission: $activityRecognitionGranted');
+          print('Sensors Permission: $sensorsGranted');
         }
-        return status.isGranted;
+
+        // Activity recognition is the primary permission needed
+        return activityRecognitionGranted;
+
       } else if (Platform.isIOS) {
+        // For iOS, request motion & fitness permission
         var status = await Permission.sensors.status;
         if (!status.isGranted) {
           status = await Permission.sensors.request();
         }
+
+        if (kDebugMode) {
+          print('iOS Sensors Permission: ${status.isGranted}');
+        }
+
         return status.isGranted;
       }
       return false;
     } catch (e) {
-      onError("Permission check error: $e");
+      onError("Physical activity permission check error: $e");
       return false;
     }
   }
@@ -104,11 +123,17 @@ class PedometerService {
 
   // Handle step count updates
   void onStepCount(StepCount event) {
+    if (kDebugMode) {
+      print('Step count update: ${event.steps} at ${event.timeStamp}');
+    }
     onStepCountUpdate(event.steps);
   }
 
   // Handle status updates
   void onPedestrianStatusChanged(PedestrianStatus event) {
+    if (kDebugMode) {
+      print('Pedestrian status: ${event.status} at ${event.timeStamp}');
+    }
     onStatusUpdate(event.status);
   }
 
@@ -125,12 +150,14 @@ class PedometerService {
   // Request permission (can be called from UI)
   Future<void> requestPermission() async {
     try {
-      final granted = await _checkActivityRecognitionPermission();
+      final granted = await _checkPhysicalActivityPermission();
       _permissionGranted = granted;
       onPermissionUpdate(granted);
 
       if (granted) {
         await _checkPedometerAvailability();
+      } else {
+        onError('Physical activity permission denied. Please enable it in device settings to access step data from the past 24 hours.');
       }
     } catch (e) {
       onError('Permission request failed: $e');
@@ -145,6 +172,20 @@ class PedometerService {
 
   // Check if service is listening
   bool get isListening => _isListening;
+
+  // Method to get detailed permission status
+  Future<Map<String, bool>> getPermissionStatus() async {
+    Map<String, bool> status = {};
+
+    if (Platform.isAndroid) {
+      status['activityRecognition'] = await Permission.activityRecognition.isGranted;
+      status['sensors'] = await Permission.sensors.isGranted;
+    } else if (Platform.isIOS) {
+      status['sensors'] = await Permission.sensors.isGranted;
+    }
+
+    return status;
+  }
 
   // Dispose of resources
   void dispose() {

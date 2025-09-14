@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  health: ^13.1.4
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.3.9
   cupertino_icons: ^1.0.8
