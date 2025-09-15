@@ -4,9 +4,11 @@ import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/health_app_service.dart';
 import 'package:calora/common/service/health_data_service.dart';
 import 'package:calora/common/service/health_step_service.dart'
     show HealthStepService;
+import 'package:calora/common/service/pedomert_two_service.dart';
 import 'package:calora/common/service/pedometr_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
@@ -29,14 +31,23 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   late PedometerService _pedometerService;
   late HealthStepService _healthStepService = HealthStepService();
   late HealthDataService healthDataService;
+  final HealthAppService healthAppService = HealthAppService();
 
   @override
-  void init(context, manager) {
+  void init(context, manager) async {
+    // await healthAppService.initHealthConfig();
+    // await healthAppService.getHealthConnectSdkStatus();
+    // await healthAppService.authorize();
+    //
+    // await healthAppService.fetchStepData();
+
+    // Then later when you need data
     manager.fetchUserStates();
     manager.getSteps();
     manager.getUserMetrics();
+    _initializePedometerService();
     // initHealthDataService();
-    _initializeHealthyService();
+    // _initializeHealthyService();
     // _initializePedometerService();
   }
 
@@ -53,20 +64,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   void _initializePedometerService() async {
     _pedometerService = PedometerService(
-      onStepCountUpdate: (count) {
-        log("SteCount->${count}");
+      onPedestrianStatusUpdated: (data) {
+        log("SteStatus->${data}");
       },
-      onStatusUpdate: (status) {
-        log("SteStatus->${status}");
-      },
-      onPermissionUpdate: (granted) {
-        log("StePermission->${granted}");
+      onStepCountUpdated: (data) {
+        log("SteCount->${data}");
       },
       onError: (error) {
         log("SteError->${error}");
       },
     );
-    await _pedometerService.initialize();
+    await _pedometerService.checkPermissions();
+    final result = await _pedometerService.getTodaysSteps();
+    final past24Hours = await _pedometerService.getStepsPast24Hours();
+    final pastFourHours = await _pedometerService.getWeeklySteps();
+    log("StepsPageTodayResult->$result->$past24Hours-$pastFourHours");
+  }
+
+  void getHealthAppService() async {
+    await healthAppService.fetchStepData();
   }
 
   void initHealthDataService() async {
