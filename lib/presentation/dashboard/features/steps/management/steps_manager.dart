@@ -11,11 +11,15 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   StepsManager(this.stepRepo) : super(const StepsState());
 
+  void updateTodaySteps(int steps) async{
+    emit(state.copyWith(stepCount: steps));
+  }
+
   void getSteps() async {
     await stepRepo.getSteps().handle(
       onStart: () {},
       onData: (data) {
-        emit(state.copyWith(stepCount: data));
+        // emit(state.copyWith(stepCount: data));
       },
       onDone: () {},
       onError: (error) {},

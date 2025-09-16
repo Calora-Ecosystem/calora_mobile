@@ -1,13 +1,8 @@
-import 'dart:developer';
 
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/service/health_app_service.dart';
-import 'package:calora/common/service/health_data_service.dart';
-import 'package:calora/common/service/health_step_service.dart'
-    show HealthStepService;
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
@@ -29,37 +24,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   late PedometerService _pedometerService;
 
-  // final cmpPedometer = CmpPedometer();
-
   @override
   void init(context, manager) async {
     // Then later when you need data
     manager.fetchUserStates();
     manager.getSteps();
     manager.getUserMetrics();
-    _initializePedometerService();
+    _initializePedometerService(manager);
   }
 
-  void _initializePedometerService() async {
+  void _initializePedometerService(StepsManager manager) async {
     _pedometerService = PedometerService(
-      onPedestrianStatusUpdated: (data) {
-        log("StepsPedometerStatus->${data}");
-      },
-      onStepCountUpdated: (data) {
-        log("StepsPedometerLiveCount->${data}");
-      },
-      onStepCountWeekly: (data) {
-        log("StepsPedometerWeeklyCount->${data}");
+      onTodayStepCountUpdated: (todaySteps) {
+        manager.updateTodaySteps(todaySteps);
       },
       onError: (error) {
-        log("StepsPedometerError->${error}");
+        print('StepsPageError: $error');
       },
     );
     await _pedometerService.initializePedometer();
-    final result = await _pedometerService.getTodaySteps();
-    // final past24Hours = await _pedometerService.getStepsPast24Hours();
-    // final pastFourHours = await _pedometerService.getWeeklySteps();
-    log("StepsPageTodayResult->$result");
   }
 
   @override
