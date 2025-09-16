@@ -7,15 +7,6 @@ import 'package:pedometer_2/pedometer_2.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PedometerService {
-  // Current step data
-  int? stepCount;
-  int? stepCountStream;
-  PedestrianStatus? pedestrianStatus;
-
-  // For Android step counting
-  int? _androidInitialStepCount;
-  DateTime? _lastUpdateTime;
-
   // Stream subscriptions
   StreamSubscription<int>? _stepStreamSubscription;
   StreamSubscription<int>? _stepStreamFromSubscription;
@@ -34,11 +25,13 @@ class PedometerService {
 
   // Callbacks for UI updates
   final ValueChanged<int>? onStepCountUpdated;
+  final ValueChanged<int>? onStepCountWeekly;
   final ValueChanged<PedestrianStatus>? onPedestrianStatusUpdated;
   final ValueChanged<String>? onError;
 
   PedometerService({
     this.onStepCountUpdated,
+    this.onStepCountWeekly,
     this.onPedestrianStatusUpdated,
     this.onError,
   });
@@ -72,9 +65,6 @@ class PedometerService {
   /// Initialize pedometer and start listening to streams
   Future<void> initializePedometer() async {
     try {
-      // Get historical step count
-      await _getHistoricalStepCount();
-
       // Start listening to real-time streams
       _listenToStepCountStream();
       _listenToPedestrianStatusStream();
@@ -91,34 +81,11 @@ class PedometerService {
     }
   }
 
-  /// Get historical step count for the current week
-  Future<void> _getHistoricalStepCount() async {
-    try {
-      stepCount = await Pedometer().getStepCount(
-        from: _startOfWeek,
-        to: _endOfWeek,
-      );
-
-      log('Historical step count: $stepCount');
-      onStepCountUpdated?.call(stepCount ?? 0);
-    } catch (e) {
-      onError?.call('Failed to get historical step count: $e');
-    }
-  }
-
   /// Listen to real-time step count stream
   void _listenToStepCountStream() {
     try {
       _stepStreamSubscription = Pedometer().stepCountStream().listen(
         (int steps) {
-          stepCountStream = steps;
-
-          // For Android, calculate steps since service start
-          if (Platform.isAndroid && _androidInitialStepCount == null) {
-            _androidInitialStepCount = steps;
-            _lastUpdateTime = DateTime.now();
-          }
-
           log('Real-time step count: $steps');
           onStepCountUpdated?.call(steps);
         },
@@ -141,9 +108,8 @@ class PedometerService {
           .stepCountStreamFrom(from: _startOfWeek)
           .listen(
             (int steps) {
-              stepCount = steps;
               log('Step count from start of week: $steps');
-              onStepCountUpdated?.call(steps);
+              onStepCountWeekly?.call(steps);
             },
             onError: (error) {
               onError?.call('Step count from stream error: $error');
@@ -162,7 +128,6 @@ class PedometerService {
           .pedestrianStatusStream()
           .listen(
             (PedestrianStatus status) {
-              pedestrianStatus = status;
               log('Pedestrian status: ${status}');
               onPedestrianStatusUpdated?.call(status);
             },
@@ -191,7 +156,7 @@ class PedometerService {
   }
 
   /// Get today's steps
-  Future<int> getTodaysSteps() async {
+  Future<int> getTodaySteps() async {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
     final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);

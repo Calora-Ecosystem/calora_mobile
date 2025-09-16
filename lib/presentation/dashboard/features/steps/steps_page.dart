@@ -8,8 +8,7 @@ import 'package:calora/common/service/health_app_service.dart';
 import 'package:calora/common/service/health_data_service.dart';
 import 'package:calora/common/service/health_step_service.dart'
     show HealthStepService;
-import 'package:calora/common/service/pedomert_two_service.dart';
-import 'package:calora/common/service/pedometr_service.dart';
+import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
@@ -29,82 +28,38 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   StepsPage({super.key});
 
   late PedometerService _pedometerService;
-  late HealthStepService _healthStepService = HealthStepService();
-  late HealthDataService healthDataService;
-  final HealthAppService healthAppService = HealthAppService();
+
+  // final cmpPedometer = CmpPedometer();
 
   @override
   void init(context, manager) async {
-    // await healthAppService.initHealthConfig();
-    // await healthAppService.getHealthConnectSdkStatus();
-    // await healthAppService.authorize();
-    //
-    // await healthAppService.fetchStepData();
-
     // Then later when you need data
     manager.fetchUserStates();
     manager.getSteps();
     manager.getUserMetrics();
     _initializePedometerService();
-    // initHealthDataService();
-    // _initializeHealthyService();
-    // _initializePedometerService();
-  }
-
-  void _initializeHealthyService() async {
-    final now = DateTime.now();
-    final yesterday = now.subtract(const Duration(hours: 24));
-    await _healthStepService.initialize();
-    await _healthStepService.getTotalStepsInRange(yesterday, now);
-
-    // Get steps with comprehensive error handling
-    final steps = await _healthStepService.getStepsWithFallback();
-    log("StepsPagesStepCount->$steps");
   }
 
   void _initializePedometerService() async {
     _pedometerService = PedometerService(
       onPedestrianStatusUpdated: (data) {
-        log("SteStatus->${data}");
+        log("StepsPedometerStatus->${data}");
       },
       onStepCountUpdated: (data) {
-        log("SteCount->${data}");
+        log("StepsPedometerLiveCount->${data}");
+      },
+      onStepCountWeekly: (data) {
+        log("StepsPedometerWeeklyCount->${data}");
       },
       onError: (error) {
-        log("SteError->${error}");
+        log("StepsPedometerError->${error}");
       },
     );
-    await _pedometerService.checkPermissions();
-    final result = await _pedometerService.getTodaysSteps();
-    final past24Hours = await _pedometerService.getStepsPast24Hours();
-    final pastFourHours = await _pedometerService.getWeeklySteps();
-    log("StepsPageTodayResult->$result->$past24Hours-$pastFourHours");
-  }
-
-  void getHealthAppService() async {
-    await healthAppService.fetchStepData();
-  }
-
-  void initHealthDataService() async {
-    healthDataService = HealthDataService(
-      onStepCountUpdate: (data) {
-        log("HealthDataStepCount->$data");
-      },
-      onHistoricalDataUpdate: (data) {
-        log("HealthDataServiceDataUpdate->$data");
-      },
-      onPermissionUpdate: (data) {
-        log("HealthDataPermissionData->$data");
-      },
-      onError: (error) {
-        log("HealthDataPermissionError->$error");
-      },
-    );
-    await healthDataService.initialize();
-
-    // Get hourly breakdown
-    final hourlyData = await healthDataService.getHourlyStepData();
-    log("HealthDataHourly->$hourlyData");
+    await _pedometerService.initializePedometer();
+    final result = await _pedometerService.getTodaySteps();
+    // final past24Hours = await _pedometerService.getStepsPast24Hours();
+    // final pastFourHours = await _pedometerService.getWeeklySteps();
+    log("StepsPageTodayResult->$result");
   }
 
   @override

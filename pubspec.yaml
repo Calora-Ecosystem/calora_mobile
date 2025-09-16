@@ -52,6 +52,7 @@ dependencies:
   fl_chart: ^1.1.0
   pedometer: ^4.1.1
   pedometer_2: ^5.0.4
+  cm_pedometer: ^1.2.0
 
 dev_dependencies:
   flutter_test:

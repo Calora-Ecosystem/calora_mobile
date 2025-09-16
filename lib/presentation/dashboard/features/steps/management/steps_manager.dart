@@ -15,7 +15,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo.getSteps().handle(
       onStart: () {},
       onData: (data) {
-        log('data::::::' + data.toString());
         emit(state.copyWith(stepCount: data));
       },
       onDone: () {},
@@ -38,7 +37,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo.getStats().handle(
       onStart: () {},
       onData: (data) {
-        log('stats data::::::' + data.toString());
         emit(state.copyWith(statsTotal: data));
       },
       onDone: () {},

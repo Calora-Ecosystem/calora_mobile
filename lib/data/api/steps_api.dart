@@ -12,7 +12,6 @@ class StepsApi {
   Future getSteps() async {
     final response = await _dio.get('users/dailies');
     final data = response.data as Map<String, dynamic>;
-    log('Steps::::: ${data['total']}');
     return data['total'] as int;
   }
 
