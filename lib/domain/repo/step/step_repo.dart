@@ -16,4 +16,6 @@ abstract class StepRepo {
   Future<void> updateNorm(Norms norm);
 
   Future<void> deleteNorm(String metric);
+
+  Future<void> sendDailyData({required String metric, required int value});
 }

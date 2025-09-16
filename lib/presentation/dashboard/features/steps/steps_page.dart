@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:auto_route/annotations.dart';
@@ -34,6 +35,9 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.getSteps(0, offset: _offset);
     manager.getStats(0, offset: _offset);
     _initializePedometerService(manager);
+    Timer.periodic(const Duration(hours: 1), (_) {
+      manager.sendDailyData(metric: "Step", value: manager.state.stepCount);
+    });
   }
 
   void _initializePedometerService(StepsManager manager) async {

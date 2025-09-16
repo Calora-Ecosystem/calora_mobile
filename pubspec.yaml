@@ -48,13 +48,13 @@ dependencies:
   device_info_plus: ^11.5.0
   firebase_messaging: ^16.0.0
   flutter_widget_from_html: ^0.17.0
-
   fl_chart: ^1.1.0
   pedometer: ^4.1.1
   pedometer_2: ^5.0.4
   cm_pedometer: ^1.2.0
   path_provider: ^2.1.5
   share_plus: ^11.1.0
+  workmanager: ^0.9.0+3
 
 
 dev_dependencies:

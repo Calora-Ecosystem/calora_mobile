@@ -56,6 +56,10 @@ class StepRepoImpl extends StepRepo {
   Future<void> updateNorm(Norms norm) => _stepsApi.updateNorm(norm);
 
   @override
+  Future<void> sendDailyData({required String metric, required int value}) =>
+      _stepsApi.sendDailyData(metric: metric, value: value);
+
+  @override
   Future<void> deleteNorm(String metric) => _stepsApi.deleteNorm(metric);
 
   @override

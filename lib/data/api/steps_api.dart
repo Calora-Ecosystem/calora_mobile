@@ -73,4 +73,13 @@ class StepsApi {
   Future<void> deleteNorm(String metric) async {
     await _dio.delete('/users/norms/$metric');
   }
+
+  Future<void> sendDailyData({required String metric, required int value}) async {
+    final body = {
+      "metric": metric,
+      "value": value,
+      "date": DateTime.now().toUtc().toIso8601String(),
+    };
+    await _dio.post('/users/dailies', data: body);
+  }
 }

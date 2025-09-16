@@ -81,4 +81,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
   }
+
+  void sendDailyData({required String metric, required int value}) async {
+    await stepRepo
+        .sendDailyData(metric: metric, value: value)
+        .handle(onStart: () => emit(state), onData: (data) {}, onDone: () {}, onError: (error) {});
+  }
 }
