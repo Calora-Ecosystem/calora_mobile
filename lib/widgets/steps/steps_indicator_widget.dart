@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class StepsIndicatorWidget extends StatelessWidget {
-  final int current;
+  final double current;
   final int goal;
   final VoidCallback? onEditTap;
 
@@ -35,7 +35,7 @@ class StepsIndicatorWidget extends StatelessWidget {
         children: [
           Assets.icons.stepsHuman.svg(),
           const SizedBox(height: 8),
-          current.toString().text(32, 40, 700).c(context.colors.textStrong),
+          current.toInt().toString().text(32, 40, 700).c(context.colors.textStrong),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -69,10 +69,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
 
     if (isLogin) {
       return DashboardRoute();
-    } else 
+    } else
       return AuthRoute();
-     
-
-    }
   }
 }

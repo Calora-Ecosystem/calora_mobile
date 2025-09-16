@@ -9,16 +9,10 @@ enum ChartType { monthly, weekly }
 class ChartWidget extends StatelessWidget {
   final ChartType type;
   final List<double> primaryValues;
-  final double total;
+
   final double? target;
 
-  const ChartWidget({
-    super.key,
-    required this.type,
-    required this.primaryValues,
-    required this.total,
-    this.target,
-  });
+  const ChartWidget({super.key, required this.type, required this.primaryValues, this.target});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +21,7 @@ class ChartWidget extends StatelessWidget {
     }
 
     final average = primaryValues.reduce((a, b) => a + b) / primaryValues.length;
+    final total = primaryValues.reduce((a, b) => a + b);
 
     final maxValue = [
       ...primaryValues,
