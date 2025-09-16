@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  health: ^13.1.4
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.3.9
   cupertino_icons: ^1.0.8
@@ -50,6 +51,8 @@ dependencies:
 
   fl_chart: ^1.1.0
   pedometer: ^4.1.1
+  pedometer_2: ^5.0.4
+  cm_pedometer: ^1.2.0
   path_provider: ^2.1.5
   share_plus: ^11.1.0
 

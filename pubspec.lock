@@ -193,6 +193,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  carp_serializable:
+    dependency: transitive
+    description:
+      name: carp_serializable
+      sha256: f039f8ea22e9437aef13fe7e9743c3761c76d401288dcb702eadd273c3e4dcef
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   characters:
     dependency: transitive
     description:
@@ -241,6 +249,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
+  cm_pedometer:
+    dependency: "direct main"
+    description:
+      name: cm_pedometer
+      sha256: e90aa23e3ac4acdd6f9e6d8e1d86170d2bebe5b081cf6217f9bc096e0393be9f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   code_builder:
     dependency: transitive
     description:
@@ -902,6 +918,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  health:
+    dependency: "direct main"
+    description:
+      name: health
+      sha256: "320633022fb2423178baa66508001c4ca5aee5806ffa2c913e66488081e9fd47"
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.1.4"
   hotreloader:
     dependency: transitive
     description:
@@ -1294,6 +1318,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.1"
+  pedometer_2:
+    dependency: "direct main"
+    description:
+      name: pedometer_2
+      sha256: "799742f38a13c85ff2aa9e4624f6439678f7cd84eb58ef69ab69720377c444e5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.4"
   percent_indicator:
     dependency: "direct main"
     description:

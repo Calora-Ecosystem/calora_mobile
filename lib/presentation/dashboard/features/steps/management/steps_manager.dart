@@ -25,6 +25,19 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
+  void updateTodaySteps(int steps) async{
+    emit(state.copyWith(stepCount: steps));
+  }
+
+  void getSteps() async {
+    await stepRepo.getSteps().handle(
+      onStart: () {},
+      onData: (data) {
+        // emit(state.copyWith(stepCount: data));
+      },
+      onDone: () {},
+      onError: (error) {},
+    );
   }
 
   /// Foydalanuvchi metricslarini olish

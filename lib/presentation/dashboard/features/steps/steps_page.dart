@@ -6,6 +6,11 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometr_service.dart';
 import 'package:calora/domain/model/norms/norms.dart';
+import 'package:calora/common/service/pedometer_service.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/common/action/actions_page.dart';
+import 'package:calora/presentation/common/confirm/confirm_page.dart';
+import 'package:calora/presentation/dashboard/features/steps/features/edit/edit_step_goal_page.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
 import 'package:calora/widgets/builder/winner/winner_item_builder.dart';
@@ -30,16 +35,19 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.getSteps(0, offset: _offset);
     manager.getStats(0, offset: _offset);
     _initializePedometerService();
+    _initializePedometerService(manager);
   }
 
-  void _initializePedometerService() async {
+  void _initializePedometerService(StepsManager manager) async {
     _pedometerService = PedometerService(
-      onStepCountUpdate: (count) => log("StepCount->$count"),
-      onStatusUpdate: (status) => log("StepStatus->$status"),
-      onPermissionUpdate: (granted) => log("StepPermission->$granted"),
-      onError: (error) => log("StepError->$error"),
+      onTodayStepCountUpdated: (todaySteps) {
+        manager.updateTodaySteps(todaySteps);
+      },
+      onError: (error) {
+        print('StepsPageError: $error');
+      },
     );
-    await _pedometerService.initialize();
+    await _pedometerService.initializePedometer();
   }
 
   GlobalKey globalKey = GlobalKey();
@@ -157,7 +165,16 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
             ),
           );
         },
+        onTapShare: () {},
+        onTapShareApp: () {},
       ),
+    );
+  }
+
+  void _showConfirmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => ConfirmPage(onConfirm: () {}, onCancel: () {}),
     );
   }
 
