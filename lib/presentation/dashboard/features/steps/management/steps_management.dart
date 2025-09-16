@@ -13,6 +13,7 @@ abstract class StepsState with _$StepsState {
     @Default(MetricsData(foots: 100, distance: 50, kcal: 50)) MetricsData metrics,
     @Default([Norms(metric: 'metric', value: 200)]) List<Norms> norms,
     @Default([]) List<UserStat> userStates,
+    @Default(0) int stepCount,
     @Default(false) bool isLoading,
   }) = _StepsState;
 

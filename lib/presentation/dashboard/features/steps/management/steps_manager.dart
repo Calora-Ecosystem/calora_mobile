@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
@@ -12,40 +10,27 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   StepsManager(this.stepRepo) : super(StepsState());
 
-  /// Stepsni olish (daily/weekly/monthly)
+  void updateTodaySteps(int steps) async {
+    emit(state.copyWith(stepCount: steps));
+  }
+
   void getSteps(int period, {int offset = 0}) async {
     await stepRepo
         .getSteps(period, offset: offset)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (data) {
-            log('Steps data:::: $data');
             emit(state.copyWith(steps: data));
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
-  void updateTodaySteps(int steps) async{
-    emit(state.copyWith(stepCount: steps));
   }
 
-  void getSteps() async {
-    await stepRepo.getSteps().handle(
-      onStart: () {},
-      onData: (data) {
-        // emit(state.copyWith(stepCount: data));
-      },
-      onDone: () {},
-      onError: (error) {},
-    );
-  }
-
-  /// Foydalanuvchi metricslarini olish
   void getUserMetrics() async {
     await stepRepo.getUserMetrics().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
       onData: (data) {
-        log('Metrics data:::: $data');
         emit(state.copyWith(metrics: data));
       },
       onDone: () => emit(state.copyWith(isLoading: false)),
@@ -53,14 +38,12 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     );
   }
 
-  /// Steps statistikasini olish (leaderboard)
   void getStats(int period, {int offset = 0}) async {
     await stepRepo
         .getStats(period, offset: offset)
         .handle(
           onStart: () => emit(state),
           onData: (data) {
-            log('Stats data:::: $data');
             emit(state.copyWith(userStates: data));
           },
           onDone: () => emit(state),
@@ -68,7 +51,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  /// Normslarni olish
   void getNorms() async {
     await stepRepo.getNorms().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
@@ -78,7 +60,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     );
   }
 
-  /// Normni yangilash
   void update(Norms norm) async {
     await stepRepo
         .updateNorm(norm)
@@ -90,7 +71,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  /// Normni o'chirish (kerak bo'lsa)
   void deleteNorm(String metric) async {
     await stepRepo
         .deleteNorm(metric)

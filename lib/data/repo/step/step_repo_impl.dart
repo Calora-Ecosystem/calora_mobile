@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:calora/data/api/steps_api.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -21,17 +19,14 @@ class StepRepoImpl extends StepRepo {
         ? 7
         : 30;
 
-    // skip = offset * take
     final skip = offset * take;
 
     final response = await _stepsApi.getSteps(period, skip: skip, take: take);
-    log('steps total:::::::: $response');
     return response;
   }
 
   Future<MetricsData> getUserMetrics() async {
     final response = await _stepsApi.getUserMetrics();
-    log('metrics total:::::::: $response');
     return response;
   }
 
@@ -54,7 +49,6 @@ class StepRepoImpl extends StepRepo {
     }
 
     final response = await _stepsApi.getStats(from, to);
-    log('stats total:::::::: $response');
     return response;
   }
 
@@ -67,7 +61,6 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<List<Norms>> getNorms() async {
     final response = await _stepsApi.getNorms();
-    log('norms:::::::: $response');
     return response;
   }
 }

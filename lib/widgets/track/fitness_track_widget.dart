@@ -11,9 +11,10 @@ class FitnessTrackWidget extends StatefulWidget {
   const FitnessTrackWidget({
     super.key,
     required this.primaryValues,
+    required this.stepCount,
     required this.globalKey,
     required this.goal,
-    required this.steps,
+
     required this.metrics,
     required this.onClickForward,
     required this.onClickBackward,
@@ -23,7 +24,7 @@ class FitnessTrackWidget extends StatefulWidget {
     this.selectedDate,
   });
 
-  final double steps;
+  final int stepCount;
   final List<double> primaryValues;
   final int goal;
   final GlobalKey globalKey;
@@ -114,7 +115,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                           const SizedBox(height: 12),
                           if (index == 0)
                             StepsIndicatorWidget(
-                              current: widget.steps,
+                              current: widget.stepCount.toDouble(),
                               goal: widget.goal,
                               onEditTap: () {
                                 widget.onClickEditStepGoal();

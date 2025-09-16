@@ -4,10 +4,9 @@ import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/service/pedometr_service.dart';
-import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/common/service/pedometer_service.dart';
-import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/common/widgets/capture_and_share/capture_and_share.dart';
+import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:calora/presentation/dashboard/features/steps/features/edit/edit_step_goal_page.dart';
@@ -34,7 +33,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.getNorms();
     manager.getSteps(0, offset: _offset);
     manager.getStats(0, offset: _offset);
-    _initializePedometerService();
     _initializePedometerService(manager);
   }
 
@@ -63,6 +61,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     final stepValue = state.norms
         .firstWhere((norm) => norm.metric == "Step", orElse: () => Norms(metric: "Step", value: 0))
         .value;
+    log('StepCount::::::::::::::::::::::::::::${state.stepCount}');
 
     return DefaultTabController(
       length: 3,
@@ -127,16 +126,20 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                   globalKey: globalKey,
                                   goal: stepValue,
                                   metrics: state.metrics,
-                                  steps: state.steps.isNotEmpty ? state.steps[0].value : 0,
+                                  stepCount: state.stepCount,
                                   onClickBackward: () {
                                     _changeOffset(-1, tabController.index, manager);
                                   },
                                   onClickForward: () {
                                     _changeOffset(1, tabController.index, manager);
                                   },
-                                  onClickMoreVert: () {},
+                                  onClickMoreVert: () {
+                                    _showActionsSheet(context);
+                                  },
                                   onClickPause: () {},
-                                  onClickEditStepGoal: () {},
+                                  onClickEditStepGoal: () {
+                                    _showEditStepGoalSheet(context, manager);
+                                  },
                                 ),
                                 state.isLoading
                                     ? const Center(child: CircularProgressIndicator())
@@ -165,8 +168,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
             ),
           );
         },
-        onTapShare: () {},
-        onTapShareApp: () {},
       ),
     );
   }
@@ -175,6 +176,39 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     showDialog(
       context: context,
       builder: (_) => ConfirmPage(onConfirm: () {}, onCancel: () {}),
+    );
+  }
+
+  void _showEditStepGoalSheet(BuildContext context, StepsManager manager) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => EditStepGoalPage(
+        initialValue: 16000,
+        onSave: (value) {
+          manager.update(Norms(metric: "Step", value: value));
+          manager.getNorms();
+        },
+      ),
+    );
+  }
+
+  void _showActionsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => ActionsPage(
+        onTapDelete: () {
+          _showConfirmDialog(context);
+        },
+        onTapShare: () {
+          captureAndShare(globalKey);
+        },
+        onTapShareApp: () {},
+      ),
     );
   }
 

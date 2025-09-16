@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/step/metrics_data.dart';
@@ -59,8 +57,6 @@ class StepsApi {
   Future<MetricsData> getUserMetrics() async {
     final response = await _dio.get('users/steps/metrics');
     final data = response.data as Map<String, dynamic>;
-    log('Metrics:::: ${data['content']}');
-    // TODO: backend response ga qarab to‘liq parse qilish
     return MetricsData(foots: 100, distance: 100, kcal: 50);
   }
 
