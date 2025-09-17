@@ -19,7 +19,7 @@ we_have_questions,We have a few questions for you !,Sizga bir neshta savollarimi
 what_is_your_name,What is your name ?,Ismingiz nima ?,Как вас зовут ?
 what_is_your_gender,What is your gender ?,Jinsingiz nima ?,Ваш пол ?
 male,Male,Erkak kishi,Мужской
-famale,Female,Ayol kishi,Женщина
+female,Female,Ayol kishi,Женщина
 choose_your_goals,Choose your goals ?,Maqsadlaringizni tanlang ?,Выберите свои цели ?
 weight_loss,Weight loss,Vazn yo'qotish (ozish),Потеря веса
 maintaining_body,Maintaining the body in its current state,Tanani xozirgi xolatda saqlash,Поддержание тела в его текущем состоянии
@@ -73,3 +73,13 @@ are_you_sure_delete_statistic,Are you sure you want to clear these statistics?,"
 steps_to_set_a_goal,Steps to set a goal,Qadamlar maqsadni sozlash,Шаги для постановки цели
 actions,Actions,Amallar,Действия
 save,Save,Saqlash,Сохранять
+body_mass_index,Body mass index,Tana massasi indeksi,Индекс массы тела
+progress,Progress,Progress,Прогресс
+remained,Remained,Qoldi,Остался
+account_information,Account information,Hisob ma'lumotlari,Информация об учетной записи
+norms,Norms,Normalar,Нормы
+application_language,Application language,Ilova tili,Язык приложения
+setting_up_notification,Setting up notifications,Bildirishnomalarni sozlash,Настройка уведомлений
+make_an_offer,Make an offer,Taklif qilish,Сделать предложение
+about_calora,About Calora,Calora haqida,О Калоре
+help_faq,Help & FAQ,Yordam & FAQ,Помощь и часто задаваемые вопросы

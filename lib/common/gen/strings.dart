@@ -9,7 +9,7 @@ part 'strings.g.dart';
 
 @SheetLocalization(
   docId: '12OIaFbGqovuAgHEcXFADUXPb5AqlyGASLpP3kHyFQtU',
-  version: 13,
+  version: 14,
   outDir: 'assets/localization',
   outName: 'translations.csv',
   preservedKeywords: ['few', 'many', 'one', 'other', 'two', 'zero', 'male', 'female'],
