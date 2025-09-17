@@ -1,6 +1,7 @@
-import 'dart:developer';
-
 import 'package:calora/data/api/steps_api.dart';
+import 'package:calora/domain/model/dailies/steps_stat.dart';
+import 'package:calora/domain/model/norms/norms.dart';
+import 'package:calora/domain/model/step/metrics_data.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:injectable/injectable.dart';
@@ -11,44 +12,59 @@ class StepRepoImpl extends StepRepo {
 
   StepRepoImpl(this._stepsApi);
 
-  @override
-  Future<int> getSteps() async {
-    final response = await _stepsApi.getSteps();
+  Future<List<StepsWithMetrics>> getSteps(int period, {int offset = 0}) async {
+    final take = period == 0
+        ? 1
+        : period == 1
+        ? 7
+        : 30;
+
+    final skip = offset * take;
+
+    final response = await _stepsApi.getSteps(period, skip: skip, take: take);
     return response;
   }
 
-  @override
-  Future<int> getUserMetrics() async {
+  Future<MetricsData> getUserMetrics() async {
     final response = await _stepsApi.getUserMetrics();
     return response;
   }
 
-  @override
-  Future<int> getStats() async {
-    final response = await _stepsApi.getStats();
-    log('stats total::::::::' + response.toString());
+  Future<List<UserStat>> getStats(int period, {int offset = 0}) async {
+    final now = DateTime.now();
+    late DateTime from;
+    late DateTime to;
+
+    if (period == 0) {
+      from = DateTime(now.year, now.month, now.day).add(Duration(days: offset));
+      to = from.add(const Duration(days: 1)).subtract(const Duration(seconds: 1));
+    } else if (period == 1) {
+      final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+      from = startOfWeek.add(Duration(days: 7 * offset));
+      to = from.add(const Duration(days: 7)).subtract(const Duration(seconds: 1));
+    } else {
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      from = DateTime(startOfMonth.year, startOfMonth.month + offset, 1);
+      to = DateTime(from.year, from.month + 1, 1).subtract(const Duration(seconds: 1));
+    }
+
+    final response = await _stepsApi.getStats(from, to);
     return response;
   }
 
   @override
-  Future<List<UserStat>> fetchUserStates() {
-    return Future.value(_userStates);
-  }
+  Future<void> updateNorm(Norms norm) => _stepsApi.updateNorm(norm);
 
-  List<UserStat> _userStates = [
-    UserStat(
-      firstName: "Lolaxon",
-      lastName: "Ahmedov",
-      talks: 159,
-      isWinner: true,
-      stepCount: 104943,
-    ),
-    UserStat(firstName: "Nurbek", lastName: "Nurxonov", talks: 155, stepCount: 69030),
-    UserStat(firstName: "Akhmadjon", lastName: "Boydadayev", talks: 149, stepCount: 66934),
-    UserStat(firstName: "Sardor", lastName: "Eshniyoz", talks: 140, stepCount: 59030),
-    UserStat(firstName: "Sherzod", lastName: "Bekniyozov", talks: 129, stepCount: 53030),
-    UserStat(firstName: "Jasur", lastName: "Eshonqulov", talks: 121, stepCount: 52943),
-    UserStat(firstName: "Abror", lastName: "Sodiqov", talks: 119, stepCount: 52430, isMe: true),
-    UserStat(firstName: "Abdurashid", lastName: "Abdurasulov", talks: 119, stepCount: 1046),
-  ];
+  @override
+  Future<void> sendDailyData({required String metric, required int value}) =>
+      _stepsApi.sendDailyData(metric: metric, value: value);
+
+  @override
+  Future<void> deleteNorm(String metric) => _stepsApi.deleteNorm(metric);
+
+  @override
+  Future<List<Norms>> getNorms() async {
+    final response = await _stepsApi.getNorms();
+    return response;
+  }
 }
