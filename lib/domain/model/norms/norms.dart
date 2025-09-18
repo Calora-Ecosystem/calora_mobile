@@ -4,8 +4,8 @@ part 'norms.freezed.dart';
 part 'norms.g.dart';
 
 @freezed
-abstract class Norms with _$Norms {
-  const factory Norms({required String metric, required int value}) = _Norms;
+abstract class NormsRequest with _$NormsRequest {
+  const factory NormsRequest({required String metric, required int value}) = _NormsRequest;
 
-  factory Norms.fromJson(Map<String, dynamic> json) => _$NormsFromJson(json);
+  factory NormsRequest.fromJson(Map<String, dynamic> json) => _$NormsRequestFromJson(json);
 }

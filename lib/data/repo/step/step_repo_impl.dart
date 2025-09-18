@@ -1,7 +1,7 @@
 import 'package:calora/data/api/steps_api.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
-import 'package:calora/domain/model/step/metrics_data.dart';
+import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:injectable/injectable.dart';
@@ -12,7 +12,7 @@ class StepRepoImpl extends StepRepo {
 
   StepRepoImpl(this._stepsApi);
 
-  Future<List<StepsWithMetrics>> getSteps(int period, {int offset = 0}) async {
+  Future<List<StepsWithMetricsRequest>> getSteps(int period, {int offset = 0}) async {
     final take = period == 0
         ? 1
         : period == 1
@@ -25,12 +25,12 @@ class StepRepoImpl extends StepRepo {
     return response;
   }
 
-  Future<MetricsData> getUserMetrics() async {
+  Future<MetricsRequest> getUserMetrics() async {
     final response = await _stepsApi.getUserMetrics();
     return response;
   }
 
-  Future<List<UserStat>> getStats(int period, {int offset = 0}) async {
+  Future<List<UserStatRequest>> getStats(int period, {int offset = 0}) async {
     final now = DateTime.now();
     late DateTime from;
     late DateTime to;
@@ -53,7 +53,7 @@ class StepRepoImpl extends StepRepo {
   }
 
   @override
-  Future<void> updateNorm(Norms norm) => _stepsApi.updateNorm(norm);
+  Future<void> updateNorm(NormsRequest norm) => _stepsApi.updateNorm(norm);
 
   @override
   Future<void> sendDailyData({required String metric, required int value}) =>
@@ -63,7 +63,7 @@ class StepRepoImpl extends StepRepo {
   Future<void> deleteNorm(String metric) => _stepsApi.deleteNorm(metric);
 
   @override
-  Future<List<Norms>> getNorms() async {
+  Future<List<NormsRequest>> getNorms() async {
     final response = await _stepsApi.getNorms();
     return response;
   }

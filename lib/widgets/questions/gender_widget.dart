@@ -36,9 +36,9 @@ class _GenderWidgetState extends State<GenderWidget> {
         ),
         const SizedBox(width: 8),
         genderButton(
-          gender: Strings.famale,
+          gender: Strings.female,
           icon: Assets.icons.female.svg(),
-          label: Strings.famale,
+          label: Strings.female,
           borderColor: context.colors.neutral600Secondary,
         ),
       ],
