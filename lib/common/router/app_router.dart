@@ -13,6 +13,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: CalculateRoute.page),
     AutoRoute(page: CaloriesRoute.page),
     AutoRoute(page: CourseRoute.page),
+    AutoRoute(page: AccountDetailRoute.page),
     AutoRoute(
       page: DashboardRoute.page,
       children: [

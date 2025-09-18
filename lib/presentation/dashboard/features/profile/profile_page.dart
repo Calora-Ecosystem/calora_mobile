@@ -1,10 +1,13 @@
 import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_manager.dart';
 import 'package:calora/widgets/profile_cards/bmi_card/bmi_card.dart';
 import 'package:calora/widgets/profile_cards/profile_card.dart';
-import 'package:calora/widgets/profile_cards/settings_card.dart' show SettingsCard;
+import 'package:calora/widgets/profile_cards/settings_card.dart'
+    show SettingsCard;
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -20,7 +23,9 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -37,7 +42,9 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                     BmiCard(bmi: 37.5, weight: 87, targetWeight: 70),
                     SizedBox(height: 16),
                     SettingsCard(
-                      onAccountTap: () {},
+                      onAccountTap: () {
+                        _openAccountInfoPage("", context);
+                      },
                       onNormsTap: () {},
                       onLanguageTap: () {},
                       onNotificationsTap: () {},
@@ -55,5 +62,9 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
         ],
       ),
     );
+  }
+
+  void _openAccountInfoPage(String profileId, BuildContext context) {
+    context.router.push(AccountDetailRoute(profileId: profileId));
   }
 }
