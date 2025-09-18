@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
@@ -7,84 +9,104 @@ import 'package:management/management.dart';
 @injectable
 class StepsManager extends Manager<StepsState, StepsEffect> {
   final StepRepo stepRepo;
+  Timer? _timer;
 
   StepsManager(this.stepRepo) : super(StepsState());
 
-  void updateTodaySteps(int steps) async {
+  void updateTodaySteps(int steps) {
     emit(state.copyWith(stepCount: steps));
   }
 
-  void getSteps(int period, {int offset = 0}) async {
+  void start() {
+    _timer = Timer.periodic(const Duration(hours: 1), (_) {
+      sendDailyData();
+    });
+
+    sendDailyData();
+  }
+
+  Future<void> getSteps() async {
     await stepRepo
-        .getSteps(period, offset: offset)
+        .getSteps(state.period, offset: state.offset)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) {
-            emit(state.copyWith(steps: data));
-          },
+          onData: (data) => emit(state.copyWith(steps: data, isLoading: false)),
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (_) => emit(state.copyWith(isLoading: false)),
         );
   }
 
-  void getUserMetrics() async {
+  Future<void> getStats() async {
+    await stepRepo
+        .getStats(state.period, offset: state.offset)
+        .handle(
+          onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (data) => emit(state.copyWith(userStates: data, isLoading: false)),
+          onDone: () => emit(state.copyWith(isLoading: false)),
+          onError: (_) => emit(state.copyWith(isLoading: false)),
+        );
+  }
+
+  Future<void> getUserMetrics() async {
     await stepRepo.getUserMetrics().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) {
-        emit(state.copyWith(metrics: data));
-      },
+      onData: (data) => emit(state.copyWith(metrics: data, isLoading: false)),
       onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
+      onError: (_) => emit(state.copyWith(isLoading: false)),
     );
   }
 
-  void getStats(int period, {int offset = 0}) async {
-    await stepRepo
-        .getStats(period, offset: offset)
-        .handle(
-          onStart: () => emit(state),
-          onData: (data) {
-            emit(state.copyWith(userStates: data));
-          },
-          onDone: () => emit(state),
-          onError: (error) => emit(state),
-        );
-  }
-
-  void getNorms() async {
+  Future<void> getNorms() async {
     await stepRepo.getNorms().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
       onData: (data) => emit(state.copyWith(norms: data, isLoading: false)),
       onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
+      onError: (_) => emit(state.copyWith(isLoading: false)),
     );
   }
 
-  void update(Norms norm) async {
+  Future<void> updateNorm(NormsRequest norm) async {
     await stepRepo
         .updateNorm(norm)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) {},
+          onData: (_) => getNorms(),
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (_) => emit(state.copyWith(isLoading: false)),
         );
   }
 
-  void deleteNorm(String metric) async {
+  Future<void> deleteNorm(String metric) async {
     await stepRepo
         .deleteNorm(metric)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) {},
+          onData: (_) => getNorms(),
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (_) => emit(state.copyWith(isLoading: false)),
         );
   }
 
-  void sendDailyData({required String metric, required int value}) async {
+  Future<void> sendDailyData() async {
     await stepRepo
-        .sendDailyData(metric: metric, value: value)
-        .handle(onStart: () => emit(state), onData: (data) {}, onDone: () {}, onError: (error) {});
+        .sendDailyData(metric: "Step", value: state.stepCount)
+        .handle(
+          onStart: () => emit(state),
+          onData: (_) => emit(state),
+          onDone: () => emit(state),
+          onError: (_) => emit(state),
+        );
+  }
+
+  void changePeriod(int newPeriod) {
+    emit(state.copyWith(period: newPeriod, offset: 0));
+    getSteps();
+    getStats();
+  }
+
+  void changeOffset(int change) {
+    emit(state.copyWith(offset: state.offset + change));
+    getSteps();
+    getStats();
   }
 }

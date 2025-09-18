@@ -6,7 +6,7 @@ import 'package:calora/widgets/avatar/flag/avatar_with_flag_widget.dart';
 import 'package:flutter/material.dart';
 
 class LeaderboardWidget extends StatelessWidget {
-  final List<UserStat> users;
+  final List<UserStatRequest> users;
 
   const LeaderboardWidget({super.key, required this.users});
 
@@ -27,10 +27,7 @@ class LeaderboardWidget extends StatelessWidget {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 24),
-                leading: (index + 4)
-                    .toString()
-                    .text(16, 20, 500)
-                    .c(context.colors.neutralPrimary),
+                leading: (index + 4).toString().text(16, 20, 500).c(context.colors.neutralPrimary),
                 title: Row(
                   children: [
                     AvatarWithFlagWidget(
@@ -41,20 +38,14 @@ class LeaderboardWidget extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        user.firstName
-                            .text(16, 20, 500)
-                            .c(context.colors.neutralPrimary),
+                        user.firstName.text(16, 20, 500).c(context.colors.neutralPrimary),
                         const SizedBox(height: 8),
-                        ("${user.prettyTalks} talks")
-                            .text(12, 16, 500)
-                            .c(context.colors.textSub),
+                        ("${user.prettyTalks} talks").text(12, 16, 500).c(context.colors.textSub),
                       ],
                     ),
                   ],
                 ),
-                trailing: user.prettySteps
-                    .text(12, 16, 500)
-                    .c(context.colors.neutralPrimary),
+                trailing: user.prettySteps.text(12, 16, 500).c(context.colors.neutralPrimary),
               ),
             ],
           );

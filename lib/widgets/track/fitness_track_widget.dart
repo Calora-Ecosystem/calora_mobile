@@ -1,7 +1,8 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/domain/model/step/metrics_data.dart';
+import 'package:calora/common/widgets/date_and_time/date_and_time.dart';
+import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/chart/chart_widget.dart';
 import 'package:calora/widgets/steps/steps_indicator_widget.dart';
@@ -28,7 +29,7 @@ class FitnessTrackWidget extends StatefulWidget {
   final List<double> primaryValues;
   final int goal;
   final GlobalKey globalKey;
-  final MetricsData metrics;
+  final MetricsRequest metrics;
   final Function() onClickForward;
   final Function() onClickBackward;
   final Function() onClickPause;
@@ -41,9 +42,18 @@ class FitnessTrackWidget extends StatefulWidget {
 }
 
 class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
+  int offset = 0;
+  String _getDateLabel(int index) {
+    if (index == 0) return formatDateLabel(offset, "daily");
+    if (index == 1) return formatDateLabel(offset, "weekly");
+    return formatDateLabel(offset, "monthly");
+  }
+
   @override
   Widget build(BuildContext context) {
     final tabController = DefaultTabController.of(context);
+    final selected = widget.selectedDate ?? DateTime.now();
+
     return AnimatedBuilder(
       animation: tabController,
       builder: (context, _) {
@@ -64,7 +74,12 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InkWell(
-                        onTap: widget.onClickBackward,
+                        onTap: () {
+                          setState(() {
+                            offset--;
+                            widget.onClickBackward();
+                          });
+                        },
                         child: Padding(
                           padding: const EdgeInsets.only(left: 16),
                           child: Assets.icons.icBackward.svg(),
@@ -73,13 +88,16 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          "Bugun".text(14, 16, 400).c(context.colors.textWhite),
-                          const SizedBox(height: 4),
-                          "7- sentabr".text(14, 16, 400).c(context.colors.textWhite),
+                          _getDateLabel(index).text(14, 16, 400).c(context.colors.textWhite),
                         ],
                       ),
                       InkWell(
-                        onTap: widget.onClickForward,
+                        onTap: () {
+                          setState(() {
+                            offset++;
+                            widget.onClickForward();
+                          });
+                        },
                         child: Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: Assets.icons.icForward.svg(),
@@ -152,7 +170,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 children: [
                                   Assets.icons.icDistance.svg(),
                                   const SizedBox(height: 4),
-                                  '${widget.metrics.distance}'
+                                  '${widget.stepCount * 0.72}'
                                       .text(16, 20, 500)
                                       .c(context.colors.textStrong),
                                   const SizedBox(height: 2),

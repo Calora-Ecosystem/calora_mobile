@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:developer';
-
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -26,18 +23,16 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   StepsPage({super.key});
 
   late PedometerService _pedometerService;
-  int _offset = 0;
+  GlobalKey globalKey = GlobalKey();
 
   @override
   void init(context, manager) {
     manager.getUserMetrics();
     manager.getNorms();
-    manager.getSteps(0, offset: _offset);
-    manager.getStats(0, offset: _offset);
+    manager.getSteps();
+    manager.getStats();
+    manager.start();
     _initializePedometerService(manager);
-    Timer.periodic(const Duration(hours: 1), (_) {
-      manager.sendDailyData(metric: "Step", value: manager.state.stepCount);
-    });
   }
 
   void _initializePedometerService(StepsManager manager) async {
@@ -52,36 +47,24 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     await _pedometerService.initializePedometer();
   }
 
-  GlobalKey globalKey = GlobalKey();
-
-  void _changeOffset(int change, int period, StepsManager manager) {
-    _offset += change;
-    manager.getSteps(period, offset: _offset);
-    manager.getStats(period, offset: _offset);
-  }
-
   @override
   Widget builder(context, manager, state) {
     final stepValue = state.norms
-        .firstWhere((norm) => norm.metric == "Step", orElse: () => Norms(metric: "Step", value: 0))
+        .firstWhere(
+          (norm) => norm.metric == "Step",
+          orElse: () => NormsRequest(metric: "Step", value: 0),
+        )
         .value;
-    log('StepCount::::::::::::::::::::::::::::${state.stepCount}');
-
     return DefaultTabController(
       length: 3,
       child: Builder(
         builder: (context) {
           final tabController = DefaultTabController.of(context);
-
           tabController.addListener(() {
             if (!tabController.indexIsChanging) {
-              _offset = 0;
-              final period = tabController.index;
-              manager.getSteps(period, offset: _offset);
-              manager.getStats(period, offset: _offset);
+              manager.changePeriod(tabController.index);
             }
           });
-
           return Scaffold(
             body: Stack(
               children: [
@@ -103,7 +86,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: TabBar(
-                            indicatorPadding: EdgeInsets.all(2),
+                            indicatorPadding: const EdgeInsets.all(2),
                             indicatorSize: TabBarIndicatorSize.tab,
                             dividerColor: Colors.transparent,
                             indicator: BoxDecoration(
@@ -132,10 +115,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                   metrics: state.metrics,
                                   stepCount: state.stepCount,
                                   onClickBackward: () {
-                                    _changeOffset(-1, tabController.index, manager);
+                                    manager.changeOffset(-1);
                                   },
                                   onClickForward: () {
-                                    _changeOffset(1, tabController.index, manager);
+                                    manager.changeOffset(1);
                                   },
                                   onClickMoreVert: () {
                                     _showActionsSheet(context);
@@ -191,8 +174,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       builder: (_) => EditStepGoalPage(
         initialValue: 16000,
         onSave: (value) {
-          manager.update(Norms(metric: "Step", value: value));
-          manager.getNorms();
+          manager.updateNorm(NormsRequest(metric: "Step", value: value));
         },
       ),
     );
