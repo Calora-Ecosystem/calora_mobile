@@ -162,7 +162,13 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   void _showConfirmDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => ConfirmPage(onConfirm: () {}, onCancel: () {}),
+      builder: (_) => ConfirmPage(
+        onConfirm: () {},
+        onCancel: () {},
+        cancelText: Strings.cleaning,
+        confirmText: Strings.rejection,
+        title: Strings.areYouSureDeleteStatistic,
+      ),
     );
   }
 

@@ -37,4 +37,5 @@ class DefaultThemeColors {
   final informationBase = Color(0xFF0090FF);
   final awayBase = Color(0xFFFFE629);
   final warningBase = Color(0xFFF76B15);
+  final black = Color(0xFF000000);
 }
