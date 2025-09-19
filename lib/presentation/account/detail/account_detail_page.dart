@@ -22,7 +22,6 @@ class AccountDetailPage
   @override
   Widget builder(context, manager, state) {
     return Scaffold(
-      appBar: AppBar(title: ,),
       backgroundColor: context.colors.white,
       body: Column(children: []),
     );
