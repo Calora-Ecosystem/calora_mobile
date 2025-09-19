@@ -83,3 +83,43 @@ setting_up_notification,Setting up notifications,Bildirishnomalarni sozlash,На
 make_an_offer,Make an offer,Taklif qilish,Сделать предложение
 about_calora,About Calora,Calora haqida,О Калоре
 help_faq,Help & FAQ,Yordam & FAQ,Помощь и часто задаваемые вопросы
+account_info,Account information,Hisob ma’lumotlari,Информация об учетной записи
+name,Name,Ism,Имя
+last_name,Last name,Familiya,Фамилия
+birthday,Birthday,Tug’ilgan kun,День рождения
+height,Height,Bo'y,Высота
+weight,Weight,Vazn,Масса
+gender,Gender,Jins,Пол
+activity_level,Activity level,Aktivlik darajasi,Уровень активности
+metrics,Metrics,Metrikalar,Метрики
+input,Input,Kiritish,Вход
+through_apple_id,Through Apple ID,Apple ID orqali,Через Apple ID
+by_mail,By mail,Pochta orqali,По почте
+via_google,Via Google,Google orqali,Через Google
+verified_mail,Verified by mail,Pochta orqali tasdiqlangan,Подтверждено по почте
+verified_google_account,Google account verified,Google akkaunti tasdiqlangan,Аккаунт Google подтвержден
+verified_apple,Verified by Apple ID,Apple ID orqali tasdiqlangan,Подтверждено Apple ID
+automatic_tracking,Automatic tracking,Avtomatik kuzatish,Автоматическое отслеживание
+subscribe,Subscribe,Obuna,Подписаться
+restore_purchase,Restore purchase,Xaridni tiklash,Восстановить покупку
+connect,Connect,Bog‘lash,Соединять
+log_out,Log out,Hisobdan chiqish,Выйти
+exit,Exit,Chiqish,Выход
+are_you_sure_want_log_out,Are you sure you want to log out of your app account?,Rostdan ham ilovadagi hisobingizdan chiqmoqchisiz ?,"Вы уверены, что хотите выйти из своей учетной записи приложения?"
+write_help,"If you encounter any problems, write to our telegram bot or email address. We will answer you soon!",Muammolarga duch kelsangiz telegram botimiz  yoki elektron manzilimizga yozing.Tezda sizga javob beramiz ! ,"Если у вас возникнут проблемы, напишите нам в Telegram или на почту. Мы ответим вам в ближайшее время!"
+help_desk,Help desk,Yordam xizmati,Справочная служба 
+calora_about_text,"Calora is an innovative platform designed to make self-assessment easier for users. The app helps users analyze their learning outcomes and provides them with the resources they need to achieve their goals. Calora’s UI is intuitive, making it easy for users to navigate. The app also offers a variety of tools and features to make the self-assessment process more effective and engaging for users.","Calora ilovasi, foydalanuvchilarga o'z-o'zini baholash jarayonini osonlashtirish uchun mo'ljallangan innovatsion platformadir. Bu ilova o'qish jarayonidagi natijalarni tahlil qilishda yordam beradi, shuningdek, foydalanuvchilarga o'z maqsadlariga erishish uchun zarur bo'lgan resurslarni taqdim etadi. Calora UI intuitiv interfeysi bilan ajralib turadi, bu esa foydalanuvchilarga oson navigatsiya qilish imkonini beradi. Ilova, shuningdek, foydalanuvchilarning o'z-o'zini baholash jarayonini yanada samarali va qiziqarli qilish uchun turli xil vositalar va funksiyalarni taklif etadi.",
+welcome_to_healthy_life,Welcome to a healthy life!,Sog’lom hayotga xush kelibsiz !,Добро пожаловать в здоровую жизнь!
+version,Application version,Ilova versiyasi,Версия приложения
+daily_calorie_intake,Daily calorie intake,Kunlik kaloriya normasi,Суточная норма потребления калорий
+enter_your_daily_calorie,Enter your daily calorie intake,Kunlik kaloriya normasini kiriting,Введите вашу суточную норму потребления калорий
+daily_protein_intake,Daily protein intake,Kunlik oqsil normasi,Суточное потребление белка
+enter_your_daily_protein,Enter your daily protein intake,Kunlik oqsil normasini kiriting,Введите вашу суточную норму потребления белка
+daily_carbohydrade_intake,Daily carbohydrate intake,Kunlik uglevod normasi,Суточное потребление углеводов
+enter_your_daily_carbohydrate,Enter your daily carbohydrate intake,Kunlik uglevod normasini kiriting,Введите вашу суточную норму потребления углеводов
+daily_water_intake,Daily water intake,Kunlik suv normasi,Ежедневное потребление воды
+enter_your_daily_water,Enter your daily water intake.,Kunlik suv normasini kiriting,Укажите суточную норму потребления воды.
+daily_step_rate,Daily step rate,Kunlik qadamlar normasi,Ежедневная скорость шага
+enter_your_daily_step_goal,Enter your daily step goal,Kunlik qadamlar normasini kiriting,Введите вашу ежедневную цель по количеству шагов
+enter_your_daily_fat,Enter your daily fat intake,Kunlik yog' normasini kiriting,Введите ваше ежедневное потребление жиров
+daily_fat_intake,Daily fat intake,Kunlik yog' normasi,Суточное потребление жиров

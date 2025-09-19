@@ -1,4 +1,3 @@
-import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -11,8 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class DashboardPage
-    extends Managed<DashboardManager, DashboardState, DashboardEffect> {
+class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardEffect> {
   const DashboardPage({super.key});
 
   @override
@@ -21,13 +19,7 @@ class DashboardPage
   @override
   Widget builder(context, manager, state) {
     return AutoTabsRouter(
-      routes: [
-        HomeRoute(),
-        CaloriesRoute(),
-        CourseRoute(),
-        StepsRoute(),
-        ProfileRoute(),
-      ],
+      routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), MainProfileRoute()],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
@@ -132,10 +124,7 @@ class DashboardPage
     required BuildContext context,
   }) {
     return BottomNavigationBarItem(
-      icon: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [icon],
-      ),
+      icon: Column(mainAxisAlignment: MainAxisAlignment.start, children: [icon]),
       label: title,
     );
   }
