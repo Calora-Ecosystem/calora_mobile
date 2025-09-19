@@ -1,14 +1,23 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
-import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class ConfirmPage extends StatelessWidget {
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
+  final String title;
+  final String confirmText;
+  final String cancelText;
 
-  const ConfirmPage({super.key, required this.onConfirm, required this.onCancel});
+  const ConfirmPage({
+    super.key,
+    required this.onConfirm,
+    required this.onCancel,
+    required this.title,
+    required this.confirmText,
+    required this.cancelText,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +38,7 @@ class ConfirmPage extends StatelessWidget {
               child: Assets.icons.warning.svg(),
             ),
             const SizedBox(height: 8),
-            Strings.areYouSureDeleteStatistic
+            title
                 .text(16, 20, 400)
                 .c(context.colors.textStrong)
                 .copyWith(textAlign: TextAlign.center),
@@ -43,12 +52,12 @@ class ConfirmPage extends StatelessWidget {
                       onCancel();
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: context.colors.errorLighter,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Strings.cleaning
+                      child: cancelText
                           .text(16, 20, 500)
                           .c(context.colors.errorBase)
                           .copyWith(textAlign: TextAlign.center),
@@ -63,12 +72,12 @@ class ConfirmPage extends StatelessWidget {
                       onConfirm();
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: context.colors.backgroundElevation,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Strings.rejection
+                      child: confirmText
                           .text(16, 20, 500)
                           .c(context.colors.textStrong)
                           .copyWith(textAlign: TextAlign.center),
