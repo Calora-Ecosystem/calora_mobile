@@ -19,7 +19,6 @@ class SingleSelectionItemBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log("ResultPath->${selection.icon}");
     return InkWell(
       onTap: () {
         selection.isChecked ? null : onClicked(selection);
