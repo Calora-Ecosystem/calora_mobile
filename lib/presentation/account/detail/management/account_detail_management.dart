@@ -1,5 +1,4 @@
 import 'package:calora/domain/model/detail/detail_info.dart';
-import 'package:calora/domain/model/profile/profile.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'account_detail_management.freezed.dart';

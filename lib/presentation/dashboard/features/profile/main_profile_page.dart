@@ -66,7 +66,9 @@ class MainProfilePage
                       onLanguageTap: () {
                         showLanguageBottomSheet(context);
                       },
-                      onNotificationsTap: () {},
+                      onNotificationsTap: () {
+                        _openNotificationSettingsPage(context);
+                      },
                       onInviteTap: () {
                         SharePlus.instance.share(
                           ShareParams(
@@ -96,5 +98,9 @@ class MainProfilePage
 
   void _openAccountDetailPage(BuildContext context) {
     context.router.push(AccountDetailRoute(profile: Profile()));
+  }
+
+  void _openNotificationSettingsPage(BuildContext context) {
+    context.router.push(NotificationSettingsRoute());
   }
 }
