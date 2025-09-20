@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/domain/model/profile/profile.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -7,7 +8,7 @@ part 'account_detail_management.freezed.dart';
 abstract class AccountDetailState with _$AccountDetailState {
   const factory AccountDetailState({
     @Default(false) bool loading,
-    Profile? profile,
+    List<DetailInfo>? detailInfos,
   }) = _AccountDetailState;
 }
 

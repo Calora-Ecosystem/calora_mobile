@@ -9,4 +9,12 @@ class AccountDetailManager
   final ProfileRepo profileRepo;
 
   AccountDetailManager(this.profileRepo) : super(const AccountDetailState());
+
+  void getProfileDetail() async {
+    await profileRepo.getProfileDetail().handle(
+      onStart: () => emit(state.copyWith(loading: true)),
+      onData: (data) => emit(state.copyWith(detailInfos: data, loading: false)),
+      onDone: () => emit(state.copyWith(loading: false)),
+    );
+  }
 }

@@ -57,7 +57,9 @@ class MainProfilePage
                     ),
                     SizedBox(height: 16),
                     SettingsCard(
-                      onAccountTap: () {},
+                      onAccountTap: () {
+                        _openAccountDetailPage(context);
+                      },
                       onNormsTap: () {
                         context.pushRoute(NormsRoute());
                       },
@@ -92,7 +94,7 @@ class MainProfilePage
     );
   }
 
-  void _openAccountInfoPage(String profileId, BuildContext context) {
+  void _openAccountDetailPage(BuildContext context) {
     context.router.push(AccountDetailRoute(profile: Profile()));
   }
 }
