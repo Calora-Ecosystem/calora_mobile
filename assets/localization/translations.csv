@@ -134,3 +134,9 @@ september,September,Sentabr,Сентябрь
 october,October,Oktabr,Октябрь
 november,November,Noyabr,Ноябрь
 december,December,Dekabr,Декабрь
+male,Male,Erkak,Мужской
+female,Female,Ayol,Женский
+choose_gender,Choose gender,Jinsni tanlang,Выберите пол
+choose_goal,Choose goal,Maqsadni tanlang,Выберите цель
+choose_activity_level,Choose activity level,Aktivlik tarajasini tanlang,Выберите уровень активности
+choose_metrics,Choose metrics,Metrikalarni tanlang,Выберите метрики

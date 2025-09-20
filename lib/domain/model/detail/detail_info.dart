@@ -4,6 +4,7 @@ import 'package:calora/domain/model/detail/detail_info_type.dart';
 import 'package:flutter/cupertino.dart';
 
 class DetailInfo {
+  final String id;
   final String title;
   final String message;
   final String metric;
@@ -11,6 +12,7 @@ class DetailInfo {
 
   DetailInfo({
     this.title = "",
+    this.id = "",
     this.message = "",
     this.metric = "",
     this.type = DetailInfoType.none,
@@ -31,12 +33,14 @@ class DetailInfo {
 
   DetailInfo copyWith({
     String? title,
+    String? id,
     String? message,
     String? metric,
     DetailInfoType? type,
   }) {
     return DetailInfo(
       title: title ?? this.title,
+      id: id ?? this.id,
       message: message ?? this.message,
       metric: metric ?? this.metric,
       type: type ?? this.type,

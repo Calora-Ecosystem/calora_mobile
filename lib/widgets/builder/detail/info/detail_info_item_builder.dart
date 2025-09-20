@@ -1,4 +1,5 @@
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,12 @@ class DetailInfoItemBuilder extends StatelessWidget {
                     : context.colors.textSub,
               ),
           const SizedBox(width: 4),
-          const Icon(Icons.arrow_forward_ios, size: 16),
+          Assets.icons.icForward.svg(
+            colorFilter: ColorFilter.mode(
+              context.colors.black,
+              BlendMode.srcIn,
+            ),
+          ),
         ],
       ),
       onTap: () => onClickItem(detailInfo),
