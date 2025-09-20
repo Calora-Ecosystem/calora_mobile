@@ -39,7 +39,11 @@ class ProfileRepoImpl extends ProfileRepo {
       message: "Nurbek",
       type: DetailInfoType.name,
     ),
-    DetailInfo(title: Strings.lastName, message: "", type: DetailInfoType.name),
+    DetailInfo(
+      title: Strings.lastName,
+      message: "",
+      type: DetailInfoType.lastName,
+    ),
     DetailInfo(
       title: Strings.birthday,
       message: "1999-08-06",

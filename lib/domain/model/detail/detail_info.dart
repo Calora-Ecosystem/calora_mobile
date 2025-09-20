@@ -27,7 +27,7 @@ class DetailInfo {
   String get prettyDateVision => DateFormatter.getBirthDate(message);
 
   TextInputType get currentTextInputType =>
-      type == DetailInfoType.name || type == DetailInfoType.fullName
+      type == DetailInfoType.name || type == DetailInfoType.lastName
       ? TextInputType.name
       : TextInputType.number;
 

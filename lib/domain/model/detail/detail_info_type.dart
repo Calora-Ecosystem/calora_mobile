@@ -1,6 +1,6 @@
 enum DetailInfoType {
   name,
-  fullName,
+  lastName,
   birthDay,
   height,
   weight,
