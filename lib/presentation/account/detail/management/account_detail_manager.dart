@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_management.dart';
@@ -19,5 +21,16 @@ class AccountDetailManager
     );
   }
 
-  void updateProfileDetail(DetailInfo info) async {}
+  void updateProfileDetail(DetailInfo info, String lastResult) {
+    emit(
+      state.copyWith(
+        detailInfos: state.detailInfos?.map((element) {
+          if (element.type == info.type) {
+            return element.copyWith(message: lastResult);
+          }
+          return element;
+        }).toList(),
+      ),
+    );
+  }
 }

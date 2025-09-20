@@ -39,11 +39,15 @@ class AccountDetailPage
           _back(context);
         },
       ),
-      body: _uiBuilder(state, context),
+      body: _uiBuilder(state, context, manager),
     );
   }
 
-  Widget _uiBuilder(AccountDetailState state, BuildContext context) {
+  Widget _uiBuilder(
+    AccountDetailState state,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     if (state.loading) {
       return Loadable(
         builder: (context) {
@@ -64,7 +68,7 @@ class AccountDetailPage
           return DetailInfoItemBuilder(
             detailInfo: detailsInfo,
             onClickItem: (data) {
-              _openInputPage(data, context);
+              _openInputPage(data, context, manager);
             },
           );
         },
@@ -72,7 +76,11 @@ class AccountDetailPage
     }
   }
 
-  void _openInputPage(DetailInfo info, BuildContext context) {
+  void _openInputPage(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -87,10 +95,19 @@ class AccountDetailPage
               ? TextInputType.name
               : TextInputType.number,
           message: info.message,
-          onSave: (data) {},
+          onSave: (data) {
+
+            manager.updateProfileDetail(info, data);
+            _dismiss(context);
+
+          },
         );
       },
     );
+  }
+
+  void _dismiss(BuildContext context) {
+    Navigator.pop(context);
   }
 
   void _back(BuildContext context) {
