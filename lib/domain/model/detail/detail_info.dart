@@ -1,5 +1,7 @@
+import 'package:calora/common/date/date_formatter.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/detail/detail_info_type.dart';
+import 'package:flutter/cupertino.dart';
 
 class DetailInfo {
   final String title;
@@ -16,7 +18,16 @@ class DetailInfo {
 
   bool get isHaveMessage => message.isNotEmpty;
 
-  String get resultMessage => isHaveMessage ? "$message $metric" : Strings.input;
+  String get resultMessage => type != DetailInfoType.birthDay ? isHaveMessage
+      ? "$message $metric"
+      : Strings.input :prettyDateVision;
+
+  String get prettyDateVision => DateFormatter.getBirthDate(message);
+
+  TextInputType get currentTextInputType =>
+      type == DetailInfoType.name || type == DetailInfoType.fullName
+      ? TextInputType.name
+      : TextInputType.number;
 
   DetailInfo copyWith({
     String? title,

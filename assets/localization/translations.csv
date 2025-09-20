@@ -83,7 +83,6 @@ setting_up_notification,Setting up notifications,Bildirishnomalarni sozlash,На
 make_an_offer,Make an offer,Taklif qilish,Сделать предложение
 about_calora,About Calora,Calora haqida,О Калоре
 help_faq,Help & FAQ,Yordam & FAQ,Помощь и часто задаваемые вопросы
-account_info,Account information,Hisob ma’lumotlari,Информация об учетной записи
 name,Name,Ism,Имя
 last_name,Last name,Familiya,Фамилия
 birthday,Birthday,Tug’ilgan kun,День рождения
@@ -123,3 +122,15 @@ daily_step_rate,Daily step rate,Kunlik qadamlar normasi,Ежедневная с�
 enter_your_daily_step_goal,Enter your daily step goal,Kunlik qadamlar normasini kiriting,Введите вашу ежедневную цель по количеству шагов
 enter_your_daily_fat,Enter your daily fat intake,Kunlik yog' normasini kiriting,Введите ваше ежедневное потребление жиров
 daily_fat_intake,Daily fat intake,Kunlik yog' normasi,Суточное потребление жиров
+january,January,Yanvar,Январь
+february,February,Fevral,Февраль
+march,March,Mart,Март 
+april,April,Aprel,Апрель
+may,May,May,Май
+june,June,Iyun,Июнь
+july,July,Iyul,Июль
+august,August,Avgust,Август
+september,September,Sentabr,Сентябрь
+october,October,Oktabr,Октябрь
+november,November,Noyabr,Ноябрь
+december,December,Dekabr,Декабрь

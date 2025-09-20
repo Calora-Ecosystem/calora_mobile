@@ -89,17 +89,11 @@ class AccountDetailPage
         return SingleInputPage(
           title: info.title,
           metrics: info.metric,
-          textInputType:
-              info.type == DetailInfoType.name ||
-                  info.type == DetailInfoType.fullName
-              ? TextInputType.name
-              : TextInputType.number,
+          textInputType: info.currentTextInputType,
           message: info.message,
           onSave: (data) {
-
             manager.updateProfileDetail(info, data);
             _dismiss(context);
-
           },
         );
       },
