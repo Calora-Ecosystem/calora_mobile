@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_management.dart';
 import 'package:injectable/injectable.dart';
@@ -17,4 +18,6 @@ class AccountDetailManager
       onDone: () => emit(state.copyWith(loading: false)),
     );
   }
+
+  void updateProfileDetail(DetailInfo info) async {}
 }

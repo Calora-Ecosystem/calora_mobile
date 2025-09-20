@@ -1,12 +1,16 @@
+import 'dart:developer';
+
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
+import 'package:calora/domain/model/detail/detail_info_type.dart';
 import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_management.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/input/single/single_input_page.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/builder/detail/info/detail_info_item_builder.dart';
 import 'package:flutter/material.dart';
@@ -59,11 +63,34 @@ class AccountDetailPage
           final detailsInfo = state.detailInfos?[index] ?? DetailInfo();
           return DetailInfoItemBuilder(
             detailInfo: detailsInfo,
-            onClickItem: (data) {},
+            onClickItem: (data) {
+              _openInputPage(data, context);
+            },
           );
         },
       );
     }
+  }
+
+  void _openInputPage(DetailInfo info, BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.colors.white,
+      builder: (context) {
+        return SingleInputPage(
+          title: info.title,
+          metrics: info.metric,
+          textInputType:
+              info.type == DetailInfoType.name ||
+                  info.type == DetailInfoType.fullName
+              ? TextInputType.name
+              : TextInputType.number,
+          message: info.message,
+          onSave: (data) {},
+        );
+      },
+    );
   }
 
   void _back(BuildContext context) {
