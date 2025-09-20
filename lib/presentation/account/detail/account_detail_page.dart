@@ -10,6 +10,7 @@ import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_management.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/calendar/select/select_calendar_page.dart';
 import 'package:calora/presentation/input/single/single_input_page.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/builder/detail/info/detail_info_item_builder.dart';
@@ -68,11 +69,34 @@ class AccountDetailPage
           return DetailInfoItemBuilder(
             detailInfo: detailsInfo,
             onClickItem: (data) {
-              _openInputPage(data, context, manager);
+              _openInputManagePage(data, context, manager);
             },
           );
         },
       );
+    }
+  }
+
+  void _openInputManagePage(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
+    switch (info.type) {
+      case DetailInfoType.activityLevel:
+        break;
+      case DetailInfoType.goal:
+        break;
+      case DetailInfoType.gender:
+        break;
+      case DetailInfoType.metrics:
+        break;
+      case DetailInfoType.birthDay:
+        _openSelectCalendar(info, context, manager);
+        break;
+      default:
+        _openInputPage(info, context, manager);
+        break;
     }
   }
 
@@ -91,6 +115,28 @@ class AccountDetailPage
           metrics: info.metric,
           textInputType: info.currentTextInputType,
           message: info.message,
+          onSave: (data) {
+            manager.updateProfileDetail(info, data);
+            _dismiss(context);
+          },
+        );
+      },
+    );
+  }
+
+  void _openSelectCalendar(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.colors.white,
+      builder: (context) {
+        return SelectCalendarPage(
+          title: info.title,
+          selectedDate: info.message,
           onSave: (data) {
             manager.updateProfileDetail(info, data);
             _dismiss(context);
