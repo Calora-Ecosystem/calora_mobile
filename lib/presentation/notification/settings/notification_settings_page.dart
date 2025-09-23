@@ -1,10 +1,10 @@
-import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/notification/notificaiton_setting.dart';
 import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/input/date/date_input_page.dart';
 import 'package:calora/presentation/notification/settings/management/notification_settings_management.dart';
 import 'package:calora/presentation/notification/settings/management/notification_settings_manager.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
@@ -66,7 +66,9 @@ class NotificationSettingsPage
           final notificationSetting = state.notificationSettings[index];
           return NotificationSettingItemBuilder(
             notificationSetting: notificationSetting,
-            onClickItem: (data) {},
+            onClickItem: (data) {
+              _openInputManagePage(notificationSetting, context, manager);
+            },
           );
         },
       );
@@ -80,21 +82,31 @@ class NotificationSettingsPage
   ) {
     switch (notificationSetting.type) {
       case NotificationSettingType.mealReminder:
-        // _openSingleSelectionActivityLevel(info, context, manager);
+        _showNotificationSettingsSheet(context, NotificationSettingType.mealReminder);
         break;
       case NotificationSettingType.waterReminder:
-        // _openSingleSelectionGoal(info, context, manager);
+        _showNotificationSettingsSheet(context, NotificationSettingType.waterReminder);
         break;
       case NotificationSettingType.sleepReminder:
-        // _openSingleSelectionGender(info, context, manager);
+        _showNotificationSettingsSheet(context, NotificationSettingType.sleepReminder);
         break;
       case NotificationSettingType.thirtyDayChallenges:
-        // _openSingleSelectionMetrics(info, context, manager);
+        _showNotificationSettingsSheet(context, NotificationSettingType.thirtyDayChallenges);
         break;
       default:
-        // _openInputPage(info, context, manager);
         break;
     }
+  }
+
+  void _showNotificationSettingsSheet(BuildContext context, NotificationSettingType type) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return NotificationSettingSheet(type: type, onSave: (times) {});
+      },
+    );
   }
 
   void _dismiss(BuildContext context) {

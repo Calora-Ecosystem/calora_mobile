@@ -7,8 +7,14 @@ part 'profile_request.g.dart';
 abstract class ProfileRequest with _$ProfileRequest {
   const factory ProfileRequest({
     required String name,
+    required String birthDay,
+    required String goal,
+    required String activityLevel,
+    required String metrics,
     required String email,
     required double bmi,
+    required String gender,
+    required double height,
     required double targetWeight,
     required double weight,
     required String userId,

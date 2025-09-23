@@ -73,6 +73,6 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   }
 
   void _openInputNamePage(BuildContext context) {
-    context.router.replace(DashboardRoute());
+    context.router.replace(QuestionsRoute());
   }
 }

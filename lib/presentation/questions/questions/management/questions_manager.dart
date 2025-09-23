@@ -58,6 +58,7 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
       targetWeight: profile.targetWeight,
       activityHours: profile.activityHours,
       bmi: bmi,
+      language: 'Uzbek',
     );
 
     return _repo

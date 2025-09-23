@@ -25,7 +25,7 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: MainProfileRoute.page),
       ],
     ),
-    AutoRoute(page: ProfileRoute.page),
+    AutoRoute(page: ProfileDetailRoute.page),
     AutoRoute(page: NormsRoute.page),
   ];
 }

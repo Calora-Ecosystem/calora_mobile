@@ -29,14 +29,14 @@ class _GenderWidgetState extends State<GenderWidget> {
     return Row(
       children: [
         genderButton(
-          gender: Strings.male,
+          gender: 'Male',
           icon: Assets.icons.male.svg(),
           label: Strings.male,
           borderColor: context.colors.neutral600Secondary,
         ),
         const SizedBox(width: 8),
         genderButton(
-          gender: Strings.female,
+          gender: 'Female',
           icon: Assets.icons.female.svg(),
           label: Strings.female,
           borderColor: context.colors.neutral600Secondary,

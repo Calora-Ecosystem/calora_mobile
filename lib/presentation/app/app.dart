@@ -44,9 +44,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: context.theme,
-              routerConfig: _appRouter.config(
-                deepLinkBuilder: (_) => DeepLink([_initialRoute()]),
-              ),
+              routerConfig: _appRouter.config(deepLinkBuilder: (_) => DeepLink([_initialRoute()])),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
                 return MediaQuery(
@@ -56,10 +54,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
                       maxScaleFactor: 1.2,
                     ),
                   ),
-                  child: DisplayWidget(
-                    key: ValueKey(state.language),
-                    child: child!,
-                  ),
+                  child: DisplayWidget(key: ValueKey(state.language), child: child!),
                 );
               },
             ),
@@ -75,6 +70,6 @@ class App extends Managed<AppManager, AppState, AppEffect> {
     if (isLogin) {
       return DashboardRoute();
     } else
-      return DashboardRoute();
+      return AuthRoute();
   }
 }

@@ -1,11 +1,11 @@
 import 'package:calora/domain/repo/profile/profile_repo.dart';
-import 'package:calora/presentation/dashboard/features/profile/management/main_profile_management.dart';
+import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class MainProfileManager extends Manager<MainProfileState, MainProfileEffect> {
-  MainProfileManager(this._repo) : super(const MainProfileState());
+class ProfileManager extends Manager<ProfileState, ProfileEffect> {
+  ProfileManager(this._repo) : super(const ProfileState());
 
   final ProfileRepo _repo;
 

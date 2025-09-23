@@ -1,4 +1,3 @@
-import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/selection/Selection.dart';
@@ -10,22 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 class SingleSelectionPage
-    extends
-        Managed<
-          SingleSelectionManager,
-          SingleSelectionState,
-          SingleSelectionEffect
-        > {
+    extends Managed<SingleSelectionManager, SingleSelectionState, SingleSelectionEffect> {
   final Selection selection;
   final Function(Selection) onSave;
   final String title;
 
-  SingleSelectionPage({
-    super.key,
-    this.title = "",
-    required this.selection,
-    required this.onSave,
-  });
+  SingleSelectionPage({super.key, this.title = "", required this.selection, required this.onSave});
 
   @override
   void init(context, manager) {
@@ -41,21 +30,12 @@ class SingleSelectionPage
     return Container(
       margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              height: 2,
-              width: 24,
-              color: context.colors.strokeSub,
-            ),
-          ),
+          Center(child: Container(height: 2, width: 24, color: context.colors.strokeSub)),
           const SizedBox(height: 8),
           if (title.isNotEmpty) ...[
             title.text(20, 24, 700).c(context.colors.textStrong),

@@ -8,8 +8,12 @@ class QuestionsApi {
 
   QuestionsApi(this._dio);
 
-  Future<Response> sendAnswers(QuestionsRequest request) async {
+  Future<Response> sendAnswers(QuestionsRequest request) {
     final data = request.toJson();
     return _dio.post('users/extras', data: data);
+  }
+
+  Future<Response> sendTargetWeightAndActivityLevel() {
+    return _dio.post('users/extras');
   }
 }
