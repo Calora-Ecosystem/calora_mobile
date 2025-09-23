@@ -140,3 +140,20 @@ choose_gender,Choose gender,Jinsni tanlang,Выберите пол
 choose_goal,Choose goal,Maqsadni tanlang,Выберите цель
 choose_activity_level,Choose activity level,Aktivlik tarajasini tanlang,Выберите уровень активности
 choose_metrics,Choose metrics,Metrikalarni tanlang,Выберите метрики
+setting_up_reminders,Setting up reminders,Eslatmalarni sozlash,Настройка напоминаний
+water_drink_reminder,Water drinking reminder,Suv ichish vaqtini eslatish,Напоминание о питье воды
+every_1_hour,Every 1 hour,Har 1 soatda,Каждый 1 час
+every_2_hour,Every 2 hour,Har 2 soatda,Каждый 2 час
+every_3_hour,Every 3 hour,Har 3 soatda,Каждый 3 час
+every_4_hour,Every 4 hour,Har 4 soatda,Каждый 4 час
+every_5_hour,Every 5 hour,Har 5 soatda,Каждый 5 час
+before_10_min,10 minutes before,10 daqiqa oldin,За 10 минут до
+before_20_min,20 minutes before,20 daqiqa oldin,За 20 минут до
+before_30_min,30 minutes before,30 daqiqa oldin,За 30 минут до
+before_40_min,40 minutes before,40 daqiqa oldin,За 40 минут до
+before_50_min,50 minutes before,50 daqiqa oldin,За 50 минут до
+bedtime_reminder,Bedtime reminder,Uxlash vaqtini eslatish ,Напоминание о времени отхода ко сну
+reminder_of_daily_challange_times,Reminder of daily challenge times,Kunlik chellenj vaqtlarini eslatish,Напоминание о времени ежедневных испытаний
+lunch_time_reminder,Lunch time reminder,Tushlik vaqtini eslatish,Напоминание о времени обеда
+dinner_time_reminder,Dinner time reminder,Kechki tamaddi vaqtini eslatish,Напоминание о времени ужина
+breakfast_time_reminder,Breakfast time reminder,Nonushta vaqtini eslatish,Напоминание о завтраке

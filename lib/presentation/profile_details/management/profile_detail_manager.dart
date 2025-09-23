@@ -1,12 +1,13 @@
 import 'package:calora/domain/repo/profile/profile_repo.dart';
-import 'package:calora/presentation/dashboard/features/profile/features/profile_page/management/profile_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
+import 'profile_detail_management.dart';
+
 @injectable
-class ProfileManager extends Manager<ProfileState, ProfileEffect> {
+class ProfileDetailManager extends Manager<ProfileDetailState, ProfileDetailEffect> {
   final ProfileRepo _repo;
-  ProfileManager(this._repo) : super(const ProfileState());
+  ProfileDetailManager(this._repo) : super(const ProfileDetailState());
 
   void onAppleHealthTap() {
     emit(state.copyWith(isAppleHealthSelected: true));
@@ -25,7 +26,7 @@ class ProfileManager extends Manager<ProfileState, ProfileEffect> {
   }
 
   void logOutDialog() {
-    publish(ProfileEffect.showDialog());
+    publish(ProfileDetailEffect.showDialog());
   }
 
   void logOut() {

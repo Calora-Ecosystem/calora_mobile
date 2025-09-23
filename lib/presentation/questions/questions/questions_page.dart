@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
-import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/widgets/questions/question_progress_widget.dart';
@@ -10,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 import '../../../common/gen/strings.dart';
+import '../../../common/router/app_router.gr.dart' show DashboardRoute;
 import 'management/questions_management.dart';
 import 'management/questions_manager.dart';
 

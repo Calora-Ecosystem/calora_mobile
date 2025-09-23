@@ -6,18 +6,20 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/automatic_tracking/automatick_tracking.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
-import 'package:calora/presentation/dashboard/features/profile/features/profile_page/management/profile_management.dart';
-import 'package:calora/presentation/dashboard/features/profile/features/profile_page/management/profile_manager.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/social_button/social_button.dart';
 import 'package:calora/widgets/svg_buttons_row/svg_buttons_row.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
+import 'management/profile_detail_management.dart';
+import 'management/profile_detail_manager.dart';
+
 @RoutePage()
-class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
+class ProfileDetailPage
+    extends Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
   final String userId;
-  const ProfilePage({required this.userId, super.key});
+  const ProfileDetailPage({required this.userId, super.key});
 
   @override
   void listener(context, manager, effect) {

@@ -8,6 +8,10 @@ enum DetailInfoType {
   goal,
   activityLevel,
   metrics,
+  email,
+  targetWeight,
+  bmi,
+  userId,
 
   dailyCalorieNorm,
   dailyProteinNorm,
