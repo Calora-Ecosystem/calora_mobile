@@ -55,7 +55,6 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
               ),
             ),
           ),
-
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
