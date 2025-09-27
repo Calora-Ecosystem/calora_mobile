@@ -10,12 +10,9 @@ part 'strings.g.dart';
 
 @SheetLocalization(
   docId: '12OIaFbGqovuAgHEcXFADUXPb5AqlyGASLpP3kHyFQtU',
-  version: 25,
+  version: 29,
   outDir: 'assets/localization',
   outName: 'translations.csv',
   preservedKeywords: ['few', 'many', 'one', 'other', 'two', 'zero', 'male', 'female'],
 )
-class _Strings {
-  static String get telegram => 'Telegram';
-  static String get email => 'Email';
-}
+class _Strings {}

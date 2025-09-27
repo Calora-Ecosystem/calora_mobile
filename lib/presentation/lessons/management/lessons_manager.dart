@@ -1,0 +1,19 @@
+import 'package:calora/domain/repo/course/course_repo.dart';
+import 'package:calora/presentation/lessons/management/lessons_management.dart';
+import 'package:injectable/injectable.dart' show injectable;
+import 'package:management/management.dart';
+
+@injectable
+class LessonsManager extends Manager<LessonsState, LessonsEffect> {
+  final CourseRepo _courseRepo;
+  LessonsManager(this._courseRepo) : super(const LessonsState());
+
+  void setLevel(int index) {
+    emit(state.copyWith(levelIndex: index));
+  }
+
+  Future<void> getLessons() async {
+    final lessons = await _courseRepo.getLessons();
+    emit(state.copyWith(lessons: lessons));
+  }
+}
