@@ -36,6 +36,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         QuestionWidget(
           questionText: Strings.whatIsYourName,
           child: CustomTextField(
+            keyboardType: TextInputType.text,
             hintText: '-',
             onChanged: (val) => manager.setAnswer(Questions(name: val)),
           ),
@@ -72,7 +73,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         QuestionWidget(
           questionText: Strings.whatIsYourHeight,
           child: CustomTextField(
-            hintText: '- sm',
+            metrics: ' sm',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (val) => manager.setAnswer(Questions(height: double.tryParse(val))),
           ),
@@ -83,7 +84,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         QuestionWidget(
           questionText: Strings.howManyKilograms,
           child: CustomTextField(
-            hintText: '- kg',
+            metrics: ' kg',
             keyboardType: TextInputType.number,
             onChanged: (val) => manager.setAnswer(Questions(weight: double.tryParse(val))),
           ),
@@ -95,6 +96,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
           questionText: Strings.weightChange,
           child: CustomTextField(
             hintText: '- kg',
+            metrics: ' kg',
             keyboardType: TextInputType.number,
             onChanged: (val) => manager.setAnswer(Questions(targetWeight: double.tryParse(val))),
           ),

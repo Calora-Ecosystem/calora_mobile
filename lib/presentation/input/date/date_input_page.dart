@@ -1,4 +1,5 @@
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/switch/custom_switch.dart';
 import 'package:calora/domain/model/notification/notification_setting_type.dart';
@@ -204,7 +205,7 @@ class _NotificationSettingSheetState extends State<NotificationSettingSheet> {
                             (options != null && selectedIndex != null ? options[selectedIndex] : '')
                                 .text(16, 20, 400)
                                 .c(context.colors.textStrong),
-                            Icon(isExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down),
+                            isExpanded ? Assets.icons.down.svg() : Assets.icons.arrowDown.svg(),
                           ],
                         ),
                       ),
