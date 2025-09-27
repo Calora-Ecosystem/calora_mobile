@@ -64,7 +64,7 @@ class _CalculateContentState extends State<_CalculateContent> with TickerProvide
         children: [
           done ? Assets.icons.done.svg() : const CupertinoActivityIndicator(radius: 12),
           const SizedBox(width: 8),
-          text.text(14, 16, 400).c(textColor),
+          Expanded(child: text.text(14, 16, 400).c(textColor)),
         ],
       ),
     );
@@ -78,6 +78,7 @@ class _CalculateContentState extends State<_CalculateContent> with TickerProvide
           Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   margin: const EdgeInsets.only(left: 20, right: 20, top: 80),
@@ -108,15 +109,14 @@ class _CalculateContentState extends State<_CalculateContent> with TickerProvide
                       Center(
                         child: CircularPercentIndicator(
                           radius: 80,
-                          lineWidth: 12,
+                          lineWidth: 16,
                           percent: _animation.value,
                           circularStrokeCap: CircularStrokeCap.round,
-                          progressColor: Colors.green,
-                          backgroundColor: Colors.grey[300]!,
-                          center: Text(
-                            '${(_animation.value * 100).round()}%',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
+                          progressColor: context.colors.accentSub,
+                          backgroundColor: context.colors.backgroundElevation,
+                          center: '${(_animation.value * 100).round()}%'
+                              .text(32, 40, 700)
+                              .c(context.colors.textStrong),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -128,6 +128,23 @@ class _CalculateContentState extends State<_CalculateContent> with TickerProvide
                     ],
                   ),
                 ),
+                if (_animation.value == 1)
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: context.colors.accentSub,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Strings.next
+                          .text(16, 20, 500)
+                          .c(context.colors.textWhite)
+                          .copyWith(textAlign: TextAlign.center),
+                    ),
+                  ),
               ],
             ),
           ),

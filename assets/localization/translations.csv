@@ -157,3 +157,26 @@ reminder_of_daily_challange_times,Reminder of daily challenge times,Kunlik chell
 lunch_time_reminder,Lunch time reminder,Tushlik vaqtini eslatish,Напоминание о времени обеда
 dinner_time_reminder,Dinner time reminder,Kechki tamaddi vaqtini eslatish,Напоминание о времени ужина
 breakfast_time_reminder,Breakfast time reminder,Nonushta vaqtini eslatish,Напоминание о завтраке
+all_courses,All courses,Barcha kurslar,Все курсы
+healthy_weight_loss_classes,Healthy weight loss classes,Sog’lom ozish darslari,Здоровые занятия по снижению веса
+video_lessons_onlosing_weight,Video lessons on losing weight through proper nutrition,Tog'ri ovqatlanish orqali ozishga bag'ishlangan video darslar,Видеоуроки по похудению с помощью правильного питания
+healthy_mass_gain_classes,Healthy mass gain classes,Sog‘lom massa olish darslari,Здоровые занятия по набору массы
+video_lessons_onbuilding_body,Video lessons on building body and muscle mass,Tana va mushak massasini oshirishga baģishlangan video darslar,Видеоуроки по наращиванию тела и мышечной массы
+day_30_weight_loss_workout,30 day weight loss workout,30 kunlik ozish mashqlar,30-дневная тренировка для похудения
+day_30_exercise_weight_loss_program,30-day exercise weight loss program,30 kunlik mashqlar orqali vazn kamaytirish dasturi,30-дневная программа упражнений для похудения
+participation,Participation,Qatnashish,Участие
+enter_your_physical_condition,Enter your physical condition.,Jismoniy xolatingizni kiriting,Укажите свое физическое состояние.
+i_am_fine,"I am fine, I am healthy.","Menda hammasi yaxshi, sog’lomman","У меня все хорошо, я здоров."
+minimum_load,Minimum load (recommended for those who are overweight),"Minimal yuk, (ortiqcha vazni borlar uchun tavsiya qilinadi)",Минимальная нагрузка (рекомендуется для людей с избыточным весом)
+choose_your_workout_level,Choose your workout level!,Mashq darajasini tanlang !,Выберите свой уровень тренировки!
+easy_start,Easy start (5-7 minutes),Yengil boshlash (5-7 daqiqa),Легкий старт (5-7 минут)
+without_overload,Without overload (8-11 minutes),Ortiqcha yuklamasiz (8-11 daqiqa),Без перегрузки (8-11 минут)
+return_to_activity,Return to activity (12-15 minutes),Faollikga qaytish (12-15 daqiqa),Возврат к деятельности (12–15 минут)
+increase_activity,Increase activity (15-20 minutes),Faollikni oshirish (15-20 daqiqa),Увеличьте активность (15-20 минут)
+high_level_activity,High-level activity (20-30 minutes),Yuqori darajadagi faollik (20-30 daqiqa),Активность высокого уровня (20-30 минут)
+enter_workout_time,Enter workout time,Mashq vaqtini kiriting,Введите время тренировки
+change_within_30_days,Change within 30 days,30 kun ichida o'zgaring,Изменение в течение 30 дней
+start,Start,Boshlash,Начинать
+start_easy,Easy start,Yengil boshlash,Легкий старт
+done,Done,Bajarildi,Сделанный
+you_can_relax_tuday,You can relax today,Bugun dam olishingiz mumkin,Сегодня вы можете расслабиться.

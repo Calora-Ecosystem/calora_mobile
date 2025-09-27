@@ -1,15 +1,18 @@
-
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
-import 'package:calora/presentation/dashboard/features/course/management/course_manager.dart';
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/course/course_cards.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 import 'management/course_management.dart';
+import 'management/course_manager.dart';
 
 @RoutePage()
-class CoursePage
-    extends Managed<CourseManager, CourseState, CourseEffect> {
+class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
   const CoursePage({super.key});
 
   @override
@@ -20,15 +23,27 @@ class CoursePage
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Center(child: Text("Coming soon")),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Strings.allCourses.text(17, 22, 600).c(context.colors.textStrong),
+                  ),
+                  const SizedBox(height: 8),
+                  CourseCards(
+                    onTapHealthyWeightLoss: () {
+                      context.router.push(LessonsRoute());
+                    },
+                    onTapHealthyMassGain: () {},
+                    onTapDay30WeightLossWorkout: () {},
+                  ),
+                ],
+              ),
             ),
           ),
         ],

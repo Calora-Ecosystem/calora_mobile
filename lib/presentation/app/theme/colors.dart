@@ -35,6 +35,7 @@ class DefaultThemeColors {
   final errorLighter = Color(0xFFFEEBEC);
   final defaultText = Color(0xFF323232);
   final informationBase = Color(0xFF0090FF);
+  final informationLighter = Color(0xFFE6F4FE);
   final awayBase = Color(0xFFFFE629);
   final warningBase = Color(0xFFF76B15);
   final black = Color(0xFF000000);

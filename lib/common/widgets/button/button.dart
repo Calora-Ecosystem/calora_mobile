@@ -45,15 +45,11 @@ class Button extends StatelessWidget {
               WidgetState.disabled: Colors.grey,
               WidgetState.any: backgroundColor,
             }),
-            padding: WidgetStatePropertyAll(
-              EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            ),
+            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
             shape: WidgetStatePropertyAll(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: borderColor == null
-                    ? BorderSide.none
-                    : BorderSide(color: borderColor),
+                side: borderColor == null ? BorderSide.none : BorderSide(color: borderColor),
               ),
             ),
           ),

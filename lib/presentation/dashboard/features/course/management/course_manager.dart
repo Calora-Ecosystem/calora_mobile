@@ -4,7 +4,5 @@ import 'package:management/management.dart';
 
 @injectable
 class CourseManager extends Manager<CourseState, CourseEffect> {
-
   CourseManager() : super(const CourseState());
-
 }

@@ -40,7 +40,7 @@ class _PurposesWidgetState extends State<PurposesWidget> {
       children: [
         for (int i = 0; i < widget.goals.length; i++) ...[
           purposeButton(i, widget.goals[i]),
-          if (i < widget.goals.length - 1) const SizedBox(height: 8),
+          if (i < widget.goals.length - 1) const SizedBox(height: 16),
         ],
       ],
     );
@@ -55,7 +55,7 @@ class _PurposesWidgetState extends State<PurposesWidget> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 26),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? context.colors.neutral600Secondary : Colors.transparent,
+            color: isSelected ? context.colors.accentSub : Colors.transparent,
             width: 1,
           ),
           color: context.colors.commonBackground,
