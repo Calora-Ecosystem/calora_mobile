@@ -1,5 +1,6 @@
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/lessons/management/lessons_management.dart';
@@ -54,6 +55,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
           Column(
             children: [
               LessonAppBar(
+                title: Strings.changeWithin30Days,
                 level: _mapIntToLevel(state.levelIndex),
                 onLevelChanged: (value) => manager.setLevel(value),
               ),
@@ -66,8 +68,18 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                   ),
                   child: Column(
                     children: [
-                      Assets.images.yandexBanner.image(),
-                      Expanded(child: LessonsCards(lessons: state.lessons)),
+                      GestureDetector(
+                        onTap: () {
+                          print(state.levelIndex);
+                        },
+                        child: Assets.images.yandexBanner.image(),
+                      ),
+                      Expanded(
+                        child: LessonsCards(
+                          lessons: state.lessons,
+                          level: _mapIntToLevel(state.levelIndex),
+                        ),
+                      ),
                     ],
                   ),
                 ),
