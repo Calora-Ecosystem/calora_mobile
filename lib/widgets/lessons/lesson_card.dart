@@ -7,13 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class LessonCard extends StatelessWidget {
-  final LessonInfo lessonInfo;
-  const LessonCard({super.key, required this.lessonInfo});
+  final LessonInfo? lessonInfo;
+  final TaskInfo? taskInfo;
+
+  const LessonCard({super.key, this.lessonInfo, this.taskInfo});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       width: double.infinity,
       decoration: BoxDecoration(
         color: context.colors.backgroundElevation,
@@ -21,54 +23,65 @@ class LessonCard extends StatelessWidget {
       ),
       child: Row(
         children: [
+          if (taskInfo != null) ...[
+            Assets.images.task.image(width: 32, height: 32),
+            const SizedBox(width: 12),
+          ],
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              (lessonInfo.id.toString() + '-' + Strings.day.toLowerCase())
-                  .text(16, 20, 500)
-                  .c(context.colors.textStrong),
-              const SizedBox(height: 8),
-              if (lessonInfo.isDayOff)
-                Strings.youCanRelaxTuday.text(14, 18, 500).c(context.colors.textSub)
-              else
-                (lessonInfo.duration.toString() +
-                        ' minut' +
-                        ' • ' +
-                        lessonInfo.calories.toString() +
-                        ' kkal')
-                    .text(14, 18, 500)
-                    .c(context.colors.textSub),
+              if (lessonInfo != null) ...[
+                // Lesson title
+                ("${lessonInfo!.id}-${Strings.day.toLowerCase()}")
+                    .text(16, 20, 500)
+                    .c(context.colors.textStrong),
+                const SizedBox(height: 8),
+                if (lessonInfo!.isDayOff)
+                  Strings.youCanRelaxTuday.text(14, 18, 500).c(context.colors.textSub)
+                else
+                  ("${lessonInfo!.duration} minut • ${lessonInfo!.calories} kkal")
+                      .text(14, 18, 500)
+                      .c(context.colors.textSub),
+              ] else if (taskInfo != null) ...[
+                // Task title
+                taskInfo!.title.text(16, 20, 500).c(context.colors.textStrong),
+                const SizedBox(height: 8),
+                // Task count
+                ("${taskInfo!.count} ta").text(14, 18, 500).c(context.colors.textSub),
+              ],
             ],
           ),
-          Spacer(),
-          if (lessonInfo.isLocked)
-            Assets.icons.lock.svg()
-          else if (lessonInfo.isDayOff)
-            Assets.icons.dayOffIcon.svg()
-          else if (lessonInfo.isCompleted)
-            Row(
-              children: [
-                Strings.done.text(14, 18, 500).c(context.colors.accentSub),
-                const SizedBox(width: 8),
-                Assets.icons.done.svg(),
-              ],
-            )
-          else
-            Row(
-              children: [
-                CircularPercentIndicator(
-                  radius: 10,
-                  lineWidth: 2,
-                  percent: lessonInfo.level,
-                  backgroundColor: context.colors.accentWhite,
-                  progressColor: context.colors.accentSub,
-                ),
-                const SizedBox(width: 8),
-                ((lessonInfo.level * 100).toInt().toString() + '%')
-                    .text(14, 18, 500)
-                    .c(context.colors.textSub),
-              ],
-            ),
+          const Spacer(),
+          if (lessonInfo != null) ...[
+            if (lessonInfo!.isLocked)
+              Assets.icons.lock.svg()
+            else if (lessonInfo!.isDayOff)
+              Assets.icons.dayOffIcon.svg()
+            else if (lessonInfo!.isCompleted)
+              Row(
+                children: [
+                  Strings.done.text(14, 18, 500).c(context.colors.accentSub),
+                  const SizedBox(width: 8),
+                  Assets.icons.done.svg(),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  CircularPercentIndicator(
+                    radius: 10,
+                    lineWidth: 2,
+                    percent: lessonInfo!.level,
+                    backgroundColor: context.colors.accentWhite,
+                    progressColor: context.colors.accentSub,
+                  ),
+                  const SizedBox(width: 8),
+                  ("${(lessonInfo!.level * 100).toInt()}%")
+                      .text(14, 18, 500)
+                      .c(context.colors.textSub),
+                ],
+              ),
+          ],
         ],
       ),
     );

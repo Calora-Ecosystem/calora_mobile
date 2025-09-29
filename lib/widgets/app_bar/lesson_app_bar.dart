@@ -10,9 +10,19 @@ import '../train_level/train_level_page.dart';
 
 class LessonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ValueChanged<int> onLevelChanged;
+  final bool showSettings;
+  final bool showIndicator;
   final Level level;
+  final String title;
 
-  const LessonAppBar({super.key, required this.onLevelChanged, required this.level});
+  const LessonAppBar({
+    super.key,
+    required this.title,
+    required this.onLevelChanged,
+    required this.level,
+    this.showSettings = true,
+    this.showIndicator = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,36 +56,38 @@ class LessonAppBar extends StatelessWidget implements PreferredSizeWidget {
                       Strings.startEasy.text(12, 14, 500).c(context.colors.textSub),
                     ],
                   ),
-                  Strings.changeWithin30Days
-                      .text(24, 32, 700)
-                      .c(context.colors.accentSub)
-                      .copyWith(maxLines: 2),
+                  title.text(24, 32, 700).c(context.colors.accentSub).copyWith(maxLines: 2),
                 ],
               ),
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () => _openSettings(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: context.colors.white,
-                        shape: BoxShape.circle,
+            if (showIndicator)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (showSettings)
+                      GestureDetector(
+                        onTap: () => _openSettings(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: context.colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Assets.icons.settings.svg(),
+                        ),
                       ),
-                      child: Assets.icons.settings.svg(),
+                    const SizedBox(height: 40),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 30),
+                        child: CardIndicator(percent: 0.1),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 40),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: CardIndicator(percent: 0.1),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
