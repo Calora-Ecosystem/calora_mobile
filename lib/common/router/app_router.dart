@@ -30,5 +30,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: CourseQuestionsRoute.page),
     AutoRoute(page: LessonsRoute.page),
     AutoRoute(page: TasksRoute.page),
+    AutoRoute(page: TaskRoute.page),
   ];
 }

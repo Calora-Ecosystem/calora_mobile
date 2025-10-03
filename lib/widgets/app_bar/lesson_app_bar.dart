@@ -8,14 +8,16 @@ import 'package:flutter/material.dart';
 
 import '../train_level/train_level_page.dart';
 
-class LessonAppBar extends StatelessWidget implements PreferredSizeWidget {
+class LessonAppBar extends StatelessWidget {
   final ValueChanged<int> onLevelChanged;
   final bool showSettings;
   final bool showIndicator;
+  final double percent;
   final Level level;
   final String title;
 
   const LessonAppBar({
+    this.percent = 0.5,
     super.key,
     required this.title,
     required this.onLevelChanged,
@@ -28,80 +30,78 @@ class LessonAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        margin: EdgeInsets.fromLTRB(16, 12, 16, 12),
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
         color: Colors.transparent,
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 12),
+            const SizedBox(height: 12),
+            // Birinchi qator: Back button va Settings
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                    decoration: BoxDecoration(color: context.colors.white, shape: BoxShape.circle),
+                    child: Assets.icons.arrowLeft.svg(),
+                  ),
+                ),
+                if (showSettings)
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => _openSettings(context),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                       decoration: BoxDecoration(
                         color: context.colors.white,
                         shape: BoxShape.circle,
                       ),
-                      child: Assets.icons.arrowLeft.svg(),
+                      child: Assets.icons.settings.svg(),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+                  )
+                else
+                  const SizedBox(width: 40),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Ikkinchi qator: Rating/Title va Indicator
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RatingStars(level: level),
-                      const SizedBox(width: 8),
-                      Strings.startEasy.text(12, 14, 500).c(context.colors.textSub),
+                      Row(
+                        children: [
+                          RatingStars(level: level),
+                          const SizedBox(width: 8),
+                          Strings.startEasy.text(12, 14, 500).c(context.colors.textSub),
+                        ],
+                      ),
+                      title.text(24, 32, 700).c(context.colors.accentSub).copyWith(maxLines: 2),
                     ],
                   ),
-                  title.text(24, 32, 700).c(context.colors.accentSub).copyWith(maxLines: 2),
-                ],
-              ),
-            ),
-            if (showIndicator)
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (showSettings)
-                      GestureDetector(
-                        onTap: () => _openSettings(context),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: context.colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Assets.icons.settings.svg(),
-                        ),
-                      ),
-                    const SizedBox(height: 40),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 30),
-                        child: CardIndicator(percent: 0.1),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
+                if (showIndicator)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: SizedBox(width: 128, child: CardIndicator(percent: percent)),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  @override
-  Size get preferredSize => const Size.fromHeight(230);
-
   void _openSettings(BuildContext context) async {
     final result = await showModalBottomSheet<int>(
       backgroundColor: context.colors.backgroundBase,
       context: context,
-      isScrollControlled: true,
       builder: (context) {
         return TrainLevelPage(
           onSave: (value) {

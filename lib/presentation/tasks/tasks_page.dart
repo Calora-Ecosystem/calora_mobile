@@ -1,26 +1,30 @@
 import 'package:auto_route/annotations.dart';
+import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart' show Strings;
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
+import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/tasks/management/tasks_management.dart';
 import 'package:calora/presentation/tasks/management/tasks_manager.dart';
 import 'package:calora/widgets/app_bar/lesson_app_bar.dart';
 import 'package:calora/widgets/lessons/tasks_cards.dart';
+import 'package:calora/widgets/task/off_day_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
 class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
-  final List<TaskInfo> tasks;
-  final int id;
+  final LessonInfo lessonInfo;
+  final Gender gender;
   final Level level;
-  const TasksPage(this.tasks, this.id, this.level, {super.key});
+  const TasksPage(this.level, this.lessonInfo, this.gender, {super.key});
 
   @override
   Widget builder(BuildContext context, TasksManager manager, TasksState state) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: context.colors.accentDisabled,
       body: Stack(
         children: [
@@ -30,18 +34,23 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
               child: SizedBox(
                 height: 200,
                 width: 200,
-                child: Assets.images.courseImage.image(fit: BoxFit.cover),
+                child: gender == Gender.female
+                    ? Assets.images.femaleCourseImage.image(fit: BoxFit.cover)
+                    : Assets.images.courseImage.image(fit: BoxFit.cover),
               ),
             ),
           ),
           Column(
             children: [
               LessonAppBar(
-                title: id.toString() + '-' + Strings.day.toLowerCase(),
+                percent: lessonInfo.level,
+                title: lessonInfo.id.toString() + '-' + Strings.day.toLowerCase(),
                 level: level,
+                showIndicator: !lessonInfo.isDayOff,
                 showSettings: false,
                 onLevelChanged: (value) {},
               ),
+              const SizedBox(height: 50),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.all(16),
@@ -49,15 +58,33 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
                     color: context.colors.white,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                   ),
-                  child: Column(
-                    children: [Expanded(child: TasksCards(tasks: tasks))],
-                  ),
+                  child: lessonInfo.isDayOff ? OffDayWidget() : TasksCards(lessonInfo: lessonInfo),
                 ),
               ),
             ],
           ),
         ],
       ),
+      bottomNavigationBar: lessonInfo.isDayOff
+          ? null
+          : SafeArea(
+              child: GestureDetector(
+                onTap: () {},
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: context.colors.accentSub,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  width: double.infinity,
+                  child: Strings.start
+                      .text(16, 20, 500)
+                      .c(context.colors.backgroundBase)
+                      .copyWith(textAlign: TextAlign.center),
+                ),
+              ),
+            ),
     );
     ;
   }

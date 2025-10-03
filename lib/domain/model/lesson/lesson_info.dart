@@ -18,25 +18,39 @@ class LessonInfo {
     this.isDayOff = false,
     this.isCompleted = false,
   });
-
-  factory LessonInfo.empty() => LessonInfo(
-    id: 0,
-    duration: 0,
-    calories: 0,
-    level: 0,
-    tasks: const [],
-    isLocked: true,
-    isDayOff: false,
-    isCompleted: false,
-  );
 }
 
 class TaskInfo {
   final String count;
   final String title;
   final bool isCompleted;
+  final int duration;
+  final String videoUrl;
+  final String descriptionTitle;
+  final String description;
 
-  TaskInfo({required this.count, required this.title, this.isCompleted = false});
+  TaskInfo({
+    this.descriptionTitle = 'Press mashqi (qorin muskullari uchun)',
+    this.description = '',
+    this.videoUrl =
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    this.duration = 30,
+    required this.count,
+    required this.title,
+    this.isCompleted = false,
+  });
+}
 
-  factory TaskInfo.empty() => TaskInfo(count: '0', title: '', isCompleted: false);
+sealed class LessonCardData {}
+
+class LessonData extends LessonCardData {
+  final LessonInfo lessonInfo;
+
+  LessonData(this.lessonInfo);
+}
+
+class TaskData extends LessonCardData {
+  final TaskInfo taskInfo;
+
+  TaskData(this.taskInfo);
 }

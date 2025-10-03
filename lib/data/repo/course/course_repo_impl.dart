@@ -23,7 +23,7 @@ class CourseRepoImpl implements CourseRepo {
       isCompleted: true,
       isLocked: false,
       tasks: [
-        TaskInfo(count: '00:30', title: 'Salom'),
+        TaskInfo(count: '00:30', title: 'Salom', isCompleted: true),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '00:30', title: 'Salom'),

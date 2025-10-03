@@ -36,8 +36,9 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                   ),
                   const SizedBox(height: 8),
                   CourseCards(
+                    gender: state.gender,
                     onTapHealthyWeightLoss: () {
-                      context.router.push(LessonsRoute());
+                      context.router.push(LessonsRoute(gender: state.gender));
                     },
                     onTapHealthyMassGain: () {},
                     onTapDay30WeightLossWorkout: () {},
