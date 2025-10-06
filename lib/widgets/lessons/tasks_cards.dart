@@ -1,5 +1,3 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/lessons/lesson_card.dart' show LessonCard;
@@ -23,7 +21,7 @@ class TasksCards extends StatelessWidget {
             itemCount: lessonInfo.tasks.length,
             itemBuilder: (context, index) {
               return GestureDetector(
-                onTap: () => context.router.push(TaskRoute(taskInfo: lessonInfo.tasks[index])),
+                onTap: () => _showTask(context, lessonInfo.tasks[index]),
                 child: LessonCard(data: TaskData(lessonInfo.tasks[index])),
               );
             },

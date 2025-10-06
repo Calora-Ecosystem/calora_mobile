@@ -1,7 +1,8 @@
-import 'package:auto_route/annotations.dart';
-import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart' show Strings;
+import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/button/simple_button.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
 import 'package:calora/domain/model/profile/profile.dart';
@@ -68,20 +69,20 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
       bottomNavigationBar: lessonInfo.isDayOff
           ? null
           : SafeArea(
-              child: GestureDetector(
-                onTap: () {},
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: context.colors.accentSub,
-                    borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SimpleButton(
+                  text: Strings.start,
+                  onPressed: () => context.router.push(
+                    TasksProcessRoute(
+                      duration: 10,
+                      current: 5,
+                      total: 10,
+                      taskName: 'Press mashqi (qorin muskullari uchun)',
+                    ),
                   ),
-                  width: double.infinity,
-                  child: Strings.start
-                      .text(16, 20, 500)
-                      .c(context.colors.backgroundBase)
-                      .copyWith(textAlign: TextAlign.center),
+                  color: context.colors.accentSub,
+                  textColor: context.colors.textWhite,
                 ),
               ),
             ),

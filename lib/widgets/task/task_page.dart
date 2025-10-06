@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/leave/leave_page.dart';
 import 'package:flutter/material.dart';
 
 @RoutePage()
@@ -18,7 +20,10 @@ class TaskPage extends StatelessWidget {
         leading: Row(
           children: [
             SizedBox(width: 16),
-            GestureDetector(onTap: () => context.router.pop(), child: Assets.icons.arrowLeft.svg()),
+            GestureDetector(
+              onTap: () => _showLeaveBottomSheet(context),
+              child: Assets.icons.arrowLeft.svg(),
+            ),
           ],
         ),
       ),
@@ -30,7 +35,7 @@ class TaskPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 70, vertical: 30),
+                width: double.infinity,
                 color: context.colors.backgroundElevation,
                 child: Assets.images.task.image(),
               ),
@@ -44,8 +49,20 @@ class TaskPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // _buildButton(context: context, icon: Assets.icons..svg(), onTap: () {}),
+                    _buildButton(context: context, icon: Assets.icons.pause.svg(), onTap: () {}),
+                    Column(
+                      children: [
+                        '00:${taskInfo.duration}'.text(32, 40, 700),
+                        Strings.getReady.text(16, 20, 500).c(context.colors.accentSub),
+                      ],
+                    ),
+                    _buildButton(
+                      context: context,
+                      icon: Assets.icons.arrowRight.svg(),
+                      onTap: () {},
+                    ),
                   ],
                 ),
               ),
@@ -71,6 +88,20 @@ class TaskPage extends StatelessWidget {
         ),
         child: icon,
       ),
+    );
+  }
+
+  void _showLeaveBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      isScrollControlled: true,
+      backgroundColor: context.colors.white,
+      builder: (context) {
+        return LeavePage();
+      },
     );
   }
 }
