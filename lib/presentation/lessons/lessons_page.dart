@@ -1,6 +1,8 @@
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
+import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/lessons/management/lessons_management.dart';
 import 'package:calora/presentation/lessons/management/lessons_manager.dart';
@@ -11,7 +13,8 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
-  const LessonsPage({super.key});
+  final Gender gender;
+  const LessonsPage(this.gender, {super.key});
 
   Level _mapIntToLevel(int index) {
     switch (index) {
@@ -47,13 +50,16 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
               child: SizedBox(
                 height: 200,
                 width: 200,
-                child: Assets.images.courseImage.image(fit: BoxFit.cover),
+                child: gender == Gender.female
+                    ? Assets.images.femaleCourseImage.image(fit: BoxFit.cover)
+                    : Assets.images.courseImage.image(fit: BoxFit.cover),
               ),
             ),
           ),
           Column(
             children: [
               LessonAppBar(
+                title: Strings.changeWithin30Days,
                 level: _mapIntToLevel(state.levelIndex),
                 onLevelChanged: (value) => manager.setLevel(value),
               ),
@@ -67,7 +73,11 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                   child: Column(
                     children: [
                       Assets.images.yandexBanner.image(),
-                      Expanded(child: LessonsCards(lessons: state.lessons)),
+                      LessonsCards(
+                        lessons: state.lessons,
+                        level: _mapIntToLevel(state.levelIndex),
+                        gender: gender,
+                      ),
                     ],
                   ),
                 ),

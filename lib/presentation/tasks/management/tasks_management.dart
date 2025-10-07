@@ -1,0 +1,18 @@
+import 'package:calora/domain/model/lesson/lesson_info.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'tasks_management.freezed.dart';
+
+@freezed
+abstract class TasksState with _$TasksState {
+  const factory TasksState({
+    @Default(0) int levelIndex,
+    @Default([]) List<TaskInfo> tasks,
+    @Default(0) int currentTaskIndex,
+  }) = _TasksState;
+}
+
+@freezed
+class TasksEffect with _$TasksEffect {
+  const factory TasksEffect() = _TasksEffect;
+}

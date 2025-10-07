@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/navigation_button.dart';
 import 'package:calora/widgets/questions/course_questions_body_widget.dart';
@@ -33,7 +34,11 @@ class CourseQuestionsPage
                 children: [
                   Column(
                     children: [
-                      QuestionProgressWidget(current: state.currentIndex + 1, total: total),
+                      QuestionProgressWidget(
+                        title: Strings.weHaveQuestions,
+                        current: state.currentIndex + 1,
+                        total: total,
+                      ),
                       const SizedBox(height: 16),
                       CourseQuestionsBodyWidget(),
                     ],

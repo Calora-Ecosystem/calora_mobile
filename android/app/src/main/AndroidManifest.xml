@@ -18,9 +18,13 @@
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND" />
 
+    <!-- Internet permission -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher"
+        android:label="Calora">
 
         <activity
             android:name=".MainActivity"
@@ -30,6 +34,7 @@
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
+            android:screenOrientation="fullSensor"
             android:windowSoftInputMode="adjustResize">
 
             <meta-data
@@ -59,28 +64,21 @@
     <queries>
         <!-- Query for Health Connect app -->
         <package android:name="com.google.android.apps.healthdata" />
-
         <!-- Alternative Health Connect package -->
         <package android:name="com.google.android.apps.healthdata.debug" />
-
         <!-- Query for permission rationale -->
         <intent>
             <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
         </intent>
-
         <!-- Query for Health Connect SDK permissions -->
         <intent>
             <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
         </intent>
-
         <!-- Query for Health Connect activities -->
         <intent>
             <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
             <data android:scheme="package" />
         </intent>
-
-        <!-- Query for Health Connect provider -->
-        <provider android:authorities="com.google.android.apps.healthdata" />
     </queries>
 
 </manifest>
