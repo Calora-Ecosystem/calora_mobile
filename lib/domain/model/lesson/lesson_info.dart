@@ -39,6 +39,26 @@ class TaskInfo {
     required this.title,
     this.isCompleted = false,
   });
+
+  TaskInfo copyWith({
+    String? count,
+    String? title,
+    bool? isCompleted,
+    int? duration,
+    String? videoUrl,
+    String? descriptionTitle,
+    String? description,
+  }) {
+    return TaskInfo(
+      count: count ?? this.count,
+      title: title ?? this.title,
+      isCompleted: isCompleted ?? this.isCompleted,
+      duration: duration ?? this.duration,
+      videoUrl: videoUrl ?? this.videoUrl,
+      descriptionTitle: descriptionTitle ?? this.descriptionTitle,
+      description: description ?? this.description,
+    );
+  }
 }
 
 sealed class LessonCardData {}

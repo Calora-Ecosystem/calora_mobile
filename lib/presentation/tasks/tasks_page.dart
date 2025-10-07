@@ -23,6 +23,11 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
   const TasksPage(this.level, this.lessonInfo, this.gender, {super.key});
 
   @override
+  void init(BuildContext context, TasksManager manager) {
+    super.init(context, manager);
+  }
+
+  @override
   Widget builder(BuildContext context, TasksManager manager, TasksState state) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -73,20 +78,15 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SimpleButton(
                   text: Strings.start,
-                  onPressed: () => context.router.push(
-                    TasksProcessRoute(
-                      duration: 10,
-                      current: 5,
-                      total: 10,
-                      taskName: 'Press mashqi (qorin muskullari uchun)',
-                    ),
-                  ),
+                  onPressed: () {
+                    manager.initTasks(lessonInfo.tasks);
+                    context.router.push(TasksProcessRoute(lessonInfo: lessonInfo));
+                  },
                   color: context.colors.accentSub,
                   textColor: context.colors.textWhite,
                 ),
               ),
             ),
     );
-    ;
   }
 }

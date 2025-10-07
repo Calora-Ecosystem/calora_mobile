@@ -42,13 +42,10 @@ class SimpleButton extends StatelessWidget {
               icon!,
               if (text != null) const SizedBox(width: 8),
             ],
-
-            // Text
             if (text != null)
               Flexible(
                 child: text!.text(16, 20, 500).c(textColor).copyWith(textAlign: TextAlign.center),
               ),
-
             if (icon != null && iconPosition == IconPosition.right) ...[
               if (text != null) const SizedBox(width: 8),
               icon!,
