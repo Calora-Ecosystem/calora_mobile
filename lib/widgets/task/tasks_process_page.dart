@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/progress_button.dart';
 import 'package:calora/common/widgets/button/simple_button.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
@@ -34,6 +35,13 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
 
     final currentIndex = state.currentTaskIndex;
     final totalTasks = state.tasks.length;
+
+    final totalCalories = lessonInfo.tasks.fold<double>(
+      0,
+      (sum, task) => sum + (lessonInfo.calories / lessonInfo.tasks.length),
+    );
+
+    final totalDuration = lessonInfo.tasks.fold<int>(0, (sum, task) => sum + task.duration);
 
     return Scaffold(
       backgroundColor: context.colors.white,
@@ -73,7 +81,14 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
                 onFinished: () {
                   manager.completeCurrentTask();
                   if (currentIndex == totalTasks - 1) {
-                    context.router.pop();
+                    context.router.push(
+                      FinishTaskRoute(
+                        calories: totalCalories,
+                        day: 1,
+                        duration: totalDuration,
+                        taskCount: lessonInfo.tasks.length,
+                      ),
+                    );
                   } else {
                     manager.nextTask();
                   }
@@ -84,8 +99,10 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
                 children: [
                   Expanded(
                     child: SimpleButton(
-                      text: 'Previous',
-                      icon: Assets.icons.previewIcon.svg(),
+                      text: Strings.previous,
+                      icon: currentIndex > 0
+                          ? Assets.icons.previewIcon.svg()
+                          : Assets.icons.softPrevious.svg(),
                       iconPosition: IconPosition.left,
                       onPressed: currentIndex > 0 ? () => manager.previousTask() : () {},
                       color: context.colors.backgroundElevation,
@@ -97,10 +114,10 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
                   const SizedBox(width: 20),
                   Expanded(
                     child: SimpleButton(
-                      text: 'Next',
+                      text: Strings.next,
                       icon: currentIndex < totalTasks - 1
                           ? Assets.icons.nextIcon.svg()
-                          : Assets.icons.nextIcon.svg(),
+                          : Assets.icons.softNext.svg(),
                       iconPosition: IconPosition.right,
                       onPressed: currentIndex < totalTasks - 1 ? () => manager.nextTask() : () {},
                       color: context.colors.backgroundElevation,
