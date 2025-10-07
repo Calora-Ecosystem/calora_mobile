@@ -8,6 +8,7 @@ class CourseCard extends StatelessWidget {
   final String description;
   final AssetGenImage image;
   final VoidCallback onTap;
+
   const CourseCard({
     super.key,
     required this.onTap,

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/navigation_button.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
@@ -45,7 +46,11 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        QuestionProgressWidget(current: state.currentIndex + 1, total: 8),
+                        QuestionProgressWidget(
+                          title: Strings.weHaveQuestions,
+                          current: state.currentIndex + 1,
+                          total: 8,
+                        ),
                         const SizedBox(height: 16),
                         QuestionsBodyWidget(),
                         SizedBox(height: MediaQuery.of(context).viewInsets.bottom),

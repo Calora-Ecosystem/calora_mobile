@@ -7,10 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class LessonCard extends StatelessWidget {
-  final LessonInfo? lessonInfo;
-  final TaskInfo? taskInfo;
+  final LessonCardData data;
 
-  const LessonCard({super.key, this.lessonInfo, this.taskInfo});
+  const LessonCard({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -21,43 +20,30 @@ class LessonCard extends StatelessWidget {
         color: context.colors.backgroundElevation,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          if (taskInfo != null) ...[
-            Assets.images.task.image(width: 32, height: 32),
-            const SizedBox(width: 12),
-          ],
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (lessonInfo != null) ...[
-                // Lesson title
-                ("${lessonInfo!.id}-${Strings.day.toLowerCase()}")
+      child: switch (data) {
+        LessonData(:final lessonInfo) => Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ("${lessonInfo.id}-${Strings.day.toLowerCase()}")
                     .text(16, 20, 500)
                     .c(context.colors.textStrong),
                 const SizedBox(height: 8),
-                if (lessonInfo!.isDayOff)
+                if (lessonInfo.isDayOff)
                   Strings.youCanRelaxTuday.text(14, 18, 500).c(context.colors.textSub)
                 else
-                  ("${lessonInfo!.duration} minut • ${lessonInfo!.calories} kkal")
+                  ("${lessonInfo.duration} minut • ${lessonInfo.calories} kkal")
                       .text(14, 18, 500)
                       .c(context.colors.textSub),
-              ] else if (taskInfo != null) ...[
-                // Task title
-                taskInfo!.title.text(16, 20, 500).c(context.colors.textStrong),
-                const SizedBox(height: 8),
-                // Task count
-                ("${taskInfo!.count} ta").text(14, 18, 500).c(context.colors.textSub),
               ],
-            ],
-          ),
-          const Spacer(),
-          if (lessonInfo != null) ...[
-            if (lessonInfo!.isLocked)
+            ),
+            const Spacer(),
+            if (lessonInfo.isLocked)
               Assets.icons.lock.svg()
-            else if (lessonInfo!.isDayOff)
+            else if (lessonInfo.isDayOff)
               Assets.icons.dayOffIcon.svg()
-            else if (lessonInfo!.isCompleted)
+            else if (lessonInfo.isCompleted)
               Row(
                 children: [
                   Strings.done.text(14, 18, 500).c(context.colors.accentSub),
@@ -71,19 +57,41 @@ class LessonCard extends StatelessWidget {
                   CircularPercentIndicator(
                     radius: 10,
                     lineWidth: 2,
-                    percent: lessonInfo!.level,
+                    percent: lessonInfo.level,
                     backgroundColor: context.colors.accentWhite,
                     progressColor: context.colors.accentSub,
                   ),
                   const SizedBox(width: 8),
-                  ("${(lessonInfo!.level * 100).toInt()}%")
+                  ("${(lessonInfo.level * 100).toInt()}%")
                       .text(14, 18, 500)
                       .c(context.colors.textSub),
                 ],
               ),
           ],
-        ],
-      ),
+        ),
+        TaskData(:final taskInfo) => Row(
+          children: [
+            Container(
+              color: context.colors.white,
+              height: 56,
+              width: 56,
+              child: Assets.images.task.image(width: 32, height: 32),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  taskInfo.title.text(16, 20, 500).c(context.colors.textStrong),
+                  const SizedBox(height: 8),
+                  ("${taskInfo.count}").text(14, 18, 500).c(context.colors.textSub),
+                ],
+              ),
+            ),
+            if (taskInfo.isCompleted) Assets.icons.twoDone.svg() else Assets.icons.time.svg(),
+          ],
+        ),
+      },
     );
   }
 }

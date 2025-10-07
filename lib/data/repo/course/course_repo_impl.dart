@@ -23,9 +23,9 @@ class CourseRepoImpl implements CourseRepo {
       isCompleted: true,
       isLocked: false,
       tasks: [
+        TaskInfo(count: '00:30', title: 'Salom', isCompleted: true),
         TaskInfo(count: '00:30', title: 'Salom'),
-        TaskInfo(count: '00:30', title: 'Salom'),
-        TaskInfo(count: '00:30', title: 'Salom'),
+        TaskInfo(count: '00:30', title: 'Ishlar qaleee'),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '8', title: 'Salom'),
         TaskInfo(count: '8', title: 'Salom'),
@@ -39,7 +39,7 @@ class CourseRepoImpl implements CourseRepo {
       isLocked: false,
       tasks: [
         TaskInfo(count: '00:30', title: 'Salom'),
-        TaskInfo(count: '00:30', title: 'Salom'),
+        TaskInfo(count: '00:30', title: 'Ishlar qaleee'),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '8', title: 'Salom'),
@@ -62,7 +62,7 @@ class CourseRepoImpl implements CourseRepo {
       level: 0.5,
       isLocked: false,
       tasks: [
-        TaskInfo(count: '00:30', title: 'Salom'),
+        TaskInfo(count: '00:30', title: 'Ishlar qaleee'),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '00:30', title: 'Salom'),
@@ -77,7 +77,7 @@ class CourseRepoImpl implements CourseRepo {
       level: 0.5,
       isLocked: true,
       tasks: [
-        TaskInfo(count: '8', title: 'Salom'),
+        TaskInfo(count: '8', title: 'Ishlar qaleee', isCompleted: true),
         TaskInfo(count: '00:30', title: 'Salom'),
         TaskInfo(count: '8', title: 'Salom'),
         TaskInfo(count: '8', title: 'Salom'),
@@ -92,7 +92,7 @@ class CourseRepoImpl implements CourseRepo {
       tasks: [
         TaskInfo(count: '8', title: 'Salom'),
         TaskInfo(count: '00:30', title: 'Salom'),
-        TaskInfo(count: '8', title: 'Salom'),
+        TaskInfo(count: '8', title: 'Ishlar qaleee'),
         TaskInfo(count: '8', title: 'Salom'),
       ],
     ),
