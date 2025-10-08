@@ -32,9 +32,9 @@ class MainProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffec
         children: [
           Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: SingleChildScrollView(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Column(
                   children: [
                     ProfileCard(

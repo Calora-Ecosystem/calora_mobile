@@ -37,11 +37,11 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                   const SizedBox(height: 8),
                   CourseCards(
                     gender: state.gender,
-                    onTapHealthyWeightLoss: () {
-                      context.router.push(LessonsRoute(gender: state.gender));
-                    },
+                    onTapHealthyWeightLoss: () {},
                     onTapHealthyMassGain: () {},
-                    onTapDay30WeightLossWorkout: () {},
+                    onTapDay30WeightLossWorkout: () {
+                      _openChallenge(context, state);
+                    },
                   ),
                 ],
               ),
@@ -50,5 +50,9 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
         ],
       ),
     );
+  }
+
+  void _openChallenge(BuildContext context, CourseState state) {
+    context.router.push(LessonsRoute(gender: state.gender));
   }
 }
