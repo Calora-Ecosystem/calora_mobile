@@ -21,9 +21,9 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
   int selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             ToggleButtonsWidget(

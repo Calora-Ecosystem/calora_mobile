@@ -59,7 +59,7 @@ class Button extends StatelessWidget {
         onPressed: onPressed,
         child: loading
             ? CupertinoActivityIndicator(color: context.colors.textWhite)
-            : text?.text(16, 20, 500).c(context.colors.textStrong) ?? child,
+            : text?.text(16, 20, 500).c(textColor ?? context.colors.textWhite) ?? child,
       ),
     );
   }
