@@ -6,7 +6,6 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:management/management.dart';
 
 import 'management/auth_management.dart';
@@ -22,6 +21,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
   @override
   void listener(context, manager, effect) {
     effect.when(
+      registerNeeded: (email) {
+        context.router.push(QuestionsRoute(email: email));
+      },
       verify: (verification) {
         context.router.push(VerifyRoute(verification: verification));
       },
@@ -33,9 +35,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -56,26 +56,17 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       onPressed: manager.login,
                       // _openVerifyPage(context, "");
                       text: Strings.doContinue,
+                      textColor: context.colors.textWhite,
                     ),
                   ),
                   const SizedBox(height: 32),
                   Row(
                     children: [
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: context.colors.accentSub,
-                        ),
-                      ),
+                      Expanded(child: Container(height: 1, color: context.colors.accentSub)),
                       const SizedBox(width: 8),
                       Strings.or.text(14, 18, 500).c(context.colors.textStrong),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: context.colors.accentSub,
-                        ),
-                      ),
+                      Expanded(child: Container(height: 1, color: context.colors.accentSub)),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -87,9 +78,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       children: [
                         Assets.icons.apple.svg(),
                         const SizedBox(width: 8),
-                        Strings.continueWithApple
-                            .text(14, 18, 500)
-                            .c(context.colors.textStrong),
+                        Strings.continueWithApple.text(14, 18, 500).c(context.colors.textStrong),
                       ],
                     ),
                   ),
@@ -102,34 +91,38 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       children: [
                         Assets.icons.google.svg(),
                         const SizedBox(width: 8),
-                        Strings.continueWithGoogle
-                            .text(14, 18, 500)
-                            .c(context.colors.textStrong),
+                        Strings.continueWithGoogle.text(14, 18, 500).c(context.colors.textStrong),
                       ],
                     ),
                   ),
                   const SizedBox(height: 32),
                   Row(
                     children: [
-                      Checkbox(
-                        value: state.checked,
-                        onChanged: manager.setChecked,
-                      ),
+                      Checkbox(value: state.checked, onChanged: manager.setChecked),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: HtmlWidget(
-                          Strings.termsOfUse(link: 'https://www.google.com'),
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            height: 18 / 14,
-                            fontWeight: FontWeight.w500,
-                            color: context.colors.neutral600Secondary,
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 14,
+                              height: 18 / 14,
+                              fontWeight: FontWeight.w500,
+                              color: context.colors.neutral600Secondary,
+                            ),
+                            children: [
+                              TextSpan(text: Strings.iReadAndAgree),
+                              TextSpan(
+                                text: ' ${Strings.termsOfUseLink} ',
+                                style: TextStyle(color: context.colors.informationBase),
+                                recognizer: manager.termsRecognizer,
+                              ),
+                              TextSpan(text: Strings.readAndAgreeEnd),
+                            ],
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const Spacer(),
                 ],
               ),
             ),

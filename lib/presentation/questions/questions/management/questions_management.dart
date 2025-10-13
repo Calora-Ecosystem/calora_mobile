@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/verification/verification.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../domain/model/questions/questions.dart';
@@ -9,12 +10,15 @@ abstract class QuestionsState with _$QuestionsState {
   const factory QuestionsState({
     @Default(Questions()) Questions? answers,
     @Default(0) int currentIndex,
+    @Default(false) bool isLoading,
   }) = _QuestionsState;
 }
 
 @freezed
 sealed class QuestionsEffect with _$QuestionsEffect {
   const factory QuestionsEffect.withType() = _QuestionsEffect;
+  const factory QuestionsEffect.navigateToVerify(Verification verification) =
+      _NavigateToVerifyEffect;
 }
 
 enum QuestionsEffectType { success, error, empty }

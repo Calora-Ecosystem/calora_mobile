@@ -101,6 +101,7 @@ class LessonAppBar extends StatelessWidget {
   void _openSettings(BuildContext context) async {
     final result = await showModalBottomSheet<int>(
       backgroundColor: context.colors.backgroundBase,
+      isScrollControlled: true,
       context: context,
       builder: (context) {
         return TrainLevelPage(

@@ -75,10 +75,10 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                     children: [
                       InkWell(
                         onTap: () {
-                          setState(() {
-                            offset--;
-                            widget.onClickBackward();
-                          });
+                          final tabController = DefaultTabController.of(context);
+                          final index = tabController.index;
+                          final selected = widget.selectedDate ?? DateTime.now();
+                          changeOffset(index, selected, false);
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(left: 16),
@@ -93,10 +93,10 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                       ),
                       InkWell(
                         onTap: () {
-                          setState(() {
-                            offset++;
-                            widget.onClickForward();
-                          });
+                          final tabController = DefaultTabController.of(context);
+                          final index = tabController.index;
+                          final selected = widget.selectedDate ?? DateTime.now();
+                          changeOffset(index, selected, true);
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(right: 16),
@@ -202,5 +202,29 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
         );
       },
     );
+  }
+
+  void changeOffset(int index, DateTime selected, bool isForward) {
+    final now = DateTime.now();
+    DateTime nextDate;
+    if (index == 0) {
+      // daily
+      nextDate = selected.add(Duration(days: isForward ? offset + 1 : offset - 1));
+    } else if (index == 1) {
+      // weekly
+      nextDate = selected.add(Duration(days: (isForward ? offset + 1 : offset - 1) * 7));
+    } else {
+      // monthly
+      nextDate = DateTime(selected.year, selected.month + (isForward ? offset + 1 : offset - 1));
+    }
+    if (isForward && nextDate.isAfter(now)) return;
+    setState(() {
+      offset += isForward ? 1 : -1;
+      if (isForward) {
+        widget.onClickForward();
+      } else {
+        widget.onClickBackward();
+      }
+    });
   }
 }

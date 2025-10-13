@@ -8,18 +8,16 @@ class ProfileApi {
 
   ProfileApi(this._dio);
 
-  Future<Response> getProfile() {
+  Future<Response> getProfileMe() async {
     return _dio.get('/users/me');
-    // return ProfileRequest(
-    //   height: 180,
-    //   gender: 'Male',
-    //   name: 'Nodir',
-    //   email: 'hasanovnodir2005@gmail.com',
-    //   bmi: 38.5,
-    //   targetWeight: 70,
-    //   weight: 88,
-    //   userId: 'a424fjie4934dvjk',
-    // );
+  }
+
+  Future<Response> getProfileExtras() async {
+    return _dio.get('/users/extras');
+  }
+
+  Future<Response> updateProfile(Map<String, dynamic> data) async {
+    return _dio.put('/users/extras', data: data);
   }
 
   Future<DailyNormsInfo> getDailyNorms() async {
@@ -39,5 +37,23 @@ class ProfileApi {
 
   Future<void> logout() async {
     print('Log out');
+  }
+
+  Future<Response> getReminders() {
+    return _dio.get('/reminder');
+  }
+
+  Future<Response> postReminders({
+    required String time,
+    required String type,
+    required String menu,
+  }) async {
+    final data = {"time": time, "type": type, "menu": menu};
+
+    return _dio.post('/reminder', data: data);
+  }
+
+  Future<void> deleteReminder(int id) async {
+    _dio.delete('/reminder/$id');
   }
 }

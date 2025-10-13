@@ -40,4 +40,5 @@ class DefaultThemeColors {
   final warningBase = Color(0xFFF76B15);
   final black = Color(0xFF000000);
   final neutral200Stroke = Color(0xFFE2E8F0);
+  final tertiaryContainer = Color(0xFFF4F4F4);
 }

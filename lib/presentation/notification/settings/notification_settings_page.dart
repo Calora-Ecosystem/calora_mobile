@@ -104,13 +104,60 @@ class NotificationSettingsPage
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) {
-        return NotificationSettingSheet(type: type, onSave: (times) {});
+        return NotificationSettingSheet(
+          type: type,
+          onSave: (times) {
+            final manager = context.read<NotificationSettingsManager>();
+
+            if (type == NotificationSettingType.mealReminder) {
+              final rawResult = times as Map<dynamic, dynamic>?;
+
+              if (rawResult == null) return;
+
+              rawResult.forEach((menu, value) {
+                final List<String> timeList = [];
+
+                if (value is String) {
+                  timeList.add(value);
+                } else if (value is List) {
+                  for (var item in value) {
+                    timeList.add(item.toString());
+                  }
+                }
+
+                for (final time in timeList) {
+                  final formattedTime = _mapMealTimeToServerFormat(time);
+
+                  manager.postNotificationSettings(
+                    menu: menu.toString(),
+                    time: formattedTime,
+                    type: "Food",
+                  );
+                }
+              });
+            }
+          },
+        );
       },
     );
   }
 
-  void _dismiss(BuildContext context) {
-    Navigator.pop(context);
+  String capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
+  }
+
+  String _mapMealTimeToServerFormat(String option) {
+    switch (option) {
+      case "Before 10 minutes":
+        return "08:00";
+      case "Before 20 minutes":
+        return "08:10";
+      case "Before 30 minutes":
+        return "08:30";
+      default:
+        return option;
+    }
   }
 
   void _back(BuildContext context) {
