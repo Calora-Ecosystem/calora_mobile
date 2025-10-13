@@ -25,7 +25,6 @@ class _TrainLevelPageState extends State<TrainLevelPage> {
       Strings.increaseActivity,
       Strings.highLevelActivity,
     ];
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: IntrinsicHeight(

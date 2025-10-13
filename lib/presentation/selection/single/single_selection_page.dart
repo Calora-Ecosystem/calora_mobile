@@ -41,7 +41,6 @@ class SingleSelectionPage
             title.text(20, 24, 700).c(context.colors.textStrong),
             const SizedBox(height: 12),
           ],
-          // Solution 2: Use SizedBox with fixed height for DatePicker
           ListView.builder(
             shrinkWrap: true,
             itemCount: state.selections.length,
@@ -55,7 +54,6 @@ class SingleSelectionPage
               );
             },
           ),
-
           const SizedBox(height: 16),
           GestureDetector(
             onTap: () {},

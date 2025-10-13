@@ -4,17 +4,13 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class VerifyCodeWidget extends StatefulWidget {
   final Function(String) resultCode;
   final Function() resend;
 
-  VerifyCodeWidget({
-    required this.resend,
-    required this.resultCode,
-  });
+  VerifyCodeWidget({required this.resend, required this.resultCode});
 
   @override
   State<VerifyCodeWidget> createState() => _VerifyCodeWidgetState();
@@ -27,7 +23,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
   @override
   void initState() {
     super.initState();
-      _startTimer();
+    _startTimer();
   }
 
   @override
@@ -38,6 +34,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
       children: [
         Container(
           width: double.infinity,
+          padding: EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: context.colors.backgroundBase,
             borderRadius: BorderRadius.circular(12),
@@ -50,6 +47,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             // Even spacing
             pinTheme: PinTheme(
+              borderRadius: BorderRadius.circular(12),
               fieldHeight: 36,
               fieldWidth: 18,
               fieldOuterPadding: EdgeInsets.symmetric(vertical: 10),
@@ -75,9 +73,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
                 },
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Strings.resend
-                      .text(14, 20, 500)
-                      .c(context.colors.accentSub),
+                  child: Strings.resend.text(14, 20, 500).c(context.colors.accentSub),
                 ),
               )
             : Row(
@@ -89,7 +85,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
                       .c(context.colors.textStrong),
                 ],
               ),
-        SizedBox(height: 32), // Added spacing
+        SizedBox(height: 32),
       ],
     );
   }

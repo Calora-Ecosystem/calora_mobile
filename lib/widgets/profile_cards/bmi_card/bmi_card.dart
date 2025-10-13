@@ -30,7 +30,7 @@ class BmiCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                bmi.toString().text(20, 24, 600).c(context.colors.textStrong),
+                formatBmi(bmi).text(20, 24, 600).c(context.colors.textStrong),
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.all(4),
@@ -103,5 +103,14 @@ class BmiCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String formatBmi(double? bmi) {
+    if (bmi == null) return '-';
+    if (bmi % 1 == 0) {
+      return bmi.toInt().toString();
+    } else {
+      return bmi.toStringAsFixed(1);
+    }
   }
 }

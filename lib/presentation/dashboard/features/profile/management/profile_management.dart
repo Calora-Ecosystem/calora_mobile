@@ -5,25 +5,8 @@ part 'profile_management.freezed.dart';
 
 @freezed
 abstract class ProfileState with _$ProfileState {
-  const factory ProfileState({
-    @Default(
-      ProfileRequest(
-        name: '',
-        email: '',
-        height: 0,
-        bmi: 0,
-        targetWeight: 0,
-        weight: 0,
-        userId: '',
-        gender: '',
-        birthDay: '',
-        goal: '',
-        activityLevel: '',
-        metrics: '',
-      ),
-    )
-    ProfileRequest profile,
-  }) = _ProfileState;
+  const factory ProfileState({ProfileRequest? profile, @Default(false) bool isLoading}) =
+      _ProfileState;
 }
 
 @freezed

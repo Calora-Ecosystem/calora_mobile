@@ -8,8 +8,8 @@ class AuthApi {
   AuthApi(this._dio);
 
   Future<Response> register(String email, String name) {
-    final data = {'email': email, 'questions': name};
-    return _dio.post('auth/register', data: data);
+    final data = {'email': email, 'name': name};
+    return _dio.post('auth/registration', data: data);
   }
 
   Future<Response> login(String email) {

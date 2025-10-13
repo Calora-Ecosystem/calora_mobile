@@ -10,7 +10,10 @@ class ProfileManager extends Manager<ProfileState, ProfileEffect> {
   final ProfileRepo _repo;
 
   Future<void> getProfile() async {
-    final profile = await _repo.getProfile();
-    emit(state.copyWith(profile: profile));
+    await _repo.getProfile().handle(
+      onStart: () => emit(state.copyWith(isLoading: true)),
+      onData: (profile) => emit(state.copyWith(profile: profile, isLoading: false)),
+      onError: (error) => emit(state.copyWith(isLoading: false)),
+    );
   }
 }

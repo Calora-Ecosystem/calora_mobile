@@ -16,8 +16,9 @@ import 'management/verify_manager.dart';
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   final Verification verification;
+  final Future<void> Function()? onVerified;
 
-  VerifyPage({super.key, required this.verification});
+  VerifyPage({super.key, required this.verification, this.onVerified});
 
   @override
   void init(context, manager) {
@@ -26,8 +27,11 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
 
   @override
   void listener(context, manager, effect) {
-    effect.when(() {
-      _openInputNamePage(context);
+    effect.when(() async {
+      if (onVerified != null) {
+        await onVerified!();
+      }
+      _openDashboard(context);
     });
   }
 
@@ -72,7 +76,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     );
   }
 
-  void _openInputNamePage(BuildContext context) {
-    context.router.replace(QuestionsRoute());
+  void _openDashboard(BuildContext context) {
+    context.router.replaceAll([DashboardRoute()]);
   }
 }

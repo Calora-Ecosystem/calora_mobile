@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:injectable/injectable.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route')
 class AppRouter extends RootStackRouter {
@@ -22,7 +23,7 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: CaloriesRoute.page),
         AutoRoute(page: CourseRoute.page),
         AutoRoute(page: StepsRoute.page),
-        AutoRoute(page: MainProfileRoute.page),
+        AutoRoute(page: ProfileRoute.page),
       ],
     ),
     AutoRoute(page: ProfileDetailRoute.page),

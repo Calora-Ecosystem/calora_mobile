@@ -28,6 +28,7 @@ class ProfileCard extends StatelessWidget {
         : "";
 
     return Container(
+      height: 80,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colors.white,
@@ -50,7 +51,10 @@ class ProfileCard extends StatelessWidget {
               children: [
                 name.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 8),
-                email.text(14, 16, 400).c(context.colors.textSub),
+                email
+                    .text(14, 16, 400)
+                    .c(context.colors.textSub)
+                    .copyWith(overflow: TextOverflow.ellipsis),
               ],
             ),
           ),

@@ -19,7 +19,7 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   @override
   Widget builder(context, manager, state) {
     return AutoTabsRouter(
-      routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), MainProfileRoute()],
+      routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
