@@ -35,16 +35,10 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
         onError: (error) {
           if (error is DioException) {
             final statusCode = error.response?.statusCode;
-            final responseData = error.response?.data;
-            final errorMessage = responseData?['error'] ?? error.message;
-
-            print('❌ Dio error: $statusCode | $errorMessage');
-
             if (statusCode == 404) {
               publish(AuthEffect.registerNeeded(controller.text));
               return;
             }
-            ;
           }
           emit(state.copyWith(loading: false));
         },
