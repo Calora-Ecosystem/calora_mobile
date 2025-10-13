@@ -14,7 +14,25 @@ import 'management/questions_manager.dart';
 
 @RoutePage()
 class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
-  QuestionsPage({super.key});
+  final String email;
+  QuestionsPage(this.email, {super.key});
+
+  @override
+  void listener(BuildContext context, QuestionsManager manager, QuestionsEffect effect) {
+    effect.mapOrNull(
+      navigateToVerify: (e) {
+        context.router.push(
+          VerifyRoute(
+            verification: e.verification,
+            onVerified: () async {
+              await manager.finish();
+            },
+          ),
+        );
+      },
+    );
+    super.listener(context, manager, effect);
+  }
 
   @override
   Widget builder(BuildContext context, QuestionsManager manager, QuestionsState state) {
@@ -66,15 +84,13 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                     top: 10,
                   ),
                   child: NavigationButtons(
+                    isLoading: state.isLoading,
                     currentIndex: state.currentIndex,
                     total: 8,
                     isAnswerProvided: currentAnswer != null,
                     onNext: manager.next,
                     onBack: manager.back,
-                    onFinish: () {
-                      manager.finish();
-                      context.router.replace(DashboardRoute());
-                    },
+                    onFinish: () => manager.register(email),
                   ),
                 ),
               ],

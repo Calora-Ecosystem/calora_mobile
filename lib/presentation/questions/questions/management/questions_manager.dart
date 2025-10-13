@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:calora/domain/model/questions/questions.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
+import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -11,8 +12,9 @@ import 'questions_management.dart';
 @injectable
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
   final QuestionsRepo _repo;
+  final AuthRepo _authRepo;
 
-  QuestionsManager(this._repo) : super(const QuestionsState());
+  QuestionsManager(this._repo, this._authRepo) : super(const QuestionsState());
 
   void setAnswer(Questions model) {
     final updated =
@@ -40,9 +42,11 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
     }
   }
 
-  Future<void> finish() {
+  Future<bool> finish() async {
     final profile = state.answers;
-    if (profile == null) return Future.value();
+    if (profile == null) return false;
+
+    emit(state.copyWith(isLoading: true));
 
     final bmi = (profile.height != null && profile.weight != null)
         ? profile.weight! / pow(profile.height! / 100, 2)
@@ -61,19 +65,43 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
       language: 'Uzbek',
     );
 
-    return _repo
+    bool success = false;
+
+    await _repo
         .sendAnswers(request)
         .handle(
-          onStart: () {
-            emit(state);
-          },
+          onStart: () {},
           onData: (_) {
-            emit(state);
+            success = true;
           },
           onError: (error) {
-            emit(state);
+            success = false;
           },
           onDone: () {},
         );
+    emit(state.copyWith(isLoading: false));
+    return success;
+  }
+
+  Future<bool> register(String email) async {
+    final profile = state.answers;
+    if (profile == null) return false;
+    emit(state.copyWith(isLoading: true));
+    bool success = false;
+    await _authRepo
+        .register(email, profile.name!)
+        .handle(
+          onStart: () {},
+          onData: (verification) {
+            success = true;
+            publish(QuestionsEffect.navigateToVerify(verification));
+          },
+          onError: (error) {
+            success = false;
+          },
+          onDone: () {},
+        );
+    emit(state.copyWith(isLoading: false));
+    return success;
   }
 }

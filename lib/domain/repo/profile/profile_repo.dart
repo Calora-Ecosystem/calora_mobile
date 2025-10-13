@@ -6,6 +6,7 @@ abstract class ProfileRepo {
   Future<void> logout();
 
   Future<ProfileRequest> getProfile();
+  Future<void> updateProfile(ProfileRequest request);
 
   Future<List<DetailInfo>> getDailyNorms();
 

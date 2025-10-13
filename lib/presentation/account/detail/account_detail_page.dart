@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
@@ -22,8 +19,7 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class AccountDetailPage
-    extends
-        Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
+    extends Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
   final Profile profile;
 
   AccountDetailPage({super.key, required this.profile});
@@ -32,6 +28,9 @@ class AccountDetailPage
   void init(context, manager) {
     manager.getProfileDetail();
   }
+
+  @override
+  void listener(context, manager, effect) {}
 
   @override
   Widget builder(context, manager, state) {
@@ -43,15 +42,20 @@ class AccountDetailPage
           _back(context);
         },
       ),
-      body: _uiBuilder(state, context, manager),
+      body: Stack(
+        children: [
+          _uiBuilder(state, context, manager),
+          if (state.saving)
+            Container(
+              color: Colors.black26,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+        ],
+      ),
     );
   }
 
-  Widget _uiBuilder(
-    AccountDetailState state,
-    BuildContext context,
-    AccountDetailManager manager,
-  ) {
+  Widget _uiBuilder(AccountDetailState state, BuildContext context, AccountDetailManager manager) {
     if (state.loading) {
       return Loadable(
         builder: (context) {
@@ -65,10 +69,10 @@ class AccountDetailPage
           child: Divider(height: 1, color: context.colors.strokeSoft),
         ),
         physics: const BouncingScrollPhysics(),
-        itemCount: state.detailInfos?.length ?? 1,
+        itemCount: state.detailInfos?.length ?? 0,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          final detailsInfo = state.detailInfos?[index] ?? DetailInfo();
+          final detailsInfo = state.detailInfos![index];
           return DetailInfoItemBuilder(
             detailInfo: detailsInfo,
             onClickItem: (data) {
@@ -80,11 +84,7 @@ class AccountDetailPage
     }
   }
 
-  void _openInputManagePage(
-    DetailInfo info,
-    BuildContext context,
-    AccountDetailManager manager,
-  ) {
+  void _openInputManagePage(DetailInfo info, BuildContext context, AccountDetailManager manager) {
     switch (info.type) {
       case DetailInfoType.activityLevel:
         _openSingleSelectionActivityLevel(info, context, manager);
@@ -120,7 +120,10 @@ class AccountDetailPage
         return SingleSelectionPage(
           title: Strings.chooseActivityLevel,
           selection: Selection(type: SelectionType.activityLevel),
-          onSave: (data) {},
+          onSave: (data) {
+            manager.updateProfileDetail(info, data.name);
+            _dismiss(context);
+          },
         );
       },
     );
@@ -139,7 +142,10 @@ class AccountDetailPage
         return SingleSelectionPage(
           title: Strings.chooseGoal,
           selection: Selection(type: SelectionType.goal),
-          onSave: (data) {},
+          onSave: (data) {
+            manager.updateProfileDetail(info, data.name);
+            _dismiss(context);
+          },
         );
       },
     );
@@ -158,7 +164,10 @@ class AccountDetailPage
         return SingleSelectionPage(
           title: Strings.chooseMetrics,
           selection: Selection(type: SelectionType.metrics),
-          onSave: (data) {},
+          onSave: (data) {
+            manager.updateProfileDetail(info, data.name);
+            _dismiss(context);
+          },
         );
       },
     );
@@ -177,17 +186,16 @@ class AccountDetailPage
         return SingleSelectionPage(
           title: Strings.chooseGender,
           selection: Selection(type: SelectionType.gender),
-          onSave: (data) {},
+          onSave: (data) {
+            manager.updateProfileDetail(info, data.name);
+            _dismiss(context);
+          },
         );
       },
     );
   }
 
-  void _openInputPage(
-    DetailInfo info,
-    BuildContext context,
-    AccountDetailManager manager,
-  ) {
+  void _openInputPage(DetailInfo info, BuildContext context, AccountDetailManager manager) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -207,11 +215,7 @@ class AccountDetailPage
     );
   }
 
-  void _openSelectCalendar(
-    DetailInfo info,
-    BuildContext context,
-    AccountDetailManager manager,
-  ) {
+  void _openSelectCalendar(DetailInfo info, BuildContext context, AccountDetailManager manager) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -230,10 +234,10 @@ class AccountDetailPage
   }
 
   void _dismiss(BuildContext context) {
-    Navigator.pop(context);
+    context.router.pop(context);
   }
 
   void _back(BuildContext context) {
-    return context.router.pop();
+    return Navigator.of(context).pop();
   }
 }

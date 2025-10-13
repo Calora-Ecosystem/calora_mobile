@@ -7,6 +7,7 @@ part 'account_detail_management.freezed.dart';
 abstract class AccountDetailState with _$AccountDetailState {
   const factory AccountDetailState({
     @Default(false) bool loading,
+    @Default(false) bool saving,
     List<DetailInfo>? detailInfos,
   }) = _AccountDetailState;
 }

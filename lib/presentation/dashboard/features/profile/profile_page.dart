@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/shimmer/shimmer.dart';
+import 'package:calora/common/widgets/shimmer/shimmer_child.dart';
 import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/about/about_page.dart' show AboutPage;
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -17,8 +19,8 @@ import 'package:share_plus/share_plus.dart';
 import 'management/profile_management.dart';
 
 @RoutePage()
-class MainProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
-  const MainProfilePage({super.key});
+class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
+  const ProfilePage({super.key});
 
   @override
   void init(context, manager) {
@@ -28,66 +30,86 @@ class MainProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffec
   @override
   Widget builder(context, manager, state) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                child: Column(
-                  children: [
-                    ProfileCard(
-                      surname: state.profile.name,
-                      name: state.profile.name,
-                      email: state.profile.email,
-                      onEdit: () {
-                        _openProfileDetailPage(context, state.profile.userId);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    BmiCard(
-                      bmi: state.profile.bmi,
-                      weight: state.profile.weight,
-                      targetWeight: state.profile.targetWeight,
-                    ),
-                    SizedBox(height: 16),
-                    SettingsCard(
-                      onAccountTap: () {
-                        _openAccountDetailPage(context);
-                      },
-                      onNormsTap: () {
-                        context.pushRoute(NormsRoute());
-                      },
-                      onLanguageTap: () {
-                        _showLanguageBottomSheet(context);
-                      },
-                      onNotificationsTap: () {
-                        _openNotificationSettingsPage(context);
-                      },
-                      onInviteTap: () {
-                        SharePlus.instance.share(
-                          ShareParams(
-                            text:
-                                'Men Calora ilovasidan foydalanayapman 😊.\nSiz ham sog‘lom hayot uchun yuklab oling!',
-                          ),
-                        );
-                      },
-                      onAboutTap: () {
-                        _showAboutBottomSheet(context);
-                      },
-                      onHelpTap: () {
-                        _showHelpBottomSheet(context);
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    Image.asset('assets/images/yandex-banner.png'),
-                  ],
+      body: Shimmer(
+        child: Stack(
+          children: [
+            Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+            SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  child: Column(
+                    children: [
+                      ShimmerLoading(
+                        loading: state.isLoading,
+                        shimmerChild: ShimmerChild(
+                          color: context.colors.white,
+                          radius: 20,
+                          width: double.infinity,
+                          height: 80,
+                        ),
+                        child: ProfileCard(
+                          surname: state.profile?.name ?? '',
+                          name: state.profile?.name ?? '',
+                          email: state.profile?.email ?? '',
+                          onEdit: () {
+                            _openProfileDetailPage(context, state.profile?.userId ?? '');
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ShimmerLoading(
+                        loading: state.isLoading,
+                        shimmerChild: ShimmerChild(
+                          color: context.colors.white,
+                          radius: 20,
+                          width: double.infinity,
+                          height: 250,
+                        ),
+                        child: BmiCard(
+                          bmi: state.profile?.bmi ?? 0,
+                          weight: state.profile?.weight ?? 0,
+                          targetWeight: state.profile?.targetWeight ?? 0,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      SettingsCard(
+                        onAccountTap: () {
+                          _openAccountDetailPage(context);
+                        },
+                        onNormsTap: () {
+                          context.pushRoute(NormsRoute());
+                        },
+                        onLanguageTap: () {
+                          _showLanguageBottomSheet(context);
+                        },
+                        onNotificationsTap: () {
+                          _openNotificationSettingsPage(context);
+                        },
+                        onInviteTap: () {
+                          SharePlus.instance.share(
+                            ShareParams(
+                              text:
+                                  'Men Calora ilovasidan foydalanayapman 😊.\nSiz ham sog‘lom hayot uchun yuklab oling!',
+                            ),
+                          );
+                        },
+                        onAboutTap: () {
+                          _showAboutBottomSheet(context);
+                        },
+                        onHelpTap: () {
+                          _showHelpBottomSheet(context);
+                        },
+                      ),
+                      SizedBox(height: 16),
+                      Assets.images.yandexBanner.image(),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

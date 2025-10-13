@@ -32,7 +32,6 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
     return IndexedStack(
       index: manager.state.currentIndex,
       children: [
-        // 0 - Name
         QuestionWidget(
           questionText: Strings.whatIsYourName,
           child: CustomTextField(

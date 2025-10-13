@@ -1,6 +1,8 @@
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/data/api/profile_api.dart';
+import 'package:calora/domain/mapper/detail/account_detail_mapper.dart';
 import 'package:calora/domain/mapper/detail/detail_mapper.dart';
+import 'package:calora/domain/mapper/detail/profile_request_mapper.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/domain/model/detail/detail_info_type.dart';
 import 'package:calora/domain/model/norms/daily_norms_info.dart';
@@ -16,20 +18,16 @@ class ProfileRepoImpl extends ProfileRepo {
 
   @override
   Future<ProfileRequest> getProfile() async {
-    return ProfileRequest(
-      height: 180,
-      gender: 'Male',
-      name: 'Nodir',
-      email: 'hasanovnodir2005@gmail.com',
-      bmi: 38.5,
-      targetWeight: 70,
-      weight: 88,
-      userId: 'a424fjie4934dvjk',
-      birthDay: '',
-      goal: '',
-      activityLevel: '',
-      metrics: '',
-    );
+    final meResponse = await _api.getProfileMe();
+    final extrasResponse = await _api.getProfileExtras();
+
+    final meData = meResponse.data['content'];
+    final extrasData = extrasResponse.data['content'];
+
+    final profile = ProfileRequest.fromJson(extrasData);
+
+    final updated = profile.copyWith(email: meData['email']);
+    return updated;
   }
 
   Future<List<DetailInfo>> getDailyNorms() async {
@@ -46,22 +44,31 @@ class ProfileRepoImpl extends ProfileRepo {
   }
 
   @override
+  Future<void> updateProfile(ProfileRequest request) async {
+    double? calculatedBmi;
+    if (request.weight != null && request.height != null && request.height! > 0) {
+      final heightInMeters = request.height! / 100; // sm dan metrga
+      calculatedBmi = request.weight! / (heightInMeters * heightInMeters);
+      calculatedBmi = double.parse(calculatedBmi.toStringAsFixed(2));
+    }
+
+    final updatedRequest = request.copyWith(bmi: calculatedBmi);
+
+    final data = updatedRequest.toJson();
+
+    data.removeWhere((key, value) => value == null);
+
+    print('📤 Sending to API: $data');
+    print('📊 Calculated BMI: $calculatedBmi');
+
+    await _api.updateProfile(data);
+  }
+
+  @override
   Future<List<DetailInfo>> getProfileDetail() async {
-    // var result = await _api.getProfile();
-    // var profile = ProfileRequest.fromJson(result.data);
-    // return Future.value([
-    //   profile.toDetailName(),
-    //   profile.toDetailBirthday(),
-    //   profile.toDetailHeight(),
-    //   profile.toDetailWeight(),
-    //   profile.toDetailGender(),
-    //   profile.toDetailGoal(),
-    //   profile.toDetailActivityLevel(),
-    //   profile.toDetailUserId(),
-    //   profile.toDetailEmail(),
-    //   profile.toDetailBirthday(),
-    // ]);
-    return Future.value(detailInfos);
+    final profileRequest = await getProfile();
+    final profile = profileRequest.toProfile();
+    return profile.toDetailInfoList();
   }
 
   @override
