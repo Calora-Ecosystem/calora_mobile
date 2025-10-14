@@ -42,9 +42,9 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
     }
   }
 
-  Future<bool> finish() async {
+  void finish() {
     final profile = state.answers;
-    if (profile == null) return false;
+    if (profile == null) return;
 
     emit(state.copyWith(isLoading: true));
 
@@ -65,43 +65,20 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
       language: 'Uzbek',
     );
 
-    bool success = false;
-
-    await _repo
+    _repo
         .sendAnswers(request)
         .handle(
           onStart: () {},
           onData: (_) {
-            success = true;
+            emit(state.copyWith(isLoading: false));
           },
           onError: (error) {
-            success = false;
+            emit(state.copyWith(isLoading: false));
+            publish(const QuestionsEffect.withType(QuestionsEffectType.error));
           },
-          onDone: () {},
+          onDone: () {
+            publish(const QuestionsEffect.withType(QuestionsEffectType.success));
+          },
         );
-    emit(state.copyWith(isLoading: false));
-    return success;
-  }
-
-  Future<bool> register(String email) async {
-    final profile = state.answers;
-    if (profile == null) return false;
-    emit(state.copyWith(isLoading: true));
-    bool success = false;
-    await _authRepo
-        .register(email, profile.name!)
-        .handle(
-          onStart: () {},
-          onData: (verification) {
-            success = true;
-            publish(QuestionsEffect.navigateToVerify(verification));
-          },
-          onError: (error) {
-            success = false;
-          },
-          onDone: () {},
-        );
-    emit(state.copyWith(isLoading: false));
-    return success;
   }
 }

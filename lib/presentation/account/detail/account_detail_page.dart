@@ -234,10 +234,10 @@ class AccountDetailPage
   }
 
   void _dismiss(BuildContext context) {
-    context.router.pop(context);
+    Navigator.of(context).pop();
   }
 
   void _back(BuildContext context) {
-    return Navigator.of(context).pop();
+    context.router.pop(context);
   }
 }

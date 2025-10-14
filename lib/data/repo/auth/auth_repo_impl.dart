@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:calora/data/api/auth_api.dart';
@@ -7,6 +6,7 @@ import 'package:calora/domain/model/token/token.dart';
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_app_installations/firebase_app_installations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
@@ -19,32 +19,24 @@ class AuthRepoImpl extends AuthRepo {
   AuthRepoImpl(this._api, this._store);
 
   @override
-  Future<Verification> login(String email) async {
-    final response = await _api.login(email);
-    final verification = Verification.fromJson(response.data['content']);
-    log(verification.toString());
-    return verification.copyWith(email: email);
-  }
-
-  @override
-  Future<Verification> register(String email, String name) async {
-    final response = await _api.register(email, name);
+  Future<Verification> sendOtp(String email) async {
+    final response = await _api.sendOtp(email);
     final verification = Verification.fromJson(response.data['content']);
     return verification.copyWith(email: email);
   }
 
   @override
-  Future<void> verify(Verification verification, String code) async {
+  Future<void> signIn(Verification verification, String code) async {
     final installationId = await FirebaseInstallations.instance.getId();
 
     final String deviceName;
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      deviceName = androidInfo.model;
+      final android = await deviceInfo.androidInfo;
+      deviceName = android.model;
     } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      deviceName = iosInfo.utsname.machine;
+      final ios = await deviceInfo.iosInfo;
+      deviceName = ios.utsname.machine;
     } else {
       deviceName = 'N/A';
     }
@@ -56,7 +48,7 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken = await FirebaseMessaging.instance.getToken();
     }
 
-    final response = await _api.verify(
+    final response = await _api.signIn(
       email: verification.email!,
       verificationCode: verification.verificationCode!,
       code: code,
@@ -71,5 +63,25 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   @override
-  Future<void> resendVerifyCode() async {}
+  Future<bool> checkExtras() async {
+    try {
+      await _api.getUserExtras();
+      return true; // user extras mavjud
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return false; // mavjud emas
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> saveExtras(Map<String, dynamic> extras) async {
+    await _api.postUserExtras(extras);
+  }
+
+  @override
+  Future<void> fetchUser() async {
+    await _api.getUserMe();
+  }
 }
