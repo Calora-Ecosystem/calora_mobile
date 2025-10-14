@@ -87,7 +87,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                   ),
                   SizedBox(
                     width: double.infinity,
-                    child: Button(onPressed: manager.goToNextPage, text: Strings.start),
+                    child: Button(onPressed: () => goToNextPage(context), text: Strings.start),
                   ),
                 ],
               ),
@@ -126,6 +126,6 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
   }
 
   void goToNextPage(BuildContext context) {
-    context.router.replace(const DashboardRoute());
+    context.router.replaceAll([DashboardRoute()]);
   }
 }
