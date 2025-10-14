@@ -20,6 +20,7 @@ class QuestionsBodyWidget extends StatefulWidget {
 class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
   List<String> goals = [Strings.weightLoss, Strings.maintainingBody, Strings.muscleDevelopment];
   List<String> activities = [
+    Strings.minActivity,
     Strings.lowActivity,
     Strings.averageActivity,
     Strings.highActivity,

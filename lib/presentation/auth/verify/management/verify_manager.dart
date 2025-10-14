@@ -24,37 +24,42 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
   }
 
   void resend() {
-    authRepo
-        .login(_verification.email ?? "")
-        .handle(
-          onStart: () {
-            emit(state.copyWith(loading: true));
-          },
-          onData: (data) {
-            _verification = data.copyWith(email: _verification.email);
-            emit(state.copyWith(loading: false));
-          },
-          onError: (error) {
-            emit(state.copyWith(loading: false));
-          },
-          onDone: () {},
-        );
+    // authRepo
+    //     .login(_verification.email ?? "")
+    //     .handle(
+    //       onStart: () {
+    //         emit(state.copyWith(loading: true));
+    //       },
+    //       onData: (data) {
+    //         _verification = data.copyWith(email: _verification.email);
+    //         emit(state.copyWith(loading: false));
+    //       },
+    //       onError: (error) {
+    //         emit(state.copyWith(loading: false));
+    //       },
+    //       onDone: () {},
+    //     );
   }
 
   void verify() {
     authRepo
-        .verify(_verification, _verificationCode)
+        .signIn(_verification, _verificationCode)
         .handle(
-          onStart: () {
-            emit(state.copyWith(loading: true));
+          onStart: () => emit(state.copyWith(loading: true)),
+          onData: (_) async {
+            // 3-qadam: extras tekshirish
+            final hasExtras = await authRepo.checkExtras();
+
+            if (!hasExtras) {
+              publish(VerifyEffect.openQuestions(_verification.email!));
+            } else {
+              // 5-qadam: user ma’lumotlarini olish
+              await authRepo.fetchUser();
+              publish(VerifyEffect.openDashboard());
+            }
           },
-          onData: (data) {
-            publish(VerifyEffect());
-          },
-          onError: (error) {
-            emit(state.copyWith(loading: false));
-          },
-          onDone: () {},
+          onError: (error) => emit(state.copyWith(loading: false)),
+          onDone: () => emit(state.copyWith(loading: false)),
         );
   }
 }

@@ -27,12 +27,14 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
 
   @override
   void listener(context, manager, effect) {
-    effect.when(() async {
-      if (onVerified != null) {
-        await onVerified!();
-      }
-      _openDashboard(context);
-    });
+    effect.when(
+      openQuestions: (email) {
+        context.router.replaceAll([QuestionsRoute(email: email)]);
+      },
+      openDashboard: () {
+        context.router.replaceAll([DashboardRoute()]);
+      },
+    );
   }
 
   @override

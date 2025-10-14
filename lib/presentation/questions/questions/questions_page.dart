@@ -20,15 +20,16 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
   @override
   void listener(BuildContext context, QuestionsManager manager, QuestionsEffect effect) {
     effect.mapOrNull(
-      navigateToVerify: (e) {
-        context.router.push(
-          VerifyRoute(
-            verification: e.verification,
-            onVerified: () async {
-              await manager.finish();
-            },
-          ),
-        );
+      withType: (e) {
+        switch (e.type) {
+          case QuestionsEffectType.success:
+            pushProgressPage(context);
+            break;
+          case QuestionsEffectType.error:
+            break;
+          case QuestionsEffectType.empty:
+            break;
+        }
       },
     );
     super.listener(context, manager, effect);
@@ -90,7 +91,7 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                     isAnswerProvided: currentAnswer != null,
                     onNext: manager.next,
                     onBack: manager.back,
-                    onFinish: () => manager.register(email),
+                    onFinish: manager.finish,
                   ),
                 ),
               ],
@@ -98,6 +99,12 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
           ),
         ],
       ),
+    );
+  }
+
+  void pushProgressPage(BuildContext context) {
+    context.router.push(
+      ProgressRoute(mode: 2, fetchGoals: true, nextRoute: const CalculateRoute()),
     );
   }
 

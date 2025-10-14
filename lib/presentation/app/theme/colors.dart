@@ -27,7 +27,7 @@ class DefaultThemeColors {
   final neutralPrimary = Color(0xFF202327);
   final iconSoft = Color(0xFFBBBBBB);
   final strokeSub = Color(0xFFD9D9D9);
-  final accentDisabled = Color(0xFFE9F6E9);
+  final accentDisabled = Color(0xFFEDF2FE);
   final primarySolid = Color(0xFF0C111D);
   final textPrimary = Color(0xFF202020);
   final warningLighter = Color(0xFFFFEFD6);

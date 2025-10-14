@@ -21,4 +21,11 @@ class QuestionsRepoImpl extends QuestionsRepo {
 
     return result;
   }
+
+  @override
+  Future<List<int>> getDailyGoals() {
+    return Future.value(goals);
+  }
+
+  List<int> goals = [2000, 600, 2200];
 }

@@ -4,6 +4,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -26,6 +27,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
       },
       verify: (verification) {
         context.router.push(VerifyRoute(verification: verification));
+      },
+      showError: (message) {
+        CustomSnackBar.show(context, message);
       },
     );
   }

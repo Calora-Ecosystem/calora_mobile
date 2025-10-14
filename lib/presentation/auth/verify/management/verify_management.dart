@@ -8,6 +8,7 @@ abstract class VerifyState with _$VerifyState {
 }
 
 @freezed
-sealed class VerifyEffect with _$VerifyEffect {
-  const factory VerifyEffect() = _VerifyEffect;
+class VerifyEffect with _$VerifyEffect {
+  const factory VerifyEffect.openQuestions(String email) = _OpenQuestions;
+  const factory VerifyEffect.openDashboard() = _OpenDashboard;
 }

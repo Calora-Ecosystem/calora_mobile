@@ -126,6 +126,10 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
     context.router.push(NotificationSettingsRoute());
   }
 
+  void _openNormsPage(BuildContext context) {
+    context.router.push(NormsRoute());
+  }
+
   void _showHelpBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,

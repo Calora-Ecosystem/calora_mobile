@@ -29,29 +29,45 @@ class NavigationButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        if (hasPrevious)
-          Expanded(child: _buildButton(context, Strings.previous, onTap: onBack, enabled: true)),
-        if (hasPrevious) const SizedBox(width: 12),
-        Expanded(
-          flex: hasPrevious ? 1 : 2,
-          child: isLast
-              ? Button(
-                  loading: isLoading,
-                  text: Strings.finish,
-                  textColor: context.colors.textWhite,
-                  onPressed: isAnswerProvided ? onFinish : null,
-                )
-              : _buildButton(
-                  context,
-                  Strings.next,
-                  enabled: isAnswerProvided,
-                  isPrimary: true,
-                  onTap: isAnswerProvided ? onNext : null,
-                ),
+    return Row(children: [_buildBackButton(context), _buildMainButton(context)]);
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    if (!hasPrevious) return const SizedBox.shrink();
+
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: _buildButton(
+          context,
+          Strings.previous,
+          onTap: onBack,
+          enabled: true,
+          isPrimary: false,
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildMainButton(BuildContext context) {
+    return Expanded(flex: hasPrevious ? 1 : 2, child: _buildActionButton(context));
+  }
+
+  Widget _buildActionButton(BuildContext context) {
+    if (isLast) {
+      return Button(
+        loading: isLoading,
+        text: Strings.finish,
+        textColor: context.colors.textWhite,
+        onPressed: isAnswerProvided ? onFinish : null,
+      );
+    }
+    return _buildButton(
+      context,
+      Strings.next,
+      enabled: isAnswerProvided,
+      isPrimary: true,
+      onTap: isAnswerProvided ? onNext : null,
     );
   }
 
@@ -59,12 +75,13 @@ class NavigationButtons extends StatelessWidget {
     BuildContext context,
     String text, {
     VoidCallback? onTap,
-    bool enabled = true,
-    bool isPrimary = false,
+    required bool enabled,
+    required bool isPrimary,
   }) {
     final colors = context.colors;
 
     final bgColor = isPrimary ? (enabled ? colors.accentSub : colors.white) : colors.accentWhite;
+
     final textColor = isPrimary ? (enabled ? colors.white : colors.black) : colors.black;
 
     return GestureDetector(

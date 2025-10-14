@@ -13,4 +13,5 @@ abstract class AuthState with _$AuthState {
 sealed class AuthEffect with _$AuthEffect {
   const factory AuthEffect.verify(Verification verification) = Verify;
   const factory AuthEffect.registerNeeded(String email) = _RegisterNeeded;
+  const factory AuthEffect.showError(String message) = _ShowError;
 }
