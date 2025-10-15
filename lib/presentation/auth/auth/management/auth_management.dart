@@ -5,13 +5,12 @@ part 'auth_management.freezed.dart';
 
 @freezed
 abstract class AuthState with _$AuthState {
-  const factory AuthState({@Default(false) bool checked, @Default(false) bool loading}) =
+  const factory AuthState({@Default(false) bool loading, @Default(false) bool checked}) =
       _AuthState;
 }
 
 @freezed
-sealed class AuthEffect with _$AuthEffect {
-  const factory AuthEffect.verify(Verification verification) = Verify;
-  const factory AuthEffect.registerNeeded(String email) = _RegisterNeeded;
+class AuthEffect with _$AuthEffect {
+  const factory AuthEffect.verify(Verification verification) = _Verify;
   const factory AuthEffect.showError(String message) = _ShowError;
 }

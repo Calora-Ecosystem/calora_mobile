@@ -22,9 +22,6 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
   @override
   void listener(context, manager, effect) {
     effect.when(
-      registerNeeded: (email) {
-        context.router.push(QuestionsRoute(email: email));
-      },
       verify: (verification) {
         context.router.push(VerifyRoute(verification: verification));
       },
@@ -58,7 +55,6 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                     child: Button(
                       loading: state.loading,
                       onPressed: manager.login,
-                      // _openVerifyPage(context, "");
                       text: Strings.doContinue,
                       textColor: context.colors.textWhite,
                     ),

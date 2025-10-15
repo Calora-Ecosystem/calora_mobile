@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/questions/questions.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
@@ -64,11 +65,24 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
       bmi: bmi,
       language: 'Uzbek',
     );
-
+    _repo
+        .sendTargetWeight(NormsRequest(metric: 'Weight', value: profile.targetWeight ?? 0))
+        .handle(
+          onStart: () {
+            emit(state.copyWith(isLoading: true));
+          },
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            publish(const QuestionsEffect.withType(QuestionsEffectType.error));
+          },
+          onDone: () {},
+        );
     _repo
         .sendAnswers(request)
         .handle(
-          onStart: () {},
+          onStart: () {
+            emit(state.copyWith(isLoading: true));
+          },
           onData: (_) {
             emit(state.copyWith(isLoading: false));
           },

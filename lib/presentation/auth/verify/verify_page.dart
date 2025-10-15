@@ -18,7 +18,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   final Verification verification;
   final Future<void> Function()? onVerified;
 
-  VerifyPage({super.key, required this.verification, this.onVerified});
+  const VerifyPage({super.key, required this.verification, this.onVerified});
 
   @override
   void init(context, manager) {
@@ -60,6 +60,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                         manager.setVerificationCode(data);
                       },
                     ),
+                    SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: Button(
@@ -76,9 +77,5 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
         ],
       ),
     );
-  }
-
-  void _openDashboard(BuildContext context) {
-    context.router.replaceAll([DashboardRoute()]);
   }
 }

@@ -50,7 +50,7 @@ class BmiCard extends StatelessWidget {
               children: [
                 _infoBox("Progress", "2 kg", context),
                 SizedBox(width: 16),
-                _infoBox("Qoldi", (weight - targetWeight).toString() + ' kg', context),
+                _infoBox("Qoldi", (weight - targetWeight).abs().toString() + ' kg', context),
               ],
             ),
             const SizedBox(height: 16),
@@ -60,7 +60,7 @@ class BmiCard extends StatelessWidget {
                   child: LinearPercentIndicator(
                     animation: true,
                     lineHeight: 16,
-                    percent: targetWeight / weight,
+                    percent: calculateWeightProgress(weight, targetWeight),
                     backgroundColor: context.colors.backgroundElevation,
                     progressColor: context.colors.accentSub,
                     barRadius: Radius.circular(12),
@@ -103,6 +103,17 @@ class BmiCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double calculateWeightProgress(double weight, double targetWeight) {
+    if (weight == 0 || targetWeight == 0) return 0.0;
+    double progress;
+    if (targetWeight < weight) {
+      progress = (weight - (weight - targetWeight).abs()) / weight;
+    } else {
+      progress = weight / targetWeight;
+    }
+    return progress.clamp(0.0, 1.0);
   }
 
   String formatBmi(double? bmi) {

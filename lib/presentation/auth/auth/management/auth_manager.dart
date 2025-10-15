@@ -23,7 +23,6 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
 
   void _openTermsOfUse() async {
     final url = Uri.parse('https://www.google.com');
-
     await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 

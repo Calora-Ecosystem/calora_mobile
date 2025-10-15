@@ -20,13 +20,18 @@ class ProfileRepoImpl extends ProfileRepo {
   Future<ProfileRequest> getProfile() async {
     final meResponse = await _api.getProfileMe();
     final extrasResponse = await _api.getProfileExtras();
+    final targetWeight = await _api.getTargetWeight();
 
     final meData = meResponse.data['content'];
     final extrasData = extrasResponse.data['content'];
-
+    final target = targetWeight.data['content'][0];
+    print('-------------${target['value']}');
     final profile = ProfileRequest.fromJson(extrasData);
 
-    final updated = profile.copyWith(email: meData['email']);
+    final updated = profile.copyWith(
+      email: meData['email'],
+      targetWeight: target['value'].toDouble(),
+    );
     return updated;
   }
 
@@ -47,20 +52,13 @@ class ProfileRepoImpl extends ProfileRepo {
   Future<void> updateProfile(ProfileRequest request) async {
     double? calculatedBmi;
     if (request.weight != null && request.height != null && request.height! > 0) {
-      final heightInMeters = request.height! / 100; // sm dan metrga
+      final heightInMeters = request.height! / 100;
       calculatedBmi = request.weight! / (heightInMeters * heightInMeters);
       calculatedBmi = double.parse(calculatedBmi.toStringAsFixed(2));
     }
-
     final updatedRequest = request.copyWith(bmi: calculatedBmi);
-
     final data = updatedRequest.toJson();
-
     data.removeWhere((key, value) => value == null);
-
-    print('📤 Sending to API: $data');
-    print('📊 Calculated BMI: $calculatedBmi');
-
     await _api.updateProfile(data);
   }
 
@@ -74,11 +72,6 @@ class ProfileRepoImpl extends ProfileRepo {
   @override
   Future<void> updateDailyNorms(DailyNormsInfo dailyNormsInfo) {
     return _api.updateDailyNorms(dailyNormsInfo);
-  }
-
-  @override
-  Future<void> logout() {
-    return _api.logout();
   }
 
   List<DetailInfo> normsList = [

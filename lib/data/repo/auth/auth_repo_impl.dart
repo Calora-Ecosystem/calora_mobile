@@ -6,7 +6,6 @@ import 'package:calora/domain/model/token/token.dart';
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:firebase_app_installations/firebase_app_installations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
@@ -26,9 +25,8 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   @override
-  Future<void> signIn(Verification verification, String code) async {
+  Future<bool> signIn(Verification verification, String code) async {
     final installationId = await FirebaseInstallations.instance.getId();
-
     final String deviceName;
     final deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
@@ -40,14 +38,12 @@ class AuthRepoImpl extends AuthRepo {
     } else {
       deviceName = 'N/A';
     }
-
     final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
     final apnsAvailable = apnsToken != null || !Platform.isIOS;
     String? fcmToken;
     if (apnsAvailable) {
       fcmToken = await FirebaseMessaging.instance.getToken();
     }
-
     final response = await _api.signIn(
       email: verification.email!,
       verificationCode: verification.verificationCode!,
@@ -57,31 +53,11 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken: fcmToken,
     );
 
-    final token = Token.fromJson(response.data['content']);
+    final content = response.data['content'];
+    final token = Token.fromJson(content);
     await _store.token.set(token);
     await _store.isLogin.set(true);
-  }
 
-  @override
-  Future<bool> checkExtras() async {
-    try {
-      await _api.getUserExtras();
-      return true; // user extras mavjud
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        return false; // mavjud emas
-      }
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> saveExtras(Map<String, dynamic> extras) async {
-    await _api.postUserExtras(extras);
-  }
-
-  @override
-  Future<void> fetchUser() async {
-    await _api.getUserMe();
+    return content['hasNewUser'] as bool;
   }
 }
