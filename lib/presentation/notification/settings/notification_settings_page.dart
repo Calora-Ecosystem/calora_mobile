@@ -1,10 +1,11 @@
+// notification_settings_page.dart
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/notification/notificaiton_setting.dart';
-import 'package:calora/domain/model/notification/notification_setting_type.dart';
+import 'package:calora/domain/model/notification/reminder_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/input/date/date_input_page.dart';
+import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
 import 'package:calora/presentation/notification/settings/management/notification_settings_management.dart';
 import 'package:calora/presentation/notification/settings/management/notification_settings_manager.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
@@ -23,6 +24,7 @@ class NotificationSettingsPage
   @override
   void init(context, manager) {
     manager.getNotificationSettings();
+    manager.getReminders();
   }
 
   @override
@@ -60,14 +62,14 @@ class NotificationSettingsPage
           child: Divider(height: 1, color: context.colors.strokeSoft),
         ),
         physics: const BouncingScrollPhysics(),
-        itemCount: state.notificationSettings.length ?? 1,
+        itemCount: state.notificationSettings.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
           final notificationSetting = state.notificationSettings[index];
           return NotificationSettingItemBuilder(
             notificationSetting: notificationSetting,
             onClickItem: (data) {
-              _openInputManagePage(notificationSetting, context, manager);
+              _openInputManagePage(notificationSetting, context, state.reminders);
             },
           );
         },
@@ -78,89 +80,19 @@ class NotificationSettingsPage
   void _openInputManagePage(
     NotificationSetting notificationSetting,
     BuildContext context,
-    NotificationSettingsManager manager,
+    List<ReminderRequest> reminders,
   ) {
-    switch (notificationSetting.type) {
-      case NotificationSettingType.mealReminder:
-        _showNotificationSettingsSheet(context, NotificationSettingType.mealReminder);
-        break;
-      case NotificationSettingType.waterReminder:
-        _showNotificationSettingsSheet(context, NotificationSettingType.waterReminder);
-        break;
-      case NotificationSettingType.sleepReminder:
-        _showNotificationSettingsSheet(context, NotificationSettingType.sleepReminder);
-        break;
-      case NotificationSettingType.thirtyDayChallenges:
-        _showNotificationSettingsSheet(context, NotificationSettingType.thirtyDayChallenges);
-        break;
-      default:
-        break;
-    }
-  }
-
-  void _showNotificationSettingsSheet(BuildContext context, NotificationSettingType type) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) {
-        return NotificationSettingSheet(
-          type: type,
-          onSave: (times) {
-            final manager = context.read<NotificationSettingsManager>();
-
-            if (type == NotificationSettingType.mealReminder) {
-              final rawResult = times as Map<dynamic, dynamic>?;
-
-              if (rawResult == null) return;
-
-              rawResult.forEach((menu, value) {
-                final List<String> timeList = [];
-
-                if (value is String) {
-                  timeList.add(value);
-                } else if (value is List) {
-                  for (var item in value) {
-                    timeList.add(item.toString());
-                  }
-                }
-
-                for (final time in timeList) {
-                  final formattedTime = _mapMealTimeToServerFormat(time);
-
-                  manager.postNotificationSettings(
-                    menu: menu.toString(),
-                    time: formattedTime,
-                    type: "Food",
-                  );
-                }
-              });
-            }
-          },
-        );
+        return NotificationSettingSheet(type: notificationSetting.type, reminders: reminders);
       },
     );
   }
 
-  String capitalizeFirstLetter(String input) {
-    if (input.isEmpty) return input;
-    return input[0].toUpperCase() + input.substring(1);
-  }
-
-  String _mapMealTimeToServerFormat(String option) {
-    switch (option) {
-      case "Before 10 minutes":
-        return "08:00";
-      case "Before 20 minutes":
-        return "08:10";
-      case "Before 30 minutes":
-        return "08:30";
-      default:
-        return option;
-    }
-  }
-
   void _back(BuildContext context) {
-    return context.router.pop();
+    context.router.pop();
   }
 }

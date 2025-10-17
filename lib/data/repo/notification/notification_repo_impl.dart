@@ -2,12 +2,15 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/data/api/profile_api.dart';
 import 'package:calora/domain/model/notification/notificaiton_setting.dart';
 import 'package:calora/domain/model/notification/notification_setting_type.dart';
+import 'package:calora/domain/model/notification/reminder_request.dart';
 import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:injectable/injectable.dart';
 
 @Injectable(as: NotificationRepo)
 class NotificationRepoImpl extends NotificationRepo {
   final ProfileApi profileApi;
+
+  NotificationRepoImpl(this.profileApi);
 
   @override
   Future<List<NotificationSetting>> getNotificationSettings() {
@@ -41,15 +44,20 @@ class NotificationRepoImpl extends NotificationRepo {
     ),
   ];
 
-  NotificationRepoImpl(this.profileApi);
-
   @override
   Future<void> deleteNotificationSetting(int id) async {
     await profileApi.deleteReminder(id);
   }
 
   @override
-  Future<void> postNotificationSettings(String menu, String time, String type) async {
-    await profileApi.postReminders(menu: menu, time: time, type: type);
+  Future<void> postNotificationSettings(ReminderRequest reminder) async {
+    await profileApi.postReminders(reminder: reminder);
+  }
+
+  @override
+  Future<List<ReminderRequest>> getReminders() async {
+    final response = await profileApi.getReminders();
+    final List<dynamic> content = response.data['content'] ?? [];
+    return content.map((e) => ReminderRequest.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

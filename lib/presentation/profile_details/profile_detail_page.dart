@@ -3,6 +3,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/automatic_tracking/automatick_tracking.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
@@ -154,6 +155,11 @@ class ProfileDetailPage
         ],
       ),
     );
+  }
+
+  Future<void> logout(AuthStore authStore) async {
+    await authStore.token.set(null);
+    await authStore.isLogin.set(false);
   }
 
   Widget _buildRow(String label, String value, BuildContext context) {

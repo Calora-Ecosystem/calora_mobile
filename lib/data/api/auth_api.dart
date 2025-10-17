@@ -26,16 +26,4 @@ class AuthApi {
     };
     return _dio.post('auth/sign-in', data: data);
   }
-
-  Future<Response> getUserExtras() {
-    return _dio.get('users/extras');
-  }
-
-  Future<Response> postUserExtras(Map<String, dynamic> extras) {
-    return _dio.post('users/extras', data: extras);
-  }
-
-  Future<Response> getUserMe() {
-    return _dio.get('users/me');
-  }
 }

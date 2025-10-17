@@ -78,7 +78,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                           _openAccountDetailPage(context);
                         },
                         onNormsTap: () {
-                          context.pushRoute(NormsRoute());
+                          _openNormsPage(context);
                         },
                         onLanguageTap: () {
                           _showLanguageBottomSheet(context);

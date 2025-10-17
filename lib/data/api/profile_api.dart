@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/norms/daily_norms_info.dart';
+import 'package:calora/domain/model/notification/reminder_request.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
@@ -14,6 +15,10 @@ class ProfileApi {
 
   Future<Response> getProfileExtras() async {
     return _dio.get('/users/extras');
+  }
+
+  Future<Response> getTargetWeight() async {
+    return _dio.get('/users/norms', queryParameters: {'metrics': 'Weight'});
   }
 
   Future<Response> updateProfile(Map<String, dynamic> data) async {
@@ -43,14 +48,8 @@ class ProfileApi {
     return _dio.get('/reminder');
   }
 
-  Future<Response> postReminders({
-    required String time,
-    required String type,
-    required String menu,
-  }) async {
-    final data = {"time": time, "type": type, "menu": menu};
-
-    return _dio.post('/reminder', data: data);
+  Future<Response> postReminders({required ReminderRequest reminder}) async {
+    return _dio.post('/reminder', data: reminder.toJson());
   }
 
   Future<void> deleteReminder(int id) async {

@@ -111,7 +111,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                 FitnessTrackWidget(
                                   primaryValues: state.steps.map((e) => e.value).toList(),
                                   globalKey: globalKey,
-                                  goal: stepValue,
+                                  goal: stepValue.toInt(),
                                   metrics: state.metrics,
                                   stepCount: state.stepCount,
                                   onClickBackward: () {
@@ -180,7 +180,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       builder: (_) => EditStepGoalPage(
         initialValue: 16000,
         onSave: (value) {
-          manager.updateNorm(NormsRequest(metric: "Step", value: value));
+          manager.updateNorm(NormsRequest(metric: "Step", value: value.toDouble()));
         },
       ),
     );

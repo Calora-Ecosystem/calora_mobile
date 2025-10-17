@@ -1,51 +1,70 @@
+// notification_setting_sheet.dart
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/switch/custom_switch.dart';
 import 'package:calora/domain/model/notification/notification_setting_type.dart';
+import 'package:calora/domain/model/notification/reminder_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/input/date/management/notification_setting_sheet_management.dart';
+import 'package:calora/presentation/input/date/management/notification_setting_sheet_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:management/management.dart';
 
-class NotificationSettingSheet extends StatefulWidget {
+class NotificationSettingSheet
+    extends
+        Managed<
+          NotificationSettingSheetManager,
+          NotificationSettingSheetState,
+          NotificationSettingSheetEffect
+        > {
   final NotificationSettingType type;
-  final Function(dynamic) onSave;
+  final List<ReminderRequest> reminders;
 
-  const NotificationSettingSheet({super.key, required this.type, required this.onSave});
-
-  @override
-  State<NotificationSettingSheet> createState() => _NotificationSettingSheetState();
-}
-
-class _NotificationSettingSheetState extends State<NotificationSettingSheet> {
-  bool isEnabled = false;
-  int selectedIndex = 0;
-  DateTime selectedTime = DateTime.now();
-
-  bool breakfastEnabled = false, lunchEnabled = false, dinnerEnabled = false;
-  int breakfastIndex = 0, lunchIndex = 0, dinnerIndex = 0;
-
-  int? expandedMealIndex;
-  final waterOptions = [
-    Strings.every1Hour,
-    Strings.every2Hour,
-    Strings.every3Hour,
-    Strings.every4Hour,
-    Strings.every5Hour,
-  ];
-  final mealOptions = [
-    Strings.before10Min,
-    Strings.before20Min,
-    Strings.before30Min,
-    Strings.before40Min,
-    Strings.before50Min,
-  ];
-  bool get _isTimePicker =>
-      widget.type == NotificationSettingType.sleepReminder ||
-      widget.type == NotificationSettingType.thirtyDayChallenges;
+  NotificationSettingSheet({super.key, required this.type, required this.reminders});
 
   @override
-  Widget build(BuildContext context) {
+  void init(BuildContext context, NotificationSettingSheetManager manager) {
+    manager.init(type, reminders);
+  }
+
+  @override
+  void listener(
+    BuildContext context,
+    NotificationSettingSheetManager manager,
+    NotificationSettingSheetEffect effect,
+  ) {
+    effect.when(
+      save: (type, data) => Navigator.pop(context),
+      delete: (id) => null, // Delete backend orqali boshqariladi
+    );
+  }
+
+  @override
+  Widget builder(
+    BuildContext context,
+    NotificationSettingSheetManager manager,
+    NotificationSettingSheetState state,
+  ) {
+    final waterOptions = [
+      Strings.every1Hour,
+      Strings.every2Hour,
+      Strings.every3Hour,
+      Strings.every4Hour,
+      Strings.every5Hour,
+    ];
+    final mealOptions = [
+      Strings.before10Min,
+      Strings.before20Min,
+      Strings.before30Min,
+      Strings.before40Min,
+      Strings.before50Min,
+    ];
+    final bool isTimePicker =
+        type == NotificationSettingType.sleepReminder ||
+        type == NotificationSettingType.thirtyDayChallenges;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -59,85 +78,81 @@ class _NotificationSettingSheetState extends State<NotificationSettingSheet> {
           children: [
             Strings.settingUpReminders.text(20, 24, 700),
             const SizedBox(height: 16),
-            if (widget.type == NotificationSettingType.waterReminder)
+            if (type == NotificationSettingType.waterReminder)
               _buildSettingBlock(
+                context: context,
+                manager: manager,
+                state: state,
                 title: Strings.waterDrinkReminder,
-                isEnabled: isEnabled,
-                onToggle: (v) => setState(() => isEnabled = v),
+                isEnabled: state.isEnabled,
+                onToggle: manager.toggleEnabled,
                 options: waterOptions,
-                selectedIndex: selectedIndex,
-                onOptionChanged: (i) => setState(() => selectedIndex = i),
-                isExpanded: isEnabled,
+                selectedIndex: state.selectedIndex,
+                onOptionChanged: manager.setSelectedIndex,
+                isExpanded: state.isEnabled,
                 onExpandToggle: () {},
               ),
-            if (widget.type == NotificationSettingType.mealReminder) ...[
+            if (type == NotificationSettingType.mealReminder) ...[
               _buildSettingBlock(
+                context: context,
+                manager: manager,
+                state: state,
                 title: Strings.breakfastTimeReminder,
-                isEnabled: breakfastEnabled,
-                onToggle: (v) => setState(() => breakfastEnabled = v),
+                isEnabled: state.breakfastEnabled,
+                onToggle: manager.toggleBreakfastEnabled,
                 options: mealOptions,
-                selectedIndex: breakfastIndex,
-                onOptionChanged: (i) => setState(() => breakfastIndex = i),
-                isExpanded: expandedMealIndex == 0 && breakfastEnabled,
-                onExpandToggle: () => setState(() {
-                  expandedMealIndex = expandedMealIndex == 0 ? null : 0;
-                }),
+                selectedIndex: state.breakfastIndex,
+                onOptionChanged: manager.setBreakfastIndex,
+                isExpanded: state.expandedMealIndex == 0 && state.breakfastEnabled,
+                onExpandToggle: () => manager.toggleExpandedMealIndex(0),
               ),
               const SizedBox(height: 12),
               _buildSettingBlock(
+                context: context,
+                manager: manager,
+                state: state,
                 title: Strings.lunchTimeReminder,
-                isEnabled: lunchEnabled,
-                onToggle: (v) => setState(() => lunchEnabled = v),
+                isEnabled: state.lunchEnabled,
+                onToggle: manager.toggleLunchEnabled,
                 options: mealOptions,
-                selectedIndex: lunchIndex,
-                onOptionChanged: (i) => setState(() => lunchIndex = i),
-                isExpanded: expandedMealIndex == 1 && lunchEnabled,
-                onExpandToggle: () => setState(() {
-                  expandedMealIndex = expandedMealIndex == 1 ? null : 1;
-                }),
+                selectedIndex: state.lunchIndex,
+                onOptionChanged: manager.setLunchIndex,
+                isExpanded: state.expandedMealIndex == 1 && state.lunchEnabled,
+                onExpandToggle: () => manager.toggleExpandedMealIndex(1),
               ),
               const SizedBox(height: 12),
               _buildSettingBlock(
+                context: context,
+                manager: manager,
+                state: state,
                 title: Strings.dinnerTimeReminder,
-                isEnabled: dinnerEnabled,
-                onToggle: (v) => setState(() => dinnerEnabled = v),
+                isEnabled: state.dinnerEnabled,
+                onToggle: manager.toggleDinnerEnabled,
                 options: mealOptions,
-                selectedIndex: dinnerIndex,
-                onOptionChanged: (i) => setState(() => dinnerIndex = i),
-                isExpanded: expandedMealIndex == 2 && dinnerEnabled,
-                onExpandToggle: () => setState(() {
-                  expandedMealIndex = expandedMealIndex == 2 ? null : 2;
-                }),
+                selectedIndex: state.dinnerIndex,
+                onOptionChanged: manager.setDinnerIndex,
+                isExpanded: state.expandedMealIndex == 2 && state.dinnerEnabled,
+                onExpandToggle: () => manager.toggleExpandedMealIndex(2),
               ),
             ],
-            if (_isTimePicker)
+            if (isTimePicker)
               _buildSettingBlock(
-                title: widget.type == NotificationSettingType.sleepReminder
+                context: context,
+                manager: manager,
+                state: state,
+                title: type == NotificationSettingType.sleepReminder
                     ? Strings.bedtimeReminder
                     : Strings.reminderOfDailyChallangeTimes,
-                isEnabled: isEnabled,
-                onToggle: (v) => setState(() => isEnabled = v),
-                selectedTime: selectedTime,
-                onTimeChanged: (t) => setState(() => selectedTime = t),
-                isExpanded: isEnabled,
+                isEnabled: state.isEnabled,
+                onToggle: manager.toggleEnabled,
+                selectedTime: state.selectedTime ?? DateTime.now(),
+                onTimeChanged: manager.setSelectedTime,
+                isExpanded: state.isEnabled,
                 onExpandToggle: () {},
               ),
             const SizedBox(height: 16),
             GestureDetector(
-              onTap: () {
-                if (widget.type == NotificationSettingType.waterReminder && isEnabled) {
-                  widget.onSave(waterOptions[selectedIndex]);
-                } else if (widget.type == NotificationSettingType.mealReminder) {
-                  final result = {};
-                  if (breakfastEnabled) result["breakfast"] = mealOptions[breakfastIndex];
-                  if (lunchEnabled) result["lunch"] = mealOptions[lunchIndex];
-                  if (dinnerEnabled) result["dinner"] = mealOptions[dinnerIndex];
-                  widget.onSave(result);
-                } else if (_isTimePicker && isEnabled) {
-                  widget.onSave(selectedTime);
-                }
-                Navigator.pop(context);
-              },
+              onTap: () => manager.saveSettings(type),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -158,6 +173,9 @@ class _NotificationSettingSheetState extends State<NotificationSettingSheet> {
   }
 
   Widget _buildSettingBlock({
+    required BuildContext context,
+    required NotificationSettingSheetManager manager,
+    required NotificationSettingSheetState state,
     required String title,
     required bool isEnabled,
     required Function(bool) onToggle,
