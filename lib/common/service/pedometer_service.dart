@@ -320,4 +320,51 @@ class PedometerService {
 
     return await getStepsForDateRange(todayStart, todayEnd);
   }
+
+  Future<Map<DateTime, int>> getDailyStepsForRange(
+      DateTime fromDate,
+      DateTime toDate,
+      ) async {
+    try {
+      final Map<DateTime, int> dailySteps = {};
+
+      // Normalize dates to start of day
+      final startDate = DateTime(fromDate.year, fromDate.month, fromDate.day);
+      final endDate = DateTime(toDate.year, toDate.month, toDate.day);
+
+      // Iterate through each day in the range
+      DateTime currentDate = startDate;
+
+      while (currentDate.isBefore(endDate) ||
+          currentDate.isAtSameMomentAs(endDate)) {
+        // Define start and end of current day
+        final dayStart = currentDate;
+        final dayEnd = DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day,
+          23,
+          59,
+          59,
+          999,
+        );
+
+        // Get steps for this day
+        final steps = await getStepsForDateRange(dayStart, dayEnd);
+
+        // Store in map with normalized date as key
+        dailySteps[currentDate] = steps;
+
+        log('Steps for ${currentDate.toIso8601String().split('T')[0]}: $steps');
+
+        // Move to next day
+        currentDate = currentDate.add(const Duration(days: 1));
+      }
+
+      return dailySteps;
+    } catch (e) {
+      onError?.call('Failed to get daily steps for range: $e');
+      rethrow;
+    }
+  }
 }

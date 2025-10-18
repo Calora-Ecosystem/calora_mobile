@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -34,6 +36,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.getStats(3);
     manager.start();
     _initializePedometerService(manager);
+    _getRangeSteps();
   }
 
   void _initializePedometerService(StepsManager manager) async {
@@ -46,6 +49,20 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       },
     );
     await _pedometerService.initializePedometer();
+  }
+
+  void _getRangeSteps() async {
+    final fromDate = DateTime(
+      DateTime.now().year,
+      10,
+      1,
+    ); // October is month 10
+    final toDate = DateTime.now();
+    Map<DateTime, int> result= await _pedometerService.getDailyStepsForRange(fromDate, toDate);
+
+    for (var entry in result.entries) {
+      log("Results: ${entry.key.toIso8601String().split('T')[0]}: ${entry.value}");
+    }
   }
 
   @override
