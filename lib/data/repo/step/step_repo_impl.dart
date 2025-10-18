@@ -36,11 +36,43 @@ class StepRepoImpl extends StepRepo {
   }
 
   Future<List<UserStatRequest>> getStats(int period, {int offset = 0}) async {
-    final now = DateTime.now();
     late DateTime from;
     late DateTime to;
 
     log("ResultRepoImp: $period, $offset");
+
+    Map<String, DateTime> datePeriod = getDatePeriods(period, offset);
+    from = datePeriod["from"]!;
+    to = datePeriod["to"]!;
+
+    final response = await _stepsApi.getStats(
+      datePeriod["from"] ?? DateTime.now(),
+      datePeriod["to"] ?? DateTime.now(),
+    );
+    return response;
+  }
+
+  @override
+  Future<void> updateNorm(NormsRequest norm) => _stepsApi.updateNorm(norm);
+
+  @override
+  Future<void> sendDailyData({required String metric, required int value}) =>
+      _stepsApi.sendDailyData(metric: metric, value: value);
+
+  @override
+  Future<void> deleteNorm(String metric) => _stepsApi.deleteNorm(metric);
+
+  @override
+  Future<List<NormsRequest>> getNorms() async {
+    final response = await _stepsApi.getNorms();
+    return response;
+  }
+
+  Map<String, DateTime> getDatePeriods(int period, int offset) {
+    final now = DateTime.now();
+
+    late DateTime from;
+    late DateTime to;
 
     if (period == 0) {
       // Use UTC-aware calculation
@@ -68,24 +100,6 @@ class StepRepoImpl extends StepRepo {
         1,
       ).subtract(const Duration(seconds: 1));
     }
-
-    final response = await _stepsApi.getStats(from, to);
-    return response;
-  }
-
-  @override
-  Future<void> updateNorm(NormsRequest norm) => _stepsApi.updateNorm(norm);
-
-  @override
-  Future<void> sendDailyData({required String metric, required int value}) =>
-      _stepsApi.sendDailyData(metric: metric, value: value);
-
-  @override
-  Future<void> deleteNorm(String metric) => _stepsApi.deleteNorm(metric);
-
-  @override
-  Future<List<NormsRequest>> getNorms() async {
-    final response = await _stepsApi.getNorms();
-    return response;
+    return {"from": from, "to": to};
   }
 }
