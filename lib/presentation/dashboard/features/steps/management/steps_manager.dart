@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
@@ -36,12 +37,14 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  Future<void> getStats() async {
+  Future<void> getStats(int value) async {
+    log("ResultStepManageStatsCalled->$value");
     await stepRepo
         .getStats(state.period, offset: state.offset)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) => emit(state.copyWith(userStates: data, isLoading: false)),
+          onData: (data) =>
+              emit(state.copyWith(userStates: data, isLoading: false)),
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (_) => emit(state.copyWith(isLoading: false)),
         );
@@ -101,12 +104,12 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   void changePeriod(int newPeriod) {
     emit(state.copyWith(period: newPeriod, offset: 0));
     getSteps();
-    getStats();
+    getStats(1);
   }
 
   void changeOffset(int change) {
     emit(state.copyWith(offset: state.offset + change));
     getSteps();
-    getStats();
+    getStats(2);
   }
 }
