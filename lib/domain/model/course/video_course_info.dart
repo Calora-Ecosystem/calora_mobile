@@ -12,3 +12,19 @@ class VideoCourseInfo {
     this.isWatched = false,
   });
 }
+
+class CoursesInfo {
+  final String name;
+  final String price;
+  final Duration duration;
+  final bool purchased;
+  final List<VideoCourseInfo> videoCourses;
+
+  CoursesInfo({
+    required this.videoCourses,
+    required this.name,
+    required this.price,
+    required this.duration,
+    this.purchased = false,
+  });
+}

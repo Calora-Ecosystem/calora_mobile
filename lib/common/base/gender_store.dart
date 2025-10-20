@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/profile/profile.dart';
+import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
 import 'base_store.dart';
@@ -27,3 +28,5 @@ class GenderStore extends BaseStore<Gender> {
     await set(gender);
   }
 }
+
+final genderStore = GetIt.I<GenderStore>();

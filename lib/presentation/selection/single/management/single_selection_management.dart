@@ -8,6 +8,7 @@ abstract class SingleSelectionState with _$SingleSelectionState {
   const factory SingleSelectionState({
     @Default(false) bool loading,
     @Default([]) List<Selection> selections,
+    Selection? selected,
   }) = _SingleSelectionState;
 }
 

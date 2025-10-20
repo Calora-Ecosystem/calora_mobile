@@ -53,9 +53,8 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                           surname: state.profile?.name ?? '',
                           name: state.profile?.name ?? '',
                           email: state.profile?.email ?? '',
-                          onEdit: () {
-                            _openProfileDetailPage(context, state.profile?.userId ?? '');
-                          },
+                          onEdit: () =>
+                              _openProfileDetailPage(context, state.profile?.userId ?? ''),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -109,8 +108,8 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
     );
   }
 
-  void _openAccountDetailPage(BuildContext context, ProfileManager manager) {
-    context.router.push(AccountDetailRoute(profile: Profile()));
+  void _openAccountDetailPage(BuildContext context, ProfileManager manager) async {
+    await context.router.push(AccountDetailRoute(profile: Profile()));
     manager.getProfile();
   }
 

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/gender_store.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
@@ -138,7 +139,7 @@ class AccountDetailPage
           title: Strings.chooseGoal,
           selection: Selection(type: SelectionType.goal),
           onSave: (data) {
-            manager.updateProfileDetail(info, data.name);
+            // manager.updateProfileDetail(info, data.name);
             _dismiss(context);
           },
         );
@@ -182,7 +183,13 @@ class AccountDetailPage
           title: Strings.chooseGender,
           selection: Selection(type: SelectionType.gender),
           onSave: (data) {
-            manager.updateProfileDetail(info, data.name);
+            Gender gender = Gender.Male;
+            if (data.name == Strings.male)
+              gender = Gender.Male;
+            else
+              gender = Gender.Female;
+            genderStore.set(gender);
+            manager.updateProfileDetail(info, gender.name);
             _dismiss(context);
           },
         );
