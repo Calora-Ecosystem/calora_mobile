@@ -60,6 +60,11 @@ class StepRepoImpl extends StepRepo {
       _stepsApi.sendDailyData(metric: metric, value: value);
 
   @override
+  Future<void> sendStepDataDateRange({
+    required List<StepsWithMetricsRequest> steps,
+  }) => _stepsApi.sendStepDataDateRange(steps: steps);
+
+  @override
   Future<void> deleteNorm(String metric) => _stepsApi.deleteNorm(metric);
 
   @override

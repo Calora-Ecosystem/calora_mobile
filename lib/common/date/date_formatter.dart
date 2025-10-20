@@ -64,4 +64,12 @@ class DateFormatter {
 
     return '${date.day} ${monthNames[date.month - 1]} ${date.year}';
   }
+
+  static DateTime? parseIsoDateTime({required String dateString}) {
+    try {
+      return DateTime.parse(dateString);
+    } catch (e) {
+      return null;
+    }
+  }
 }

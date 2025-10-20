@@ -18,4 +18,8 @@ abstract class StepRepo {
   Future<void> deleteNorm(String metric);
 
   Future<void> sendDailyData({required String metric, required int value});
+
+  Future<void> sendStepDataDateRange({
+    required List<StepsWithMetricsRequest> steps,
+  });
 }

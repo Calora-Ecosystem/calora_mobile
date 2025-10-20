@@ -10,16 +10,23 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardEffect> {
+class DashboardPage
+    extends Managed<DashboardManager, DashboardState, DashboardEffect> {
   const DashboardPage({super.key});
 
   @override
-  void init(context, manager) {}
+  void init(context, manager) async {}
 
   @override
   Widget builder(context, manager, state) {
     return AutoTabsRouter(
-      routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
+      routes: [
+        HomeRoute(),
+        CaloriesRoute(),
+        CourseRoute(),
+        StepsRoute(),
+        ProfileRoute(),
+      ],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
@@ -124,7 +131,10 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
     required BuildContext context,
   }) {
     return BottomNavigationBarItem(
-      icon: Column(mainAxisAlignment: MainAxisAlignment.start, children: [icon]),
+      icon: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [icon],
+      ),
       label: title,
     );
   }

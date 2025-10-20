@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:injectable/injectable.dart';
 import 'package:pedometer_2/pedometer_2.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -174,7 +175,7 @@ class PedometerService {
       bool _isInitialized = false;
 
       _stepStreamSubscription = Pedometer().stepCountStream().listen(
-            (int steps) async {
+        (int steps) async {
           log('Real-time step count: $steps');
 
           if (!_isInitialized) {
@@ -191,7 +192,9 @@ class PedometerService {
               // Add the new steps to today's total
               _dailySteps += stepsSinceLastUpdate;
               _lastStepCount = steps;
-              log('Added $stepsSinceLastUpdate steps, Total today: $_dailySteps');
+              log(
+                'Added $stepsSinceLastUpdate steps, Total today: $_dailySteps',
+              );
             }
           }
 
@@ -206,6 +209,7 @@ class PedometerService {
       onError?.call('Failed to listen to step count stream: $e');
     }
   }
+
   /// Listen to step count stream from specific date (iOS only)
   // void _listenToStepCountStreamFrom() {
   //   if (!Platform.isIOS) return;
@@ -322,9 +326,9 @@ class PedometerService {
   }
 
   Future<Map<DateTime, int>> getDailyStepsForRange(
-      DateTime fromDate,
-      DateTime toDate,
-      ) async {
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
     try {
       final Map<DateTime, int> dailySteps = {};
 

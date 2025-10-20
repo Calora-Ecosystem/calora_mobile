@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:calora/domain/model/dailies/steps_stat.dart';
@@ -98,5 +99,12 @@ class StepsApi {
       "date": DateTime.now().toUtc().toIso8601String(),
     };
     await _dio.post('/users/dailies', data: body);
+  }
+
+  Future<void> sendStepDataDateRange({
+    List<StepsWithMetricsRequest> steps = const [],
+  }) async {
+    final payload = steps.map((element) => element.toJson()).toList();
+    await _dio.post('/users/dailies/batch', data: payload);
   }
 }
