@@ -8,10 +8,15 @@ class TabBarItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tab(
+    return FittedBox(
+      fit: BoxFit.scaleDown,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [name.text(14, 18, 500)],
+        children: [
+          name
+              .text(14, 18, 500)
+              .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+        ],
       ),
     );
   }
