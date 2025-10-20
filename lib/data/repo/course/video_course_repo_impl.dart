@@ -6,8 +6,12 @@ import 'package:injectable/injectable.dart';
 @Injectable(as: VideoCourseRepo)
 class VideoCourseRepoImpl implements VideoCourseRepo {
   @override
-  Future<CoursesInfo> getVideoCourses() {
+  Future<CoursesInfo> getSlimmingCourses() {
     return Future.value(weightLossCourse);
+  }
+
+  Future<CoursesInfo> getBulkingCourses() {
+    return Future.value(massGainCourse);
   }
 }
 
@@ -16,6 +20,13 @@ CoursesInfo weightLossCourse = CoursesInfo(
   name: Strings.weightLossCourse,
   duration: Duration(hours: 1, minutes: 12),
   price: '1.300.000 so`m',
+);
+
+CoursesInfo massGainCourse = CoursesInfo(
+  videoCourses: videoCourses,
+  name: Strings.massGainCourse,
+  duration: Duration(hours: 1, minutes: 12),
+  price: '1.500.000 so`m',
 );
 
 List<VideoCourseInfo> videoCourses = [

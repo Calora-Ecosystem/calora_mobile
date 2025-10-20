@@ -5,12 +5,10 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class SingleSelectionManager
-    extends Manager<SingleSelectionState, SingleSelectionEffect> {
+class SingleSelectionManager extends Manager<SingleSelectionState, SingleSelectionEffect> {
   final SelectionRepo _selectionRepo;
 
-  SingleSelectionManager(this._selectionRepo)
-    : super(const SingleSelectionState());
+  SingleSelectionManager(this._selectionRepo) : super(const SingleSelectionState());
   Selection _currentSelection = Selection();
 
   void setSelection(Selection value) {
@@ -39,5 +37,13 @@ class SingleSelectionManager
             .toList(),
       ),
     );
+  }
+
+  Selection? getSelectedItem() {
+    try {
+      return state.selections.firstWhere((element) => element.isChecked);
+    } catch (e) {
+      return null;
+    }
   }
 }

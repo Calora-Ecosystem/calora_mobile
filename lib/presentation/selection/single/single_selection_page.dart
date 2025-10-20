@@ -56,7 +56,7 @@ class SingleSelectionPage
           ),
           const SizedBox(height: 16),
           GestureDetector(
-            onTap: () {},
+            onTap: () => onSave(manager.getSelectedItem() ?? Selection()),
             child: Container(
               decoration: BoxDecoration(
                 color: context.colors.accentSub,

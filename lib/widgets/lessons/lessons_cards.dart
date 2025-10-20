@@ -22,9 +22,7 @@ class LessonsCards extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               if (!lessons[index].isLocked)
-                context.router.push(
-                  TasksRoute(level: level, lessonInfo: lessons[index], gender: gender),
-                );
+                context.router.push(TasksRoute(level: level, lessonInfo: lessons[index]));
             },
             child: LessonCard(data: LessonData(lessons[index])),
           );
