@@ -10,6 +10,7 @@ import 'package:management/management.dart';
 @injectable
 class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   final StepRepo _stepRepo;
+
   // todo will be fix int the future
   late PedometerService _pedometerService;
 
@@ -24,7 +25,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
 
   Future<void> getSteps() async {
     await _stepRepo
-        .getSteps(0, offset: 0)
+        .getSteps(0, offset: 0, isSortDate: true)
         .handle(
           onStart: () => {},
           onData: (data) => {
@@ -42,7 +43,6 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
     _pedometerService = PedometerService(
       onTodayStepCountUpdated: (todaySteps) {},
       onError: (error) {
-        print('StepsPageError: $error');
       },
     );
     await _pedometerService.initializePedometer();

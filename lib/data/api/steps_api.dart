@@ -15,10 +15,11 @@ class StepsApi {
   StepsApi(this._dio);
 
   Future<List<StepsWithMetricsRequest>> getSteps(
-    int period, {
-    int skip = 0,
-    int take = 7,
-  }) async {
+      int period, {
+        int skip = 0,
+        int take = 7,
+        bool isSortDate = false,
+      }) async {
     final response = await _dio.get(
       'users/dailies',
       queryParameters: {
@@ -26,6 +27,7 @@ class StepsApi {
         "skip": skip,
         "take": take,
         "sortDirection": "Descending",
+        "sortPropName": isSortDate ? "date" : "",
       },
     );
 
@@ -40,7 +42,6 @@ class StepsApi {
   }
 
   Future<List<UserStatRequest>> getStats(DateTime from, DateTime to) async {
-    log("Query rangeService: from $from to $to");
 
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);

@@ -17,6 +17,7 @@ class StepRepoImpl extends StepRepo {
   Future<List<StepsWithMetricsRequest>> getSteps(
     int period, {
     int offset = 0,
+    bool isSortDate = false,
   }) async {
     final take = period == 0
         ? 1
@@ -26,7 +27,12 @@ class StepRepoImpl extends StepRepo {
 
     final skip = offset * take;
 
-    final response = await _stepsApi.getSteps(period, skip: skip, take: take);
+    final response = await _stepsApi.getSteps(
+      period,
+      skip: skip,
+      take: take,
+      isSortDate: isSortDate,
+    );
     return response;
   }
 

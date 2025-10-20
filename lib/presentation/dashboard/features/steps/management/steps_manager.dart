@@ -38,7 +38,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   }
 
   Future<void> getStats(int value) async {
-    log("ResultStepManageStatsCalled->$value");
     await stepRepo
         .getStats(state.period, offset: state.offset)
         .handle(
