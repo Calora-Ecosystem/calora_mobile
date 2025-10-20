@@ -108,81 +108,78 @@ class NotificationSettingSheetManager
   }
 
   void saveSettings(NotificationSettingType type) async {
-    try {
-      if (type == NotificationSettingType.waterReminder) {
-        final existing = state.existingReminders.firstWhere(
-          (r) => r.type == "Water",
-          orElse: () => ReminderRequest(time: "", type: "", menu: ""),
-        );
-        if (state.isEnabled) {
-          final time = _mapIndexToServerTime(state.selectedIndex, type);
-          if (existing.id != null) {
-            await _notificationRepo.deleteNotificationSetting(existing.id!);
-          }
-          await _notificationRepo.postNotificationSettings(
-            ReminderRequest(
-              time: time,
-              type: "Water",
-              menu: "Breakfast",
-            ), // Water uchun menu Breakfast
-          );
-        } else if (existing.id != null) {
-          publish(DeleteNotificationSetting(id: existing.id!));
+    if (type == NotificationSettingType.waterReminder) {
+      final existing = state.existingReminders.firstWhere(
+        (r) => r.type == "Water",
+        orElse: () => ReminderRequest(time: "", type: "", menu: ""),
+      );
+      if (state.isEnabled) {
+        final time = _mapIndexToServerTime(state.selectedIndex, type);
+        if (existing.id != null) {
           await _notificationRepo.deleteNotificationSetting(existing.id!);
         }
-      } else if (type == NotificationSettingType.mealReminder) {
-        final meals = [
-          {"menu": "Breakfast", "enabled": state.breakfastEnabled, "index": state.breakfastIndex},
-          {"menu": "Lunch", "enabled": state.lunchEnabled, "index": state.lunchIndex},
-          {"menu": "Dinner", "enabled": state.dinnerEnabled, "index": state.dinnerIndex},
-        ];
-        for (final meal in meals) {
-          final existing = state.existingReminders.firstWhere(
-            (r) => r.type == "Food" && r.menu == meal["menu"],
-            orElse: () => ReminderRequest(time: "", type: "", menu: ""),
-          );
-          if (meal["enabled"] as bool) {
-            final time = _mapIndexToServerTime(meal["index"] as int, type);
-            if (existing.id != null) {
-              await _notificationRepo.deleteNotificationSetting(existing.id!);
-            }
-            await _notificationRepo.postNotificationSettings(
-              ReminderRequest(time: time, type: "Food", menu: meal["menu"] as String),
-            );
-          } else if (existing.id != null) {
-            publish(DeleteNotificationSetting(id: existing.id!));
-            await _notificationRepo.deleteNotificationSetting(existing.id!);
-          }
-        }
-      } else if (type == NotificationSettingType.sleepReminder ||
-          type == NotificationSettingType.thirtyDayChallenges) {
+        await _notificationRepo.postNotificationSettings(
+          ReminderRequest(time: time, type: "Water", menu: "Breakfast"),
+        );
+      } else if (existing.id != null) {
+        publish(DeleteNotificationSetting(id: existing.id!));
+        await _notificationRepo.deleteNotificationSetting(existing.id!);
+      }
+    } else if (type == NotificationSettingType.mealReminder) {
+      final meals = [
+        MealReminderState(
+          menu: "Breakfast",
+          enabled: state.breakfastEnabled,
+          index: state.breakfastIndex,
+        ),
+        MealReminderState(menu: "Lunch", enabled: state.lunchEnabled, index: state.lunchIndex),
+        MealReminderState(menu: "Dinner", enabled: state.dinnerEnabled, index: state.dinnerIndex),
+      ];
+
+      for (final meal in meals) {
         final existing = state.existingReminders.firstWhere(
-          (r) =>
-              r.type ==
-              (type == NotificationSettingType.sleepReminder ? "Sleep" : "DailyChallenge"),
+          (r) => r.type == "Food" && r.menu == meal.menu,
           orElse: () => ReminderRequest(time: "", type: "", menu: ""),
         );
-        if (state.isEnabled && state.selectedTime != null) {
-          final time = _formatTimeOfDay(state.selectedTime!);
+
+        if (meal.enabled) {
+          final time = _mapIndexToServerTime(meal.index, type);
           if (existing.id != null) {
             await _notificationRepo.deleteNotificationSetting(existing.id!);
           }
           await _notificationRepo.postNotificationSettings(
-            ReminderRequest(
-              time: time,
-              type: type == NotificationSettingType.sleepReminder ? "Sleep" : "DailyChallenge",
-              menu: "Breakfast", // Sleep va DailyChallenge uchun menu Breakfast
-            ),
+            ReminderRequest(time: time, type: "Food", menu: meal.menu),
           );
         } else if (existing.id != null) {
           publish(DeleteNotificationSetting(id: existing.id!));
           await _notificationRepo.deleteNotificationSetting(existing.id!);
         }
       }
-      publish(SaveNotificationSettings(type: type, data: null));
-    } catch (e) {
-      print("Xato yuz berdi: $e");
+    } else if (type == NotificationSettingType.sleepReminder ||
+        type == NotificationSettingType.thirtyDayChallenges) {
+      final existing = state.existingReminders.firstWhere(
+        (r) =>
+            r.type == (type == NotificationSettingType.sleepReminder ? "Sleep" : "DailyChallenge"),
+        orElse: () => ReminderRequest(time: "", type: "", menu: ""),
+      );
+      if (state.isEnabled && state.selectedTime != null) {
+        final time = _formatTimeOfDay(state.selectedTime!);
+        if (existing.id != null) {
+          await _notificationRepo.deleteNotificationSetting(existing.id!);
+        }
+        await _notificationRepo.postNotificationSettings(
+          ReminderRequest(
+            time: time,
+            type: type == NotificationSettingType.sleepReminder ? "Sleep" : "DailyChallenge",
+            menu: "Breakfast",
+          ),
+        );
+      } else if (existing.id != null) {
+        publish(DeleteNotificationSetting(id: existing.id!));
+        await _notificationRepo.deleteNotificationSetting(existing.id!);
+      }
     }
+    publish(SaveNotificationSettings(type: type, data: null));
   }
 
   int _mapServerTimeToIndex(String time, NotificationSettingType type) {
@@ -236,4 +233,12 @@ class NotificationSettingSheetManager
     final minute = time.minute.toString().padLeft(2, '0');
     return "$hour:$minute:00";
   }
+}
+
+class MealReminderState {
+  final String menu;
+  final bool enabled;
+  final int index;
+
+  MealReminderState({required this.menu, required this.enabled, required this.index});
 }

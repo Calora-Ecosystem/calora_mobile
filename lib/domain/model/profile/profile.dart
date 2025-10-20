@@ -20,4 +20,4 @@ abstract class Profile with _$Profile {
   factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
 }
 
-enum Gender { male, female }
+enum Gender { Male, Female }

@@ -1,6 +1,9 @@
 import 'dart:math';
 
+import 'package:calora/common/base/gender_store.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/domain/model/norms/norms.dart';
+import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/domain/model/questions/questions.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
@@ -55,7 +58,7 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
 
     final request = QuestionsRequest(
       name: profile.name,
-      gender: profile.gender,
+      gender: profile.gender?.name,
       purposeIds: profile.purposeIds,
       birthDate: profile.birthDate,
       height: profile.height,
@@ -65,6 +68,7 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
       bmi: bmi,
       language: 'Uzbek',
     );
+    getIt<GenderStore>().set(profile.gender ?? Gender.Male);
     _repo
         .sendTargetWeight(NormsRequest(metric: 'Weight', value: profile.targetWeight ?? 0))
         .handle(

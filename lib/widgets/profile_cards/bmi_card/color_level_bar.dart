@@ -2,18 +2,19 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class ColorIndicatorBar extends StatelessWidget {
-  final double indicatorPosition;
+  final double bmi;
 
-  const ColorIndicatorBar({Key? key, required this.indicatorPosition}) : super(key: key);
+  const ColorIndicatorBar({Key? key, required this.bmi}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     List<Color> colors = [
-      context.colors.informationBase,
-      context.colors.accentSub,
-      context.colors.awayBase,
-      context.colors.warningBase,
-      context.colors.errorBase,
+      context.colors.blue,
+      context.colors.green,
+      context.colors.yellow,
+      context.colors.orange,
+      context.colors.red,
+      context.colors.darkRed,
     ];
 
     return Column(
@@ -22,7 +23,7 @@ class ColorIndicatorBar extends StatelessWidget {
         Column(
           children: [
             Align(
-              alignment: Alignment((indicatorPosition * 2) - 1, 0),
+              alignment: Alignment((_calculateIndicatorPosition(bmi) * 2) - 1, 0),
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 0),
                 child: CustomPaint(
@@ -31,7 +32,6 @@ class ColorIndicatorBar extends StatelessWidget {
                 ),
               ),
             ),
-
             Container(
               height: 20,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
@@ -55,6 +55,12 @@ class ColorIndicatorBar extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  double _calculateIndicatorPosition(double bmi) {
+    if (bmi <= 0) return 0.0;
+    if (bmi >= 40) return 1.0;
+    return (bmi / 40).clamp(0.0, 1.0);
   }
 }
 

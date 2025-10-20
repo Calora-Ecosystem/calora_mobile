@@ -34,5 +34,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: TasksProcessRoute.page),
     AutoRoute(page: FinishTaskRoute.page),
     AutoRoute(page: ProgressRoute.page),
+    AutoRoute(page: SlimmingRoute.page),
   ];
 }

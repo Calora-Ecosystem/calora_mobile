@@ -1,5 +1,7 @@
+import 'package:calora/common/extensions/bottom_sheet.dart';
+import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
-import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/lessons/lesson_card.dart' show LessonCard;
 import 'package:calora/widgets/task/task_info_page.dart';
 import 'package:calora/widgets/task/task_parametrs_widget.dart';
@@ -14,7 +16,17 @@ class TasksCards extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TaskParametrsWidget(id: lessonInfo.id, lessonInfo: lessonInfo),
+        TaskParametersWidget(
+          title: '${lessonInfo.id}-kun mashqlari bilan tanishing'.text(20, 24, 600),
+          parameters: [
+            ParameterItem(name: Strings.degree, value: 'Yengil'),
+            ParameterItem(name: 'Kkal', value: '${lessonInfo.calories}'),
+            ParameterItem(name: Strings.duration, value: '${lessonInfo.duration}'),
+          ],
+          bottomLabel: Strings.exercises,
+          bottomCount: lessonInfo.tasks.length,
+          onChangePressed: () {},
+        ),
         Expanded(
           child: ListView.separated(
             physics: const BouncingScrollPhysics(),
@@ -35,15 +47,6 @@ class TasksCards extends StatelessWidget {
   }
 
   void _showTask(BuildContext context, TaskInfo taskInfo) {
-    showModalBottomSheet(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      backgroundColor: context.colors.white,
-      context: context,
-      builder: (context) {
-        return TaskInfoPage(taskInfo: taskInfo);
-      },
-    );
+    context.showAppBottomSheet(child: TaskInfoPage(taskInfo: taskInfo));
   }
 }

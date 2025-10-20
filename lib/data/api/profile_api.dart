@@ -22,7 +22,7 @@ class ProfileApi {
   }
 
   Future<Response> updateProfile(Map<String, dynamic> data) async {
-    return _dio.put('/users/extras', data: data);
+    return _dio.post('/users/extras', data: data);
   }
 
   Future<DailyNormsInfo> getDailyNorms() async {

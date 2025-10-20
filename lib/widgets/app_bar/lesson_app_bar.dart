@@ -37,7 +37,6 @@ class LessonAppBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 12),
-            // Birinchi qator: Back button va Settings
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -66,7 +65,6 @@ class LessonAppBar extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            // Ikkinchi qator: Rating/Title va Indicator
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
