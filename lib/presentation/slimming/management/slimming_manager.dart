@@ -6,12 +6,12 @@ import 'package:management/management.dart';
 @injectable
 class SlimmingManager extends Manager<SlimmingState, SlimmingEffect> {
   final VideoCourseRepo _repo;
-  SlimmingManager(this._repo) : super(const SlimmingState());
+  SlimmingManager(this._repo) : super(SlimmingState());
 
   Future<void> getVideoCourses() async {
     await _repo.getVideoCourses().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) => emit(state.copyWith(videoCourses: data, isLoading: false)),
+      onData: (data) => emit(state.copyWith(videoCourse: data, isLoading: false)),
       onError: (error) => emit(state.copyWith(isLoading: false)),
     );
   }

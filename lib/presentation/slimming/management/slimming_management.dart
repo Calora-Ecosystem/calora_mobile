@@ -5,10 +5,8 @@ part 'slimming_management.freezed.dart';
 
 @freezed
 abstract class SlimmingState with _$SlimmingState {
-  const factory SlimmingState({
-    @Default([]) List<VideoCourseInfo> videoCourses,
-    @Default(false) bool isLoading,
-  }) = _SlimmingState;
+  factory SlimmingState({CoursesInfo? videoCourse, @Default(false) bool isLoading}) =
+      _SlimmingState;
 }
 
 @freezed

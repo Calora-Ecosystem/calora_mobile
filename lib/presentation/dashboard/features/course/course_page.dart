@@ -53,7 +53,7 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
   }
 
   void _openWeightLossCourse(BuildContext context, CourseState state) {
-    // context.router.push(SlimmingRoute());
+    context.router.push(SlimmingRoute());
   }
 
   void _openChallenge(BuildContext context, CourseState state) {

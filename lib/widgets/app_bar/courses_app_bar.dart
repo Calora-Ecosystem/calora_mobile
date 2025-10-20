@@ -3,10 +3,18 @@ import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
+enum CoursesType { bulking, slimming }
+
 class CoursesAppBar extends StatelessWidget {
   final Future<Gender> gender;
+  final CoursesType type;
   final void Function() openInfoSheet;
-  const CoursesAppBar({super.key, required this.openInfoSheet, required this.gender});
+  const CoursesAppBar({
+    super.key,
+    required this.openInfoSheet,
+    required this.gender,
+    required this.type,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +22,12 @@ class CoursesAppBar extends StatelessWidget {
       child: Stack(
         children: [
           gender == Gender.Female
-              ? Assets.images.femaleSlimmingBackgorund.image(fit: BoxFit.cover)
-              : Assets.images.slimmingBackground.image(fit: BoxFit.cover),
+              ? (type == CoursesType.slimming
+                    ? Assets.images.femaleSlimmingBackgorund.image(fit: BoxFit.cover)
+                    : Assets.images.femaleMassGainCourseBackground.image(fit: BoxFit.cover))
+              : (type == CoursesType.slimming
+                    ? Assets.images.slimmingBackground.image(fit: BoxFit.cover)
+                    : Assets.images.massGainCourseBackgorund.image(fit: BoxFit.cover)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
