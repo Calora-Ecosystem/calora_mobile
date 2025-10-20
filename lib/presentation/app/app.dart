@@ -16,11 +16,13 @@ import 'package:management/management.dart';
 import 'management/app_management.dart';
 import 'management/app_manager.dart';
 
+
 @RoutePage()
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
-  final _appRouter = getIt<AppRouter>();
+  // Remove this line from here
+  // final _appRouter = getIt<AppRouter>();
 
   @override
   void init(BuildContext context, AppManager manager) {
@@ -29,6 +31,9 @@ class App extends Managed<AppManager, AppState, AppEffect> {
 
   @override
   Widget builder(context, manager, state) {
+    // Get the router here instead
+    final appRouter = getIt<AppRouter>();
+
     return EasyLocalization(
       supportedLocales: Strings.supportedLocales,
       path: Assets.localization.translations,
@@ -45,7 +50,9 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: context.theme,
-              routerConfig: _appRouter.config(deepLinkBuilder: (_) => DeepLink([_initialRoute()])),
+              routerConfig: appRouter.config(
+                  deepLinkBuilder: (_) => DeepLink([_initialRoute()])
+              ),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
                 return MediaQuery(
@@ -55,7 +62,10 @@ class App extends Managed<AppManager, AppState, AppEffect> {
                       maxScaleFactor: 1.2,
                     ),
                   ),
-                  child: DisplayWidget(key: ValueKey(state.language), child: child!),
+                  child: DisplayWidget(
+                      key: ValueKey(state.language),
+                      child: child!
+                  ),
                 );
               },
             ),
@@ -70,7 +80,8 @@ class App extends Managed<AppManager, AppState, AppEffect> {
 
     if (isLogin) {
       return DashboardRoute();
-    } else
+    } else {
       return SelectLanguageRoute();
+    }
   }
 }
