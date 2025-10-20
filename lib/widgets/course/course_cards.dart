@@ -26,7 +26,7 @@ class CourseCards extends StatelessWidget {
           onTap: onTapHealthyWeightLoss,
           title: Strings.healthyWeightLossClasses,
           description: Strings.videoLessonsOnlosingWeight,
-          image: gender == Gender.female
+          image: gender == Gender.Female
               ? Assets.images.femaleWeightLoss
               : Assets.images.healthyWeightLoss,
         ),
@@ -35,7 +35,7 @@ class CourseCards extends StatelessWidget {
           onTap: onTapHealthyMassGain,
           title: Strings.healthyMassGainClasses,
           description: Strings.videoLessonsOnbuildingBody,
-          image: gender == Gender.female
+          image: gender == Gender.Female
               ? Assets.images.femaleGetMass
               : Assets.images.gainingHealthyMass,
         ),
@@ -44,7 +44,7 @@ class CourseCards extends StatelessWidget {
           onTap: onTapDay30WeightLossWorkout,
           title: Strings.day30WeightLossWorkout,
           description: Strings.day30ExerciseWeightLossProgram,
-          image: gender == Gender.female
+          image: gender == Gender.Female
               ? Assets.images.femaleChallenge
               : Assets.images.day30WeightLossWorkout,
         ),

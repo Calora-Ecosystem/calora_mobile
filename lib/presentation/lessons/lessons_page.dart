@@ -50,7 +50,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
               child: SizedBox(
                 height: 200,
                 width: 200,
-                child: gender == Gender.female
+                child: gender == Gender.Female
                     ? Assets.images.femaleCourseImage.image(fit: BoxFit.cover)
                     : Assets.images.courseImage.image(fit: BoxFit.cover),
               ),

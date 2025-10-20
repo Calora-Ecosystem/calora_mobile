@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/profile/profile.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'questions.freezed.dart';
@@ -7,7 +8,7 @@ part 'questions.g.dart';
 abstract class Questions with _$Questions {
   const factory Questions({
     String? name,
-    String? gender,
+    Gender? gender,
     List<int>? purposeIds,
     DateTime? birthDate,
     double? height,

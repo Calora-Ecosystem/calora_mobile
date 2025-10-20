@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/shimmer/shimmer.dart';
@@ -74,15 +75,9 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       ),
                       SizedBox(height: 16),
                       SettingsCard(
-                        onAccountTap: () {
-                          _openAccountDetailPage(context);
-                        },
-                        onNormsTap: () {
-                          _openNormsPage(context);
-                        },
-                        onLanguageTap: () {
-                          _showLanguageBottomSheet(context);
-                        },
+                        onAccountTap: () => _openAccountDetailPage(context, manager),
+                        onNormsTap: () => _openNormsPage(context),
+                        onLanguageTap: () => _showLanguageBottomSheet(context),
                         onNotificationsTap: () {
                           _openNotificationSettingsPage(context);
                         },
@@ -114,8 +109,9 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
     );
   }
 
-  void _openAccountDetailPage(BuildContext context) {
+  void _openAccountDetailPage(BuildContext context, ProfileManager manager) {
     context.router.push(AccountDetailRoute(profile: Profile()));
+    manager.getProfile();
   }
 
   void _openProfileDetailPage(BuildContext context, String userId) {
@@ -131,14 +127,11 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
   }
 
   void _showHelpBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: context.colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => const HelpPage(),
+    context.showAppBottomSheet(
+      minChildSize: 0.2,
+      initialChildSize: 0.3,
+      maxChildSize: 0.3,
+      child: const HelpPage(),
     );
   }
 

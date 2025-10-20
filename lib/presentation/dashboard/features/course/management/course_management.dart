@@ -5,7 +5,7 @@ part 'course_management.freezed.dart';
 
 @freezed
 abstract class CourseState with _$CourseState {
-  const factory CourseState({@Default(Gender.female) Gender gender}) = _CourseState;
+  const factory CourseState({@Default(Gender.Female) Gender gender}) = _CourseState;
 }
 
 @freezed

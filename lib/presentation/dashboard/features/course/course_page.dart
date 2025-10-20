@@ -16,7 +16,9 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
   const CoursePage({super.key});
 
   @override
-  void init(context, manager) {}
+  void init(context, manager) {
+    manager.loadGender();
+  }
 
   @override
   Widget builder(context, manager, state) {
@@ -37,11 +39,9 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                   const SizedBox(height: 8),
                   CourseCards(
                     gender: state.gender,
-                    onTapHealthyWeightLoss: () {},
+                    onTapHealthyWeightLoss: () => _openWeightLossCourse(context, state),
                     onTapHealthyMassGain: () {},
-                    onTapDay30WeightLossWorkout: () {
-                      _openChallenge(context, state);
-                    },
+                    onTapDay30WeightLossWorkout: () => _openChallenge(context, state),
                   ),
                 ],
               ),
@@ -50,6 +50,10 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
         ],
       ),
     );
+  }
+
+  void _openWeightLossCourse(BuildContext context, CourseState state) {
+    // context.router.push(SlimmingRoute());
   }
 
   void _openChallenge(BuildContext context, CourseState state) {

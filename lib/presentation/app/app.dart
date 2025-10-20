@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/flavor/flavor_config.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -19,7 +20,7 @@ import 'management/app_manager.dart';
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
-  final _appRouter = AppRouter();
+  final _appRouter = getIt<AppRouter>();
 
   @override
   void init(BuildContext context, AppManager manager) {

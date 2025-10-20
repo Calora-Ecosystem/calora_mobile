@@ -1,12 +1,13 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../../../common/gen/assets.gen.dart';
 
 class GenderWidget extends StatefulWidget {
-  final Function(String)? onGenderSelected;
+  final Function(Gender)? onGenderSelected;
 
   const GenderWidget({super.key, this.onGenderSelected});
 
@@ -15,9 +16,9 @@ class GenderWidget extends StatefulWidget {
 }
 
 class _GenderWidgetState extends State<GenderWidget> {
-  String? selected;
+  Gender? selected;
 
-  void _selectGender(String gender) {
+  void _selectGender(Gender gender) {
     setState(() {
       selected = gender;
     });
@@ -29,14 +30,14 @@ class _GenderWidgetState extends State<GenderWidget> {
     return Row(
       children: [
         genderButton(
-          gender: 'Male',
+          gender: Gender.Male,
           icon: Assets.icons.male.svg(),
           label: Strings.male,
           borderColor: context.colors.neutral600Secondary,
         ),
         const SizedBox(width: 8),
         genderButton(
-          gender: 'Female',
+          gender: Gender.Female,
           icon: Assets.icons.female.svg(),
           label: Strings.female,
           borderColor: context.colors.neutral600Secondary,
@@ -46,7 +47,7 @@ class _GenderWidgetState extends State<GenderWidget> {
   }
 
   Widget genderButton({
-    required String gender,
+    required Gender gender,
     required Widget icon,
     required String label,
     required Color borderColor,

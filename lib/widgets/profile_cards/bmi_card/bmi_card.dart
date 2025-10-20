@@ -38,12 +38,12 @@ class BmiCard extends StatelessWidget {
                     color: context.colors.errorLighter,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: "Semirib ketish II bosqichi".text(14, 16, 400).c(context.colors.errorBase),
+                  child: getBmiCategory(bmi).text(14, 16, 400).c(context.colors.errorBase),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            ColorIndicatorBar(indicatorPosition: 0.5),
+            ColorIndicatorBar(bmi: bmi),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -103,6 +103,15 @@ class BmiCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String getBmiCategory(double bmi) {
+    if (bmi < 18.5) return Strings.thinnes;
+    if (bmi < 25.0) return Strings.normal;
+    if (bmi < 30.0) return Strings.overWeight;
+    if (bmi < 35.0) return Strings.obesityStage1;
+    if (bmi < 40.0) return Strings.obesityStage2;
+    return Strings.obesityStage3;
   }
 
   double calculateWeightProgress(double weight, double targetWeight) {

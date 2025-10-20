@@ -36,12 +36,7 @@ class AccountDetailPage
   Widget builder(context, manager, state) {
     return Scaffold(
       backgroundColor: context.colors.white,
-      appBar: CustomAppBar(
-        title: Strings.accountInformation,
-        onBack: () {
-          _back(context);
-        },
-      ),
+      appBar: CustomAppBar(title: Strings.accountInformation, onBack: () => _back(context)),
       body: Stack(
         children: [
           _uiBuilder(state, context, manager),
@@ -238,6 +233,6 @@ class AccountDetailPage
   }
 
   void _back(BuildContext context) {
-    context.router.pop(context);
+    context.router.pop();
   }
 }

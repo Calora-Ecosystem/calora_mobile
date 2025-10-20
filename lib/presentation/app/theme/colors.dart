@@ -41,4 +41,10 @@ class DefaultThemeColors {
   final black = Color(0xFF000000);
   final neutral200Stroke = Color(0xFFE2E8F0);
   final tertiaryContainer = Color(0xFFF4F4F4);
+  final blue = Color(0xFF007BFF);
+  final green = Color(0xFF2FA84F);
+  final yellow = Color(0xFFF2C94C);
+  final orange = Color(0xFFF2994A);
+  final red = Color(0xFFEB5757);
+  final darkRed = Color(0xFF8B0000);
 }
