@@ -10,7 +10,7 @@ part 'steps_management.freezed.dart';
 abstract class StepsState with _$StepsState {
   const factory StepsState({
     @Default([]) List<StepsWithMetricsRequest> steps,
-    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0)) MetricsRequest metrics,
+    @Default(MetricsRequest(foots: 0.0, distance: 0, kcal: 0)) MetricsRequest metrics,
     @Default([]) List<NormsRequest> norms,
     @Default([]) List<UserStatRequest> userStates,
     @Default(0) int stepCount,

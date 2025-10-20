@@ -15,11 +15,11 @@ class StepsApi {
   StepsApi(this._dio);
 
   Future<List<StepsWithMetricsRequest>> getSteps(
-      int period, {
-        int skip = 0,
-        int take = 7,
-        bool isSortDate = false,
-      }) async {
+    int period, {
+    int skip = 0,
+    int take = 7,
+    bool isSortDate = false,
+  }) async {
     final response = await _dio.get(
       'users/dailies',
       queryParameters: {
@@ -42,7 +42,6 @@ class StepsApi {
   }
 
   Future<List<UserStatRequest>> getStats(DateTime from, DateTime to) async {
-
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
 
@@ -73,7 +72,13 @@ class StepsApi {
   Future<MetricsRequest> getUserMetrics() async {
     final response = await _dio.get('users/steps/metrics');
     final data = response.data as Map<String, dynamic>;
-    return MetricsRequest(foots: 100, distance: 100, kcal: 50);
+    final content = data["content"] as List<dynamic>;
+    final json = content.first as Map<String, dynamic>;
+    return MetricsRequest(
+      foots: (json['foots'] as num?)?.toDouble() ?? 0.0,
+      distance: (json['distance'] as num?)?.toDouble() ?? 0.0,
+      kcal: (json['kcal'] as num?)?.toDouble() ?? 0.0,
+    );
   }
 
   Future<List<NormsRequest>> getNorms() async {
