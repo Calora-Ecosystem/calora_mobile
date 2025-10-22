@@ -110,11 +110,10 @@ class ChartWidget extends StatelessWidget {
               barGroups: primaryValues.asMap().entries.map((entry) {
                 final index = entry.key;
                 final value = entry.value;
-                final barColor = target != null && value < target!
-                    ? context.colors.textSub
-                    : context.colors.blueAccent;
-
-                // 🔥 Nol qiymatni ham rangli qilib ko‘rsatish uchun:
+                final barColor = context.colors.blueAccent;
+                // final barColor = target != null && value < target!
+                //     ? context.colors.textSub
+                //     : context.colors.blueAccent;
                 final displayValue = value == 0 ? maxY * 0.01 : value;
 
                 return BarChartGroupData(

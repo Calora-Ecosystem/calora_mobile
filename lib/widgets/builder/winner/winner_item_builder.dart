@@ -28,7 +28,10 @@ class WinnerItemBuilder extends StatelessWidget {
           ],
         ),
         SizedBox(height: 8),
-        userStat.firstName.text(16, 20, 500).c(context.colors.neutral900Primary),
+        userStat.firstName
+            .text(16, 20, 500)
+            .c(context.colors.neutral900Primary)
+            .copyWith(overflow: TextOverflow.ellipsis),
         SizedBox(height: 8),
         Container(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),

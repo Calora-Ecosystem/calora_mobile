@@ -17,6 +17,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   @override
   void init(context, manager) {
     manager.getUserGender();
+    manager.requestPedometerPermissions();
   }
 
   @override
