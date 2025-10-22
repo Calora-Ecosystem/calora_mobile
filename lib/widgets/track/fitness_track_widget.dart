@@ -1,3 +1,4 @@
+import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -143,13 +144,13 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                             ChartWidget(
                               type: ChartType.weekly,
                               primaryValues: widget.primaryValues,
-                              target: 2500,
+                              target: widget.goal.toDouble(),
                             )
                           else
                             ChartWidget(
                               type: ChartType.monthly,
                               primaryValues: widget.primaryValues,
-                              target: 12000,
+                              target: widget.goal.toDouble(),
                             ),
                           const SizedBox(height: 12),
                           Row(
@@ -170,7 +171,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 children: [
                                   Assets.icons.icDistance.svg(),
                                   const SizedBox(height: 4),
-                                  '${widget.stepCount * 0.72}'
+                                  '${(widget.stepCount * 0.72).asFixedTruncated(2)}'
                                       .text(16, 20, 500)
                                       .c(context.colors.textStrong),
                                   const SizedBox(height: 2),

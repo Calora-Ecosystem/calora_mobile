@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
@@ -15,11 +12,11 @@ class StepsApi {
   StepsApi(this._dio);
 
   Future<List<StepsWithMetricsRequest>> getSteps(
-      int period, {
-        int skip = 0,
-        int take = 7,
-        bool isSortDate = false,
-      }) async {
+    int period, {
+    int skip = 0,
+    int take = 7,
+    bool isSortDate = false,
+  }) async {
     final response = await _dio.get(
       'users/dailies',
       queryParameters: {
@@ -42,16 +39,12 @@ class StepsApi {
   }
 
   Future<List<UserStatRequest>> getStats(DateTime from, DateTime to) async {
-
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
 
     final response = await _dio.get(
       "/users/steps/stat",
-      queryParameters: {
-        "from": fromUtc.toIso8601String(),
-        "to": toUtc.toIso8601String(),
-      },
+      queryParameters: {"from": fromUtc.toIso8601String(), "to": toUtc.toIso8601String()},
     );
 
     final data = response.data;
@@ -90,10 +83,7 @@ class StepsApi {
     await _dio.delete('/users/norms/$metric');
   }
 
-  Future<void> sendDailyData({
-    required String metric,
-    required int value,
-  }) async {
+  Future<void> sendDailyData({required String metric, required int value}) async {
     final body = {
       "metric": metric,
       "value": value,
@@ -102,9 +92,7 @@ class StepsApi {
     await _dio.post('/users/dailies', data: body);
   }
 
-  Future<void> sendStepDataDateRange({
-    List<StepsWithMetricsRequest> steps = const [],
-  }) async {
+  Future<void> sendStepDataDateRange({List<StepsWithMetricsRequest> steps = const []}) async {
     final payload = steps.map((element) => element.toJson()).toList();
     await _dio.post('/users/dailies/batch', data: payload);
   }
