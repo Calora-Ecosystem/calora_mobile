@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -26,7 +24,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   late PedometerService _pedometerService;
   GlobalKey globalKey = GlobalKey();
-  int _previousTabIndex = 0; // Add this to track previous index
+  int _previousTabIndex = 0;
 
   @override
   void init(context, manager) {
@@ -65,8 +63,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
           final tabController = DefaultTabController.of(context);
           tabController.addListener(() {
             // Only call changePeriod when animation is complete AND index actually changed
-            if (!tabController.indexIsChanging &&
-                tabController.index != _previousTabIndex) {
+            if (!tabController.indexIsChanging && tabController.index != _previousTabIndex) {
               _previousTabIndex = tabController.index;
               manager.changePeriod(tabController.index);
             }
@@ -74,18 +71,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
           return Scaffold(
             body: Stack(
               children: [
-                Positioned.fill(
-                  child: Image.asset(
-                    Assets.icons.background.path,
-                    fit: BoxFit.fill,
-                  ),
-                ),
+                Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Column(
                       children: [
                         Align(
@@ -123,9 +112,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 FitnessTrackWidget(
-                                  primaryValues: state.steps
-                                      .map((e) => e.value)
-                                      .toList(),
+                                  primaryValues: state.steps.map((e) => e.value).toList(),
                                   globalKey: globalKey,
                                   goal: stepValue.toInt(),
                                   metrics: state.metrics,
@@ -145,27 +132,16 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                   },
                                 ),
                                 state.isLoading
-                                    ? const Center(
-                                        child: CircularProgressIndicator(),
-                                      )
+                                    ? const Center(child: CircularProgressIndicator())
                                     : PodiumWidget(
-                                        firstPosition:
-                                            state.userStates.isNotEmpty
-                                            ? WinnerItemBuilder(
-                                                userStat: state.userStates[0],
-                                              )
+                                        firstPosition: state.userStates.isNotEmpty
+                                            ? WinnerItemBuilder(userStat: state.userStates[0])
                                             : const SizedBox.shrink(),
-                                        secondPosition:
-                                            state.userStates.length > 1
-                                            ? WinnerItemBuilder(
-                                                userStat: state.userStates[1],
-                                              )
+                                        secondPosition: state.userStates.length > 1
+                                            ? WinnerItemBuilder(userStat: state.userStates[1])
                                             : const SizedBox.shrink(),
-                                        thirdPosition:
-                                            state.userStates.length > 2
-                                            ? WinnerItemBuilder(
-                                                userStat: state.userStates[2],
-                                              )
+                                        thirdPosition: state.userStates.length > 2
+                                            ? WinnerItemBuilder(userStat: state.userStates[2])
                                             : const SizedBox.shrink(),
                                       ),
                                 const SizedBox(height: 2),
@@ -207,9 +183,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       builder: (_) => EditStepGoalPage(
         initialValue: 16000,
         onSave: (value) {
-          manager.updateNorm(
-            NormsRequest(metric: "Step", value: value.toDouble()),
-          );
+          manager.updateNorm(NormsRequest(metric: "Step", value: value.toDouble()));
         },
       ),
     );

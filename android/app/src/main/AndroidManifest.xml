@@ -6,6 +6,8 @@
 
     <!-- Activity recognition for step counting -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+
 
     <!-- Location permissions (optional for better accuracy) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

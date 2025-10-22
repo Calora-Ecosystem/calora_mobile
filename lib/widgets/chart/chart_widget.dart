@@ -9,27 +9,21 @@ enum ChartType { monthly, weekly }
 class ChartWidget extends StatelessWidget {
   final ChartType type;
   final List<double> primaryValues;
-
   final double? target;
-
   const ChartWidget({super.key, required this.type, required this.primaryValues, this.target});
-
   @override
   Widget build(BuildContext context) {
     if (primaryValues.isEmpty) {
       return const SizedBox.shrink();
     }
-
     final average = primaryValues.reduce((a, b) => a + b) / primaryValues.length;
     final total = primaryValues.reduce((a, b) => a + b);
-
     final maxValue = [
       ...primaryValues,
       if (target != null) target!,
       average,
     ].reduce((a, b) => a > b ? a : b);
     final maxY = maxValue * 1.1;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -114,7 +108,6 @@ class ChartWidget extends StatelessWidget {
                 final barColor = target != null && value < target!
                     ? context.colors.textSub
                     : context.colors.blueAccent;
-
                 return BarChartGroupData(
                   x: index,
                   barRods: [
