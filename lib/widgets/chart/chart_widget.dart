@@ -9,7 +9,6 @@ enum ChartType { monthly, weekly }
 class ChartWidget extends StatelessWidget {
   final ChartType type;
   final List<double> primaryValues;
-
   final double? target;
 
   const ChartWidget({super.key, required this.type, required this.primaryValues, this.target});
@@ -111,15 +110,17 @@ class ChartWidget extends StatelessWidget {
               barGroups: primaryValues.asMap().entries.map((entry) {
                 final index = entry.key;
                 final value = entry.value;
-                final barColor = target != null && value < target!
-                    ? context.colors.textSub
-                    : context.colors.blueAccent;
+                final barColor = context.colors.blueAccent;
+                // final barColor = target != null && value < target!
+                //     ? context.colors.textSub
+                //     : context.colors.blueAccent;
+                final displayValue = value == 0 ? maxY * 0.01 : value;
 
                 return BarChartGroupData(
                   x: index,
                   barRods: [
                     BarChartRodData(
-                      toY: value,
+                      toY: displayValue,
                       color: barColor,
                       width: type == ChartType.monthly ? 4 : 12,
                       borderRadius: BorderRadius.circular(2),
