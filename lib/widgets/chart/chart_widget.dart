@@ -15,19 +15,24 @@ class ChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (primaryValues.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    final int itemCount = type == ChartType.weekly ? 7 : 30;
 
-    final average = primaryValues.reduce((a, b) => a + b) / primaryValues.length;
-    final total = primaryValues.reduce((a, b) => a + b);
+    // 🔹 Agar kam bo‘lsa, 0 bilan to‘ldiramiz
+    final values = List<double>.generate(
+      itemCount,
+      (i) => i < primaryValues.length ? primaryValues[i] : 0,
+    );
+
+    final average = values.isNotEmpty ? values.reduce((a, b) => a + b) / values.length : 0;
+    final total = values.isNotEmpty ? values.reduce((a, b) => a + b) : 0;
 
     final maxValue = [
-      ...primaryValues,
+      ...values,
       if (target != null) target!,
       average,
     ].reduce((a, b) => a > b ? a : b);
-    final maxY = maxValue * 1.1;
+
+    final maxY = maxValue == 0 ? 10 : maxValue * 1.1;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +56,7 @@ class ChartWidget extends StatelessWidget {
               alignment: type == ChartType.monthly
                   ? BarChartAlignment.spaceBetween
                   : BarChartAlignment.spaceAround,
-              maxY: maxY,
+              maxY: maxY.toDouble(),
               borderData: FlBorderData(show: false),
               gridData: FlGridData(
                 show: true,
@@ -99,29 +104,22 @@ class ChartWidget extends StatelessWidget {
               extraLinesData: ExtraLinesData(
                 horizontalLines: [
                   if (target != null)
-                    HorizontalLine(
-                      y: target!,
-                      color: context.colors.iconSoft,
-                      strokeWidth: 1.5,
-                      dashArray: null,
-                    ),
+                    HorizontalLine(y: target!, color: context.colors.iconSoft, strokeWidth: 1),
                 ],
               ),
-              barGroups: primaryValues.asMap().entries.map((entry) {
+              barGroups: values.asMap().entries.map((entry) {
                 final index = entry.key;
                 final value = entry.value;
-                final barColor = context.colors.blueAccent;
-                // final barColor = target != null && value < target!
-                //     ? context.colors.textSub
-                //     : context.colors.blueAccent;
-                final displayValue = value == 0 ? maxY * 0.01 : value;
+
+                final adjustedValue = value == 0 ? (maxY * 0.05) : value;
+                final color = context.colors.blueAccent;
 
                 return BarChartGroupData(
                   x: index,
                   barRods: [
                     BarChartRodData(
-                      toY: displayValue,
-                      color: barColor,
+                      toY: adjustedValue,
+                      color: color,
                       width: type == ChartType.monthly ? 4 : 12,
                       borderRadius: BorderRadius.circular(2),
                     ),

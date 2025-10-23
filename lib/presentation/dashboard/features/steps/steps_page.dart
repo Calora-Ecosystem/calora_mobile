@@ -112,7 +112,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 FitnessTrackWidget(
-                                  primaryValues: state.steps.map((e) => e.value).toList(),
+                                  primaryValues: state.primaryValues,
                                   globalKey: globalKey,
                                   goal: stepValue.toInt(),
                                   metrics: state.metrics,
