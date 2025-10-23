@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -22,7 +24,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     _timer = Timer.periodic(const Duration(hours: 1), (_) {
       sendDailyData();
     });
-
     sendDailyData();
   }
 
@@ -31,9 +32,22 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         .getSteps(state.period, offset: state.offset)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) => emit(state.copyWith(steps: data, isLoading: false)),
+          onData: (data) {
+            List<double> primaryValues = [];
+
+            if (state.period == 1) {
+              primaryValues = _buildWeeklySteps(data);
+            } else if (state.period == 2) {
+              primaryValues = _buildMonthlySteps(data);
+            }
+
+            emit(state.copyWith(steps: data, primaryValues: primaryValues, isLoading: false));
+          },
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (_) => emit(state.copyWith(isLoading: false)),
+          onError: (e) {
+            log('Error in getSteps: $e');
+            emit(state.copyWith(isLoading: false));
+          },
         );
   }
 
@@ -42,8 +56,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         .getStats(state.period, offset: state.offset)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) =>
-              emit(state.copyWith(userStates: data, isLoading: false)),
+          onData: (data) => emit(state.copyWith(userStates: data, isLoading: false)),
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (_) => emit(state.copyWith(isLoading: false)),
         );
@@ -107,8 +120,52 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   }
 
   void changeOffset(int change) {
-    emit(state.copyWith(offset: state.offset + change));
+    final newOffset = state.offset + change;
+    final clampedOffset = newOffset < 0 ? 0 : newOffset;
+    if (clampedOffset == state.offset) return;
+    emit(state.copyWith(offset: clampedOffset));
     getSteps();
     getStats(2);
+  }
+
+  List<double> _buildWeeklySteps(List<StepsWithMetricsRequest> data) {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final List<double> week = List.filled(7, 0);
+
+    for (int i = 0; i < 7; i++) {
+      final currentDay = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day + i);
+
+      final item = data.firstWhere(
+        (e) =>
+            e.date.year == currentDay.year &&
+            e.date.month == currentDay.month &&
+            e.date.day == currentDay.day,
+        orElse: () => StepsWithMetricsRequest(date: currentDay, value: 0),
+      );
+
+      week[i] = item.value;
+    }
+
+    return week;
+  }
+
+  List<double> _buildMonthlySteps(List<StepsWithMetricsRequest> data) {
+    final now = DateTime.now();
+    final targetMonth = DateTime(now.year, now.month + state.offset);
+    final daysInMonth = DateUtils.getDaysInMonth(targetMonth.year, targetMonth.month);
+
+    final List<double> month = List.filled(daysInMonth, 0);
+
+    for (final step in data) {
+      if (step.date.year == targetMonth.year && step.date.month == targetMonth.month) {
+        final dayIndex = step.date.day - 1; // chart list index = kun - 1
+        if (dayIndex >= 0 && dayIndex < daysInMonth) {
+          month[dayIndex] = step.value;
+        }
+      }
+    }
+
+    return month;
   }
 }
