@@ -12,6 +12,7 @@ abstract class StepsState with _$StepsState {
     @Default([]) List<StepsWithMetricsRequest> steps,
     @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0)) MetricsRequest metrics,
     @Default([]) List<NormsRequest> norms,
+    @Default([]) List<double> primaryValues,
     @Default([]) List<UserStatRequest> userStates,
     @Default(0) int stepCount,
     @Default(0) int period,
