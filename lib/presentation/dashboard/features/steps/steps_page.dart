@@ -116,13 +116,11 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                   globalKey: globalKey,
                                   goal: stepValue.toInt(),
                                   metrics: state.metrics,
-                                  stepCount: state.stepCount,
-                                  onClickBackward: () {
-                                    manager.changeOffset(-1);
-                                  },
-                                  onClickForward: () {
-                                    manager.changeOffset(1);
-                                  },
+                                  stepCount: state.displayStepCount,
+                                  canGoForward: state.canGoForward,
+                                  offset: state.offset,
+                                  onClickBackward: () => manager.changeOffset(-1),
+                                  onClickForward: () => manager.changeOffset(1),
                                   onClickMoreVert: () {
                                     _showActionsSheet(context);
                                   },

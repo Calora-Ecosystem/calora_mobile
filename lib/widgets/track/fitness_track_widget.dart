@@ -16,7 +16,6 @@ class FitnessTrackWidget extends StatefulWidget {
     required this.stepCount,
     required this.globalKey,
     required this.goal,
-
     required this.metrics,
     required this.onClickForward,
     required this.onClickBackward,
@@ -24,6 +23,8 @@ class FitnessTrackWidget extends StatefulWidget {
     required this.onClickMoreVert,
     required this.onClickEditStepGoal,
     this.selectedDate,
+    this.canGoForward = true,
+    this.offset = 0,
   });
 
   final int stepCount;
@@ -37,23 +38,23 @@ class FitnessTrackWidget extends StatefulWidget {
   final Function() onClickMoreVert;
   final Function() onClickEditStepGoal;
   final DateTime? selectedDate;
+  final bool canGoForward; // Yangi
+  final int offset; // Yangi
 
   @override
   State<FitnessTrackWidget> createState() => _FitnessTrackWidgetState();
 }
 
 class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
-  int offset = 0;
   String _getDateLabel(int index) {
-    if (index == 0) return formatDateLabel(offset, "daily");
-    if (index == 1) return formatDateLabel(offset, "weekly");
-    return formatDateLabel(offset, "monthly");
+    if (index == 0) return formatDateLabel(widget.offset, "daily");
+    if (index == 1) return formatDateLabel(widget.offset, "weekly");
+    return formatDateLabel(widget.offset, "monthly");
   }
 
   @override
   Widget build(BuildContext context) {
     final tabController = DefaultTabController.of(context);
-    final selected = widget.selectedDate ?? DateTime.now();
 
     return AnimatedBuilder(
       animation: tabController,
@@ -74,36 +75,34 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Backward button (har doim ko'rinadi)
                       InkWell(
-                        onTap: () {
-                          final tabController = DefaultTabController.of(context);
-                          final index = tabController.index;
-                          final selected = widget.selectedDate ?? DateTime.now();
-                          changeOffset(index, selected, false);
-                        },
+                        onTap: widget.onClickBackward,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 16),
                           child: Assets.icons.icBackward.svg(),
                         ),
                       ),
+                      // Sana
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _getDateLabel(index).text(14, 16, 400).c(context.colors.textWhite),
                         ],
                       ),
-                      InkWell(
-                        onTap: () {
-                          final tabController = DefaultTabController.of(context);
-                          final index = tabController.index;
-                          final selected = widget.selectedDate ?? DateTime.now();
-                          changeOffset(index, selected, true);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: Assets.icons.icForward.svg(),
-                        ),
-                      ),
+                      // Forward button (faqat offset < 0 bo'lganda ko'rinadi)
+                      widget.canGoForward
+                          ? InkWell(
+                              onTap: widget.onClickForward,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 16),
+                                child: Assets.icons.icForward.svg(),
+                              ),
+                            )
+                          : SizedBox(
+                              width: 48, // Backward bilan bir xil kenglik
+                              height: 24,
+                            ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -171,7 +170,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 children: [
                                   Assets.icons.icDistance.svg(),
                                   const SizedBox(height: 4),
-                                  '${(widget.stepCount * 0.72).asFixedTruncated(2)}'
+                                  '${(widget.metrics.distance).asFixedTruncated(2)}'
                                       .text(16, 20, 500)
                                       .c(context.colors.textStrong),
                                   const SizedBox(height: 2),
@@ -203,29 +202,5 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
         );
       },
     );
-  }
-
-  void changeOffset(int index, DateTime selected, bool isForward) {
-    final now = DateTime.now();
-    DateTime nextDate;
-    if (index == 0) {
-      // daily
-      nextDate = selected.add(Duration(days: isForward ? offset + 1 : offset - 1));
-    } else if (index == 1) {
-      // weekly
-      nextDate = selected.add(Duration(days: (isForward ? offset + 1 : offset - 1) * 7));
-    } else {
-      // monthly
-      nextDate = DateTime(selected.year, selected.month + (isForward ? offset + 1 : offset - 1));
-    }
-    if (isForward && nextDate.isAfter(now)) return;
-    setState(() {
-      offset += isForward ? 1 : -1;
-      if (isForward) {
-        widget.onClickForward();
-      } else {
-        widget.onClickBackward();
-      }
-    });
   }
 }

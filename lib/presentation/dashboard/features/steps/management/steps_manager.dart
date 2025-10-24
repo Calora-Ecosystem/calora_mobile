@@ -18,6 +18,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   void updateTodaySteps(int steps) {
     emit(state.copyWith(stepCount: steps));
+
+    if (state.period == 0 && state.offset == 0) {
+      emit(state.copyWith(displayStepCount: steps));
+    }
   }
 
   void start() {
@@ -34,18 +38,34 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (data) {
             List<double> primaryValues = [];
+            int? displayStepCount;
 
-            if (state.period == 1) {
+            if (state.period == 0) {
+              if (state.offset == 0) {
+                displayStepCount = state.stepCount;
+              } else {
+                displayStepCount = _buildDailySteps(data);
+              }
+            } else if (state.period == 1) {
               primaryValues = _buildWeeklySteps(data);
             } else if (state.period == 2) {
               primaryValues = _buildMonthlySteps(data);
             }
-
-            emit(state.copyWith(steps: data, primaryValues: primaryValues, isLoading: false));
+            if (displayStepCount != null) {
+              emit(
+                state.copyWith(
+                  steps: data,
+                  primaryValues: primaryValues,
+                  displayStepCount: displayStepCount,
+                  isLoading: false,
+                ),
+              );
+            } else {
+              emit(state.copyWith(steps: data, primaryValues: primaryValues, isLoading: false));
+            }
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (e) {
-            log('Error in getSteps: $e');
             emit(state.copyWith(isLoading: false));
           },
         );
@@ -121,20 +141,56 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   void changeOffset(int change) {
     final newOffset = state.offset + change;
-    final clampedOffset = newOffset < 0 ? 0 : newOffset;
-    if (clampedOffset == state.offset) return;
-    emit(state.copyWith(offset: clampedOffset));
+
+    if (change > 0 && newOffset > 0) {
+      return;
+    }
+    if (newOffset == state.offset) return;
+    emit(state.copyWith(offset: newOffset));
     getSteps();
     getStats(2);
+  }
+
+  int _buildDailySteps(List<StepsWithMetricsRequest> data) {
+    if (data.isEmpty) {
+      if (state.offset == 0) {
+        return state.stepCount;
+      }
+      return 0;
+    }
+
+    final now = DateTime.now();
+    final targetDate = DateTime(now.year, now.month, now.day).add(Duration(days: state.offset));
+
+    final item = data.firstWhere(
+      (e) =>
+          e.date.year == targetDate.year &&
+          e.date.month == targetDate.month &&
+          e.date.day == targetDate.day,
+      orElse: () => StepsWithMetricsRequest(date: targetDate, value: 0),
+    );
+
+    log('Daily step count for ${targetDate.toString()}: ${item.value}');
+    return item.value.toInt();
   }
 
   List<double> _buildWeeklySteps(List<StepsWithMetricsRequest> data) {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final targetWeekStart = DateTime(
+      startOfWeek.year,
+      startOfWeek.month,
+      startOfWeek.day,
+    ).add(Duration(days: 7 * state.offset));
+
     final List<double> week = List.filled(7, 0);
 
     for (int i = 0; i < 7; i++) {
-      final currentDay = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day + i);
+      final currentDay = DateTime(
+        targetWeekStart.year,
+        targetWeekStart.month,
+        targetWeekStart.day + i,
+      );
 
       final item = data.firstWhere(
         (e) =>
@@ -159,7 +215,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
     for (final step in data) {
       if (step.date.year == targetMonth.year && step.date.month == targetMonth.month) {
-        final dayIndex = step.date.day - 1; // chart list index = kun - 1
+        final dayIndex = step.date.day - 1;
         if (dayIndex >= 0 && dayIndex < daysInMonth) {
           month[dayIndex] = step.value;
         }
