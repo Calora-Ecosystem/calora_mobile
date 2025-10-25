@@ -11,22 +11,29 @@ class StepsApi {
 
   StepsApi(this._dio);
 
-  Future<List<StepsWithMetricsRequest>> getSteps(
-    int period, {
+  Future<List<StepsWithMetricsRequest>> getSteps({
+    required String metrics,
     int skip = 0,
     int take = 7,
-    bool isSortDate = false,
+    String sortDirection = "Descending",
+    String sortPropName = "",
+    DateTime? from,
+    DateTime? to,
   }) async {
-    final response = await _dio.get(
-      'users/dailies',
-      queryParameters: {
-        "metrics": "Step",
-        "skip": skip,
-        "take": take,
-        "sortDirection": "Descending",
-        "sortPropName": isSortDate ? "date" : "",
-      },
-    );
+    final queryParams = <String, dynamic>{
+      "metrics": metrics,
+      "skip": skip,
+      "take": take,
+      "sortDirection": sortDirection,
+      "sortPropName": sortPropName,
+    };
+    if (from != null) {
+      queryParams['from'] = from.toIso8601String();
+    }
+    if (to != null) {
+      queryParams['to'] = to.toIso8601String();
+    }
+    final response = await _dio.get('users/dailies', queryParameters: queryParams);
 
     final data = response.data;
 
@@ -38,6 +45,7 @@ class StepsApi {
     }
   }
 
+  // Qolgan metodlar o'zgarishsiz...
   Future<List<UserStatRequest>> getStats(DateTime from, DateTime to) async {
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);

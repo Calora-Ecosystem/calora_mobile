@@ -15,6 +15,7 @@ abstract class StepsState with _$StepsState {
     @Default([]) List<double> primaryValues,
     @Default([]) List<UserStatRequest> userStates,
     @Default(0) int stepCount,
+    @Default(0) int displayStepCount,
     @Default(0) int period,
     @Default(0) int offset,
     @Default(false) bool isLoading,
@@ -25,6 +26,16 @@ abstract class StepsState with _$StepsState {
   List<UserStatRequest> getUserStates() {
     if (userStates.length <= 3) return [];
     return userStates.sublist(3);
+  }
+
+  bool get canGoForward => offset < 0;
+
+
+  int get currentStepCount {
+    if (period == 0 && offset == 0) {
+      return stepCount;
+    }
+    return displayStepCount;
   }
 }
 
