@@ -4,8 +4,11 @@ import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 
 abstract class StepRepo {
-  /// Stepsni olish (daily / weekly / monthly)
-  Future<List<StepsWithMetricsRequest>> getSteps(int period, {int offset = 0, bool isSortDate = false});
+  Future<List<StepsWithMetricsRequest>> getSteps(
+    int period, {
+    int offset = 0,
+    bool isSortDate = true,
+  });
 
   Future<MetricsRequest> getUserMetrics();
 
@@ -19,7 +22,5 @@ abstract class StepRepo {
 
   Future<void> sendDailyData({required String metric, required int value});
 
-  Future<void> sendStepDataDateRange({
-    required List<StepsWithMetricsRequest> steps,
-  });
+  Future<void> sendStepDataDateRange({required List<StepsWithMetricsRequest> steps});
 }
