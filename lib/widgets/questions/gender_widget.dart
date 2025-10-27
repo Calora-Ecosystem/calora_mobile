@@ -1,6 +1,6 @@
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 

@@ -1,4 +1,4 @@
-import 'package:calora/domain/model/profile/profile.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'questions.freezed.dart';

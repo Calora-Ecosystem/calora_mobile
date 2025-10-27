@@ -16,9 +16,7 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
   const CoursePage({super.key});
 
   @override
-  void init(context, manager) {
-    manager.loadGender();
-  }
+  void init(context, manager) {}
 
   @override
   Widget builder(context, manager, state) {

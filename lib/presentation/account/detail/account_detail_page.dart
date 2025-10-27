@@ -1,10 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/base/gender_store.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/domain/model/detail/detail_info_type.dart';
-import 'package:calora/domain/model/profile/profile.dart';
 import 'package:calora/domain/model/selection/Selection.dart';
 import 'package:calora/domain/model/selection/selection_type.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_management.dart';
@@ -21,9 +20,7 @@ import 'package:management/management.dart';
 @RoutePage()
 class AccountDetailPage
     extends Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
-  final Profile profile;
-
-  AccountDetailPage({super.key, required this.profile});
+  AccountDetailPage({super.key});
 
   @override
   void init(context, manager) {
@@ -118,6 +115,7 @@ class AccountDetailPage
           selection: Selection(type: SelectionType.activityLevel),
           onSave: (data) {
             manager.updateProfileDetail(info, data.name);
+            profileStore.updateProfile(activityLevel: data);
             _dismiss(context);
           },
         );
@@ -161,6 +159,7 @@ class AccountDetailPage
           title: Strings.chooseMetrics,
           selection: Selection(type: SelectionType.metrics),
           onSave: (data) {
+            profileStore.updateProfile(metrics: data.name);
             manager.updateProfileDetail(info, data.name);
             _dismiss(context);
           },
@@ -188,8 +187,9 @@ class AccountDetailPage
               gender = Gender.Male;
             else
               gender = Gender.Female;
-            genderStore.set(gender);
+
             manager.updateProfileDetail(info, gender.name);
+            profileStore.updateProfile(gender: gender.toString());
             _dismiss(context);
           },
         );
@@ -209,6 +209,12 @@ class AccountDetailPage
           textInputType: info.currentTextInputType,
           message: info.message,
           onSave: (data) {
+            profileStore.updateProfile(
+              name: info.type == DetailInfoType.name ? data : null,
+              weight: info.type == DetailInfoType.weight ? double.tryParse(data) : null,
+              height: info.type == DetailInfoType.height ? double.tryParse(data) : null,
+              targetWeight: info.type == DetailInfoType.targetWeight ? double.tryParse(data) : null,
+            );
             manager.updateProfileDetail(info, data);
             _dismiss(context);
           },
@@ -228,6 +234,7 @@ class AccountDetailPage
           selectedDate: info.message,
           onSave: (data) {
             manager.updateProfileDetail(info, data);
+            profileStore.updateProfile(birthDay: data);
             _dismiss(context);
           },
         );

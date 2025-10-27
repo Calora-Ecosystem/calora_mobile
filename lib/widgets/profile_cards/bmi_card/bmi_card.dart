@@ -50,7 +50,11 @@ class BmiCard extends StatelessWidget {
               children: [
                 _infoBox("Progress", "2 kg", context),
                 SizedBox(width: 16),
-                _infoBox("Qoldi", (weight - targetWeight).abs().toString() + ' kg', context),
+                _infoBox(
+                  Strings.remained,
+                  (weight - targetWeight).abs().toString() + ' kg',
+                  context,
+                ),
               ],
             ),
             const SizedBox(height: 16),

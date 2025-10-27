@@ -22,3 +22,5 @@ abstract class ProfileRequest with _$ProfileRequest {
 
   factory ProfileRequest.fromJson(Map<String, dynamic> json) => _$ProfileRequestFromJson(json);
 }
+
+

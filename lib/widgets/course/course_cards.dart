@@ -1,7 +1,7 @@
-import 'package:calora/common/base/gender_store.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/domain/model/profile/profile.dart';
+import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/widgets/course/course_card.dart';
 import 'package:flutter/material.dart';
 
@@ -19,17 +19,19 @@ class CourseCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Gender>(
-      stream: genderStore.watch(),
+    return StreamBuilder<ProfileRequest>(
+      stream: profileStore.watch(),
       builder: (context, snapshot) {
-        final gender = snapshot.data ?? Gender.Male;
+        final profile = snapshot.data;
+        final gender = profile?.gender?.toLowerCase() == 'female' ? 'female' : 'male';
+
         return Column(
           children: [
             CourseCard(
               onTap: onTapHealthyWeightLoss,
               title: Strings.healthyWeightLossClasses,
               description: Strings.videoLessonsOnlosingWeight,
-              image: gender == Gender.Female
+              image: gender == 'female'
                   ? Assets.images.femaleWeightLoss
                   : Assets.images.healthyWeightLoss,
             ),
@@ -38,7 +40,7 @@ class CourseCards extends StatelessWidget {
               onTap: onTapHealthyMassGain,
               title: Strings.healthyMassGainClasses,
               description: Strings.videoLessonsOnbuildingBody,
-              image: gender == Gender.Female
+              image: gender == 'female'
                   ? Assets.images.femaleGetMass
                   : Assets.images.gainingHealthyMass,
             ),
@@ -47,7 +49,7 @@ class CourseCards extends StatelessWidget {
               onTap: onTapDay30WeightLossWorkout,
               title: Strings.day30WeightLossWorkout,
               description: Strings.day30ExerciseWeightLossProgram,
-              image: gender == Gender.Female
+              image: gender == 'female'
                   ? Assets.images.femaleChallenge
                   : Assets.images.day30WeightLossWorkout,
             ),

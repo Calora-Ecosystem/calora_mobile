@@ -62,7 +62,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         builder: (context) {
           final tabController = DefaultTabController.of(context);
           tabController.addListener(() {
-            // Only call changePeriod when animation is complete AND index actually changed
             if (!tabController.indexIsChanging && tabController.index != _previousTabIndex) {
               _previousTabIndex = tabController.index;
               manager.changePeriod(tabController.index);

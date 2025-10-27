@@ -1,12 +1,12 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/base/gender_store.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart' show Strings;
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/simple_button.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
-import 'package:calora/domain/model/profile/profile.dart';
+import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/tasks/management/tasks_management.dart';
 import 'package:calora/presentation/tasks/management/tasks_manager.dart';
@@ -30,10 +30,11 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
 
   @override
   Widget builder(BuildContext context, TasksManager manager, TasksState state) {
-    return StreamBuilder<Gender>(
-      stream: genderStore.watch(),
+    return StreamBuilder<ProfileRequest>(
+      stream: profileStore.watch(),
       builder: (context, snapshot) {
-        final gender = snapshot.data ?? Gender.Male;
+        final profile = snapshot.data;
+        final gender = profile?.gender?.toLowerCase() == 'female' ? Gender.Female : Gender.Male;
         return Scaffold(
           resizeToAvoidBottomInset: true,
           backgroundColor: context.colors.accentDisabled,

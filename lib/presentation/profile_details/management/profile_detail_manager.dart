@@ -1,3 +1,4 @@
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:injectable/injectable.dart';
@@ -32,6 +33,7 @@ class ProfileDetailManager extends Manager<ProfileDetailState, ProfileDetailEffe
   }
 
   void logOut() {
+    profileStore.clear();
     authStore.token.set(null);
     authStore.isLogin.set(false);
   }
