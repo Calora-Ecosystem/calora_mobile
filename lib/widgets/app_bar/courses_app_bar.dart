@@ -23,14 +23,20 @@ class CoursesAppBar extends StatelessWidget {
         return SafeArea(
           child: Stack(
             children: [
-              if (gender == 'female')
-                (type == CoursesType.slimming
-                    ? Assets.images.femaleSlimmingBackgorund.image(fit: BoxFit.cover)
-                    : Assets.images.femaleMassGainCourseBackground.image(fit: BoxFit.cover))
-              else
-                (type == CoursesType.slimming
-                    ? Assets.images.slimmingBackground.image(fit: BoxFit.cover)
-                    : Assets.images.massGainCourseBackgorund.image(fit: BoxFit.cover)),
+              SizedBox(
+                width: double.infinity,
+                height: 220,
+                child: ClipRect(
+                  child: gender == 'female'
+                      ? (type == CoursesType.slimming
+                            ? Assets.images.femaleSlimmingBackgorund.image(width: double.infinity)
+                            : Assets.images.femaleMassGainCourseBackground.image(width: double.infinity))
+                      : (type == CoursesType.slimming
+                            ? Assets.images.slimmingBackground.image(width: double.infinity)
+                            : Assets.images.massGainCourseBackgorund.image(width: double.infinity)),
+                ),
+              ),
+              // Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
@@ -39,22 +45,16 @@ class CoursesAppBar extends StatelessWidget {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: context.colors.white,
-                          shape: BoxShape.circle,
-                        ),
+                        padding: const EdgeInsets.all(9),
+                        decoration: BoxDecoration(color: context.colors.white, shape: BoxShape.circle),
                         child: Assets.icons.arrowLeft.svg(),
                       ),
                     ),
                     GestureDetector(
                       onTap: openInfoSheet,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: context.colors.white,
-                          shape: BoxShape.circle,
-                        ),
+                        padding: const EdgeInsets.all(9),
+                        decoration: BoxDecoration(color: context.colors.white, shape: BoxShape.circle),
                         child: Assets.icons.informationCircle.svg(),
                       ),
                     ),

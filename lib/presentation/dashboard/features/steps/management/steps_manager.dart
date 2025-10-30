@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -163,14 +162,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     final targetDate = DateTime(now.year, now.month, now.day).add(Duration(days: state.offset));
 
     final item = data.firstWhere(
-      (e) =>
-          e.date.year == targetDate.year &&
-          e.date.month == targetDate.month &&
-          e.date.day == targetDate.day,
+      (e) => e.date.year == targetDate.year && e.date.month == targetDate.month && e.date.day == targetDate.day,
       orElse: () => StepsWithMetricsRequest(date: targetDate, value: 0),
     );
 
-    log('Daily step count for ${targetDate.toString()}: ${item.value}');
     return item.value.toInt();
   }
 
@@ -186,17 +181,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     final List<double> week = List.filled(7, 0);
 
     for (int i = 0; i < 7; i++) {
-      final currentDay = DateTime(
-        targetWeekStart.year,
-        targetWeekStart.month,
-        targetWeekStart.day + i,
-      );
+      final currentDay = DateTime(targetWeekStart.year, targetWeekStart.month, targetWeekStart.day + i);
 
       final item = data.firstWhere(
-        (e) =>
-            e.date.year == currentDay.year &&
-            e.date.month == currentDay.month &&
-            e.date.day == currentDay.day,
+        (e) => e.date.year == currentDay.year && e.date.month == currentDay.month && e.date.day == currentDay.day,
         orElse: () => StepsWithMetricsRequest(date: currentDay, value: 0),
       );
 

@@ -26,14 +26,7 @@ class ProfileApi {
   }
 
   Future<DailyNormsInfo> getDailyNorms() async {
-    return DailyNormsInfo(
-      calories: 123,
-      protein: 122,
-      fat: 1212,
-      carbs: 2313,
-      water: 3213,
-      steps: 23133,
-    );
+    return DailyNormsInfo(calories: 123, protein: 122, fat: 1212, carbs: 2313, water: 3213, steps: 23133);
   }
 
   Future<Response> updateDailyNorms(DailyNormsInfo dailyNormsInfo) {

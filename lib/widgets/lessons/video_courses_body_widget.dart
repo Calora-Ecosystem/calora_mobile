@@ -23,7 +23,7 @@ class VideoCoursesBodyWidget extends StatelessWidget {
         CoursesAppBar(openInfoSheet: () => openInfoSheet(context), type: type),
         Column(
           children: [
-            SizedBox(height: 230),
+            SizedBox(height: 220),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -37,18 +37,11 @@ class VideoCoursesBodyWidget extends StatelessWidget {
                   children: [
                     TaskParametersWidget(
                       title: Row(
-                        children: [
-                          course.name.text(24, 32, 700),
-                          const SizedBox(width: 8),
-                          Assets.icons.lock.svg(),
-                        ],
+                        children: [course.name.text(24, 32, 700), const SizedBox(width: 8), Assets.icons.lock.svg()],
                       ),
                       parameters: [
                         ParameterItem(name: 'Narxi', value: course.price),
-                        ParameterItem(
-                          name: 'Darslar soni',
-                          value: '${course.videoCourses.length} ta',
-                        ),
+                        ParameterItem(name: 'Darslar soni', value: '${course.videoCourses.length} ta'),
                         ParameterItem(name: Strings.duration, value: '492 min'),
                       ],
                       bottomLabel: Strings.videos,
@@ -61,11 +54,7 @@ class VideoCoursesBodyWidget extends StatelessWidget {
                         itemCount: course.videoCourses.length,
                         separatorBuilder: (context, index) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(
-                            color: context.colors.neutral200Stroke,
-                            thickness: 1,
-                            height: 1,
-                          ),
+                          child: Divider(color: context.colors.neutral200Stroke, thickness: 1, height: 1),
                         ),
                         itemBuilder: (context, index) {
                           final courseInfo = course.videoCourses[index];
@@ -85,9 +74,7 @@ class VideoCoursesBodyWidget extends StatelessWidget {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    course.name
-                                        .text(16, 20, 500)
-                                        .c(context.colors.neutral900Primary),
+                                    course.name.text(16, 20, 500).c(context.colors.neutral900Primary),
                                     const SizedBox(height: 8),
                                     formatDuration(
                                       course.duration,
@@ -95,9 +82,7 @@ class VideoCoursesBodyWidget extends StatelessWidget {
                                   ],
                                 ),
                                 Spacer(),
-                                course.purchased
-                                    ? Assets.icons.lock.svg()
-                                    : Assets.icons.lock.svg(),
+                                course.purchased ? Assets.icons.lock.svg() : Assets.icons.lock.svg(),
                               ],
                             ),
                           );

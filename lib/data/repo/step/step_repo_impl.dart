@@ -15,11 +15,7 @@ class StepRepoImpl extends StepRepo {
   StepRepoImpl(this._stepsApi);
 
   @override
-  Future<List<StepsWithMetricsRequest>> getSteps(
-    int period, {
-    int offset = 0,
-    bool isSortDate = false,
-  }) async {
+  Future<List<StepsWithMetricsRequest>> getSteps(int period, {int offset = 0, bool isSortDate = false}) async {
     final take = period == 0
         ? 1
         : period == 1
@@ -80,6 +76,7 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<List<NormsRequest>> getNorms() async {
     final response = await _stepsApi.getNorms();
+
     return response;
   }
 

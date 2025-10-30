@@ -36,5 +36,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: ProgressRoute.page),
     AutoRoute(page: SlimmingRoute.page),
     AutoRoute(page: BulkingRoute.page),
+    AutoRoute(page: InboxRoute.page),
+    AutoRoute(page: CaloraAiRoute.page),
   ];
 }

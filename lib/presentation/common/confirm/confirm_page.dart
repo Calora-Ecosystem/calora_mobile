@@ -31,17 +31,11 @@ class ConfirmPage extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colors.warningLighter,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: context.colors.warningLighter, shape: BoxShape.circle),
               child: Assets.icons.warning.svg(),
             ),
             const SizedBox(height: 8),
-            title
-                .text(16, 20, 400)
-                .c(context.colors.textStrong)
-                .copyWith(textAlign: TextAlign.center),
+            title.text(16, 20, 400).c(context.colors.textStrong).copyWith(textAlign: TextAlign.center),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -52,7 +46,7 @@ class ConfirmPage extends StatelessWidget {
                       onCancel();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       decoration: BoxDecoration(
                         color: context.colors.errorLighter,
                         borderRadius: BorderRadius.circular(8),
@@ -72,7 +66,7 @@ class ConfirmPage extends StatelessWidget {
                       onConfirm();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       decoration: BoxDecoration(
                         color: context.colors.backgroundElevation,
                         borderRadius: BorderRadius.circular(8),

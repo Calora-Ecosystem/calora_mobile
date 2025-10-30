@@ -77,17 +77,12 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                     children: [
                       InkWell(
                         onTap: widget.onClickBackward,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: Assets.icons.icBackward.svg(),
-                        ),
+                        child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
                       ),
                       // Sana
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _getDateLabel(index).text(14, 16, 400).c(context.colors.textWhite),
-                        ],
+                        children: [_getDateLabel(index).text(14, 16, 400).c(context.colors.textWhite)],
                       ),
                       widget.canGoForward
                           ? InkWell(
@@ -111,17 +106,12 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                       key: widget.globalKey,
                       child: Column(
                         children: [
-                          // pause va menu
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               InkWell(
                                 onTap: widget.onClickMoreVert,
-                                child: SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: Assets.icons.icMoreVert.svg(),
-                                ),
+                                child: SizedBox(height: 18, width: 18, child: Assets.icons.icMoreVert.svg()),
                               ),
                             ],
                           ),
@@ -177,9 +167,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 children: [
                                   Assets.icons.icCalorie.svg(),
                                   const SizedBox(height: 4),
-                                  '${widget.metrics.kcal}'
-                                      .text(16, 20, 500)
-                                      .c(context.colors.textStrong),
+                                  '${widget.metrics.kcal}'.text(16, 20, 500).c(context.colors.textStrong),
                                   const SizedBox(height: 2),
                                   Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
                                 ],

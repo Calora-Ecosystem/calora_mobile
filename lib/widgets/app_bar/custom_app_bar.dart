@@ -5,11 +5,21 @@ import 'package:flutter/material.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onBack;
+  final Widget? leading;
+  final Widget? trailing;
+  final bool showBackButton;
 
-  const CustomAppBar({Key? key, required this.title, this.onBack}) : super(key: key);
+  const CustomAppBar({
+    Key? key,
+    required this.title,
+    this.onBack,
+    this.leading,
+    this.trailing,
+    this.showBackButton = true,
+  }) : super(key: key);
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +27,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: context.colors.white,
       elevation: 0,
       centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
-        onPressed: onBack ?? () => Navigator.of(context).pop(),
-      ),
+      automaticallyImplyLeading: false,
+      leading:
+          leading ??
+          (showBackButton
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  onPressed: onBack ?? () => Navigator.of(context).pop(),
+                )
+              : null),
       title: title.text(17, 22, 600).c(context.colors.black),
+      actions: trailing != null ? [Padding(padding: const EdgeInsets.only(right: 16), child: trailing!)] : null,
     );
   }
 }

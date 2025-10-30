@@ -20,8 +20,10 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(0, 25, 0, 16),
-      decoration: BoxDecoration(color: isScrolled ? context.colors.white : Colors.transparent),
+      padding: const EdgeInsets.fromLTRB(20, 45, 20, 16),
+      decoration: BoxDecoration(
+        color: isScrolled ? context.colors.white : Colors.transparent,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -38,10 +40,16 @@ class HomeAppBar extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [Strings.hello.text(12, 14, 500), (profile?.name ?? '').text(16, 20, 500)],
+            children: [
+              Strings.hello.text(12, 14, 500),
+              (profile?.name ?? '').text(16, 20, 500),
+            ],
           ),
           const Spacer(),
-          InkWell(onTap: onTabNotification, child: Assets.icons.notification.svg()),
+          InkWell(
+            onTap: onTabNotification,
+            child: Assets.icons.notification.svg(),
+          ),
         ],
       ),
     );

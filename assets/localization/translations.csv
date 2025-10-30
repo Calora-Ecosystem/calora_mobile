@@ -244,7 +244,7 @@ take_a_picture,Take a picture of your face and analyze your health through artif
 take_picture_of_your_face_like_this,Take a picture of your face like this!,Yuzingizni quyidagicha suratga oling !,Сфотографируйте свое лицо вот так!
 stand_in_front_of_the_camera,Stand in front of the camera !,Kamera qarshida tik turing !,Встаньте перед камерой!
 make_sure_the_lighting_is_good,Make sure the lighting is good !,Yorug’lik yaxshi bo’lishiga e’tibor bering !,"Убедитесь, что освещение хорошее!"
-let_your_face_be_fully_visible,Let your face be fully visible !,Yuzingiz to’lik ko’rinsin !,Пусть ваше лицо будет полностью видно!
+let_your_face_be_fully_visible,Let your face be fully visible !,Yuzingiz to’liq ko’rinsin !,Пусть ваше лицо будет полностью видно!
 allow_access_to_your_camera,Allow access to your camera to use Calora AI,Calora AIdan foydanlanish uchun kamerangizdan foydalanishga ruxsat bering,Разрешите доступ к вашей камере для использования Calora AI
 allow,Allow,Ruxsat berish,Позволять
 turn_your_face_to_this_square,Turn your face to this square !,Yuzingizni ushbu maydonga to’g’irlang !,Повернитесь лицом к этому квадрату!
@@ -254,3 +254,4 @@ additional_information_is_being_analyzed,Additional information is being analyze
 analyzing_your_photo,"Calora AI is analyzing your photo, this may take a few seconds!",Calora AI sizning rasmingizni tahlil qilmoqda bu bir-necha sekund vaqt olishi mumkin !,Calora AI анализирует вашу фотографию. Это может занять несколько секунд!
 your_physical_health_level,Your physical health level,Sizning tana sog’lomlik darajangiz,Ваш уровень физического здоровья
 body_analysis,Body analysis via Calora AI,Calora AI orqali tana tahlili,Анализ тела с помощью Calora AI
+notification,Notification,Bildirishnoma,Уведомление
