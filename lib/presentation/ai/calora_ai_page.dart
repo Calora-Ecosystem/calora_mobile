@@ -22,7 +22,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
   Widget builder(BuildContext context, CaloraAiManager manager, CaloraAiState state) {
     return Scaffold(
       appBar: AppBar(backgroundColor: context.colors.white, elevation: 0, scrolledUnderElevation: 0),
-      backgroundColor: context.colors.white,
+      backgroundColor: context.colors.black,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
