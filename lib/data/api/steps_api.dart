@@ -45,7 +45,6 @@ class StepsApi {
     }
   }
 
-  // Qolgan metodlar o'zgarishsiz...
   Future<List<UserStatRequest>> getStats(DateTime from, DateTime to) async {
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
@@ -92,11 +91,7 @@ class StepsApi {
   }
 
   Future<void> sendDailyData({required String metric, required int value}) async {
-    final body = {
-      "metric": metric,
-      "value": value,
-      "date": DateTime.now().toUtc().toIso8601String(),
-    };
+    final body = {"metric": metric, "value": value, "date": DateTime.now().toUtc().toIso8601String()};
     await _dio.post('/users/dailies', data: body);
   }
 

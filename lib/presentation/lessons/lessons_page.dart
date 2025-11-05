@@ -1,9 +1,9 @@
 import 'package:auto_route/annotations.dart';
-import 'package:calora/common/base/gender_store.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
-import 'package:calora/domain/model/profile/profile.dart';
+import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/lessons/management/lessons_management.dart';
 import 'package:calora/presentation/lessons/management/lessons_manager.dart';
@@ -40,11 +40,12 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
 
   @override
   Widget builder(BuildContext context, LessonsManager manager, LessonsState state) {
-    return StreamBuilder<Gender>(
-      stream: genderStore.watch(), // Genderdagi o‘zgarishlarni kuzatamiz
+    return StreamBuilder<ProfileRequest>(
+      stream: profileStore.watch(),
       builder: (context, snapshot) {
-        final gender = snapshot.data ?? Gender.Male;
-
+        final profile = snapshot.data;
+        final genderString = profile?.gender.toString() ?? 'Male';
+        final isFemale = genderString == 'Female';
         return Scaffold(
           backgroundColor: context.colors.accentDisabled,
           body: Stack(
@@ -55,7 +56,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                   child: SizedBox(
                     height: 200,
                     width: 200,
-                    child: gender == Gender.Female
+                    child: isFemale
                         ? Assets.images.femaleCourseImage.image(fit: BoxFit.cover)
                         : Assets.images.courseImage.image(fit: BoxFit.cover),
                   ),
@@ -81,7 +82,6 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                           LessonsCards(
                             lessons: state.lessons,
                             level: _mapIntToLevel(state.levelIndex),
-                            gender: gender,
                           ),
                         ],
                       ),

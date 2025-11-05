@@ -1,3 +1,1 @@
-abstract class HomeRepo {
-  Future<void> getUserGender();
-}
+abstract class HomeRepo {}

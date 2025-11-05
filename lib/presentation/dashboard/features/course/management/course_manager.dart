@@ -1,17 +1,39 @@
-import 'package:calora/common/base/gender_store.dart';
-import 'package:calora/common/di/injection.dart';
+import 'package:calora/domain/model/course/course_request.dart';
+import 'package:calora/domain/repo/course/course_repo.dart';
 import 'package:calora/presentation/dashboard/features/course/management/course_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
 class CourseManager extends Manager<CourseState, CourseEffect> {
-  CourseManager() : super(const CourseState());
+  final CourseRepo _courseRepo;
 
-  final GenderStore _genderStore = getIt<GenderStore>();
+  CourseManager(this._courseRepo) : super(const CourseState());
 
-  Future<void> loadGender() async {
-    final gender = await _genderStore();
-    emit(state.copyWith(gender: gender));
+  void getCourses() {
+    _courseRepo.getCourse().handle(
+      onStart: () {
+        emit(state.copyWith(isLoading: true));
+      },
+      onData: (data) {
+        emit(state.copyWith(courses: data, isLoading: false));
+      },
+      onError: (error) {
+        emit(state.copyWith(isLoading: false));
+      },
+    );
+  }
+
+  void getLessonsAndNavigate({required CourseRequest course}) {
+    _courseRepo
+        .getLessonsById(course.id ?? 0)
+        .handle(
+          onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (lessons) {
+            emit(state.copyWith(isLoading: false, lessons: lessons));
+            publish(CourseEffect.navigateToLessons(course: course, lessons: lessons));
+          },
+          onError: (_) => emit(state.copyWith(isLoading: false)),
+        );
   }
 }

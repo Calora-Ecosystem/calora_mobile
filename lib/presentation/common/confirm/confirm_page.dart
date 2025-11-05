@@ -9,6 +9,14 @@ class ConfirmPage extends StatelessWidget {
   final String title;
   final String confirmText;
   final String cancelText;
+  final Color? backgroundColor;
+  final Color? iconBackgroundColor;
+  final Color? iconColor;
+  final Color? cancelBackgroundColor;
+  final Color? cancelTextColor;
+  final Color? confirmBackgroundColor;
+  final Color? confirmTextColor;
+  final Color? titleColor;
 
   const ConfirmPage({
     super.key,
@@ -17,12 +25,22 @@ class ConfirmPage extends StatelessWidget {
     required this.title,
     required this.confirmText,
     required this.cancelText,
+    this.backgroundColor,
+    this.iconBackgroundColor,
+    this.iconColor,
+    this.cancelBackgroundColor,
+    this.cancelTextColor,
+    this.confirmBackgroundColor,
+    this.confirmTextColor,
+    this.titleColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Dialog(
-      backgroundColor: context.colors.textWhite,
+      backgroundColor: backgroundColor ?? colors.textWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -31,17 +49,13 @@ class ConfirmPage extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colors.warningLighter,
-                shape: BoxShape.circle,
+              decoration: BoxDecoration(color: iconBackgroundColor ?? colors.warningLighter, shape: BoxShape.circle),
+              child: Assets.icons.warning.svg(
+                colorFilter: ColorFilter.mode(iconColor ?? colors.warningBase, BlendMode.srcIn),
               ),
-              child: Assets.icons.warning.svg(),
             ),
             const SizedBox(height: 8),
-            title
-                .text(16, 20, 400)
-                .c(context.colors.textStrong)
-                .copyWith(textAlign: TextAlign.center),
+            title.text(16, 20, 400).c(titleColor ?? colors.textStrong).copyWith(textAlign: TextAlign.center),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -52,14 +66,14 @@ class ConfirmPage extends StatelessWidget {
                       onCancel();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       decoration: BoxDecoration(
-                        color: context.colors.errorLighter,
+                        color: cancelBackgroundColor ?? colors.errorLighter,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: cancelText
                           .text(16, 20, 500)
-                          .c(context.colors.errorBase)
+                          .c(cancelTextColor ?? colors.errorBase)
                           .copyWith(textAlign: TextAlign.center),
                     ),
                   ),
@@ -72,14 +86,14 @@ class ConfirmPage extends StatelessWidget {
                       onConfirm();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       decoration: BoxDecoration(
-                        color: context.colors.backgroundElevation,
+                        color: confirmBackgroundColor ?? colors.backgroundElevation,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: confirmText
                           .text(16, 20, 500)
-                          .c(context.colors.textStrong)
+                          .c(confirmTextColor ?? colors.textStrong)
                           .copyWith(textAlign: TextAlign.center),
                     ),
                   ),

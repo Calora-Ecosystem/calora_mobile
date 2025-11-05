@@ -228,4 +228,31 @@ obesity_stage_3,Obesity stage Ill,Semirib ketish IIl bosqichi,Ожирение I
 thinnes,Thinness,Ozg‘inlik,Худоба
 normal,Normal,Normal,Нормальный
 over_weight,Overweight,Ortiqcha vazn,Избыточный вес
-t,,,
+hello,Hello !,Assalomu alaykum !,Привет !
+plan_for_today,Our plan for today!,Bugungi rejamiz !,Наш план на сегодня!
+try_it_for_free,Try it for free !,Bepul sinab ko’ring !,Попробуйте бесплатно!
+daily_feed_rate,Daily feed rate,Kunlik ozuqa normasi,Суточная норма кормления
+norm,Norm,Norma,Норма
+proteins,Proteins,Oqsillar,Белки
+carbohydrates,Carbohydrates,Uglevodlar,Углеводы
+oils,Oils,Yog’lar,Масла
+add_food,Add food,Ovqat qo‘shish,Добавить еду
+your_step,Your step,Sizning qadamingiz,Твой шаг
+your_water_intake,Your water intake,Sizning suv normangiz,Ваше потребление воды
+choose_day,Choose a day,Kun tanlang,Выберите день
+take_a_picture,Take a picture of your face and analyze your health through artificial intelligence,Yuzingizni suratga oling va sun’iy intellekt orqali sog’ligingizni tahlil qiling,Сфотографируйте свое лицо и проанализируйте состояние здоровья с помощью искусственного интеллекта
+take_picture_of_your_face_like_this,Take a picture of your face like this!,Yuzingizni quyidagicha suratga oling !,Сфотографируйте свое лицо вот так!
+stand_in_front_of_the_camera,Stand in front of the camera !,Kamera qarshida tik turing !,Встаньте перед камерой!
+make_sure_the_lighting_is_good,Make sure the lighting is good !,Yorug’lik yaxshi bo’lishiga e’tibor bering !,"Убедитесь, что освещение хорошее!"
+let_your_face_be_fully_visible,Let your face be fully visible !,Yuzingiz to’liq ko’rinsin !,Пусть ваше лицо будет полностью видно!
+allow_access_to_your_camera,Allow access to your camera to use Calora AI,Calora AIdan foydanlanish uchun kamerangizdan foydalanishga ruxsat bering,Разрешите доступ к вашей камере для использования Calora AI
+allow,Allow,Ruxsat berish,Позволять
+turn_your_face_to_this_square,Turn your face to this square !,Yuzingizni ushbu maydonga to’g’irlang !,Повернитесь лицом к этому квадрату!
+your_facial_features_are_being_analyzed,Your facial features are being analyzed...,Yuzingizdagi belgilar tahlil qilinmoqda...,Ваши черты лица анализируются...
+the_things_your_eyes_analyzed,The signs in your eyes are being analyzed...,Ko’zingizdagi belgilar tahlil qilinmoqda...,Знаки в ваших глазах анализируются...
+additional_information_is_being_analyzed,Additional information is being analyzed...,Qo’shimcha ma’lumotlar analiz qilinmoqda...,Дополнительная информация анализируется...
+analyzing_your_photo,"Calora AI is analyzing your photo, this may take a few seconds!",Calora AI sizning rasmingizni tahlil qilmoqda bu bir-necha sekund vaqt olishi mumkin !,Calora AI анализирует вашу фотографию. Это может занять несколько секунд!
+your_physical_health_level,Your physical health level,Sizning tana sog’lomlik darajangiz,Ваш уровень физического здоровья
+body_analysis,Body analysis via Calora AI,Calora AI orqali tana tahlili,Анализ тела с помощью Calora AI
+notification,Notification,Bildirishnoma,Уведомление
+calora_ai,Calora Ai,Calora Ai,Calora Ai

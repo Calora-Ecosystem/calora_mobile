@@ -1,8 +1,7 @@
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/data/api/profile_api.dart';
-import 'package:calora/domain/mapper/detail/account_detail_mapper.dart';
 import 'package:calora/domain/mapper/detail/detail_mapper.dart';
-import 'package:calora/domain/mapper/detail/profile_request_mapper.dart';
+import 'package:calora/domain/mapper/detail/profile_mapper.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/domain/model/detail/detail_info_type.dart';
 import 'package:calora/domain/model/norms/daily_norms_info.dart';
@@ -25,9 +24,7 @@ class ProfileRepoImpl extends ProfileRepo {
     final meData = meResponse.data['content'];
     final extrasData = extrasResponse.data['content'];
     final target = targetWeight.data['content'][0];
-    print('-------------${target['value']}');
     final profile = ProfileRequest.fromJson(extrasData);
-
     final updated = profile.copyWith(
       email: meData['email'],
       targetWeight: target['value'].toDouble(),
@@ -65,8 +62,7 @@ class ProfileRepoImpl extends ProfileRepo {
   @override
   Future<List<DetailInfo>> getProfileDetail() async {
     final profileRequest = await getProfile();
-    final profile = profileRequest.toProfile();
-    return profile.toDetailInfoList();
+    return profileRequest.toDetailInfoList();
   }
 
   @override

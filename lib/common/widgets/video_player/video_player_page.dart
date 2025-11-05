@@ -29,9 +29,7 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
         if (manager.controller != null) {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => FullscreenVideoPlayer(controller: manager.controller!),
-            ),
+            MaterialPageRoute(builder: (context) => FullscreenVideoPlayer(controller: manager.controller!)),
           );
         }
       },
@@ -50,10 +48,7 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
     if (!state.isInitialized) {
       return Container(
         height: 200,
-        decoration: BoxDecoration(
-          color: context.colors.backgroundElevation,
-          borderRadius: BorderRadius.circular(8),
-        ),
+        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(8)),
         width: double.infinity,
         child: const Center(child: CircularProgressIndicator()),
       );
@@ -96,12 +91,7 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black54,
-                            Colors.transparent,
-                            Colors.transparent,
-                            Colors.black54,
-                          ],
+                          colors: [Colors.black54, Colors.transparent, Colors.transparent, Colors.black54],
                         ),
                       ),
                       child: Stack(
@@ -109,27 +99,15 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                           Positioned(
                             top: 8,
                             right: 8,
-                            child: IconButton(
-                              icon: Assets.icons.fullScreen.svg(),
-                              onPressed: manager.openFullscreen,
-                            ),
+                            child: IconButton(icon: Assets.icons.fullScreen.svg(), onPressed: manager.openFullscreen),
                           ),
                           Center(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                IconButton(
-                                  icon: Assets.icons.replay10.svg(),
-                                  onPressed: manager.skipBackward,
-                                ),
-                                IconButton(
-                                  icon: Assets.icons.start.svg(),
-                                  onPressed: manager.togglePlayPause,
-                                ),
-                                IconButton(
-                                  icon: Assets.icons.forward10.svg(),
-                                  onPressed: manager.skipForward,
-                                ),
+                                IconButton(icon: Assets.icons.replay10.svg(), onPressed: manager.skipBackward),
+                                IconButton(icon: Assets.icons.start.svg(), onPressed: manager.togglePlayPause),
+                                IconButton(icon: Assets.icons.forward10.svg(), onPressed: manager.skipForward),
                               ],
                             ),
                           ),
@@ -144,9 +122,7 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                   child: Row(
                                     children: [
-                                      _formatDuration(
-                                        state.position,
-                                      ).text(12, 16, 400).c(context.colors.textWhite),
+                                      _formatDuration(state.position).text(12, 16, 400).c(context.colors.textWhite),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: VideoProgressIndicator(
@@ -161,9 +137,7 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      _formatDuration(
-                                        state.duration,
-                                      ).text(12, 16, 400).c(context.colors.textWhite),
+                                      _formatDuration(state.duration).text(12, 16, 400).c(context.colors.textWhite),
                                     ],
                                   ),
                                 ),
@@ -185,7 +159,6 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
 
   @override
   void dispose() {
-    print('VideoPlayerPage dispose called');
     super.dispose();
   }
 }

@@ -1,12 +1,11 @@
 import 'dart:math';
 
-import 'package:calora/common/base/gender_store.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/domain/model/norms/norms.dart';
-import 'package:calora/domain/model/profile/profile.dart';
+import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
-import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -16,14 +15,14 @@ import 'questions_management.dart';
 @injectable
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
   final QuestionsRepo _repo;
-  final AuthRepo _authRepo;
 
-  QuestionsManager(this._repo, this._authRepo) : super(const QuestionsState());
+  QuestionsManager(this._repo) : super(const QuestionsState());
 
   void setAnswer(Questions model) {
     final updated =
         state.answers?.copyWith(
           name: model.name ?? state.answers?.name,
+          entryWeight: model.weight ?? state.answers?.weight,
           gender: model.gender ?? state.answers?.gender,
           purposeIds: model.purposeIds ?? state.answers?.purposeIds,
           birthDate: model.birthDate ?? state.answers?.birthDate,
@@ -68,7 +67,21 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
       bmi: bmi,
       language: 'Uzbek',
     );
-    getIt<GenderStore>().set(profile.gender ?? Gender.Male);
+
+    final profileRequest = ProfileRequest(
+      name: profile.name,
+      gender: profile.gender?.name,
+      birthDay: profile.birthDate.toString(),
+      height: profile.height,
+      weight: profile.weight,
+      targetWeight: profile.targetWeight,
+      bmi: bmi,
+      goal: profile.purposeIds?.join(', '),
+      activityLevel: profile.activityHours,
+    );
+
+    getIt<ProfileStore>().set(profileRequest);
+
     _repo
         .sendTargetWeight(NormsRequest(metric: 'Weight', value: profile.targetWeight ?? 0))
         .handle(
@@ -81,6 +94,7 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
           },
           onDone: () {},
         );
+
     _repo
         .sendAnswers(request)
         .handle(

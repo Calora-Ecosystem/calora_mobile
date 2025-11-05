@@ -47,4 +47,7 @@ class DefaultThemeColors {
   final orange = Color(0xFFF2994A);
   final red = Color(0xFFEB5757);
   final darkRed = Color(0xFF8B0000);
+  final brightBlue = Color(0xFF0090FF);
+  final lightGray = Color(0xFFCECECE);
+  final paleGreen = Color(0xFFC9E8CA);
 }

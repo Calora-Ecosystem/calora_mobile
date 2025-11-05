@@ -38,8 +38,8 @@ class FitnessTrackWidget extends StatefulWidget {
   final Function() onClickMoreVert;
   final Function() onClickEditStepGoal;
   final DateTime? selectedDate;
-  final bool canGoForward; // Yangi
-  final int offset; // Yangi
+  final bool canGoForward;
+  final int offset;
 
   @override
   State<FitnessTrackWidget> createState() => _FitnessTrackWidgetState();
@@ -75,22 +75,15 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Backward button (har doim ko'rinadi)
                       InkWell(
                         onTap: widget.onClickBackward,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: Assets.icons.icBackward.svg(),
-                        ),
+                        child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
                       ),
                       // Sana
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _getDateLabel(index).text(14, 16, 400).c(context.colors.textWhite),
-                        ],
+                        children: [_getDateLabel(index).text(14, 16, 400).c(context.colors.textWhite)],
                       ),
-                      // Forward button (faqat offset < 0 bo'lganda ko'rinadi)
                       widget.canGoForward
                           ? InkWell(
                               onTap: widget.onClickForward,
@@ -99,10 +92,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 child: Assets.icons.icForward.svg(),
                               ),
                             )
-                          : SizedBox(
-                              width: 48, // Backward bilan bir xil kenglik
-                              height: 24,
-                            ),
+                          : SizedBox(width: 48, height: 24),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -116,17 +106,12 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                       key: widget.globalKey,
                       child: Column(
                         children: [
-                          // pause va menu
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               InkWell(
                                 onTap: widget.onClickMoreVert,
-                                child: SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: Assets.icons.icMoreVert.svg(),
-                                ),
+                                child: SizedBox(height: 18, width: 18, child: Assets.icons.icMoreVert.svg()),
                               ),
                             ],
                           ),
@@ -182,9 +167,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 children: [
                                   Assets.icons.icCalorie.svg(),
                                   const SizedBox(height: 4),
-                                  '${widget.metrics.kcal}'
-                                      .text(16, 20, 500)
-                                      .c(context.colors.textStrong),
+                                  '${widget.metrics.kcal}'.text(16, 20, 500).c(context.colors.textStrong),
                                   const SizedBox(height: 2),
                                   Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
                                 ],
