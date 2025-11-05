@@ -3,7 +3,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
+  final Object title;
   final VoidCallback? onBack;
   final Widget? leading;
   final Widget? trailing;
@@ -23,10 +23,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget titleWidget;
+
+    if (title is String) {
+      titleWidget = (title as String).text(17, 22, 600).c(context.colors.black);
+    } else if (title is Widget) {
+      titleWidget = title as Widget;
+    } else {
+      titleWidget = const SizedBox.shrink();
+    }
+
     return AppBar(
       backgroundColor: context.colors.white,
       elevation: 0,
+      animateColor: false,
       centerTitle: true,
+      surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
       leading:
           leading ??
@@ -36,7 +48,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: onBack ?? () => Navigator.of(context).pop(),
                 )
               : null),
-      title: title.text(17, 22, 600).c(context.colors.black),
+      title: titleWidget,
       actions: trailing != null ? [Padding(padding: const EdgeInsets.only(right: 16), child: trailing!)] : null,
     );
   }

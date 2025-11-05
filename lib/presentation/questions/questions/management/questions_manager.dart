@@ -6,7 +6,6 @@ import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
-import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -16,14 +15,14 @@ import 'questions_management.dart';
 @injectable
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
   final QuestionsRepo _repo;
-  final AuthRepo _authRepo;
 
-  QuestionsManager(this._repo, this._authRepo) : super(const QuestionsState());
+  QuestionsManager(this._repo) : super(const QuestionsState());
 
   void setAnswer(Questions model) {
     final updated =
         state.answers?.copyWith(
           name: model.name ?? state.answers?.name,
+          entryWeight: model.weight ?? state.answers?.weight,
           gender: model.gender ?? state.answers?.gender,
           purposeIds: model.purposeIds ?? state.answers?.purposeIds,
           birthDate: model.birthDate ?? state.answers?.birthDate,

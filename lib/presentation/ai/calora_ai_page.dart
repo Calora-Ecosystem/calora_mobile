@@ -1,7 +1,8 @@
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/ai/management/calora_ai_management.dart';
 import 'package:calora/presentation/ai/management/calora_ai_manager.dart';
@@ -14,7 +15,10 @@ import 'package:management/management.dart';
 class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
   @override
   void listener(BuildContext context, CaloraAiManager manager, CaloraAiEffect effect) {
-    effect.mapOrNull(showConfirmDialog: (value) => _showConfirmDialog(context));
+    effect.mapOrNull(
+      showConfirmDialog: (value) => _showConfirmDialog(context, manager),
+      navigateToCamera: (_) => context.router.push(const CaloraCameraRoute()),
+    );
     super.listener(context, manager, effect);
   }
 
@@ -22,7 +26,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
   Widget builder(BuildContext context, CaloraAiManager manager, CaloraAiState state) {
     return Scaffold(
       appBar: AppBar(backgroundColor: context.colors.white, elevation: 0, scrolledUnderElevation: 0),
-      backgroundColor: context.colors.black,
+      backgroundColor: context.colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -33,7 +37,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
               children: [
                 SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
                 const SizedBox(height: 4),
-                'Calora Ai'.text(16, 20, 500).c(context.colors.textStrong),
+                Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 4),
                 Container(
                   width: double.infinity,
@@ -46,7 +50,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                     children: [
                       Assets.icons.informationCircleBlue.svg(),
                       const SizedBox(width: 8),
-                      Expanded(child: Strings.takeAPicture.text(16, 20, 500).c(context.colors.brightBlue)),
+                      Expanded(child: Strings.takeAPicture.text(14, 18, 400).c(context.colors.brightBlue)),
                     ],
                   ),
                 ),
@@ -90,15 +94,18 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
     );
   }
 
-  void _showConfirmDialog(BuildContext context) {
+  void _showConfirmDialog(BuildContext context, CaloraAiManager manager) {
     showDialog(
       context: context,
       builder: (_) => ConfirmPage(
-        onConfirm: () {},
+        onConfirm: () => manager.requestCameraPermission(),
         onCancel: () {},
-        cancelText: Strings.cleaning,
+        confirmBackgroundColor: context.colors.accentSub,
+        confirmTextColor: context.colors.white,
+        cancelText: Strings.rejection,
         confirmText: Strings.allow,
-        title: Strings.areYouSureDeleteStatistic,
+        cancelTextColor: context.colors.textStrong,
+        title: Strings.allowAccessToYourCamera,
       ),
     );
   }

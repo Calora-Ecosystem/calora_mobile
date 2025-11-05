@@ -6,27 +6,18 @@ import 'package:flutter/material.dart';
 class CourseCard extends StatelessWidget {
   final String title;
   final String description;
-  final AssetGenImage image;
+  final AssetGenImage? image;
   final VoidCallback onTap;
 
-  const CourseCard({
-    super.key,
-    required this.onTap,
-    required this.title,
-    required this.description,
-    required this.image,
-  });
+  const CourseCard({super.key, required this.onTap, required this.title, required this.description, this.image});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.fromLTRB(16, 16, 0, 0),
-        decoration: BoxDecoration(
-          color: context.colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 16, 0, 0),
+        decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -38,7 +29,7 @@ class CourseCard extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     children: [
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       description
                           .text(16, 20, 500)
                           .c(context.colors.textSub)
@@ -46,7 +37,7 @@ class CourseCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Expanded(flex: 1, child: image.image(fit: BoxFit.contain)),
+                if (image != null) Expanded(flex: 1, child: image!.image(fit: BoxFit.contain)),
               ],
             ),
           ],

@@ -239,7 +239,7 @@ oils,Oils,Yog’lar,Масла
 add_food,Add food,Ovqat qo‘shish,Добавить еду
 your_step,Your step,Sizning qadamingiz,Твой шаг
 your_water_intake,Your water intake,Sizning suv normangiz,Ваше потребление воды
-choose_day,Choose a day,kun tanlang,Выберите день
+choose_day,Choose a day,Kun tanlang,Выберите день
 take_a_picture,Take a picture of your face and analyze your health through artificial intelligence,Yuzingizni suratga oling va sun’iy intellekt orqali sog’ligingizni tahlil qiling,Сфотографируйте свое лицо и проанализируйте состояние здоровья с помощью искусственного интеллекта
 take_picture_of_your_face_like_this,Take a picture of your face like this!,Yuzingizni quyidagicha suratga oling !,Сфотографируйте свое лицо вот так!
 stand_in_front_of_the_camera,Stand in front of the camera !,Kamera qarshida tik turing !,Встаньте перед камерой!
@@ -255,3 +255,4 @@ analyzing_your_photo,"Calora AI is analyzing your photo, this may take a few sec
 your_physical_health_level,Your physical health level,Sizning tana sog’lomlik darajangiz,Ваш уровень физического здоровья
 body_analysis,Body analysis via Calora AI,Calora AI orqali tana tahlili,Анализ тела с помощью Calora AI
 notification,Notification,Bildirishnoma,Уведомление
+calora_ai,Calora Ai,Calora Ai,Calora Ai

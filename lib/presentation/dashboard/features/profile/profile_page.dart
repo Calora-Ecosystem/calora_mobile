@@ -45,6 +45,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                     ),
                     const SizedBox(height: 16),
                     BmiCard(
+                      entryWeight: state.profile?.entryWeight ?? 100,
                       bmi: state.profile?.bmi ?? 0,
                       weight: state.profile?.weight ?? 0,
                       targetWeight: state.profile?.targetWeight ?? 0,
@@ -102,12 +103,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
   }
 
   void _showHelpBottomSheet(BuildContext context) {
-    context.showAppBottomSheet(
-      minChildSize: 0.2,
-      initialChildSize: 0.3,
-      maxChildSize: 0.3,
-      child: const HelpPage(),
-    );
+    context.showAppBottomSheet(minChildSize: 0.2, initialChildSize: 0.3, maxChildSize: 0.3, child: const HelpPage());
   }
 
   void _showLanguageBottomSheet(BuildContext context) {
@@ -115,9 +111,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => const LanguagePage(),
     );
   }
@@ -127,9 +121,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => const AboutPage(),
     );
   }

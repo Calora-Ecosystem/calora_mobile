@@ -1,10 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/pedometer_service.dart';
+import 'package:calora/common/widgets/calendar/calendar_selector_widget.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
@@ -14,6 +16,7 @@ import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
 import 'package:calora/widgets/plan/daily_plan_widget.dart';
 import 'package:calora/widgets/steps/step_card_widget.dart';
 import 'package:calora/widgets/water/water_intake_selector.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -80,14 +83,17 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                         child: Column(
                           spacing: 16,
                           children: [
-                            DailyPlanWidget(
-                              onBackward: () {},
-                              onForward: () {},
-                              day: '25',
-                              month: 'Iyul',
-                              calories: '${state.targetKcal} kkal',
-                              water: '${state.targetLiters} litr',
-                              steps: state.targetSteps.toString(),
+                            GestureDetector(
+                              onTap: () => openCalendar(context, manager),
+                              child: DailyPlanWidget(
+                                onBackward: () {},
+                                onForward: () {},
+                                day: state.day?.day.toString() ?? DateTime.now().day.toString(),
+                                month: DateFormat.yMMMM('Uz').format(state.day ?? DateTime.now()).capitalize(),
+                                calories: '${state.targetKcal} kkal',
+                                water: '${state.targetLiters} litr',
+                                steps: state.targetSteps.toString(),
+                              ),
                             ),
                             GestureDetector(
                               onTap: () => openCaloraAi(context),
@@ -109,7 +115,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       spacing: 8,
                                       children: [
-                                        'Calora Ai'.text(24, 30, 700).c(context.colors.white),
+                                        Strings.caloraAi.text(24, 30, 700).c(context.colors.white),
                                         Strings.tryItForFree.text(16, 20, 500).c(context.colors.white),
                                       ],
                                     ),
@@ -150,6 +156,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         );
       },
     );
+  }
+
+  void openCalendar(BuildContext context, HomeManager manager) {
+    context.showAppBottomSheet(child: CalendarSelectorWidget(onDaySelected: (date) => manager.updateDay(date)));
   }
 
   void openCaloraAi(BuildContext context) {

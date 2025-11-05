@@ -30,6 +30,10 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     await [Permission.activityRecognition, Permission.sensors, Permission.locationWhenInUse].request();
   }
 
+  void updateDay(DateTime day) {
+    emit(state.copyWith(day: day));
+  }
+
   void updateTodaySteps(int steps) {
     emit(state.copyWith(currentSteps: steps));
   }

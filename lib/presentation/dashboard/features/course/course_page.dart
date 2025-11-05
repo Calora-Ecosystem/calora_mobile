@@ -16,7 +16,19 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
   const CoursePage({super.key});
 
   @override
-  void init(context, manager) {}
+  void init(context, manager) {
+    manager.getCourses();
+  }
+
+  @override
+  void listener(BuildContext context, CourseManager manager, CourseEffect effect) {
+    effect.when(
+      navigateToLessons: (course, lessons) {
+        context.router.push(LessonBodyWidgetRoute(course: course, lessons: lessons));
+      },
+    );
+    super.listener(context, manager, effect);
+  }
 
   @override
   Widget builder(context, manager, state) {
@@ -35,11 +47,18 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                     child: Strings.allCourses.text(17, 22, 600).c(context.colors.textStrong),
                   ),
                   const SizedBox(height: 8),
-                  CourseCards(
-                    onTapHealthyWeightLoss: () => _openWeightLossCourse(context),
-                    onTapHealthyMassGain: () => _openMassGainCourse(context),
-                    onTapDay30WeightLossWorkout: () => _openChallenge(context, state),
-                  ),
+                  if (state.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else
+                    CourseCards(
+                      courses: state.courses,
+                      onTapCallbacks: {
+                        for (final course in state.courses)
+                          (course.id ?? 0): () {
+                            manager.getLessonsAndNavigate(course: course);
+                          },
+                      },
+                    ),
                 ],
               ),
             ),
@@ -47,17 +66,5 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
         ],
       ),
     );
-  }
-
-  void _openWeightLossCourse(BuildContext context) {
-    context.router.push(SlimmingRoute());
-  }
-
-  void _openMassGainCourse(BuildContext context) {
-    context.router.push(BulkingRoute());
-  }
-
-  void _openChallenge(BuildContext context, CourseState state) {
-    context.router.push(LessonsRoute());
   }
 }

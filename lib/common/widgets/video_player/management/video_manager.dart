@@ -16,7 +16,6 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
   Future<void> initializeVideo(String videoUrl) async {
     try {
       if (_controller != null) {
-        // Avvalgi kontrolerni tozalash
         await _controller!.dispose();
       }
       _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
@@ -55,7 +54,6 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
         ),
       );
     }
-    // Video tugagandan so'ng ijro holatini yangilash
     if (_controller != null &&
         _controller!.value.duration != Duration.zero &&
         _controller!.value.position >= _controller!.value.duration &&
@@ -150,6 +148,6 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
         isControlsVisible: true,
       ),
     );
-    await super.close(); // Ota sinfning close() metodini ham await bilan chaqiramiz
+    await super.close();
   }
 }

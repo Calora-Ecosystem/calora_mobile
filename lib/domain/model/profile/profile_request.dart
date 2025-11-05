@@ -1,11 +1,13 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'profile_request.freezed.dart';
+
 part 'profile_request.g.dart';
 
 @freezed
 abstract class ProfileRequest with _$ProfileRequest {
   const factory ProfileRequest({
+    @JsonKey(name: 'entryWeight') double? entryWeight,
     @JsonKey(name: 'name') String? name,
     @JsonKey(name: 'birthDate') String? birthDay,
     @JsonKey(name: 'goal') String? goal,
@@ -22,5 +24,3 @@ abstract class ProfileRequest with _$ProfileRequest {
 
   factory ProfileRequest.fromJson(Map<String, dynamic> json) => _$ProfileRequestFromJson(json);
 }
-
-
