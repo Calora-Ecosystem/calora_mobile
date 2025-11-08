@@ -45,8 +45,8 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                     ),
                     const SizedBox(height: 16),
                     BmiCard(
+                      height: state.profile?.height ?? 1,
                       entryWeight: state.profile?.entryWeight ?? 100,
-                      bmi: state.profile?.bmi ?? 0,
                       weight: state.profile?.weight ?? 0,
                       targetWeight: state.profile?.targetWeight ?? 0,
                     ),

@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/flavor/flavor_config.dart';
-import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/firebase_options.dart';
 import 'package:calora/presentation/app/app.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -18,7 +17,6 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await EasyLocalization.ensureInitialized();
   await configureDependencies();
-
   await FlavorConfig.initialize();
   setupGetIt();
   runApp(App());
