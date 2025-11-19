@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:calora/common/gen/fonts.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,24 @@ extension TextStringExtensions on String? {
     final value = this ?? '';
     if (value.isEmpty) return value;
     return value[0].toUpperCase() + value.substring(1).toLowerCase();
+  }
+}
+
+extension AutoSizeOnTextExtension on Text {
+  AutoSizeText auto({
+    int maxLines = 1,
+    double minSize = 10,
+    TextOverflow overflow = TextOverflow.ellipsis,
+    TextAlign? textAlign,
+  }) {
+    return AutoSizeText(
+      data ?? '',
+      maxLines: maxLines,
+      minFontSize: minSize,
+      overflow: overflow,
+      textAlign: textAlign ?? this.textAlign,
+      style: style,
+    );
   }
 }
 

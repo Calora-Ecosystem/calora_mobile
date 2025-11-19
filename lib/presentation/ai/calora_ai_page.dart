@@ -24,7 +24,7 @@ class CaloraAiPage
   ) {
     effect.mapOrNull(
       showConfirmDialog: (value) => _showConfirmDialog(context, manager),
-      navigateToCamera: (_) => context.router.push(const CaloraCameraRoute()),
+      navigateToCamera: (_) => imageTaken(context),
     );
     super.listener(context, manager, effect);
   }
@@ -122,6 +122,17 @@ class CaloraAiPage
         const SizedBox(width: 8),
         Expanded(child: text.text(14, 18, 400).c(context.colors.textSub)),
       ],
+    );
+  }
+
+  void imageTaken(BuildContext context) {
+    context.router.push(
+      UniversalCameraRoute(
+        title: Strings.caloraAi,
+        subtitle: Strings.turnYourFaceToThisSquare,
+        bottomText: Strings.caloraAi,
+        onImageCaptured: (value) => context.router.replace(CaloraAiCalculateRoute(imagePath: value)),
+      ),
     );
   }
 

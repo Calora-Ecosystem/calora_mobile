@@ -7,21 +7,22 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class BmiCard extends StatelessWidget {
-  final double bmi;
   final double weight;
   final double targetWeight;
+  final double height;
   final double entryWeight;
 
   const BmiCard({
     super.key,
     required this.entryWeight,
-    required this.bmi,
     required this.weight,
     required this.targetWeight,
+    required this.height,
   });
 
   @override
   Widget build(BuildContext context) {
+    final double bmi = calculateBmi(weight, height);
     return Container(
       decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
       child: Padding(
@@ -49,7 +50,7 @@ class BmiCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _infoBox("Progress", "${entryWeight - weight}", context),
+                _infoBox("Progress", "${(entryWeight - weight).abs()}", context),
                 SizedBox(width: 16),
                 _infoBox(Strings.remained, (weight - targetWeight).abs().toString() + ' kg', context),
               ],
@@ -61,7 +62,7 @@ class BmiCard extends StatelessWidget {
                   child: LinearPercentIndicator(
                     animation: true,
                     lineHeight: 16,
-                    percent: calculateWeightProgress(entryWeight, targetWeight),
+                    percent: calculateWeightProgress(entryWeight, weight, targetWeight),
                     backgroundColor: context.colors.backgroundElevation,
                     progressColor: context.colors.accentSub,
                     barRadius: Radius.circular(12),
@@ -103,6 +104,11 @@ class BmiCard extends StatelessWidget {
     );
   }
 
+  double calculateBmi(double weight, double height) {
+    if (height <= 0) return 0;
+    return weight * 100 * 100 / (height * height);
+  }
+
   String getBmiCategory(double bmi) {
     if (bmi < 18.5) return Strings.thinnes;
     if (bmi < 25.0) return Strings.normal;
@@ -112,14 +118,18 @@ class BmiCard extends StatelessWidget {
     return Strings.obesityStage3;
   }
 
-  double calculateWeightProgress(double weight, double targetWeight) {
-    if (weight == 0 || targetWeight == 0) return 0.0;
+  double calculateWeightProgress(double entryWeight, double weight, double targetWeight) {
+    if (entryWeight == targetWeight) return 1.0;
+    if (entryWeight == 0 || targetWeight == 0) return 0.0;
+
     double progress;
-    if (targetWeight < weight) {
-      progress = (weight - (weight - targetWeight).abs()) / weight;
+
+    if (entryWeight > targetWeight) {
+      progress = (entryWeight - weight) / (entryWeight - targetWeight);
     } else {
-      progress = weight / targetWeight;
+      progress = (weight - entryWeight) / (targetWeight - entryWeight);
     }
+
     return progress.clamp(0.0, 1.0);
   }
 

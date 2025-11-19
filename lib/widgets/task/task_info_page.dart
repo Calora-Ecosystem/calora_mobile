@@ -1,7 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/widgets/button/time_stepper_widget.dart';
+import 'package:calora/common/widgets/button/universal_stepper_widget.dart';
 import 'package:calora/common/widgets/button/toggle_buttons.dart';
 import 'package:calora/common/widgets/video_player/video_player_page.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
@@ -19,6 +19,7 @@ class TaskInfoPage extends StatefulWidget {
 
 class _TaskInfoPageState extends State<TaskInfoPage> {
   int selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -101,7 +102,7 @@ class DescriptionWidget extends StatelessWidget {
       children: [
         const Text(
           "Planka mashqi — tanani to‘g‘ri holatda ushlab turishni talab qiladigan statik mashq. "
-          "Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.",
+              "Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.",
         ),
         const Text(
           "• Bajarilish tartibi:",

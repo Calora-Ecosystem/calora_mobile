@@ -16,13 +16,9 @@ import 'package:management/management.dart';
 import 'management/app_management.dart';
 import 'management/app_manager.dart';
 
-
 @RoutePage()
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
-
-  // Remove this line from here
-  // final _appRouter = getIt<AppRouter>();
 
   @override
   void init(BuildContext context, AppManager manager) {
@@ -50,22 +46,14 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: context.theme,
-              routerConfig: appRouter.config(
-                  deepLinkBuilder: (_) => DeepLink([_initialRoute()])
-              ),
+              routerConfig: appRouter.config(deepLinkBuilder: (_) => DeepLink([_initialRoute()])),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
                 return MediaQuery(
                   data: mediaQuery.copyWith(
-                    textScaler: mediaQuery.textScaler.clamp(
-                      minScaleFactor: 0.8,
-                      maxScaleFactor: 1.2,
-                    ),
+                    textScaler: mediaQuery.textScaler.clamp(minScaleFactor: 0.8, maxScaleFactor: 1.2),
                   ),
-                  child: DisplayWidget(
-                      key: ValueKey(state.language),
-                      child: child!
-                  ),
+                  child: DisplayWidget(key: ValueKey(state.language), child: child!),
                 );
               },
             ),

@@ -56,6 +56,7 @@ class AuthRepoImpl extends AuthRepo {
     final content = response.data['content'];
     final token = Token.fromJson(content);
     await _store.token.set(token);
+    await _store.refreshToken.set(token.refreshToken);
     await _store.isLogin.set(true);
 
     return content['hasNewUser'] as bool;

@@ -111,13 +111,15 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      spacing: 8,
-                                      children: [
-                                        Strings.caloraAi.text(24, 30, 700).c(context.colors.white),
-                                        Strings.tryItForFree.text(16, 20, 500).c(context.colors.white),
-                                      ],
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        spacing: 8,
+                                        children: [
+                                          Strings.caloraAi.text(24, 30, 700).c(context.colors.white),
+                                          Strings.tryItForFree.text(16, 20, 500).c(context.colors.white),
+                                        ],
+                                      ),
                                     ),
                                     SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
                                   ],

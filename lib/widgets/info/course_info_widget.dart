@@ -4,7 +4,9 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class CourseInfoWidget extends StatelessWidget {
-  const CourseInfoWidget({super.key});
+  final String description;
+
+  const CourseInfoWidget({super.key, required this.description});
 
   @override
   Widget build(BuildContext context) {

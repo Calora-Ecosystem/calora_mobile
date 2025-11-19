@@ -3,7 +3,6 @@ import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/widgets/video_player/video_player_page.dart';
 import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/courses_app_bar.dart';
@@ -31,7 +30,10 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
     return Scaffold(
       body: Stack(
         children: [
-          CoursesAppBar(openInfoSheet: () => openInfoSheet(context), type: CoursesType.bulking),
+          CoursesAppBar(
+            openInfoSheet: () => openInfoSheet(context, widget.course.description ?? ''),
+            type: CoursesType.bulking,
+          ),
           Column(
             children: [
               const SizedBox(height: 220),
@@ -79,11 +81,7 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
                             );
                             return GestureDetector(
                               onTap: () {
-                                setState(() {
-                                  if (videoAsset.url.isNotEmpty) {
-                                    openVideo(context, videoAsset.url);
-                                  }
-                                });
+                                if (lesson.isFree) openVideo(context, lesson.description);
                               },
                               child: Row(
                                 children: [
@@ -106,7 +104,7 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
                                       ],
                                     ),
                                   ),
-                                  Assets.icons.lock.svg(),
+                                  if (!lesson.isFree) Assets.icons.lock.svg(),
                                 ],
                               ),
                             );
@@ -124,12 +122,17 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
     );
   }
 
-  void openInfoSheet(BuildContext context) {
-    context.showAppBottomSheet(child: const CourseInfoWidget(), backgroundColor: context.colors.white);
+  void openInfoSheet(BuildContext context, String description) {
+    context.showAppBottomSheet(
+      child: CourseInfoWidget(description: description),
+      backgroundColor: context.colors.white,
+    );
   }
 
   void openVideo(BuildContext context, String url) {
-    context.showAppBottomSheet(child: VideoPlayerPage(videoUrl: url));
+    context.showAppBottomSheet(
+      child: Container(width: double.infinity, child: url.text(14, 18, 400)),
+    );
   }
 
   String getTotalDuration() {

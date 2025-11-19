@@ -38,8 +38,12 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: BulkingRoute.page),
     AutoRoute(page: InboxRoute.page),
     AutoRoute(page: CaloraAiRoute.page),
-    AutoRoute(page: CaloraCameraRoute.page),
     AutoRoute(page: CaloraAiCalculateRoute.page),
     AutoRoute(page: LessonBodyWidgetRoute.page),
+    AutoRoute(page: MealsRoute.page),
+    AutoRoute(page: AddMealsRoute.page),
+    AutoRoute(page: DishesRoute.page),
+    AutoRoute(page: UniversalCameraRoute.page),
+    AutoRoute(page: UniversalProgressRoute.page),
   ];
 }

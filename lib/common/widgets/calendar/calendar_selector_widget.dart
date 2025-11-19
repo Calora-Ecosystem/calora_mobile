@@ -39,7 +39,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
 
   void _onDayTap(DateTime day) {
     final today = DateTime.now();
-    if (day.isAfter(today)) return; // bugundan keyingi kun bosilmasin
+    if (day.isAfter(today)) return;
 
     setState(() {
       _selectedDate = day;
@@ -90,12 +90,16 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
   }
 
   Widget _buildWeekdayHeaders() {
-    final weekdays = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
+    final locale = Localizations.localeOf(context).languageCode;
+    final monday = DateTime(2023, 1, 2);
+    final days = List.generate(7, (i) => monday.add(Duration(days: i)));
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: weekdays.map((day) => day.text(16, 20, 400).c(context.colors.textStrong)).toList(),
+        children: days
+            .map((day) => DateFormat.E(locale).format(day).capitalize().text(16, 20, 400).c(context.colors.textStrong))
+            .toList(),
       ),
     );
   }

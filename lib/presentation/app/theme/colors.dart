@@ -50,4 +50,7 @@ class DefaultThemeColors {
   final brightBlue = Color(0xFF0090FF);
   final lightGray = Color(0xFFCECECE);
   final paleGreen = Color(0xFFC9E8CA);
+  final softGray = Color(0xFFF3F3F3);
+  final mintGreen = Color(0xFF58AE8A);
+  final honeydew = Color(0xFFECFFEF);
 }

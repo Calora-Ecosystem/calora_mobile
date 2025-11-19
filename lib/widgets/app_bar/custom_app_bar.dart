@@ -33,23 +33,28 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       titleWidget = const SizedBox.shrink();
     }
 
-    return AppBar(
-      backgroundColor: context.colors.white,
-      elevation: 0,
-      animateColor: false,
-      centerTitle: true,
-      surfaceTintColor: Colors.transparent,
-      automaticallyImplyLeading: false,
-      leading:
-          leading ??
-          (showBackButton
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: onBack ?? () => Navigator.of(context).pop(),
-                )
-              : null),
-      title: titleWidget,
-      actions: trailing != null ? [Padding(padding: const EdgeInsets.only(right: 16), child: trailing!)] : null,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: context.colors.strokeSoft)),
+      ),
+      child: AppBar(
+        backgroundColor: context.colors.white,
+        elevation: 0,
+        animateColor: false,
+        centerTitle: true,
+        surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        leading:
+            leading ??
+            (showBackButton
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: onBack ?? () => Navigator.of(context).pop(),
+                  )
+                : null),
+        title: titleWidget,
+        actions: trailing != null ? [Padding(padding: const EdgeInsets.only(right: 16), child: trailing!)] : null,
+      ),
     );
   }
 }
