@@ -62,7 +62,7 @@ class BmiCard extends StatelessWidget {
                   child: LinearPercentIndicator(
                     animation: true,
                     lineHeight: 16,
-                    percent: calculateWeightProgress(weight, targetWeight),
+                    percent: calculateWeightProgress(entryWeight, weight, targetWeight),
                     backgroundColor: context.colors.backgroundElevation,
                     progressColor: context.colors.accentSub,
                     barRadius: Radius.circular(12),
@@ -118,14 +118,18 @@ class BmiCard extends StatelessWidget {
     return Strings.obesityStage3;
   }
 
-  double calculateWeightProgress(double weight, double targetWeight) {
-    if (weight == 0 || targetWeight == 0) return 0.0;
+  double calculateWeightProgress(double entryWeight, double weight, double targetWeight) {
+    if (entryWeight == targetWeight) return 1.0;
+    if (entryWeight == 0 || targetWeight == 0) return 0.0;
+
     double progress;
-    if (targetWeight < weight) {
-      progress = (weight - (weight - targetWeight).abs()) / weight;
+
+    if (entryWeight > targetWeight) {
+      progress = (entryWeight - weight) / (entryWeight - targetWeight);
     } else {
-      progress = weight / targetWeight;
+      progress = (weight - entryWeight) / (targetWeight - entryWeight);
     }
+
     return progress.clamp(0.0, 1.0);
   }
 

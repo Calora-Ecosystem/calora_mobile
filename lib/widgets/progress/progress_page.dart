@@ -22,7 +22,7 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
   void init(BuildContext context, CalculateManager manager) {
     super.init(context, manager);
     if (fetchGoals) {
-      var result = manager.getDailyGoals();
+      manager.getDailyGoals();
     }
     manager.startProgressAnimation(
       onComplete: () {
@@ -49,22 +49,14 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
     );
   }
 
-  Widget _analyzingItem(
-    BuildContext context,
-    String text,
-    double threshold,
-    double currentProgress,
-  ) {
+  Widget _analyzingItem(BuildContext context, String text, double threshold, double currentProgress) {
     bool done = currentProgress >= threshold;
     Color textColor = done ? context.colors.textSub : context.colors.textStrong;
 
     return Container(
       padding: const EdgeInsets.all(8),
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: context.colors.commonBackground,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: context.colors.commonBackground, borderRadius: BorderRadius.circular(8)),
       child: Row(
         children: [
           done ? Assets.icons.done.svg() : const CupertinoActivityIndicator(radius: 12),
@@ -90,13 +82,7 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
                   padding: const EdgeInsets.all(16),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(color: Colors.black.withAlpha(2), blurRadius: 8, offset: const Offset(0, 4))],
                     color: context.colors.accentWhite,
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -125,26 +111,11 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _analyzingItem(
-                        context,
-                        Strings.analyzingActivityLevel,
-                        0.3,
-                        state.progressPercent,
-                      ),
+                      _analyzingItem(context, Strings.analyzingActivityLevel, 0.3, state.progressPercent),
                       const SizedBox(height: 16),
-                      _analyzingItem(
-                        context,
-                        Strings.smartReminderPlan,
-                        0.5,
-                        state.progressPercent,
-                      ),
+                      _analyzingItem(context, Strings.smartReminderPlan, 0.5, state.progressPercent),
                       const SizedBox(height: 16),
-                      _analyzingItem(
-                        context,
-                        Strings.analyzingActivityLevel,
-                        0.8,
-                        state.progressPercent,
-                      ),
+                      _analyzingItem(context, Strings.analyzingActivityLevel, 0.8, state.progressPercent),
                     ],
                   ),
                 ),

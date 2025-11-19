@@ -10,8 +10,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- Location permissions (optional for better accuracy) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -25,7 +26,7 @@
     <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND" />
 
     <!-- Internet permission -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name="${applicationName}"
@@ -35,13 +36,13 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:enableOnBackInvokedCallback="true"
             android:launchMode="singleTop"
+            android:screenOrientation="fullSensor"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
-            android:screenOrientation="fullSensor"
             android:windowSoftInputMode="adjustResize">
 
             <meta-data

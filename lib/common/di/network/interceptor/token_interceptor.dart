@@ -9,7 +9,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:logger/logger.dart';
 
 @lazySingleton
-class TokenInterceptor extends QueuedInterceptor {
+class TokenInterceptor extends Interceptor {
   static const int _maxRetries = 3;
   static const int _baseDelayMs = 150;
   static const String _refreshTokenEndpoint = '/auth/refresh-token';
@@ -31,6 +31,7 @@ class TokenInterceptor extends QueuedInterceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    _log.w('=-------------------------Token Interceptor');
     if (err.requestOptions.path.contains(_refreshTokenEndpoint)) {
       _log.w('Refresh token request failed, clearing tokens.');
       await _clearTokens();
