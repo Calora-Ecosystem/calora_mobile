@@ -10,11 +10,18 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 @RoutePage()
-class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
+class CaloraAiPage
+    extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
+
   @override
-  void listener(BuildContext context, CaloraAiManager manager, CaloraAiEffect effect) {
+  void listener(
+    BuildContext context,
+    CaloraAiManager manager,
+    CaloraAiEffect effect,
+  ) {
     effect.mapOrNull(
       showConfirmDialog: (value) => _showConfirmDialog(context, manager),
       navigateToCamera: (_) => imageTaken(context),
@@ -23,9 +30,17 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
   }
 
   @override
-  Widget builder(BuildContext context, CaloraAiManager manager, CaloraAiState state) {
+  Widget builder(
+    BuildContext context,
+    CaloraAiManager manager,
+    CaloraAiState state,
+  ) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: context.colors.white, elevation: 0, scrolledUnderElevation: 0),
+      appBar: AppBar(
+        backgroundColor: context.colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
       backgroundColor: context.colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -35,7 +50,11 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
+                SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: Assets.images.ai.image(),
+                ),
                 const SizedBox(height: 4),
                 Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 4),
@@ -50,7 +69,11 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                     children: [
                       Assets.icons.informationCircleBlue.svg(),
                       const SizedBox(width: 8),
-                      Expanded(child: Strings.takeAPicture.text(14, 18, 400).c(context.colors.brightBlue)),
+                      Expanded(
+                        child: Strings.takeAPicture
+                            .text(14, 18, 400)
+                            .c(context.colors.brightBlue),
+                      ),
                     ],
                   ),
                 ),
@@ -59,7 +82,9 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                 const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Strings.takePictureOfYourFaceLikeThis.text(16, 20, 500).c(context.colors.textStrong),
+                  child: Strings.takePictureOfYourFaceLikeThis
+                      .text(16, 20, 500)
+                      .c(context.colors.textStrong),
                 ),
                 const SizedBox(height: 12),
                 buildDotTextRow(context, Strings.standInFrontOfTheCamera),
@@ -70,7 +95,10 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: Button(onPressed: () => manager.openConfirmPage(), text: Strings.next),
+                  child: Button(
+                    onPressed: () => manager.openConfirmPage(),
+                    text: Strings.next,
+                  ),
                 ),
               ],
             ),
@@ -86,7 +114,10 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(
+            color: context.colors.accentSub,
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(child: text.text(14, 18, 400).c(context.colors.textSub)),

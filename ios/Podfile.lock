@@ -11,6 +11,8 @@ PODS:
     - PromisesObjC (~> 2.4)
   - audio_session (0.0.1):
     - Flutter
+  - camera_avfoundation (0.0.1):
+    - Flutter
   - cm_pedometer (0.0.1):
     - Flutter
   - connectivity_plus (0.0.1):
@@ -180,6 +182,7 @@ PODS:
 
 DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - cm_pedometer (from `.symlinks/plugins/cm_pedometer/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -236,6 +239,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  camera_avfoundation:
+    :path: ".symlinks/plugins/camera_avfoundation/ios"
   cm_pedometer:
     :path: ".symlinks/plugins/cm_pedometer/ios"
   connectivity_plus:
@@ -301,6 +306,7 @@ SPEC CHECKSUMS:
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   audio_session: 19e9480dbdd4e5f6c4543826b2e8b0e4ab6145fe
+  camera_avfoundation: 281867ff09f1da66f031a184ecfbc6f2e625c9f5
   cm_pedometer: a67228c722191a373717febcbd03b7a7b5122706
   connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
@@ -349,6 +355,6 @@ SPEC CHECKSUMS:
   webview_flutter_wkwebview: a4af96a051138e28e29f60101d094683b9f82188
   workmanager_apple: 7bac258335c310689a641e2d66e88d4845d372e9
 
-PODFILE CHECKSUM: 53a6aebc29ccee84c41f92f409fc20cd4ca011f1
+PODFILE CHECKSUM: 05d232737e7491731c2df4d67635fddd267af15a
 
 COCOAPODS: 1.16.2
