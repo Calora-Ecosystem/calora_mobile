@@ -11,7 +11,13 @@ class MealInfo {
   final Widget image;
   final VoidCallback onTap;
 
-  MealInfo({required this.title, required this.value, required this.max, required this.image, required this.onTap});
+  MealInfo({
+    required this.title,
+    required this.value,
+    required this.max,
+    required this.image,
+    required this.onTap,
+  });
 }
 
 class MealCardsGrid extends StatelessWidget {
@@ -53,23 +59,40 @@ class MealCardsGrid extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
-        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: context.colors.backgroundElevation,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Stack(
           children: [
-            Positioned(bottom: -10, right: 0, child: SizedBox(height: 80, width: 80, child: image)),
+            Positioned(
+              bottom: -10,
+              right: 0,
+              child: SizedBox(height: 80, width: 80, child: image),
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    title.text(14, 16, 400).c(context.colors.textSub),
-                    const Spacer(),
+                    Expanded(
+                      child: title
+                          .text(14, 16, 400)
+                          .c(context.colors.textSub)
+                          .auto(
+                            maxLines: 1,
+                            minSize: 12,
+                          ),
+                    ),
                     Assets.icons.icPlusCircle.svg(),
                     const SizedBox(width: 8),
                   ],
                 ),
                 const Spacer(),
-                '$value kkal'.text(16, 20, 500).c(Colors.black).auto(maxLines: 1, minSize: 12),
+                '$value kkal'
+                    .text(16, 20, 500)
+                    .c(Colors.black)
+                    .auto(maxLines: 1, minSize: 12),
                 const SizedBox(height: 4),
                 '$max ${Strings.fromKcal}'.text(14, 16, 600).c(Colors.grey),
               ],
