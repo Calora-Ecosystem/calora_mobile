@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -115,6 +117,7 @@ class _ModernVoiceRecorderState extends State<ModernVoiceRecorder> {
             child: Button(
               text: Strings.continueBtn,
               onPressed: () {
+                log("OnClickSpeech");
                 if (_isRecording) {
                   _stopRecording();
                 } else {
