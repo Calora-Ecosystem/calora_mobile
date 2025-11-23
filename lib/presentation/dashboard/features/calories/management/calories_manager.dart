@@ -83,6 +83,7 @@ class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
         image: Assets.images.lunch.image(),
         onTap: onLunchTap,
       ),
+
       MealInfo(
         title: Strings.snacks,
         value: state.meals.length > 2 ? state.meals[2].value.asFixedTruncated(0) : "0",

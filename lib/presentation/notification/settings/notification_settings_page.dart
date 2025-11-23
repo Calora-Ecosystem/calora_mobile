@@ -1,5 +1,6 @@
 // notification_settings_page.dart
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/notification/notificaiton_setting.dart';
@@ -15,12 +16,7 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class NotificationSettingsPage
-    extends
-        Managed<
-          NotificationSettingsManager,
-          NotificationSettingsState,
-          NotificationSettingsEffect
-        > {
+    extends Managed<NotificationSettingsManager, NotificationSettingsState, NotificationSettingsEffect> {
   @override
   void init(context, manager) {
     manager.getNotificationSettings();
@@ -44,11 +40,7 @@ class NotificationSettingsPage
     );
   }
 
-  Widget _uiBuilder(
-    NotificationSettingsState state,
-    BuildContext context,
-    NotificationSettingsManager manager,
-  ) {
+  Widget _uiBuilder(NotificationSettingsState state, BuildContext context, NotificationSettingsManager manager) {
     if (state.loading) {
       return Loadable(
         builder: (context) {
@@ -82,13 +74,9 @@ class NotificationSettingsPage
     BuildContext context,
     List<ReminderRequest> reminders,
   ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return NotificationSettingSheet(type: notificationSetting.type, reminders: reminders);
-      },
+    context.showAppBottomSheet(
+      initialChildSize: 0.6,
+      child: NotificationSettingSheet(type: notificationSetting.type, reminders: reminders),
     );
   }
 

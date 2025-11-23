@@ -40,8 +40,11 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
             color: state.isScrolled ? context.colors.softGray : Colors.transparent,
             child: SafeArea(
               child: NotificationListener<ScrollNotification>(
-                onNotification: (scroll) {
-                  manager.setScrolled(scroll.metrics.pixels > 0);
+                onNotification: (notification) {
+                  if (notification.metrics.axis == Axis.horizontal) return false;
+                  if (notification is ScrollUpdateNotification) {
+                    manager.setScrolled(notification.metrics.pixels > 0);
+                  }
                   return false;
                 },
                 child: SingleChildScrollView(

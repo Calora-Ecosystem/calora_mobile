@@ -4,22 +4,17 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-enum CoursesType { bulking, slimming }
-
 class CoursesAppBar extends StatelessWidget {
-  final CoursesType type;
+  final String imageUrl;
   final void Function() openInfoSheet;
 
-  const CoursesAppBar({super.key, required this.openInfoSheet, required this.type});
+  const CoursesAppBar({super.key, required this.openInfoSheet, required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<ProfileRequest>(
       stream: profileStore.watch(),
       builder: (context, snapshot) {
-        final profile = snapshot.data;
-        final gender = profile?.gender?.toLowerCase() == 'female' ? 'female' : 'male';
-
         return SafeArea(
           child: Stack(
             children: [
@@ -27,16 +22,30 @@ class CoursesAppBar extends StatelessWidget {
                 width: double.infinity,
                 height: 220,
                 child: ClipRect(
-                  child: gender == 'female'
-                      ? (type == CoursesType.slimming
-                            ? Assets.images.femaleSlimmingBackgorund.image(width: double.infinity)
-                            : Assets.images.femaleMassGainCourseBackground.image(width: double.infinity))
-                      : (type == CoursesType.slimming
-                            ? Assets.images.slimmingBackground.image(width: double.infinity)
-                            : Assets.images.massGainCourseBackgorund.image(width: double.infinity)),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(child: Icon(Icons.broken_image, color: Colors.grey.shade400, size: 48));
+                    },
+                  ),
                 ),
               ),
-              // Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(

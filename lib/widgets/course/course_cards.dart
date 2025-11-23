@@ -16,11 +16,7 @@ class CourseCards extends StatelessWidget {
       itemCount: courses.length,
       itemBuilder: (context, index) {
         final course = courses[index];
-        return CourseCard(
-          onTap: onTapCallbacks[course.id] ?? () {},
-          title: course.title ?? '',
-          description: course.description ?? '',
-        );
+        return CourseCard(onTap: onTapCallbacks[course.id] ?? () {}, course: course);
       },
       separatorBuilder: (context, index) => const SizedBox(height: 20),
     );

@@ -13,7 +13,7 @@ abstract class CourseRequest with _$CourseRequest {
     String? type,
     int? total,
     int? order,
-    List<Map<String, dynamic>>? assets,
+    List<Map<String, String>>? assets,
     int? price,
   }) = _CourseRequest;
 
