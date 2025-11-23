@@ -1,4 +1,5 @@
 import 'package:auto_route/annotations.dart';
+import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -8,9 +9,10 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/courses_app_bar.dart';
 import 'package:calora/widgets/info/course_info_widget.dart';
 import 'package:calora/widgets/task/task_parametrs_widget.dart';
+import 'package:calora/widgets/video/about_video_page.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/model/lesson/lesson_request.dart' show LessonRequest, LessonAsset;
+import '../../domain/model/lesson/lesson_request.dart' show LessonRequest;
 
 @RoutePage()
 class LessonBodyWidgetPage extends StatefulWidget {
@@ -32,7 +34,7 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
         children: [
           CoursesAppBar(
             openInfoSheet: () => openInfoSheet(context, widget.course.description ?? ''),
-            type: CoursesType.bulking,
+            imageUrl: widget.course.subCoverImage ?? '',
           ),
           Column(
             children: [
@@ -75,13 +77,9 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
                           ),
                           itemBuilder: (context, index) {
                             final lesson = widget.lessons[index];
-                            final videoAsset = lesson.assets.firstWhere(
-                              (a) => a.type == 'video',
-                              orElse: () => LessonAsset(type: '', url: ''),
-                            );
                             return GestureDetector(
                               onTap: () {
-                                if (lesson.isFree) openVideo(context, lesson.description);
+                                if (lesson.isFree) openVideo(context, lesson);
                               },
                               child: Row(
                                 children: [
@@ -129,10 +127,8 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
     );
   }
 
-  void openVideo(BuildContext context, String url) {
-    context.showAppBottomSheet(
-      child: Container(width: double.infinity, child: url.text(14, 18, 400)),
-    );
+  void openVideo(BuildContext context, LessonRequest lesson) {
+    context.showAppBottomSheet(child: AboutVideoPage(lesson: lesson));
   }
 
   String getTotalDuration() {

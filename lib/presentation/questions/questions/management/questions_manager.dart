@@ -81,6 +81,7 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
     );
 
     getIt<ProfileStore>().set(profileRequest);
+    getIt<ProfileStore>().setGender(profile.gender?.name ?? '');
 
     _repo
         .sendTargetWeight(NormsRequest(metric: 'Weight', value: profile.targetWeight ?? 0))

@@ -1,15 +1,14 @@
+import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class CourseCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final AssetGenImage? image;
+  final CourseRequest course;
   final VoidCallback onTap;
 
-  const CourseCard({super.key, required this.onTap, required this.title, required this.description, this.image});
+  const CourseCard({super.key, required this.onTap, required this.course});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,7 @@ class CourseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            title.text(20, 24, 600),
+            course.title.text(20, 24, 600),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -30,14 +29,42 @@ class CourseCard extends StatelessWidget {
                   child: Column(
                     children: [
                       const SizedBox(height: 8),
-                      description
+                      course.description
                           .text(16, 20, 500)
                           .c(context.colors.textSub)
                           .copyWith(maxLines: 3, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
-                if (image != null) Expanded(flex: 1, child: image!.image(fit: BoxFit.contain)),
+                if (course.assets != null)
+                  Expanded(
+                    flex: 1,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        course.mainImage ?? '',
+                        fit: BoxFit.cover,
+                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.broken_image, size: 48, color: Colors.grey);
+                        },
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
