@@ -30,10 +30,19 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to scan food barcodes and take photos of your meals for calorie tracking</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>We will sync your data with the Apple Health app to give you better insights</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>We will sync your data with the Apple Health app to give you better insights</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Permission required for recording, please give permission</string>
 	<key>NSMotionUsageDescription</key>
 	<string>This app needs access to motion and fitness data to track your steps</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
@@ -46,8 +55,6 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>NSCameraUsageDescription</key>
-    <string>This app requires camera access to scan food barcodes and take photos of your meals for calorie tracking</string>
 	<key>UIStatusBarHidden</key>
 	<false/>
 	<key>UISupportedInterfaceOrientations</key>
@@ -63,13 +70,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-
-	<key>NSMicrophoneUsageDescription</key>
-    <string>Permission required for recording, please give permission</string>
-    <key>NSAppTransportSecurity</key>
-    <dict>
-        <key>NSAllowsArbitraryLoads</key>
-        <true/>
-    </dict>
 </dict>
 </plist>

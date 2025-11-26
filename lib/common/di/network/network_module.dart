@@ -38,17 +38,15 @@ abstract class NetworkModule {
     ErrorInterceptor errorInterceptor,
     LanguageInterceptor languageInterceptor,
     AuthInterceptor authInterceptor,
-    TokenInterceptor tokenInterceptor,
     AliceDioAdapter aliceDioAdapter,
   ) {
     final dio = Dio(baseOptions);
 
-    dio.interceptors.addAll([languageInterceptor, authInterceptor, tokenInterceptor, errorInterceptor]);
+    dio.interceptors.addAll([languageInterceptor, authInterceptor,  errorInterceptor]);
 
     if (kDebugMode) dio.interceptors.add(prettyLogger);
     if (kProfileMode || kReleaseMode) dio.interceptors.add(aliceDioAdapter);
 
-    tokenInterceptor.setDio(dio);
 
     return dio;
   }
