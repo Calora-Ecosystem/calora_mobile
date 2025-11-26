@@ -30,11 +30,6 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>This app requires camera access to scan food barcodes and take photos of your meals for calorie tracking</string>
 	<key>NSHealthShareUsageDescription</key>

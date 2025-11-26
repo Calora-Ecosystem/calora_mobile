@@ -75,7 +75,6 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                   Button(
                     type: Type.secondary,
                     onPressed: () {
-                      _logFilePages(context);
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

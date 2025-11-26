@@ -39,8 +39,7 @@ abstract class NetworkModule {
     ErrorInterceptor errorInterceptor,
     LanguageInterceptor languageInterceptor,
     AuthInterceptor authInterceptor,
-    AliceDioAdapter aliceDioAdapter,
-    LoggingInterceptor loggingInterceptor,
+    // LoggingInterceptor loggingInterceptor,
   ) {
     final dio = Dio(baseOptions);
 
@@ -48,11 +47,11 @@ abstract class NetworkModule {
       languageInterceptor,
       authInterceptor,
       errorInterceptor,
-      loggingInterceptor,
+      // loggingInterceptor,
     ]);
 
     if (kDebugMode) dio.interceptors.add(prettyLogger);
-    if (kProfileMode || kReleaseMode) dio.interceptors.add(aliceDioAdapter);
+    // if (kProfileMode || kReleaseMode) dio.interceptors.add(aliceDioAdapter);
 
     return dio;
   }

@@ -30,13 +30,13 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   Future<void> login() async {
     final email = controller.text.trim();
 
-    final localLogger = LocalLogger();
-
-    localLogger.writeToFile("Email: $email\n"
-        "Email isEmpty: ${email.isEmpty}\n"
-        "Email isValid: ${_isValidEmail(email)}\n"
-        "Checked: ${state.checked}\n"
-        );
+    // final localLogger = LocalLogger();
+    //
+    // localLogger.writeToFile("Email: $email\n"
+    //     "Email isEmpty: ${email.isEmpty}\n"
+    //     "Email isValid: ${_isValidEmail(email)}\n"
+    //     "Checked: ${state.checked}\n"
+    //     );
 
     if (email.isEmpty) {
       publish(AuthEffect.showError(Strings.enterEmailAddress));
@@ -55,16 +55,16 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
         .sendOtp(email)
         .handle(
           onStart: () {
-            localLogger.writeToFile("OnStart\n");
+            // localLogger.writeToFile("OnStart\n");
             emit(state.copyWith(loading: true));
           },
           onData: (verification) {
-            localLogger.writeToFile("OnDone: ${verification.toJson()}\n");
+            //  localLogger.writeToFile("OnDone: ${verification.toJson()}\n");
 
             publish(AuthEffect.verify(verification));
           },
           onError: (error) {
-            localLogger.writeToFile("OnError: ${error.toString()}\n");
+            //  localLogger.writeToFile("OnError: ${error.toString()}\n");
             emit(state.copyWith(loading: false));
           },
           onDone: () => emit(state.copyWith(loading: false)),
