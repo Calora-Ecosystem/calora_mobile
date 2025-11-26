@@ -1,4 +1,5 @@
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/logger/local_logger.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -29,6 +30,14 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   Future<void> login() async {
     final email = controller.text.trim();
 
+    final localLogger = LocalLogger();
+
+    localLogger.writeToFile("Email: $email\n"
+        "Email isEmpty: ${email.isEmpty}\n"
+        "Email isValid: ${_isValidEmail(email)}\n"
+        "Checked: ${state.checked}\n"
+        );
+
     if (email.isEmpty) {
       publish(AuthEffect.showError(Strings.enterEmailAddress));
       return;
@@ -45,11 +54,17 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
     return _repo
         .sendOtp(email)
         .handle(
-          onStart: () => emit(state.copyWith(loading: true)),
+          onStart: () {
+            localLogger.writeToFile("OnStart\n");
+            emit(state.copyWith(loading: true));
+          },
           onData: (verification) {
+            localLogger.writeToFile("OnDone: ${verification.toJson()}\n");
+
             publish(AuthEffect.verify(verification));
           },
           onError: (error) {
+            localLogger.writeToFile("OnError: ${error.toString()}\n");
             emit(state.copyWith(loading: false));
           },
           onDone: () => emit(state.copyWith(loading: false)),
