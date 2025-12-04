@@ -1,5 +1,6 @@
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/domain/model/norms/norms.dart';
+import 'package:calora/domain/model/nutrient/nutrient_data.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
@@ -55,9 +56,23 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         final kcalValue = data
             .firstWhere((e) => e.metric == "Kcal", orElse: () => NormsRequest(metric: "Kcal", value: 0))
             .value;
+        final proteinValue = data
+            .firstWhere((e) => e.metric == "Protein", orElse: () => NormsRequest(metric: "Protein", value: 0))
+            .value;
+        final fatValue = data
+            .firstWhere((e) => e.metric == "Fat", orElse: () => NormsRequest(metric: "Fat", value: 0))
+            .value;
+        final carbsValue = data
+            .firstWhere((e) => e.metric == "Carb", orElse: () => NormsRequest(metric: "Carb", value: 0))
+            .value;
 
         emit(
           state.copyWith(
+            nutrients: [
+              NutrientData(name: "Protein", value: proteinValue, percent: 0.5),
+              NutrientData(name: "Fat", value: fatValue, percent: 0.3),
+              NutrientData(name: "Carb", value: carbsValue, percent: 0.2),
+            ],
             norms: data,
             isLoading: false,
             targetSteps: stepValue.toInt(),

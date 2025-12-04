@@ -1,3 +1,4 @@
+import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/domain/model/detail/detail_info_type.dart';
@@ -8,7 +9,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
     return DetailInfo(
       title: Strings.dailyCalorieIntake,
       id: 'daily_calorie_intake',
-      message: calories.toString(),
+      message: calories.asFixedTruncated(2).toString(),
       metric: 'kcal',
       type: DetailInfoType.dailyCalorieNorm,
     );
@@ -18,7 +19,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
     return DetailInfo(
       title: Strings.dailyProteinIntake,
       id: 'daily_protein_intake',
-      message: protein.toString(),
+      message: protein.asFixedTruncated(2).toString(),
       metric: 'gr',
       type: DetailInfoType.dailyProteinNorm,
     );
@@ -28,7 +29,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
     return DetailInfo(
       title: Strings.dailyFatIntake,
       id: 'daily_fat_intake',
-      message: fat.toString(),
+      message: fat.asFixedTruncated(2).toString(),
       metric: 'gr',
       type: DetailInfoType.dailyFatNorm,
     );
@@ -38,7 +39,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
     return DetailInfo(
       title: Strings.dailyCarbohydradeIntake,
       id: 'daily_carbohydrate_intake',
-      message: carbs.toString(),
+      message: carbs.asFixedTruncated(2).toString(),
       metric: 'gr',
       type: DetailInfoType.dailyCarbohydrateNorm,
     );
@@ -48,7 +49,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
     return DetailInfo(
       title: Strings.dailyWaterIntake,
       id: 'daily_water_intake',
-      message: water.toString(),
+      message: water.asFixedTruncated(2).toString(),
       metric: 'ml',
       type: DetailInfoType.dailyWaterNorm,
     );
@@ -58,7 +59,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
     return DetailInfo(
       title: Strings.dailyStepRate,
       id: 'daily_step_intake',
-      message: steps.toString(),
+      message: steps.asFixedTruncated(2).toString(),
       metric: 'steps',
       type: DetailInfoType.dailyStepNorm,
     );

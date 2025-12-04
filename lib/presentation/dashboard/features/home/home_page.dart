@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
+import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -128,10 +129,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                             ),
                             DailyFeedRateWidget(
                               onAddFoodTap: () {},
-                              normCalories: state.targetKcal.toString(),
+                              normCalories: state.targetKcal.asFixedTruncated(1).toString(),
                               nutrients: state.nutrients,
                               progressPercent: state.remainedCalories / state.targetKcal,
-                              remainedCalories: state.remainedCalories.toString(),
+                              remainedCalories: state.remainedCalories.asFixedTruncated(1).toString(),
                             ),
                             StepCardWidget(
                               currentSteps: state.currentSteps,

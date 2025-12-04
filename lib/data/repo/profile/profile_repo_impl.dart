@@ -1,10 +1,8 @@
-import 'package:calora/common/gen/strings.dart';
 import 'package:calora/data/api/profile_api.dart';
 import 'package:calora/domain/mapper/detail/detail_mapper.dart';
 import 'package:calora/domain/mapper/detail/profile_mapper.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
-import 'package:calora/domain/model/detail/detail_info_type.dart';
-import 'package:calora/domain/model/norms/daily_norms_info.dart';
+import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:injectable/injectable.dart';
@@ -25,10 +23,7 @@ class ProfileRepoImpl extends ProfileRepo {
     final extrasData = extrasResponse.data['content'];
     final target = targetWeight.data['content'][0];
     final profile = ProfileRequest.fromJson(extrasData);
-    final updated = profile.copyWith(
-      email: meData['email'],
-      targetWeight: target['value'].toDouble(),
-    );
+    final updated = profile.copyWith(email: meData['email'], targetWeight: target['value'].toDouble());
     return updated;
   }
 
@@ -66,62 +61,7 @@ class ProfileRepoImpl extends ProfileRepo {
   }
 
   @override
-  Future<void> updateDailyNorms(DailyNormsInfo dailyNormsInfo) {
-    return _api.updateDailyNorms(dailyNormsInfo);
+  Future<void> updateSingleNorm(NormsRequest request) async {
+    await _api.updateSingleNorm(request);
   }
-
-  List<DetailInfo> normsList = [
-    DetailInfo(
-      title: Strings.dailyCalorieIntake,
-      message: "2500",
-      metric: "kcal",
-      type: DetailInfoType.dailyCalorieNorm,
-    ),
-    DetailInfo(
-      title: Strings.dailyProteinIntake,
-      message: "200",
-      metric: "gr",
-      type: DetailInfoType.dailyProteinNorm,
-    ),
-    DetailInfo(
-      title: Strings.dailyFatIntake,
-      message: "300",
-      metric: "gr",
-      type: DetailInfoType.dailyFatNorm,
-    ),
-    DetailInfo(
-      title: Strings.dailyCarbohydradeIntake,
-      message: "340",
-      metric: "gr",
-      type: DetailInfoType.dailyCarbohydrateNorm,
-    ),
-    DetailInfo(
-      title: Strings.dailyWaterIntake,
-      message: "2200",
-      metric: 'ml',
-      type: DetailInfoType.dailyWaterNorm,
-    ),
-    DetailInfo(
-      title: Strings.dailyStepRate,
-      message: "20000",
-      metric: "qadam",
-      type: DetailInfoType.dailyStepNorm,
-    ),
-  ];
-
-  List<DetailInfo> detailInfos = [
-    DetailInfo(title: Strings.name, message: "Nurbek", type: DetailInfoType.name),
-    DetailInfo(title: Strings.lastName, message: "", type: DetailInfoType.lastName),
-    DetailInfo(title: Strings.birthday, message: "1999-08-06", type: DetailInfoType.birthDay),
-    DetailInfo(title: Strings.height, message: "165", metric: "sm", type: DetailInfoType.height),
-    DetailInfo(title: Strings.weight, message: "75", metric: "kg", type: DetailInfoType.weight),
-    DetailInfo(title: Strings.gender, message: "Erkak", type: DetailInfoType.gender),
-    DetailInfo(title: Strings.goal, message: "Maqsad", type: DetailInfoType.goal),
-    DetailInfo(
-      title: Strings.activityLevel,
-      message: "O'rtacha",
-      type: DetailInfoType.activityLevel,
-    ),
-    DetailInfo(title: Strings.metrics, message: "km/sm/kg", type: DetailInfoType.metrics),
-  ];
 }
