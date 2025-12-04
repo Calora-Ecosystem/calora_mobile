@@ -1,5 +1,6 @@
 import 'package:calora/domain/model/detail/detail_info.dart';
-import 'package:calora/domain/model/norms/daily_norms_info.dart';
+import 'package:calora/domain/model/detail/detail_info_type.dart';
+import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -9,6 +10,7 @@ import 'norms_management.dart';
 @injectable
 class NormsManager extends Manager<NormsState, NormsEffect> {
   final ProfileRepo _repo;
+
   NormsManager(this._repo) : super(const NormsState());
 
   void getDailyNorms() {
@@ -26,20 +28,35 @@ class NormsManager extends Manager<NormsState, NormsEffect> {
       }
       return e;
     }).toList();
-    DailyNormsInfo dailyNormsInfo = DailyNormsInfo(
-      calories: double.parse(resultData[0].message),
-      protein: double.parse(resultData[1].message),
-      carbs: double.parse(resultData[2].message),
-      fat: double.parse(resultData[3].message),
-      steps: double.parse(resultData[4].message),
-      water: double.parse(resultData[5].message),
-    );
+
+    final metricName = _getMetricName(info.type);
+    final request = NormsRequest(metric: metricName, value: double.parse(lastResult));
+
     _repo
-        .updateDailyNorms(dailyNormsInfo)
+        .updateSingleNorm(request)
         .handle(
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (data) => emit(state.copyWith(dailyNormsList: resultData, loading: false)),
           onDone: () => emit(state.copyWith(loading: false)),
         );
+  }
+
+  String _getMetricName(DetailInfoType type) {
+    switch (type) {
+      case DetailInfoType.dailyCalorieNorm:
+        return 'Kcal';
+      case DetailInfoType.dailyProteinNorm:
+        return 'Protein';
+      case DetailInfoType.dailyFatNorm:
+        return 'Fat';
+      case DetailInfoType.dailyCarbohydrateNorm:
+        return 'Carb';
+      case DetailInfoType.dailyWaterNorm:
+        return 'Water';
+      case DetailInfoType.dailyStepNorm:
+        return 'Step';
+      default:
+        throw Exception('Noma\'lum norm turi: $type');
+    }
   }
 }

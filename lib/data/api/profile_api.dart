@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/norms/daily_norms_info.dart';
+import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/notification/reminder_request.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -26,11 +27,49 @@ class ProfileApi {
   }
 
   Future<DailyNormsInfo> getDailyNorms() async {
-    return DailyNormsInfo(calories: 123, protein: 122, fat: 1212, carbs: 2313, water: 3213, steps: 23133);
+    final response = await _dio.get('/users/norms');
+
+    final data = response.data;
+    final List content = data['content'];
+
+    double calories = 0;
+    double protein = 0;
+    double fat = 0;
+    double carbs = 0;
+    double water = 0;
+    double steps = 0;
+
+    for (final item in content) {
+      final metric = item['metric']?.toString() ?? '';
+      final value = (item['value'] ?? 0).toDouble();
+
+      switch (metric) {
+        case 'Kcal':
+          calories = value;
+          break;
+        case 'Protein':
+          protein = value;
+          break;
+        case 'Fat':
+          fat = value;
+          break;
+        case 'Carb':
+          carbs = value;
+          break;
+        case 'Water':
+          water = value;
+          break;
+        case 'Step':
+          steps = value;
+          break;
+      }
+    }
+
+    return DailyNormsInfo(calories: calories, protein: protein, fat: fat, carbs: carbs, water: water, steps: steps);
   }
 
-  Future<Response> updateDailyNorms(DailyNormsInfo dailyNormsInfo) {
-    return _dio.post('/users/norms', data: dailyNormsInfo.toJson());
+  Future<Response> updateSingleNorm(NormsRequest request) async {
+    return _dio.post('/users/norms', data: request.toJson());
   }
 
   Future<void> logout() async {
