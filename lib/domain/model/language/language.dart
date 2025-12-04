@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -9,16 +7,11 @@ enum Language {
   RU;
 
   static Language fromName(String name) {
-    return Language.values.firstWhere(
-      (element) => element.name == name,
-      orElse: () => Language.UZ,
-    );
+    return Language.values.firstWhere((element) => element.name == name, orElse: () => Language.UZ);
   }
 
   static Language from(BuildContext context) {
-    return Language.values.firstWhere(
-      (element) => element.locale.languageCode == context.locale.languageCode,
-    );
+    return Language.values.firstWhere((element) => element.locale.languageCode == context.locale.languageCode);
   }
 
   String get name {
@@ -40,6 +33,17 @@ enum Language {
         return const Locale('uz', 'UZ');
       case Language.RU:
         return const Locale('ru', 'RU');
+    }
+  }
+
+  String get code {
+    switch (this) {
+      case Language.UZ:
+        return 'UZ';
+      case Language.EN:
+        return 'ENG';
+      case Language.RU:
+        return 'RU';
     }
   }
 }

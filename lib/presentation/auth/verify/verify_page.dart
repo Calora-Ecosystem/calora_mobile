@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -18,8 +16,9 @@ import 'management/verify_manager.dart';
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   final Verification verification;
+  final Future<void> Function()? onVerified;
 
-  VerifyPage({super.key, required this.verification});
+  const VerifyPage({super.key, required this.verification, this.onVerified});
 
   @override
   void init(context, manager) {
@@ -28,9 +27,14 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
 
   @override
   void listener(context, manager, effect) {
-    effect.when(() {
-      _openInputNamePage(context);
-    });
+    effect.when(
+      openQuestions: (email) {
+        context.router.replaceAll([QuestionsRoute(email: email)]);
+      },
+      openDashboard: () {
+        context.router.replaceAll([DashboardRoute()]);
+      },
+    );
   }
 
   @override
@@ -38,9 +42,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -58,14 +60,13 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                         manager.setVerificationCode(data);
                       },
                     ),
+                    SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: Button(
                         loading: state.loading,
                         onPressed: manager.verify,
-                        child: Strings.doContinue
-                            .text(16, 20, 500)
-                            .c(context.colors.textWhite),
+                        child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
                       ),
                     ),
                   ],
@@ -76,9 +77,5 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
         ],
       ),
     );
-  }
-
-  void _openInputNamePage(BuildContext context) {
-    context.router.replace(InputNameRoute());
   }
 }

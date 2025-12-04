@@ -9,13 +9,12 @@ class AuthStore {
   final token = BaseStore<Token?>(
     'token',
     serialize: (value) => value == null ? null : jsonEncode(value.toJson()),
-    deserialize: (value) =>
-        value == null ? null : Token.fromJson(jsonDecode(value)),
+    deserialize: (value) => value == null ? null : Token.fromJson(jsonDecode(value)),
   );
-
+  final refreshToken = BaseStore<String?>('refreshToken', serialize: (value) => value, deserialize: (value) => value);
   final isLogin = BaseStore<bool?>(
     'isLogin',
     serialize: (value) => jsonEncode(value),
-    deserialize: (value) => value as bool?,
+    deserialize: (value) => bool.tryParse(value ?? "false"),
   );
 }

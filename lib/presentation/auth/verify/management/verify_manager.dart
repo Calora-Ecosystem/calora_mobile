@@ -1,6 +1,5 @@
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -13,7 +12,6 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
   VerifyManager(this.authRepo) : super(const VerifyState());
 
   Verification _verification = Verification();
-
   String _verificationCode = "";
 
   void setVerification(Verification value) {
@@ -21,41 +19,37 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
   }
 
   void setVerificationCode(String code) {
-    this._verificationCode = code;
+    _verificationCode = code;
   }
 
   void resend() {
     authRepo
-        .login(_verification.email ?? "")
+        .sendOtp(_verification.email ?? "")
         .handle(
-          onStart: () {
-            emit(state.copyWith(loading: true));
-          },
+          onStart: () => emit(state.copyWith(loading: true)),
           onData: (data) {
             _verification = data.copyWith(email: _verification.email);
             emit(state.copyWith(loading: false));
           },
-          onError: (error) {
-            emit(state.copyWith(loading: false));
-          },
+          onError: (error) => emit(state.copyWith(loading: false)),
           onDone: () {},
         );
   }
 
   void verify() {
     authRepo
-        .verify(_verification, _verificationCode)
+        .signIn(_verification, _verificationCode)
         .handle(
-          onStart: () {
-            emit(state.copyWith(loading: true));
+          onStart: () => emit(state.copyWith(loading: true)),
+          onData: (hasNewUser) {
+            if (hasNewUser) {
+              publish(VerifyEffect.openQuestions(_verification.email!));
+            } else {
+              publish(VerifyEffect.openDashboard());
+            }
           },
-          onData: (data) {
-            publish(VerifyEffect());
-          },
-          onError: (error) {
-            emit(state.copyWith(loading: false));
-          },
-          onDone: () {},
+          onError: (error) => emit(state.copyWith(loading: false)),
+          onDone: () => emit(state.copyWith(loading: false)),
         );
   }
 }

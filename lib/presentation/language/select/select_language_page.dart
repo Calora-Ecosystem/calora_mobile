@@ -6,22 +6,16 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/language%20/select/management/select_language_management.dart';
-import 'package:calora/presentation/language%20/select/management/select_language_manager.dart';
+import 'package:calora/presentation/language/select/management/select_language_management.dart';
+import 'package:calora/presentation/language/select/management/select_language_manager.dart';
 import 'package:calora/widgets/language/language_widget.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
 class SelectLanguagePage
-    extends
-        Managed<
-          SelectLanguageManager,
-          SelectLanguageState,
-          SelectLanguageEffect
-        > {
+    extends Managed<SelectLanguageManager, SelectLanguageState, SelectLanguageEffect> {
   const SelectLanguagePage({super.key});
 
   @override
@@ -37,9 +31,7 @@ class SelectLanguagePage
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -67,9 +59,7 @@ class SelectLanguagePage
                         onPressed: () {
                           _openOnboarding(context);
                         },
-                        child: Strings.doContinue
-                            .text(16, 20, 500)
-                            .c(context.colors.textWhite),
+                        child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
                       ),
                     ),
                   ],

@@ -33,7 +33,7 @@ class Button extends StatelessWidget {
         borderColor = null;
         break;
       case Type.secondary:
-        backgroundColor = context.colors.backgroundBase;
+        backgroundColor = context.colors.white;
         borderColor = context.colors.strokeSoft;
         break;
     }
@@ -45,15 +45,11 @@ class Button extends StatelessWidget {
               WidgetState.disabled: Colors.grey,
               WidgetState.any: backgroundColor,
             }),
-            padding: WidgetStatePropertyAll(
-              EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            ),
+            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
             shape: WidgetStatePropertyAll(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: borderColor == null
-                    ? BorderSide.none
-                    : BorderSide(color: borderColor),
+                side: borderColor == null ? BorderSide.none : BorderSide(color: borderColor),
               ),
             ),
           ),
@@ -63,7 +59,7 @@ class Button extends StatelessWidget {
         onPressed: onPressed,
         child: loading
             ? CupertinoActivityIndicator(color: context.colors.textWhite)
-            : text?.text(16, 20, 500).c(context.colors.textStrong) ?? child,
+            : text?.text(16, 20, 500).c(textColor ?? context.colors.textWhite) ?? child,
       ),
     );
   }

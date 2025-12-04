@@ -18,43 +18,33 @@ class AuthRepoImpl extends AuthRepo {
   AuthRepoImpl(this._api, this._store);
 
   @override
-  Future<Verification> login(String email) async {
-    final response = await _api.login(email);
+  Future<Verification> sendOtp(String email) async {
+    final response = await _api.sendOtp(email);
     final verification = Verification.fromJson(response.data['content']);
     return verification.copyWith(email: email);
   }
 
   @override
-  Future<Verification> register(String email, String name) async {
-    final response = await _api.register(email, name);
-    final verification = Verification.fromJson(response.data['content']);
-    return verification.copyWith(email: email);
-  }
-
-  @override
-  Future<void> verify(Verification verification, String code) async {
+  Future<bool> signIn(Verification verification, String code) async {
     final installationId = await FirebaseInstallations.instance.getId();
-
     final String deviceName;
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      deviceName = androidInfo.model;
+      final android = await deviceInfo.androidInfo;
+      deviceName = android.model;
     } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      deviceName = iosInfo.utsname.machine;
+      final ios = await deviceInfo.iosInfo;
+      deviceName = ios.utsname.machine;
     } else {
       deviceName = 'N/A';
     }
-
     final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
     final apnsAvailable = apnsToken != null || !Platform.isIOS;
     String? fcmToken;
     if (apnsAvailable) {
       fcmToken = await FirebaseMessaging.instance.getToken();
     }
-
-    final response = await _api.verify(
+    final response = await _api.signIn(
       email: verification.email!,
       verificationCode: verification.verificationCode!,
       code: code,
@@ -63,11 +53,12 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken: fcmToken,
     );
 
-    final token = Token.fromJson(response.data['content']);
+    final content = response.data['content'];
+    final token = Token.fromJson(content);
     await _store.token.set(token);
+    await _store.refreshToken.set(token.refreshToken);
     await _store.isLogin.set(true);
-  }
 
-  @override
-  Future<void> resendVerifyCode() async {}
+    return content['hasNewUser'] as bool;
+  }
 }

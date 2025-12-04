@@ -1,13 +1,12 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
-import 'package:calora/common/router/app_router.gr.dart';
-import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/common/flavor/flavor_config.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.dart';
+import 'package:calora/common/router/app_router.gr.dart' show DashboardRoute, SelectLanguageRoute;
 import 'package:calora/common/widgets/display/display_widget.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_localization_loader/easy_localization_loader.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +20,16 @@ import 'management/app_manager.dart';
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
-  final _appRouter = AppRouter();
+  @override
+  void init(BuildContext context, AppManager manager) {
+    super.init(context, manager);
+  }
 
   @override
   Widget builder(context, manager, state) {
+    // Get the router here instead
+    final appRouter = getIt<AppRouter>();
+
     return EasyLocalization(
       supportedLocales: Strings.supportedLocales,
       path: Assets.localization.translations,
@@ -41,20 +46,14 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: context.theme,
-              routerConfig: getIt<AppRouter>().config(),
+              routerConfig: appRouter.config(deepLinkBuilder: (_) => DeepLink([_initialRoute()])),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
                 return MediaQuery(
                   data: mediaQuery.copyWith(
-                    textScaler: mediaQuery.textScaler.clamp(
-                      minScaleFactor: 0.8,
-                      maxScaleFactor: 1.2,
-                    ),
+                    textScaler: mediaQuery.textScaler.clamp(minScaleFactor: 0.8, maxScaleFactor: 1.2),
                   ),
-                  child: DisplayWidget(
-                    key: ValueKey(state.language),
-                    child: child!,
-                  ),
+                  child: DisplayWidget(key: ValueKey(state.language), child: child!),
                 );
               },
             ),
@@ -64,13 +63,13 @@ class App extends Managed<AppManager, AppState, AppEffect> {
     );
   }
 
-  PageRouteInfo _initialRoute(bool isLogin) {
-    return SelectLanguageRoute();
+  PageRouteInfo _initialRoute() {
+    bool isLogin = FlavorConfig.isLogin;
 
-    // if (isLogin) {
-    //   return InputNameRoute();
-    // } else {
-    //   return SelectLanguageRoute();
-    // }
+    if (isLogin) {
+      return DashboardRoute();
+    } else {
+      return SelectLanguageRoute();
+    }
   }
 }

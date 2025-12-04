@@ -4,12 +4,11 @@ part 'verify_management.freezed.dart';
 
 @freezed
 abstract class VerifyState with _$VerifyState {
-  const factory VerifyState({
-    @Default(false) bool loading,
-  }) = _VerifyState;
+  const factory VerifyState({@Default(false) bool loading}) = _VerifyState;
 }
 
 @freezed
-sealed class VerifyEffect with _$VerifyEffect {
-  const factory VerifyEffect() = _VerifyEffect;
+class VerifyEffect with _$VerifyEffect {
+  const factory VerifyEffect.openQuestions(String email) = _OpenQuestions;
+  const factory VerifyEffect.openDashboard() = _OpenDashboard;
 }
