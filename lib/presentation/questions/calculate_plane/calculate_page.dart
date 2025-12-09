@@ -39,10 +39,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -59,8 +56,8 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                         _buildIconTextRow(
                           context,
                           icon: Assets.icons.workoutSport.svg(),
-                          count: '${state.dailyGoals[1]} kkal',
-                          title: Strings.activity,
+                          count: '6000 ${Strings.step}',
+                          title: Strings.steps,
                           subtitle: Strings.dailyGoal,
                         ),
                         SizedBox(height: 20),
@@ -78,9 +75,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                             color: context.colors.backgroundElevation,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Strings.beforeStartingAnyDiet
-                              .text(12, 14, 400)
-                              .c(context.colors.textStrong),
+                          child: Strings.beforeStartingAnyDiet.text(12, 14, 400).c(context.colors.textStrong),
                         ),
                       ],
                     ),

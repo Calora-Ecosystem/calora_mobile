@@ -1,8 +1,8 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/widgets/button/universal_stepper_widget.dart';
 import 'package:calora/common/widgets/button/toggle_buttons.dart';
+import 'package:calora/common/widgets/button/universal_stepper_widget.dart';
 import 'package:calora/common/widgets/video_player/video_player_page.dart';
 import 'package:calora/domain/model/lesson/lesson_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -33,8 +33,7 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
                   selectedIndex = value;
                 });
               },
-              firstTitle: Strings.animation,
-              secondTitle: Strings.videoExercises,
+              titles: [Strings.animation, Strings.videoExercises],
             ),
             const SizedBox(height: 20),
             if (selectedIndex == 0)
@@ -102,20 +101,14 @@ class DescriptionWidget extends StatelessWidget {
       children: [
         const Text(
           "Planka mashqi — tanani to‘g‘ri holatda ushlab turishni talab qiladigan statik mashq. "
-              "Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.",
+          "Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.",
         ),
-        const Text(
-          "• Bajarilish tartibi:",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+        const Text("• Bajarilish tartibi:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         _bullet("a. Tizzadan turib, tirsaklarni yelkalar ostiga qo‘ying."),
         _bullet("b. Oyoqlarni orqaga cho‘zib, tanani tekis chiziqda ushlang."),
         _bullet("c. Qorin mushaklarini tarang qilib, belni bukmasdan yoki ko‘tarmasdan ushlang."),
         _bullet("d. Belgilangan vaqt davomida (masalan, 30–60 soniya) shu holatda turing."),
-        const Text(
-          "• Asosiy foydasi:",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+        const Text("• Asosiy foydasi:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         _bullet("Qorin mushaklarini kuchaytiradi"),
         _bullet("Bel va orqa qismini mustahkamlaydi"),
       ],

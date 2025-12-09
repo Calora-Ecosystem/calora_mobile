@@ -5,10 +5,14 @@ part 'add_meals_management.freezed.dart';
 
 @freezed
 abstract class AddMealsState with _$AddMealsState {
-  const factory AddMealsState() = _AddMealsState;
+  const factory AddMealsState({@Default(false) bool hasOpenedCreator}) = _AddMealsState;
 }
 
 @freezed
-abstract class AddMealsEffect with _$AddMealsEffect {
-  const factory AddMealsEffect.openDishesPage(MealCategory category) = _OpenDishesPage;
+class AddMealsEffect with _$AddMealsEffect {
+  const factory AddMealsEffect.openDishesPage(MealCategory category) = OpenDishesPage;
+
+  const factory AddMealsEffect.openCreatorWithImage() = OpenCreatorWithImage;
+
+  const factory AddMealsEffect.openCreatorWithSpeech() = OpenCreatorWithSpeech;
 }

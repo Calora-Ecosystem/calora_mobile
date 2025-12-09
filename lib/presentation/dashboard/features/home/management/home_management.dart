@@ -22,7 +22,7 @@ abstract class HomeState with _$HomeState {
     @Default(0) int timeInSeconds,
     @Default(0) double distanceInKm,
     @Default(0) int caloriesBurned,
-    @Default(0.5) double bottleCapacity,
+    @Default(0.25) double bottleCapacity,
     @Default(0) double targetLiters,
   }) = _HomeState;
 

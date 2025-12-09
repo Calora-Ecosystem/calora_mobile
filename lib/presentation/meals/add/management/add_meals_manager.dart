@@ -10,10 +10,6 @@ import 'add_meals_management.dart';
 class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
   AddMealsManager() : super(const AddMealsState());
 
-  void openDishesPage(MealCategory category) {
-    publish(AddMealsEffect.openDishesPage(category));
-  }
-
   final mealTypes = [
     MealTypeData(name: Strings.liquidFoods, image: Assets.images.liquidFoods.image(), type: MealCategory.liquid),
     MealTypeData(name: Strings.deepDishes, image: Assets.images.solidFoods.image(), type: MealCategory.pureed),
@@ -21,4 +17,32 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     MealTypeData(name: Strings.breakfast, image: Assets.images.morningMeal.image(), type: MealCategory.breakfast),
     MealTypeData(name: Strings.fastFood, image: Assets.images.fastFoods.image(), type: MealCategory.fastFood),
   ];
+
+  void openDishesPage(MealCategory category) {
+    publish(AddMealsEffect.openDishesPage(category));
+  }
+
+  void checkInitialRoute(bool shouldOpenCreator) {
+    if (shouldOpenCreator && !state.hasOpenedCreator) {
+      emit(state.copyWith(hasOpenedCreator: true));
+      publish(const AddMealsEffect.openCreatorWithImage());
+    }
+  }
+
+  void openCreatorAfterProgress() {
+    emit(state.copyWith(hasOpenedCreator: false));
+    publish(const AddMealsEffect.openCreatorWithImage());
+  }
+
+  void markCreatorAsOpened() {
+    emit(state.copyWith(hasOpenedCreator: true));
+  }
+
+  void resetCreatorFlag() {
+    emit(state.copyWith(hasOpenedCreator: false));
+  }
+
+  void openCreatorAfterSpeech() {
+    publish(const AddMealsEffect.openCreatorWithSpeech());
+  }
 }

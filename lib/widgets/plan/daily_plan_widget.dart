@@ -3,12 +3,12 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class DailyPlanWidget extends StatelessWidget {
   final VoidCallback onBackward;
   final VoidCallback onForward;
-  final String day;
-  final String month;
+  final DateTime date; // <<-- Yangicha
   final String calories;
   final String water;
   final String steps;
@@ -17,21 +17,24 @@ class DailyPlanWidget extends StatelessWidget {
     super.key,
     required this.onBackward,
     required this.onForward,
-    required this.day,
-    required this.month,
+    required this.date,
     required this.calories,
     required this.water,
     required this.steps,
   });
 
+  bool get isToday {
+    final now = DateTime.now();
+    return now.year == date.year && now.month == date.month && now.day == date.day;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final formattedMonth = DateFormat.yMMMM('Uz').format(date);
+
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: context.colors.accentSub,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
           Padding(
@@ -39,43 +42,44 @@ class DailyPlanWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // BACKWARD
                 InkWell(
                   onTap: onBackward,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Assets.icons.icBackward.svg(),
-                  ),
+                  child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
                 ),
+
+                // DATE TEXT
                 Column(
                   children: [
-                    'Bugun'.text(14, 16, 400).c(context.colors.white),
+                    // Agar sana bugungi bo‘lsa, “Bugun” deb chiqaramiz
+                    (isToday ? 'Bugun' : '').text(14, 16, 400).c(context.colors.white),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        day.text(14, 16, 400).c(context.colors.textWhite),
+                        date.day.toString().text(14, 16, 400).c(context.colors.textWhite),
                         const SizedBox(width: 4),
-                        month.text(14, 16, 400).c(context.colors.white),
+                        formattedMonth.text(14, 16, 400).c(context.colors.white),
                       ],
                     ),
                   ],
                 ),
-                InkWell(
-                  onTap: onForward,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Assets.icons.icForward.svg(),
-                  ),
-                ),
+
+                // FORWARD – bugungi sana bo‘lsa YASHIRILADI
+                isToday
+                    ? SizedBox(width: 40)
+                    : InkWell(
+                        onTap: onForward,
+                        child: Padding(padding: const EdgeInsets.only(right: 16), child: Assets.icons.icForward.svg()),
+                      ),
               ],
             ),
           ),
+
+          // Info container
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
+            decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -84,21 +88,9 @@ class DailyPlanWidget extends StatelessWidget {
                 Row(
                   spacing: 8,
                   children: [
-                    _buildCaloriesInfo(
-                      context: context,
-                      item: calories,
-                      icon: Assets.icons.vegetarianFood.svg(),
-                    ),
-                    _buildCaloriesInfo(
-                      context: context,
-                      item: water,
-                      icon: Assets.icons.droplet.svg(),
-                    ),
-                    _buildCaloriesInfo(
-                      context: context,
-                      item: steps,
-                      icon: Assets.icons.workoutRun.svg(),
-                    ),
+                    _buildCaloriesInfo(context: context, item: calories, icon: Assets.icons.vegetarianFood.svg()),
+                    _buildCaloriesInfo(context: context, item: water, icon: Assets.icons.droplet.svg()),
+                    _buildCaloriesInfo(context: context, item: steps, icon: Assets.icons.workoutRun.svg()),
                   ],
                 ),
               ],
@@ -109,18 +101,11 @@ class DailyPlanWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCaloriesInfo({
-    required BuildContext context,
-    required String item,
-    required Widget icon,
-  }) {
+  Widget _buildCaloriesInfo({required BuildContext context, required String item, required Widget icon}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: context.colors.backgroundElevation,
-          borderRadius: BorderRadius.circular(6),
-        ),
+        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(6)),
         child: Row(
           children: [
             SizedBox(height: 20, width: 20, child: icon),

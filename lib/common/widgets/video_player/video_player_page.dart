@@ -64,96 +64,91 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
         ),
       );
     }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: GestureDetector(
-            onTap: manager.toggleControls,
-            child: AspectRatio(
-              aspectRatio: state.aspectRatio,
-              child: Stack(
-                children: [
-                  SizedBox.expand(
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: videoController.value.size.width,
-                        height: videoController.value.size.height,
-                        child: VideoPlayer(videoController),
-                      ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: GestureDetector(
+        onTap: manager.toggleControls,
+        child: AspectRatio(
+          aspectRatio: state.aspectRatio,
+          child: Stack(
+            children: [
+              SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: videoController.value.size.width,
+                    height: videoController.value.size.height,
+                    child: VideoPlayer(videoController),
+                  ),
+                ),
+              ),
+              if (state.isControlsVisible)
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.black54, Colors.transparent, Colors.transparent, Colors.black54],
                     ),
                   ),
-                  if (state.isControlsVisible)
-                    Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.black54, Colors.transparent, Colors.transparent, Colors.black54],
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: IconButton(icon: Assets.icons.fullScreen.svg(), onPressed: manager.openFullscreen),
+                      ),
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(icon: Assets.icons.replay10.svg(), onPressed: manager.skipBackward),
+                            IconButton(icon: Assets.icons.start.svg(), onPressed: manager.togglePlayPause),
+                            IconButton(icon: Assets.icons.forward10.svg(), onPressed: manager.skipForward),
+                          ],
                         ),
                       ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: IconButton(icon: Assets.icons.fullScreen.svg(), onPressed: manager.openFullscreen),
-                          ),
-                          Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(icon: Assets.icons.replay10.svg(), onPressed: manager.skipBackward),
-                                IconButton(icon: Assets.icons.start.svg(), onPressed: manager.togglePlayPause),
-                                IconButton(icon: Assets.icons.forward10.svg(), onPressed: manager.skipForward),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                  child: Row(
-                                    children: [
-                                      _formatDuration(state.position).text(12, 16, 400).c(context.colors.textWhite),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: VideoProgressIndicator(
-                                          videoController,
-                                          allowScrubbing: true,
-                                          padding: const EdgeInsets.symmetric(vertical: 4),
-                                          colors: const VideoProgressColors(
-                                            playedColor: Colors.blue,
-                                            bufferedColor: Colors.white38,
-                                            backgroundColor: Colors.white24,
-                                          ),
-                                        ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Row(
+                                children: [
+                                  _formatDuration(state.position).text(12, 16, 400).c(context.colors.textWhite),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: VideoProgressIndicator(
+                                      videoController,
+                                      allowScrubbing: true,
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      colors: const VideoProgressColors(
+                                        playedColor: Colors.blue,
+                                        bufferedColor: Colors.white38,
+                                        backgroundColor: Colors.white24,
                                       ),
-                                      const SizedBox(width: 8),
-                                      _formatDuration(state.duration).text(12, 16, 400).c(context.colors.textWhite),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
+                                  const SizedBox(width: 8),
+                                  _formatDuration(state.duration).text(12, 16, 400).c(context.colors.textWhite),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                          ],
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 

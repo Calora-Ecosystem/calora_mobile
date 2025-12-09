@@ -7,14 +7,8 @@ import 'package:flutter/material.dart';
 class ActionsPage extends StatelessWidget {
   final VoidCallback? onTapDelete;
   final VoidCallback? onTapShare;
-  final VoidCallback? onTapShareApp;
 
-  const ActionsPage({
-    super.key,
-    this.onTapDelete,
-    this.onTapShare,
-    this.onTapShareApp,
-  });
+  const ActionsPage({super.key, this.onTapDelete, this.onTapShare});
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +20,7 @@ class ActionsPage extends StatelessWidget {
           Container(
             width: 24,
             height: 4,
-            decoration: BoxDecoration(
-              color: context.colors.strokeSub,
-              borderRadius: BorderRadius.circular(2),
-            ),
+            decoration: BoxDecoration(color: context.colors.strokeSub, borderRadius: BorderRadius.circular(2)),
           ),
           const SizedBox(height: 12),
 
@@ -48,7 +39,6 @@ class ActionsPage extends StatelessWidget {
               onTapDelete?.call();
             },
           ),
-
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: Assets.icons.share.svg(),
@@ -56,16 +46,6 @@ class ActionsPage extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               onTapShare?.call();
-            },
-          ),
-
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: Assets.icons.heartAdd.svg(),
-            title: Strings.shareApp.text(14, 18, 400).c(context.colors.textPrimary),
-            onTap: () {
-              Navigator.pop(context);
-              onTapShareApp?.call();
             },
           ),
           const SizedBox(height: 8),

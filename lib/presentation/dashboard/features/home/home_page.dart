@@ -17,7 +17,6 @@ import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
 import 'package:calora/widgets/plan/daily_plan_widget.dart';
 import 'package:calora/widgets/steps/step_card_widget.dart';
 import 'package:calora/widgets/water/water_intake_selector.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -87,10 +86,11 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                             GestureDetector(
                               onTap: () => openCalendar(context, manager),
                               child: DailyPlanWidget(
-                                onBackward: () {},
-                                onForward: () {},
-                                day: state.day?.day.toString() ?? DateTime.now().day.toString(),
-                                month: DateFormat.yMMMM('Uz').format(state.day ?? DateTime.now()).capitalize(),
+                                onBackward: () =>
+                                    manager.updateDay((state.day ?? DateTime.now()).subtract(const Duration(days: 1))),
+                                onForward: () =>
+                                    manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1))),
+                                date: state.day ?? DateTime.now(),
                                 calories: '${state.targetKcal} kkal',
                                 water: '${state.targetLiters} litr',
                                 steps: state.targetSteps.toString(),
@@ -128,7 +128,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                               ),
                             ),
                             DailyFeedRateWidget(
-                              onAddFoodTap: () {},
+                              onAddFoodTap: () => openCaloriesPage(context),
                               normCalories: state.targetKcal.asFixedTruncated(1).toString(),
                               nutrients: state.nutrients,
                               progressPercent: state.remainedCalories / state.targetKcal,
@@ -163,6 +163,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   void openCalendar(BuildContext context, HomeManager manager) {
     context.showAppBottomSheet(child: CalendarSelectorWidget(onDaySelected: (date) => manager.updateDay(date)));
+  }
+
+  void openCaloriesPage(BuildContext context) {
+    context.router.navigate(const CaloriesRoute());
   }
 
   void openCaloraAi(BuildContext context) {

@@ -23,7 +23,7 @@ female,Female,Ayol kishi,Женщина
 choose_your_goals,Choose your goals ?,Maqsadlaringizni tanlang ?,Выберите свои цели ?
 weight_loss,Weight loss,Vazn yo'qotish (ozish),Потеря веса
 maintaining_body,Maintaining the body in its current state,Tanani xozirgi xolatda saqlash,Поддержание тела в его текущем состоянии
-muscle_development,Muscle development,Mushaklarni rivojlantirish,Развитие мышц
+muscle_development,Muscle development (weight gain),Mushaklarni rivojlantirish (vazn olish),Развитие мышц (увеличение веса)
 previous,Previous,Oldingi,Предыдущий
 next,Next,Keyingi,Следующий
 when_where_you_born,When were you born ?,Qachon tug’ilgansiz ?,Когда вы родились ?
@@ -82,7 +82,7 @@ application_language,Application language,Ilova tili,Язык приложени
 setting_up_notification,Setting up notifications,Bildirishnomalarni sozlash,Настройка уведомлений
 make_an_offer,Make an offer,Taklif qilish,Сделать предложение
 about_calora,About Calora,Calora haqida,О Калоре
-help_faq,Help & FAQ,Yordam & FAQ,Помощь и часто задаваемые вопросы
+help,Help,Yordam,Помощь
 name,Name,Ism,Имя
 last_name,Last name,Familiya,Фамилия
 birthday,Birthday,Tug’ilgan kun,День рождения
@@ -274,6 +274,7 @@ scanning,Scanning,Skanerlash,Сканирование
 by_voice,By voice,Ovoz orqali,Голосом
 all_dishes,All dishes,Barcha taomlar,Все блюда
 last_eaten,Last eaten,So‘nggi yeyilganlar,Последний раз съеденный
+favorite_foods,Favorite foods,Sevimli taomlar,Любимая еда
 those_i_created,Those I created,Men yaratganlar,"Те, что я создал"
 liquid_foods,Liquid foods,Suyuq taomlar,Жидкая пища
 deep_dishes,Deep dishes,Quyuq taomlar,Глубокие блюда
@@ -282,7 +283,7 @@ breakfast,Breakfast,Nonushta,Завтрак
 fast_food,Fast food,Fast foodlar,Быстрое питание
 added,Added,Qo’shildi,Добавлен
 the_composition_of_the_food_is_being_determined,The composition of the food is being determined...,Ovqatning tarkibi aniqlanmoqda...,Состав пищи уточняется...
-the_amount_of_food_is_measured,The amount of food is measured...,Ovqat moqdori o’lchanyabdi...,Количество пищи измеряется...
+the_amount_of_food_is_measured,The amount of food is measured...,Ovqat miqdori o’lchanyabdi...,Количество пищи измеряется...
 the_calorie_content_of_the_food_is_being_measured,The calorie content of the food is being measured...,Ovqatning kaloriyasi o’lchanmoqda...,Калорийность пищи измеряется...
 the_data_in_the_image_is_being_processed_we_will_announce_the_results_soon,"The data in the image is being processed, we will announce the results soon!","Rasmdagi ma’lumotlar qayta ishlanmoqda , tez orada natijasini e’lon qilamiz !","Данные на изображении обрабатываются, результаты будут объявлены в ближайшее время!"
 scanning,Scanning,Skanerlash,Сканирование
@@ -301,7 +302,22 @@ make_your_own_food,Make your own food,O‘zingizni ovqatingizni yarating,Гот�
 name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
 calorie_content_kcal,"Calorie content, kcal","Kaloriya tarkibi, kkal","Калорийность, ккал"
 protein_gr,"Protein, gr","Oqsil,gr","Белок, г"
-white_oil_gr,"White oil, gr","Oq yog’ ,gr","Белое масло, гр"
+oil_gr,"Oil, gr.","Yog’,gr","Масло, гр."
 carbohydrate_gr,"Carbohydrate, gr","Uglevod,gr","Углеводы, г"
 food,Food,Taom,Еда
 add_by_voice,Add by voice,Ovoz orqali qo’shish,Добавить голосом
+step,step,qadam,шаг
+add_your_own_food,Add your own food,O’zingizni ovqatingizni qo’shing,Добавьте свою еду
+protein,protein,oqsil,белок
+oil,oil,yog',масло
+carbohydrate,carbohydrate,uglevod,углеводы
+kcal,kcal,kkal,ккал
+cancel,Cancel,Bekor qilish,Отмена
+meals,Meals,Ovqatlar,Питание
+foods_identified_by_voice_message,Foods identified by voice message,Ovozli habar orqali aniqlangan ovqatlar,"Продукты, идентифицированные по голосовому сообщению"
+i,I,Men,я
+you,You,Siz,Ты
+meal_reminders,Meal reminders,Ovqatlanish uchun eslatmalar,Напоминания о приеме пищи
+reminders_to_drink_water,Reminders to drink water,Suv ichish uchun eslatmalar,Напоминания пить воду
+sleep_reminders,Sleep reminders,Uxlash uchun eslatmalar,Напоминания о сне
+notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj uchun eslatmalar,Заметки к 30-дневному испытанию

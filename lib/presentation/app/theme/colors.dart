@@ -53,4 +53,5 @@ class DefaultThemeColors {
   final softGray = Color(0xFFF3F3F3);
   final mintGreen = Color(0xFF58AE8A);
   final honeydew = Color(0xFFECFFEF);
+  final blackWithOpacity = Color(0x0F000000);
 }
