@@ -8,7 +8,7 @@ class ToggleButtonsWidget extends StatefulWidget {
   final int initialIndex;
 
   const ToggleButtonsWidget({super.key, required this.onChanged, required this.titles, this.initialIndex = 0})
-    : assert(titles.length > 0, 'Kamida bitta tugma bo\'lishi kerak');
+    : assert(titles.length > 0, 'At least one button is required');
 
   @override
   State<ToggleButtonsWidget> createState() => _ToggleButtonsWidgetState();
