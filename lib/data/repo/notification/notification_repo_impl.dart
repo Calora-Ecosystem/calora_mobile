@@ -20,26 +20,26 @@ class NotificationRepoImpl extends NotificationRepo {
   List<NotificationSetting> notifications = [
     NotificationSetting(
       id: "1",
-      title: "Ovqatlanish uchun eslatmalar",
+      title: Strings.mealReminders,
       type: NotificationSettingType.mealReminder,
       value: [Strings.before20Min, Strings.before20Min, Strings.before10Min],
     ),
     NotificationSetting(
       id: "2",
-      title: "Suv ichish uchun eslatmalar",
+      title: Strings.remindersToDrinkWater,
       type: NotificationSettingType.waterReminder,
       value: [Strings.every3Hour],
     ),
     NotificationSetting(
       id: "3",
-      title: "Uxlash uchun eslatmalar",
+      title: Strings.sleepReminders,
       type: NotificationSettingType.sleepReminder,
       value: ['22:00'],
     ),
     NotificationSetting(
       id: "4",
-      title: "30 kunlik chellenj eslatmalar",
-      type: NotificationSettingType.sleepReminder,
+      title: Strings.notesForThe30DayChallenge,
+      type: NotificationSettingType.thirtyDayChallenges,
       value: ['22:00'],
     ),
   ];

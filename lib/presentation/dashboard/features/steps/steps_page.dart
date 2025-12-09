@@ -51,10 +51,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   @override
   Widget builder(context, manager, state) {
     final stepValue = state.norms
-        .firstWhere(
-          (norm) => norm.metric == "Step",
-          orElse: () => NormsRequest(metric: "Step", value: 0),
-        )
+        .firstWhere((norm) => norm.metric == "Step", orElse: () => NormsRequest(metric: "Step", value: 0))
         .value;
     return DefaultTabController(
       length: 3,
@@ -76,17 +73,11 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Column(
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Strings.steps.text(32, 36, 700),
-                        ),
+                        Align(alignment: Alignment.centerLeft, child: Strings.steps.text(32, 36, 700)),
                         const SizedBox(height: 12),
                         Container(
                           height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
                           child: TabBar(
                             indicatorPadding: const EdgeInsets.all(2),
                             indicatorSize: TabBarIndicatorSize.tab,
@@ -189,9 +180,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   void _showActionsSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) => ActionsPage(
         onTapDelete: () {
           _showConfirmDialog(context);
@@ -199,7 +188,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         onTapShare: () {
           captureAndShare(globalKey);
         },
-        onTapShareApp: () {},
       ),
     );
   }

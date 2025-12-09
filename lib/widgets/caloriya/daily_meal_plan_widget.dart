@@ -42,10 +42,18 @@ class DailyMealPlanWidget extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           title.text(14, 16, 400).c(context.colors.textSub),
-          const Spacer(),
-          value.text(20, 24, 600).c(context.colors.textStrong).auto(maxLines: 1, minSize: 16),
-          const SizedBox(width: 4),
-          Expanded(child: 'kkal'.text(20, 24, 600).c(context.colors.textSub).auto(maxLines: 1, minSize: 16)),
+          Spacer(),
+          Row(
+            children: [
+              value.text(20, 24, 600).c(context.colors.textStrong).auto(maxLines: 1, minSize: 16),
+              const SizedBox(width: 4),
+              'kkal'
+                  .text(20, 24, 600)
+                  .c(context.colors.textSub)
+                  .copyWith(textAlign: TextAlign.end)
+                  .auto(maxLines: 1, minSize: 16),
+            ],
+          ),
         ],
       ),
     );

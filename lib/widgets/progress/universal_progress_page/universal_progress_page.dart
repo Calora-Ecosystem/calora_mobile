@@ -29,7 +29,14 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
 
   @override
   void listener(BuildContext context, UniversalProgressManager manager, UniversalProgressEffect effect) {
-    effect.whenOrNull(completed: () => onComplete?.call());
+    super.listener(context, manager, effect);
+    effect.mapOrNull(
+      completed: (_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.router.pop(true);
+        });
+      },
+    );
   }
 
   @override

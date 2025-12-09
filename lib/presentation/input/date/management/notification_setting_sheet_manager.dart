@@ -92,6 +92,10 @@ class NotificationSettingSheetManager extends Manager<NotificationSettingSheetSt
     publish(const NotificationSettingSheetEffect.save());
   }
 
+  void setWaterIndex(int i) {
+    emit(state.copyWith(waterIndex: i));
+  }
+
   DateTime _parseTime(String t) {
     final p = t.split(':');
     final n = DateTime.now();

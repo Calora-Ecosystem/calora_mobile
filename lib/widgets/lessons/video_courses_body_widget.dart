@@ -79,7 +79,7 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
                             final lesson = widget.lessons[index];
                             return GestureDetector(
                               onTap: () {
-                                if (lesson.isFree) openVideo(context, lesson);
+                                if (lesson.isFree) openVideo(context, lesson, index);
                               },
                               child: Row(
                                 children: [
@@ -127,8 +127,10 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
     );
   }
 
-  void openVideo(BuildContext context, LessonRequest lesson) {
-    context.showAppBottomSheet(child: AboutVideoPage(lesson: lesson));
+  void openVideo(BuildContext context, LessonRequest lesson, int index) {
+    context.showAppBottomSheet(
+      child: AboutVideoPage(lesson: lesson, index: index),
+    );
   }
 
   String getTotalDuration() {

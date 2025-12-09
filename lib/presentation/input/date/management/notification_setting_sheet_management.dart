@@ -8,6 +8,7 @@ abstract class NotificationSettingSheetState with _$NotificationSettingSheetStat
   const factory NotificationSettingSheetState({
     @Default(false) bool isEnabled,
     DateTime? singleTime,
+    final int? waterIndex,
     @Default({}) Map<String, MealTimeSetting> mealTimes,
     @Default([]) List<ReminderRequest> existingReminders,
   }) = _NotificationSettingSheetState;
