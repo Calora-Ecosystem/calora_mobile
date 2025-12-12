@@ -1,9 +1,10 @@
+import 'package:calora/common/extensions/foods_extension.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
-import 'package:calora/domain/model/meal/dish/dish_data.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/carousel/food_carousel.dart';
 import 'package:calora/widgets/steper/food_stepper.dart';
@@ -11,9 +12,9 @@ import 'package:flutter/material.dart' hide StepperType;
 import 'package:flutter/services.dart';
 
 class DishInfoPage extends StatefulWidget {
-  final DishData dish;
+  final FoodItem foodItem;
 
-  const DishInfoPage({super.key, required this.dish});
+  const DishInfoPage({super.key, required this.foodItem});
 
   @override
   State<DishInfoPage> createState() => _DishInfoPageState();
@@ -21,6 +22,11 @@ class DishInfoPage extends StatefulWidget {
 
 class _DishInfoPageState extends State<DishInfoPage> {
   bool isFavourite = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +49,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      widget.dish.name.text(24, 32, 700).c(context.colors.textStrong),
+                      widget.foodItem.name.text(24, 32, 700).c(context.colors.textStrong),
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -60,24 +66,24 @@ class _DishInfoPageState extends State<DishInfoPage> {
                       buildNutritionItem(
                         padding: EdgeInsets.fromLTRB(0, 8, 12, 8),
                         borderColor: Colors.transparent,
-                        value: widget.dish.proteins,
+                        value: widget.foodItem.proteins, // ✅
                         label: Strings.proteins,
                       ),
                       buildNutritionItem(
                         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         borderColor: context.colors.strokeSoft,
-                        value: widget.dish.carbohydrates,
+                        value: widget.foodItem.carbohydrates, // ✅
                         label: Strings.carbohydrates,
                       ),
                       buildNutritionItem(
                         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         borderColor: context.colors.strokeSoft,
-                        value: widget.dish.oils,
+                        value: widget.foodItem.fats, // ✅
                         label: Strings.oils,
                       ),
                     ],
                   ),
-                  widget.dish.description.text(14, 16, 400).c(context.colors.textSub),
+                  widget.foodItem.description.text(14, 16, 400).c(context.colors.textSub),
                   GestureDetector(
                     onTap: () {},
                     child: Strings.moreDetails.text(14, 16, 600).c(context.colors.accentSub),

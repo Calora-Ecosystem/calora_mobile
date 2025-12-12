@@ -12,9 +12,6 @@ import 'package:management/management.dart';
 class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
   final CaloriesRepo repo;
 
-  List<MealInfo>? _mealsCache;
-  List<MealData>? _lastStateMeals;
-
   CaloriesManager(this.repo) : super(const CaloriesState());
 
   void setScrolled(bool value) {
@@ -23,51 +20,42 @@ class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
     }
   }
 
-  void onBreakfastTap() {
-    publish(CaloriesEffect.openMealPage(MealType.breakfast));
+  void onBreakfastTap() =>
+      publish(CaloriesEffect.openMealPage(MealType.breakfast, state.meals, state.date ?? DateTime.now()));
+
+  void onLunchTap() => publish(CaloriesEffect.openMealPage(MealType.lunch, state.meals, state.date ?? DateTime.now()));
+
+  void onSnackTap() => publish(CaloriesEffect.openMealPage(MealType.snacks, state.meals, state.date ?? DateTime.now()));
+
+  void onDinnerTap() =>
+      publish(CaloriesEffect.openMealPage(MealType.dinner, state.meals, state.date ?? DateTime.now()));
+
+  void fetchCaloriesAndMeals(DateTime date) {
+    repo
+        .fetchSummary(date)
+        .handle(
+          onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (result) => emit(
+            state.copyWith(
+              plan: result.dailyCalories.plan,
+              consumed: result.dailyCalories.consumed,
+              leftover: result.dailyCalories.leftover,
+              meals: result.meals,
+              isLoading: false,
+            ),
+          ),
+          onDone: () => emit(state.copyWith(isLoading: false)),
+          onError: (error) => emit(state.copyWith(isLoading: false)),
+        );
   }
 
-  void onLunchTap() {
-    publish(CaloriesEffect.openMealPage(MealType.lunch));
-  }
-
-  void onSnackTap() {
-    publish(CaloriesEffect.openMealPage(MealType.snacks));
-  }
-
-  void onDinnerTap() {
-    publish(CaloriesEffect.openMealPage(MealType.dinner));
-  }
-
-  void getDailyCalories() {
-    repo.getCalories().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) => emit(state.copyWith(plan: data.plan, consumed: data.consumed, leftover: data.leftover)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
-    );
-  }
-
-  void getMealsData() {
-    repo.getMeals().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) => emit(state.copyWith(meals: data)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
-    );
+  void dateTime(DateTime date) {
+    emit(state.copyWith(date: date));
   }
 
   List<MealInfo> get meals {
-    if (_mealsCache != null && _lastStateMeals == state.meals) {
-      return _mealsCache!;
-    }
+    final canTap = isToday(state.date ?? DateTime.now());
 
-    _lastStateMeals = state.meals;
-    _mealsCache = _buildMealsList();
-    return _mealsCache!;
-  }
-
-  List<MealInfo> _buildMealsList() {
     return [
       MealInfo(
         title: Strings.breakfast,
@@ -83,7 +71,6 @@ class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
         image: Assets.images.lunch.image(),
         onTap: onLunchTap,
       ),
-
       MealInfo(
         title: Strings.snacks,
         value: state.meals.length > 2 ? state.meals[2].value.asFixedTruncated(0) : "0",
@@ -99,5 +86,10 @@ class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
         onTap: onDinnerTap,
       ),
     ];
+  }
+
+  bool isToday(DateTime date) {
+    final now = DateTime.now();
+    return now.year == date.year && now.month == date.month && now.day == date.day;
   }
 }

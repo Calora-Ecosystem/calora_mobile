@@ -1,11 +1,13 @@
 import 'package:calora/domain/model/calories/calories_data.dart';
+import 'package:calora/domain/model/meal/menu/menu_item.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'meals_management.freezed.dart';
 
 @freezed
 abstract class MealsState with _$MealsState {
-  const factory MealsState({MealData? meal}) = _MealsState;
+  const factory MealsState({@Default([]) List<MenuItem> menuItems, @Default(false) bool isLoading, MealData? meal}) =
+      _MealsState;
 }
 
 @freezed
