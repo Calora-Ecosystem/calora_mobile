@@ -11,15 +11,23 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
 
   MealsManager(this.caloriesRepo) : super(const MealsState());
 
-  void getMeal(MealType type) {
-    caloriesRepo.getMeals().handle(
-      onStart: () {},
-      onData: (mealList) {
-        final selectedMeal = mealList.firstWhere((meal) => meal.type == type);
-        emit(MealsState(meal: selectedMeal));
-      },
-      onError: (error) => emit(const MealsState()),
+  void setMealFromList(MealType type, List<MealData> meals) {
+    final meal = meals.firstWhere(
+      (m) => m.type == type,
+      orElse: () => MealData(type: type, max: 0, value: 0, mass: 0, carbohydrates: 0, proteins: 0, oils: 0),
     );
+    emit(state.copyWith(meal: meal));
+  }
+
+  void fetchMenuItem(DateTime date) {
+    caloriesRepo
+        .fetchMenuItem(date)
+        .handle(
+          onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (value) => emit(state.copyWith(menuItems: value, isLoading: false)),
+          onDone: () => emit(state.copyWith(isLoading: false)),
+          onError: (error) => emit(state.copyWith(isLoading: false)),
+        );
   }
 
   void openAddMealPage() {

@@ -23,14 +23,15 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
 
   @override
   void init(context, manager) {
-    manager.getDailyCalories();
-    manager.getMealsData();
+    manager.fetchCaloriesAndMeals(DateTime.now());
   }
 
   @override
   void listener(BuildContext context, CaloriesManager manager, CaloriesEffect effect) {
     super.listener(context, manager, effect);
-    effect.when(openMealPage: (type) => context.pushRoute(MealsRoute(type: type)));
+    effect.when(
+      openMealPage: (type, meals, date) => context.pushRoute(MealsRoute(type: type, meals: meals, dateTime: date)),
+    );
   }
 
   @override
@@ -58,49 +59,56 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                       const SizedBox(height: 40),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: WeekDaysSelector(onDaySelected: (value) {}),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        decoration: BoxDecoration(color: context.colors.white),
-                        child: Column(
-                          spacing: 8,
-                          children: [
-                            DailyMealPlanWidget(
-                              accordingToPlan: "${state.plan.asFixedTruncated(0)}",
-                              consumed: "${state.consumed.asFixedTruncated(0)}",
-                              leftover: "${state.leftover.asFixedTruncated(0)}",
-                            ),
-                            MealCardsGrid(meals: manager.meals),
-                            GestureDetector(
-                              onTap: () => _openNotificationSettings(context),
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: context.colors.backgroundElevation,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Assets.icons.greenNotification.svg(),
-                                        const SizedBox(width: 8),
-                                        Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
-                                        Spacer(),
-                                        Assets.icons.setting.svg(),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: WeekDaysSelector(
+                          onDaySelected: (value) {
+                            manager.fetchCaloriesAndMeals(value);
+                            manager.dateTime(value);
+                          },
                         ),
                       ),
+                      state.isLoading
+                          ? Center(child: CircularProgressIndicator())
+                          : Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              decoration: BoxDecoration(color: context.colors.white),
+                              child: Column(
+                                spacing: 8,
+                                children: [
+                                  DailyMealPlanWidget(
+                                    accordingToPlan: "${state.plan.asFixedTruncated(0)}",
+                                    consumed: "${state.consumed.asFixedTruncated(0)}",
+                                    leftover: "${state.leftover.asFixedTruncated(0)}",
+                                  ),
+                                  MealCardsGrid(meals: manager.meals),
+                                  GestureDetector(
+                                    onTap: () => _openNotificationSettings(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: context.colors.backgroundElevation,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Assets.icons.greenNotification.svg(),
+                                              const SizedBox(width: 8),
+                                              Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
+                                              Spacer(),
+                                              Assets.icons.setting.svg(),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                     ],
                   ),
                 ),

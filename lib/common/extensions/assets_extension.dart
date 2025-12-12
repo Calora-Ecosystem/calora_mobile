@@ -1,4 +1,6 @@
 import 'package:calora/domain/model/lesson/lesson_request.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
+import 'package:calora/domain/model/meal/meal_type_data.dart';
 
 import '../../domain/model/course/course_request.dart';
 
@@ -13,6 +15,24 @@ extension CourseRequestX on CourseRequest {
   String? get subCoverImage {
     final url = assets?.firstWhere((a) => a['type'] == 'SubCoverImage', orElse: () => {})['url'];
     return url != null ? "$baseUrl$url" : null;
+  }
+}
+
+extension MealTypeDataX on MealTypeData {
+  String get fullImageUrl {
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    return "$baseUrl$imageUrl";
+  }
+}
+
+extension FoodListItemX on FoodListItem {
+  String get fullImageUrl {
+    if (coverUrl.startsWith('http')) {
+      return coverUrl;
+    }
+    return "$baseUrl$coverUrl";
   }
 }
 

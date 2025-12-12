@@ -1,11 +1,16 @@
-import 'package:calora/domain/model/calories/calories_data.dart';
-import 'package:calora/domain/model/meal/dish/dish_data.dart';
+import 'package:calora/data/repo/calories/calories_repo_impl.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
+import 'package:calora/domain/model/meal/menu/menu_item.dart';
 
 abstract class CaloriesRepo {
-  Future<List<MealData>> getMeals();
+  Future<SummaryResult> fetchSummary(DateTime date);
 
-  Future<DailyCalories> getCalories();
+  Future<List<MealTypeData>> fetchFoodCategory();
 
-  Future<List<DishData>> getDishes(MealCategory category);
+  Future<List<FoodListItem>> fetchFoods();
+
+  Future<List<MenuItem>> fetchMenuItem(DateTime date);
+
+  Future<FoodItem> fetchFoodById(int id);
 }

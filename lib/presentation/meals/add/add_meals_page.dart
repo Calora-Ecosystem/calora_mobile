@@ -30,13 +30,14 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   void init(BuildContext context, AddMealsManager manager) {
     super.init(context, manager);
     manager.checkInitialRoute(shouldOpenCreator);
+    manager.fetchFoodCategory();
   }
 
   @override
   void listener(BuildContext context, AddMealsManager manager, AddMealsEffect effect) {
     super.listener(context, manager, effect);
     effect.mapOrNull(
-      openDishesPage: (e) => context.pushRoute(DishesRoute(mealCategory: e.category)),
+      openDishesPage: (e) => context.pushRoute(DishesRoute(data: e.meal)),
       openCreatorWithImage: (_) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
@@ -121,8 +122,8 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               ),
               Expanded(
                 child: MealTypeGrid(
-                  onMealTypeSelected: (category) => manager.openDishesPage(category),
-                  mealTypes: manager.mealTypes,
+                  onMealTypeSelected: (meal) => manager.openDishesPage(meal),
+                  mealTypes: state.mealCategories,
                 ),
               ),
             ],
