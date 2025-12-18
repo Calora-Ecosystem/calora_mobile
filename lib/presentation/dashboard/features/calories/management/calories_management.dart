@@ -12,10 +12,13 @@ abstract class CaloriesState with _$CaloriesState {
     @Default(0) double leftover,
     @Default([]) List<MealData> meals,
     @Default(false) bool isLoading,
+    DateTime? date,
   }) = _CaloriesState;
+
+  factory CaloriesState.initial() => CaloriesState(date: DateTime.now());
 }
 
 @freezed
 abstract class CaloriesEffect with _$CaloriesEffect {
-  const factory CaloriesEffect.openMealPage(MealType type) = _CaloriesEffect;
+  const factory CaloriesEffect.openMealPage(MealType type, List<MealData> meals, DateTime dateTime) = _CaloriesEffect;
 }

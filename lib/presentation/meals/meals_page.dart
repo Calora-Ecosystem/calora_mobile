@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/foods_extension.dart';
 import 'package:calora/common/extensions/meal_type_text_extension.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
@@ -8,6 +9,7 @@ import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -19,12 +21,15 @@ import 'management/meals_manager.dart' show MealsManager;
 @RoutePage()
 class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
   final MealType type;
+  final List<MealData> meals;
+  final DateTime dateTime;
 
-  const MealsPage(this.type, {super.key});
+  const MealsPage({required this.type, required this.meals, super.key, required this.dateTime});
 
   @override
   void init(BuildContext context, MealsManager manager) {
-    manager.getMeal(type);
+    manager.setMealFromList(type, meals);
+    manager.fetchMenuItem(dateTime);
     super.init(context, manager);
   }
 
@@ -73,8 +78,12 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          '${state.meal?.value.asFixedTruncated(1)} kkal'.text(12, 16, 500).c(context.colors.textSub),
-                          '${state.meal?.max.asFixedTruncated(1)} kkal'.text(12, 16, 500).c(context.colors.textSub),
+                          '${state.meal?.value.asFixedTruncated(1)} ${Strings.kcal}'
+                              .text(12, 16, 500)
+                              .c(context.colors.textSub),
+                          '${state.meal?.max.asFixedTruncated(1)} ${Strings.kcal}'
+                              .text(12, 16, 500)
+                              .c(context.colors.textSub),
                         ],
                       ),
                       LinearPercentIndicator(
@@ -83,7 +92,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                         animation: true,
                         barRadius: Radius.circular(4),
                         padding: EdgeInsets.zero,
-                        percent: (state.meal?.value ?? 0) / (state.meal?.max ?? 1),
+                        percent: calculatePercent(state.meal?.value, state.meal?.max),
                         backgroundColor: context.colors.white,
                         progressColor: context.colors.accentSub,
                       ),
@@ -101,24 +110,77 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
               ),
             ),
 
-            Column(
-              spacing: 8,
-              children: [
-                Container(
-                  height: 240,
-                  width: 240,
-                  child: ClipPath(
-                    clipper: LeftSideClipper(),
-                    child: Assets.images.empty.image(fit: BoxFit.fill),
+            state.menuItems.isNotEmpty
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Strings.added.text(20, 24, 600).c(context.colors.textStrong),
+                      SizedBox(height: 12),
+                      ...state.menuItems
+                          .map(
+                            (item) => Container(
+                              width: double.infinity,
+                              margin: EdgeInsets.only(bottom: 12),
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: context.colors.backgroundElevation,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      '${item.calories.asFixedTruncated(1)} ${Strings.kcal}'
+                                          .text(16, 20, 500)
+                                          .c(context.colors.textStrong),
+                                      DateFormat('HH:mm').format(item.date).text(14, 16, 400).c(context.colors.textSub),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  item.foodName.text(14, 16, 400).c(context.colors.textSub),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      '${Strings.oil[0].toUpperCase() + Strings.oil.substring(1)} : ${item.fats.asFixedTruncated(1)}'
+                                          .text(12, 14, 500)
+                                          .c(context.colors.textStrong),
+                                      SizedBox(width: 8),
+                                      '${Strings.proteins[0].toUpperCase() + Strings.proteins.substring(1)} : ${item.proteins.asFixedTruncated(1)}'
+                                          .text(12, 14, 500)
+                                          .c(context.colors.textStrong),
+                                      SizedBox(width: 8),
+                                      '${Strings.carbohydrates[0].toUpperCase() + Strings.carbohydrates.substring(1)} : ${item.carbohydrates.asFixedTruncated(1)}'
+                                          .text(12, 14, 500)
+                                          .c(context.colors.textStrong),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ],
+                  )
+                : Column(
+                    spacing: 8,
+                    children: [
+                      Container(
+                        height: 240,
+                        width: 240,
+                        child: ClipPath(
+                          clipper: LeftSideClipper(),
+                          child: Assets.images.empty.image(fit: BoxFit.fill),
+                        ),
+                      ),
+                      Strings.mealsAreNotAvailable.text(16, 20, 500).c(context.colors.textStrong),
+                      Strings.addYourLastMealsHere
+                          .text(14, 18, 400)
+                          .c(context.colors.textSub)
+                          .copyWith(textAlign: TextAlign.center),
+                    ],
                   ),
-                ),
-                Strings.mealsAreNotAvailable.text(16, 20, 500).c(context.colors.textStrong),
-                Strings.addYourLastMealsHere
-                    .text(14, 18, 400)
-                    .c(context.colors.textSub)
-                    .copyWith(textAlign: TextAlign.center),
-              ],
-            ),
           ],
         ),
       ),
@@ -127,6 +189,12 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
         child: Button(onPressed: () => manager.openAddMealPage(), text: Strings.add),
       ),
     );
+  }
+
+  double calculatePercent(double? value, double? max) {
+    if (value == null || max == null || max <= 0) return 0.0;
+    final percent = value / max;
+    return percent.clamp(0.0, 1.0);
   }
 
   Widget mealInfoCard(BuildContext context, {required String title, required double value, String unit = "gr"}) {

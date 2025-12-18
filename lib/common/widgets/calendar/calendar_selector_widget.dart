@@ -25,10 +25,25 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
     _scrollController = ScrollController();
     _initializeMonths();
     _selectedDate = DateTime.now();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentMonth();
+    });
+  }
+
+  void _scrollToCurrentMonth() {
+    const currentMonthIndex = 5;
+
+    _scrollController.animateTo(
+      currentMonthIndex * 330,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+    );
   }
 
   void _initializeMonths() {
     DateTime now = DateTime.now();
+
     for (int i = 6; i >= 1; i--) {
       _months.add(DateTime(now.year, now.month - i, 1));
     }
@@ -93,6 +108,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
     final locale = Localizations.localeOf(context).languageCode;
     final monday = DateTime(2023, 1, 2);
     final days = List.generate(7, (i) => monday.add(Duration(days: i)));
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -107,6 +123,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
   Widget _buildMonthView(DateTime month) {
     List<DateTime> daysInMonth = _getDaysInMonth(month);
     final today = DateTime.now();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

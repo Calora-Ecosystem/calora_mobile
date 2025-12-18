@@ -67,7 +67,7 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
                 child: '${widget.targetLiters.toStringAsFixed(1)} L'
                     .text(20, 24, 600)
                     .c(context.colors.textSub)
-                    .copyWith(overflow: TextOverflow.ellipsis, maxLines: 1),
+                    .copyWith(overflow: TextOverflow.ellipsis, maxLines: 1, textAlign: TextAlign.end),
               ),
             ],
           ),

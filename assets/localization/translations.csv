@@ -23,7 +23,7 @@ female,Female,Ayol kishi,Женщина
 choose_your_goals,Choose your goals ?,Maqsadlaringizni tanlang ?,Выберите свои цели ?
 weight_loss,Weight loss,Vazn yo'qotish (ozish),Потеря веса
 maintaining_body,Maintaining the body in its current state,Tanani xozirgi xolatda saqlash,Поддержание тела в его текущем состоянии
-muscle_development,Muscle development,Mushaklarni rivojlantirish,Развитие мышц
+muscle_development,Muscle development (weight gain),Mushaklarni rivojlantirish (vazn olish),Развитие мышц (увеличение веса)
 previous,Previous,Oldingi,Предыдущий
 next,Next,Keyingi,Следующий
 when_where_you_born,When were you born ?,Qachon tug’ilgansiz ?,Когда вы родились ?
@@ -82,7 +82,7 @@ application_language,Application language,Ilova tili,Язык приложени
 setting_up_notification,Setting up notifications,Bildirishnomalarni sozlash,Настройка уведомлений
 make_an_offer,Make an offer,Taklif qilish,Сделать предложение
 about_calora,About Calora,Calora haqida,О Калоре
-help_faq,Help & FAQ,Yordam & FAQ,Помощь и часто задаваемые вопросы
+help,Help,Yordam,Помощь
 name,Name,Ism,Имя
 last_name,Last name,Familiya,Фамилия
 birthday,Birthday,Tug’ilgan kun,День рождения
@@ -258,7 +258,7 @@ notification,Notification,Bildirishnoma,Уведомление
 calora_ai,Calora Ai,Calora Ai,Calora Ai
 according_to_plan,According to plan,Reja bo‘yicha,Согласно плану
 food_consumed,Food consumed,Iste’mol qilingan ozuqa,Потребляемая пища
-leftover_food_plan,Leftover food plan,Qoldiq ozuqa rejasi,План оставшейся еды
+leftover_food_plan,Leftover food plan,Qoldiq ozuqa rejasi,План питания из остатков еды
 breakfast,Breakfast,Nonushta,Завтрак
 lunch,Lunch,Tushlik,Обед
 snacks,Snacks,Aperatiflar,Закуски
@@ -267,41 +267,61 @@ from_kcal,from kcal,kkaldan,из ккал
 to_remind_you_of_meal_times,To remind you of meal times,Ovqat vaqtlarini eslatish uchun,Чтобы напомнить вам о времени приема пищи
 add_food,Add food,Ovqatni qo’shish,Добавить еду
 meals_are_not_available,Meals are not available.,Ovqatlar mavjud emas,Питание не предоставляется.
-add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Добавьте сюда ваши последние приемы пищи.
-search_for_food_or_product,Search for food or product,Ovqat yoki maxsulotni qidirish,Поиск еды или продукта
-creation,Creation,Yaratish,Создание
+add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь укажите ваши последние приемы пищи.
+search_for_food_or_product,Search for food or product,Ovqat yoki maxsulotni qidirish,Поиск продуктов питания или товаров
+creation,Creation,Yaratish,Творение
 scanning,Scanning,Skanerlash,Сканирование
 by_voice,By voice,Ovoz orqali,Голосом
 all_dishes,All dishes,Barcha taomlar,Все блюда
-last_eaten,Last eaten,So‘nggi yeyilganlar,Последний раз съеденный
-those_i_created,Those I created,Men yaratganlar,"Те, что я создал"
-liquid_foods,Liquid foods,Suyuq taomlar,Жидкая пища
-deep_dishes,Deep dishes,Quyuq taomlar,Глубокие блюда
+last_eaten,Last eaten,So‘nggi yeyilganlar,Последний съеденный
+favorite_foods,Favorite foods,Sevimli taomlar,Любимые блюда
+those_i_created,Those I created,Men yaratganlar,"Те, которых я создал."
+liquid_foods,Liquid foods,Suyuq taomlar,Жидкие продукты
+deep_dishes,Deep dishes,Quyuq taomlar,Глубокие тарелки
 drinks,Drinks,Ichimliklar,Напитки
 breakfast,Breakfast,Nonushta,Завтрак
 fast_food,Fast food,Fast foodlar,Быстрое питание
 added,Added,Qo’shildi,Добавлен
-the_composition_of_the_food_is_being_determined,The composition of the food is being determined...,Ovqatning tarkibi aniqlanmoqda...,Состав пищи уточняется...
-the_amount_of_food_is_measured,The amount of food is measured...,Ovqat moqdori o’lchanyabdi...,Количество пищи измеряется...
-the_calorie_content_of_the_food_is_being_measured,The calorie content of the food is being measured...,Ovqatning kaloriyasi o’lchanmoqda...,Калорийность пищи измеряется...
-the_data_in_the_image_is_being_processed_we_will_announce_the_results_soon,"The data in the image is being processed, we will announce the results soon!","Rasmdagi ma’lumotlar qayta ishlanmoqda , tez orada natijasini e’lon qilamiz !","Данные на изображении обрабатываются, результаты будут объявлены в ближайшее время!"
+the_composition_of_the_food_is_being_determined,The composition of the food is being determined...,Ovqatning tarkibi aniqlanmoqda...,Состав продуктов питания находится в стадии определения...
+the_amount_of_food_is_measured,The amount of food is measured...,Ovqat miqdori o’lchanyabdi...,Количество пищи измеряется...
+the_calorie_content_of_the_food_is_being_measured,The calorie content of the food is being measured...,Ovqatning kaloriyasi o’lchanmoqda...,Измеряется калорийность продуктов питания...
+the_data_in_the_image_is_being_processed_we_will_announce_the_results_soon,"The data in the image is being processed, we will announce the results soon!","Rasmdagi ma’lumotlar qayta ishlanmoqda , tez orada natijasini e’lon qilamiz !","Данные на изображении обрабатываются, результаты мы сообщим в ближайшее время!"
 scanning,Scanning,Skanerlash,Сканирование
-place_the_food_in_the_designated_area_and_take_a_picture,Place the food in the designated area and take a picture!,Taomni belgilangan maydonga to’g’irlab rasmga oling!,Положите еду в отведенное место и сфотографируйте!
-the_value_of_the_food_determined,The value of the food determined,Aniqlangan ovqatning qiymati,Ценность продуктов питания определяется
+place_the_food_in_the_designated_area_and_take_a_picture,Place the food in the designated area and take a picture!,Taomni belgilangan maydonga to’g’irlab rasmga oling!,Разложите еду в отведенном месте и сфотографируйте!
+the_value_of_the_food_determined,The value of the food determined,Aniqlangan ovqatning qiymati,Определена стоимость продуктов питания.
 nutritional_value_of_food,Nutritional value of food,Ovqatning ozuqaviyligi,Пищевая ценность продуктов питания
 name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
-tell_me_what_you_ate_say_something_like_coffee_300_grams_of_white_bread_3_eggs,"Tell me what you ate: Say something like coffee, 300 grams of white bread, 3 eggs.","Nima ovqat yeganingizni ayting: Qahva, 300 gr oq non, 3 ta tuxum kabi ayting.","Расскажите, что вы ели: что-то вроде кофе, 300 граммов белого хлеба, 3 яйца."
-the_information_in_your_voicemail_is_being_analyzed,The information in your voicemail is being analyzed!,Ovozli xabaringizdagi ma’lumotlar tahlil qilinyabdi !,Информация в вашем голосовом сообщении анализируется!
+tell_me_what_you_ate_say_something_like_coffee_300_grams_of_white_bread_3_eggs,"Tell me what you ate: Say something like coffee, 300 grams of white bread, 3 eggs.","Nima ovqat yeganingizni ayting: Qahva, 300 gr oq non, 3 ta tuxum kabi ayting.","Расскажите, что вы ели: например, кофе, 300 грамм белого хлеба и 3 яйца."
+the_information_in_your_voicemail_is_being_analyzed,The information in your voicemail is being analyzed!,Ovozli xabaringizdagi ma’lumotlar tahlil qilinyabdi !,Информация из вашей голосовой почты анализируется!
 daily_meal_plan,Daily meal plan,Kunlik ozuqa rejasi,Ежедневный план питания
 add,Add,Qo'shish,Добавлять
-more_details,More details,Batafsill,Подробнее
-add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавьте определенную сумму
-enter_the_amount_of_food_gr,"Enter the amount of food, gr.","Ovqat miqdorini kiriting, gr","Введите количество продукта, гр."
+more_details,More details,Batafsill,Более подробная информация
+add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённое количество
+enter_the_amount_of_food_gr,"Enter the amount of food, gr.","Ovqat miqdorini kiriting, gr","Введите количество еды, гр."
 make_your_own_food,Make your own food,O‘zingizni ovqatingizni yarating,Готовьте еду сами
 name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
 calorie_content_kcal,"Calorie content, kcal","Kaloriya tarkibi, kkal","Калорийность, ккал"
 protein_gr,"Protein, gr","Oqsil,gr","Белок, г"
-white_oil_gr,"White oil, gr","Oq yog’ ,gr","Белое масло, гр"
+oil_gr,"Oil, gr.","Yog’,gr","Масло, гр."
 carbohydrate_gr,"Carbohydrate, gr","Uglevod,gr","Углеводы, г"
 food,Food,Taom,Еда
 add_by_voice,Add by voice,Ovoz orqali qo’shish,Добавить голосом
+step,step,qadam,шаг
+add_your_own_food,Add your own food,O’zingizni ovqatingizni qo’shing,Добавьте свою еду
+protein,protein,oqsil,белок
+oil,oil,yog',масло
+carbohydrate,carbohydrate,uglevod,углеводы
+kcal,kcal,kkal,ккал
+cancel,Cancel,Bekor qilish,Отмена
+meals,Meals,Ovqatlar,Питание
+foods_identified_by_voice_message,Foods identified by voice message,Ovozli habar orqali aniqlangan ovqatlar,"Продукты, идентифицированные по голосовому сообщению."
+i,I,Men,я
+you,You,Siz,Ты
+meal_reminders,Meal reminders,Ovqatlanish uchun eslatmalar,Напоминания о еде
+reminders_to_drink_water,Reminders to drink water,Suv ichish uchun eslatmalar,Напоминания о необходимости пить воду
+sleep_reminders,Sleep reminders,Uxlash uchun eslatmalar,Напоминания о сне
+notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj uchun eslatmalar,Заметки к 30-дневному челленджу
+should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
+yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
+please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
+please_enter_food_metrics,"Please, enter food metrics","Please, enter food metrics","Пожалуйста, введите показатели качества продуктов питания."

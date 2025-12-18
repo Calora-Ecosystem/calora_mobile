@@ -1,3 +1,4 @@
+import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -5,7 +6,7 @@ import 'package:flutter/material.dart';
 
 class MealTypeGrid extends StatelessWidget {
   final List<MealTypeData> mealTypes;
-  final Function(MealCategory) onMealTypeSelected;
+  final Function(MealTypeData meal) onMealTypeSelected;
 
   const MealTypeGrid({Key? key, required this.mealTypes, required this.onMealTypeSelected}) : super(key: key);
 
@@ -22,7 +23,7 @@ class MealTypeGrid extends StatelessWidget {
       itemCount: mealTypes.length,
       itemBuilder: (context, index) {
         final mealType = mealTypes[index];
-        return _buildMealTypeCard(context: context, mealType: mealType, onTap: () => onMealTypeSelected(mealType.type));
+        return _buildMealTypeCard(context: context, mealType: mealType, onTap: () => onMealTypeSelected(mealType));
       },
     );
   }
@@ -39,7 +40,7 @@ class MealTypeGrid extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(borderRadius: BorderRadius.circular(16), child: mealType.image),
+            ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.network(mealType.fullImageUrl)),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: mealType.name.text(14, 16, 600).c(context.colors.textStrong),

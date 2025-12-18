@@ -1,3 +1,4 @@
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
@@ -48,23 +49,23 @@ class StepsApi {
   Future<List<UserStatRequest>> getStats(DateTime from, DateTime to) async {
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
-
+    final profile = await profileStore.getProfile();
+    final currentEmail = profile.email?.toLowerCase() ?? "";
     final response = await _dio.get(
       "/users/steps/stat",
       queryParameters: {"from": fromUtc.toIso8601String(), "to": toUtc.toIso8601String()},
     );
-
     final data = response.data;
     final content = data["content"] as List<dynamic>;
-
     return content.map((json) {
       final user = json["user"];
+      final userEmail = (user["email"] ?? "").toString().toLowerCase();
       return UserStatRequest(
         firstName: user["name"] ?? "",
         lastName: "",
         stepCount: json["sum"] ?? 0,
         talks: json["count"] ?? 0,
-        isMe: false,
+        isMe: userEmail == currentEmail,
         isWinner: json["index"] == 1,
       );
     }).toList();

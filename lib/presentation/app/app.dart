@@ -6,6 +6,9 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.dart';
 import 'package:calora/common/router/app_router.gr.dart' show DashboardRoute, SelectLanguageRoute;
 import 'package:calora/common/widgets/display/display_widget.dart';
+import 'package:calora/common/widgets/system_ui/remove_status_bar_background.dart';
+import 'package:calora/presentation/app/management/app_management.dart';
+import 'package:calora/presentation/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_localization_loader/easy_localization_loader.dart';
@@ -13,23 +16,13 @@ import 'package:flutter/material.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:management/management.dart';
 
-import 'management/app_management.dart';
-import 'management/app_manager.dart';
-
 @RoutePage()
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
   @override
-  void init(BuildContext context, AppManager manager) {
-    super.init(context, manager);
-  }
-
-  @override
   Widget builder(context, manager, state) {
-    // Get the router here instead
     final appRouter = getIt<AppRouter>();
-
     return EasyLocalization(
       supportedLocales: Strings.supportedLocales,
       path: Assets.localization.translations,
@@ -53,7 +46,9 @@ class App extends Managed<AppManager, AppState, AppEffect> {
                   data: mediaQuery.copyWith(
                     textScaler: mediaQuery.textScaler.clamp(minScaleFactor: 0.8, maxScaleFactor: 1.2),
                   ),
-                  child: DisplayWidget(key: ValueKey(state.language), child: child!),
+                  child: RemoveStatusBarBackground(
+                    child: DisplayWidget(key: ValueKey(state.language), child: child!),
+                  ),
                 );
               },
             ),
@@ -64,8 +59,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
   }
 
   PageRouteInfo _initialRoute() {
-    bool isLogin = FlavorConfig.isLogin;
-
+    final bool isLogin = FlavorConfig.isLogin;
     if (isLogin) {
       return DashboardRoute();
     } else {

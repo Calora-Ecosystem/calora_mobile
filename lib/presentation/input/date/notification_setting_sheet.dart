@@ -32,6 +32,14 @@ class NotificationSettingSheet
   Widget builder(BuildContext context, NotificationSettingSheetManager manager, NotificationSettingSheetState state) {
     final isMeal = type == NotificationSettingType.mealReminder;
 
+    List<String> waterItem = [
+      Strings.every1Hour,
+      Strings.every2Hour,
+      Strings.every3Hour,
+      Strings.every4Hour,
+      Strings.every5Hour,
+    ];
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
@@ -51,7 +59,6 @@ class NotificationSettingSheet
               _mealItem(context, manager, state, "Dinner", Strings.dinnerTimeReminder),
             ] else
               _singleItem(context, manager, state),
-
             SizedBox(
               width: double.infinity,
               child: Button(onPressed: () => manager.save(type), text: Strings.save),
@@ -68,6 +75,8 @@ class NotificationSettingSheet
     NotificationSettingSheetManager manager,
     NotificationSettingSheetState state,
   ) {
+    final isWater = type == NotificationSettingType.waterReminder;
+
     final title = switch (type) {
       NotificationSettingType.waterReminder => Strings.waterDrinkReminder,
       NotificationSettingType.sleepReminder => Strings.bedtimeReminder,
@@ -81,12 +90,14 @@ class NotificationSettingSheet
       enabled: state.isEnabled,
       onToggle: manager.toggleMain,
       child: state.isEnabled
-          ? CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.time,
-              use24hFormat: true,
-              initialDateTime: state.singleTime!,
-              onDateTimeChanged: manager.setSingleTime,
-            )
+          ? (isWater
+                ? _waterPicker(context, manager, state)
+                : CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.time,
+                    use24hFormat: true,
+                    initialDateTime: state.singleTime!,
+                    onDateTimeChanged: manager.setSingleTime,
+                  ))
           : null,
     );
   }
@@ -100,7 +111,6 @@ class NotificationSettingSheet
   ) {
     final setting = state.mealTimes[key] ?? MealTimeSetting(enabled: false, time: DateTime.now());
     final time = setting.time;
-
     return _block(
       context: context,
       title: title,
@@ -114,6 +124,38 @@ class NotificationSettingSheet
               onDateTimeChanged: (t) => manager.setMealTime(key, t),
             )
           : null,
+    );
+  }
+
+  Widget _waterPicker(
+    BuildContext context,
+    NotificationSettingSheetManager manager,
+    NotificationSettingSheetState state,
+  ) {
+    final waterItem = [
+      Strings.every1Hour,
+      Strings.every2Hour,
+      Strings.every3Hour,
+      Strings.every4Hour,
+      Strings.every5Hour,
+    ];
+
+    return SizedBox(
+      height: 180,
+      child: CupertinoPicker(
+        itemExtent: 40,
+        useMagnifier: true,
+        magnification: 1.1,
+        scrollController: FixedExtentScrollController(initialItem: state.waterIndex ?? 0),
+        onSelectedItemChanged: (i) => manager.setWaterIndex(i),
+        children: waterItem
+            .map(
+              (e) => Center(
+                child: Text(e, style: TextStyle(fontSize: 18, color: context.colors.textStrong)),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 
@@ -133,7 +175,7 @@ class NotificationSettingSheet
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              title.text(16, 20, 400).c(context.colors.textStrong),
+              Expanded(child: title.text(16, 20, 400).c(context.colors.textStrong).auto(minSize: 12)),
               CustomSwitch(value: enabled, result: onToggle),
             ],
           ),

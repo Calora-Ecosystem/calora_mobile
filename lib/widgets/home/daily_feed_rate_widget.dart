@@ -1,3 +1,4 @@
+import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
@@ -78,7 +79,10 @@ class DailyFeedRateWidget extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       spacing: 4,
-                      children: [nutrient.value.toString().text(16, 20, 500), 'gr'.text(12, 14, 400)],
+                      children: [
+                        nutrient.value.asFixedTruncated(1).toString().text(16, 20, 500),
+                        'gr'.text(12, 14, 400),
+                      ],
                     ),
                     LinearPercentIndicator(
                       animation: true,

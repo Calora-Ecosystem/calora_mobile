@@ -14,7 +14,7 @@ class UniversalProgressManager extends Manager<UniversalProgressState, Universal
   void startProgressAnimation({VoidCallback? onComplete}) {
     _timer?.cancel();
 
-    const durationSeconds = 10; // o'zgartirish mumkin
+    const durationSeconds = 3;
     const ticksPerSecond = 60;
     final totalTicks = durationSeconds * ticksPerSecond;
     int currentTick = 0;
@@ -29,7 +29,6 @@ class UniversalProgressManager extends Manager<UniversalProgressState, Universal
         timer.cancel();
         emit(state.copyWith(isCompleted: true));
         publish(const UniversalProgressEffect.completed());
-        onComplete?.call();
       }
     });
   }

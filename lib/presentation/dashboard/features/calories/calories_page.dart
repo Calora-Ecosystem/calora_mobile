@@ -1,11 +1,14 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/week_day_selector.dart';
+import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
 import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
 import 'package:flutter/material.dart';
@@ -20,14 +23,15 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
 
   @override
   void init(context, manager) {
-    manager.getDailyCalories();
-    manager.getMealsData();
+    manager.fetchCaloriesAndMeals(DateTime.now());
   }
 
   @override
   void listener(BuildContext context, CaloriesManager manager, CaloriesEffect effect) {
     super.listener(context, manager, effect);
-    effect.when(openMealPage: (type) => context.pushRoute(MealsRoute(type: type)));
+    effect.when(
+      openMealPage: (type, meals, date) => context.pushRoute(MealsRoute(type: type, meals: meals, dateTime: date)),
+    );
   }
 
   @override
@@ -55,46 +59,56 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                       const SizedBox(height: 40),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: WeekDaysSelector(onDaySelected: (value) {}),
+                        child: WeekDaysSelector(
+                          onDaySelected: (value) {
+                            manager.fetchCaloriesAndMeals(value);
+                            manager.dateTime(value);
+                          },
+                        ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        decoration: BoxDecoration(color: context.colors.white),
-                        child: Column(
-                          spacing: 8,
-                          children: [
-                            DailyMealPlanWidget(
-                              accordingToPlan: "${state.plan.asFixedTruncated(0)}",
-                              consumed: "${state.consumed.asFixedTruncated(0)}",
-                              leftover: "${state.leftover.asFixedTruncated(0)}",
-                            ),
-                            MealCardsGrid(meals: manager.meals),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: context.colors.backgroundElevation,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                      state.isLoading
+                          ? Center(child: CircularProgressIndicator())
+                          : Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              decoration: BoxDecoration(color: context.colors.white),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 8,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Assets.icons.greenNotification.svg(),
-                                      const SizedBox(width: 8),
-                                      Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
-                                      Spacer(),
-                                      Assets.icons.setting.svg(),
-                                    ],
+                                  DailyMealPlanWidget(
+                                    accordingToPlan: "${state.plan.asFixedTruncated(0)}",
+                                    consumed: "${state.consumed.asFixedTruncated(0)}",
+                                    leftover: "${state.leftover.asFixedTruncated(0)}",
                                   ),
-                                  const SizedBox(height: 4),
-                                  Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
+                                  MealCardsGrid(meals: manager.meals),
+                                  GestureDetector(
+                                    onTap: () => _openNotificationSettings(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: context.colors.backgroundElevation,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Assets.icons.greenNotification.svg(),
+                                              const SizedBox(width: 8),
+                                              Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
+                                              Spacer(),
+                                              Assets.icons.setting.svg(),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -103,6 +117,15 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
           ),
         ],
       ),
+    );
+  }
+
+  void _openNotificationSettings(BuildContext context) {
+    context.showAppBottomSheet(
+      maxChildSize: 0.5,
+      initialChildSize: 0.5,
+      minChildSize: 0.4,
+      child: NotificationSettingSheet(type: NotificationSettingType.mealReminder, reminders: List.empty()),
     );
   }
 }

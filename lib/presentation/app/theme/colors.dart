@@ -7,6 +7,7 @@ class DefaultThemeColors {
   final textStrong = Color(0xFF202020);
   final textWhite = Color(0xFFFCFCFC);
   final white = Color(0xFFFFFFFF);
+  final transparent = Color(0x00000000);
   final textSub = Color(0XFF8D8D8D);
   final neutral600Secondary = Color(0xFF68778D);
   final neutral900Primary = Color(0xFF202327);
@@ -53,4 +54,5 @@ class DefaultThemeColors {
   final softGray = Color(0xFFF3F3F3);
   final mintGreen = Color(0xFF58AE8A);
   final honeydew = Color(0xFFECFFEF);
+  final blackWithOpacity = Color(0x0F000000);
 }

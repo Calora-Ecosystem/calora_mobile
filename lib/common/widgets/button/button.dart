@@ -33,7 +33,7 @@ class Button extends StatelessWidget {
         borderColor = null;
         break;
       case Type.secondary:
-        backgroundColor = context.colors.white;
+        backgroundColor = context.colors.backgroundElevation;
         borderColor = context.colors.strokeSoft;
         break;
     }

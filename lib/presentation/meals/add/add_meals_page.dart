@@ -1,13 +1,18 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/button/toggle_buttons.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/speech/speech_page.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/creator/food_creator.dart';
+import 'package:calora/widgets/creator/food_creator_with_image.dart';
+import 'package:calora/widgets/creator/food_creator_with_speech.dart';
 import 'package:calora/widgets/meals/meals_type_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -17,12 +22,39 @@ import 'management/add_meals_manager.dart';
 
 @RoutePage()
 class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffect> {
-  const AddMealsPage({super.key});
+  final bool shouldOpenCreator;
+
+  const AddMealsPage({super.key, this.shouldOpenCreator = false});
+
+  @override
+  void init(BuildContext context, AddMealsManager manager) {
+    super.init(context, manager);
+    manager.checkInitialRoute(shouldOpenCreator);
+    manager.fetchFoodCategory();
+  }
 
   @override
   void listener(BuildContext context, AddMealsManager manager, AddMealsEffect effect) {
     super.listener(context, manager, effect);
-    effect.mapOrNull(openDishesPage: (e) => context.pushRoute(DishesRoute(mealCategory: e.category)));
+    effect.mapOrNull(
+      openDishesPage: (e) => context.pushRoute(DishesRoute(data: e.meal)),
+      openCreatorWithImage: (_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            openCreatorWithImage(context);
+            manager.markCreatorAsOpened();
+          }
+        });
+      },
+      openCreatorWithSpeech: (_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            openCreatorWithSpeech(context);
+            manager.markCreatorAsOpened();
+          }
+        });
+      },
+    );
   }
 
   @override
@@ -67,7 +99,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                     textColor: context.colors.textStrong,
                   ),
                   buildActionCard(
-                    onTap: () => openCameraPage(context),
+                    onTap: () => openCameraPage(context, manager),
                     context: context,
                     icon: Assets.icons.icScan.svg(),
                     text: Strings.scanning,
@@ -75,7 +107,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                     useGradient: true,
                   ),
                   buildActionCard(
-                    onTap: () => openSpeechPage(context),
+                    onTap: () => openSpeechPage(context, manager),
                     context: context,
                     icon: Assets.icons.icChat.svg(),
                     text: Strings.byVoice,
@@ -84,10 +116,14 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   ),
                 ],
               ),
+              ToggleButtonsWidget(
+                onChanged: (value) {},
+                titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
+              ),
               Expanded(
                 child: MealTypeGrid(
-                  onMealTypeSelected: (category) => manager.openDishesPage(category),
-                  mealTypes: manager.mealTypes,
+                  onMealTypeSelected: (meal) => manager.openDishesPage(meal),
+                  mealTypes: state.mealCategories,
                 ),
               ),
             ],
@@ -106,47 +142,75 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
   }
 
-  void openSpeechPage(BuildContext context) {
+  void openCreatorWithImage(BuildContext context) {
     context.showAppBottomSheet(
-      initialChildSize: 0.5,
+      child: FoodCreatorWithImage(protein: 0, oil: 0, carbohydrates: 0, calories: 0),
+      initialChildSize: 0.55,
       minChildSize: 0.2,
-      maxChildSize: 0.5,
-      child: ModernVoiceRecorder(
-        onFinished: (value) => context.pushRoute(
-          UniversalProgressRoute(
-            onComplete: () => context.replaceRoute(AddMealsRoute()),
-            description: Strings.theInformationInYourVoicemailIsBeingAnalyzed,
-            title: Strings.addByVoice,
-            steps: [
-              Strings.theCompositionOfTheFoodIsBeingDetermined,
-              Strings.theAmountOfFoodIsMeasured,
-              Strings.theCalorieContentOfTheFoodIsBeingMeasured,
-            ],
-          ),
-        ),
-      ),
+      maxChildSize: 0.7,
     );
   }
 
-  void openCameraPage(BuildContext context) {
-    context.pushRoute(
+  void openCreatorWithSpeech(BuildContext context) {
+    context.showAppBottomSheet(
+      child: FoodCreatorWithSpeech(meals: ['Qahva - 100kkal', 'Borscht - 200kkal', 'Borscht - 200kkal'], onAdd: () {}),
+      initialChildSize: 0.55,
+      minChildSize: 0.2,
+      maxChildSize: 0.6,
+    );
+  }
+
+  Future<void> openCameraPage(BuildContext context, AddMealsManager manager) async {
+    await context.pushRoute<String>(
       UniversalCameraRoute(
         title: Strings.scanning,
         subtitle: Strings.placeTheFoodInTheDesignatedAreaAndTakeAPicture,
         bottomText: Strings.food,
         useFrontCamera: false,
-        onImageCaptured: (value) => context.pushRoute(
-          UniversalProgressRoute(
-            onComplete: () => context.replaceRoute(AddMealsRoute()),
-            description: Strings.theDataInTheImageIsBeingProcessedWeWillAnnounceTheResultsSoon,
-            title: Strings.caloraAi,
-            steps: [
-              Strings.theCompositionOfTheFoodIsBeingDetermined,
-              Strings.theAmountOfFoodIsMeasured,
-              Strings.theCalorieContentOfTheFoodIsBeingMeasured,
-            ],
-          ),
-        ),
+        onImageCaptured: (file) async {},
+      ),
+    );
+    await context.pushRoute<bool>(
+      UniversalProgressRoute(
+        title: Strings.caloraAi,
+        description: Strings.theDataInTheImageIsBeingProcessedWeWillAnnounceTheResultsSoon,
+        steps: [
+          Strings.theCompositionOfTheFoodIsBeingDetermined,
+          Strings.theAmountOfFoodIsMeasured,
+          Strings.theCalorieContentOfTheFoodIsBeingMeasured,
+        ],
+        onComplete: () {},
+      ),
+    );
+    if (context.mounted) {
+      manager.openCreatorAfterProgress();
+    }
+  }
+
+  void openSpeechPage(BuildContext context, AddMealsManager manager) {
+    context.showAppBottomSheet(
+      initialChildSize: 0.5,
+      minChildSize: 0.2,
+      maxChildSize: 0.5,
+      child: ModernVoiceRecorder(
+        onFinished: (value) async {
+          await context.pushRoute(
+            UniversalProgressRoute(
+              description: Strings.theInformationInYourVoicemailIsBeingAnalyzed,
+              title: Strings.addByVoice,
+              steps: [
+                Strings.theCompositionOfTheFoodIsBeingDetermined,
+                Strings.theAmountOfFoodIsMeasured,
+                Strings.theCalorieContentOfTheFoodIsBeingMeasured,
+              ],
+              onComplete: () {},
+            ),
+          );
+          context.router.pop();
+          if (context.mounted) {
+            manager.openCreatorAfterSpeech();
+          }
+        },
       ),
     );
   }
