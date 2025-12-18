@@ -53,10 +53,9 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken: fcmToken,
     );
 
-    final content = response.data['content'];
+    final Map<String, dynamic> content = (response.data as Map<String, dynamic>)['content'];
     final token = Token.fromJson(content);
     await _store.token.set(token);
-    await _store.refreshToken.set(token.refreshToken);
     await _store.isLogin.set(true);
 
     return content['hasNewUser'] as bool;
