@@ -2,8 +2,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
+import 'package:calora/domain/model/meal/menu/menu_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/info/dish_info_page.dart';
@@ -16,8 +19,19 @@ import 'management/dishes_manager.dart';
 @RoutePage()
 class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
   final MealTypeData data;
+  final MealType type;
+  final List<MealData> meals;
+  final DateTime dateTime;
+  final int categoryId;
 
-  const DishesPage({super.key, required this.data});
+  const DishesPage({
+    super.key,
+    required this.meals,
+    required this.dateTime,
+    required this.categoryId,
+    required this.type,
+    required this.data,
+  });
 
   @override
   void init(BuildContext context, DishesManager manager) {
@@ -30,7 +44,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
     super.listener(context, manager, effect);
     effect.mapOrNull(
       openInfoSheet: (value) {
-        openAboutDishPage(context, value.food);
+        openAboutDishPage(context, value.food, manager, value.isFavourite);
       },
     );
   }
@@ -55,7 +69,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
             final dish = state.foods[index];
             return GestureDetector(
               onTap: () {
-                manager.getFoodById(dish.id);
+                manager.getFoodById(dish.id!, dish.isFavourite);
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -65,7 +79,18 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.network(dish.fullImageUrl)),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        dish.fullImageUrl,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Image.network(
+                            '$baseUrl$abstractImageUrl',
+                            height: 110,
+                          ),
+                        ),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: dish.name.text(14, 16, 600).c(context.colors.textStrong),
@@ -80,7 +105,36 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
     );
   }
 
-  void openAboutDishPage(BuildContext context, FoodItem food) {
-    context.showAppBottomSheet(child: DishInfoPage(foodItem: food));
+  void openAboutDishPage(BuildContext context, FoodModel food, DishesManager manager, bool isFavourite) {
+    context.showAppBottomSheet(
+      child: DishInfoPage(
+        isFavourite: isFavourite,
+        foodItem: food,
+        onFavouriteChanged: (value) {
+          if (value) manager.addFavourite(food.id ?? 0);
+        },
+        onSave: (value) {
+          manager.addFavourite(food.id ?? 0);
+          manager.saveMenuItem(
+            MenuInfo(menu: type.name, date: DateTime.now(), foodId: food.id ?? 0, weightInGr: value.toInt()),
+          );
+          if (context.mounted) {
+            context.router.pop();
+            context.router.pop();
+            context.router.pop();
+            context.router.pop();
+            context.router.push(
+              MealsRoute(
+                type: type,
+                meals: meals,
+                dateTime: dateTime,
+                categoryId: categoryId,
+                key: ValueKey(DateTime.now().millisecondsSinceEpoch),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 }

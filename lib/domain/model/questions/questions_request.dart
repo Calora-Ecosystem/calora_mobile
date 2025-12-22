@@ -3,18 +3,20 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'questions_request.freezed.dart';
 part 'questions_request.g.dart';
 
+enum Purpose { WeightLoss, SaveCurrent, MuscleDevelopment }
+
 @freezed
 abstract class QuestionsRequest with _$QuestionsRequest {
   const factory QuestionsRequest({
     String? name,
     String? gender,
-    List<int>? purposeIds,
+    String? purpose,
     DateTime? birthDate,
     double? height,
     double? weight,
     double? bmi,
     double? targetWeight,
-    String? activityHours,
+    String? activityLevel,
     String? photo,
     String? language,
   }) = _QuestionsRequest;

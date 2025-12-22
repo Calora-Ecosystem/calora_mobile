@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'profile_request.freezed.dart';
-
 part 'profile_request.g.dart';
 
 @freezed
@@ -19,7 +18,7 @@ abstract class ProfileRequest with _$ProfileRequest {
     @JsonKey(name: 'height') double? height,
     @JsonKey(name: 'targetWeight') double? targetWeight,
     @JsonKey(name: 'weight') double? weight,
-    @JsonKey(name: 'id') String? userId,
+    @JsonKey(name: 'userId') int? userId,
   }) = _ProfileRequest;
 
   factory ProfileRequest.fromJson(Map<String, dynamic> json) => _$ProfileRequestFromJson(json);

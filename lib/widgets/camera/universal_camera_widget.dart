@@ -9,14 +9,13 @@ class UniversalCameraPage extends StatefulWidget {
   final String subtitle;
   final String bottomText;
   final bool useFrontCamera;
-  final Future<void> Function(String image) onImageCaptured;
 
   const UniversalCameraPage({
     super.key,
     required this.title,
     required this.subtitle,
     required this.bottomText,
-    required this.onImageCaptured,
+
     this.useFrontCamera = true,
   });
 
@@ -60,8 +59,7 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
     setState(() => isTaking = true);
     try {
       final XFile file = await _controller!.takePicture();
-      await widget.onImageCaptured(file.path);
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(file.path);
     } catch (e) {
       debugPrint("Foto olishda xatolik: $e");
     } finally {

@@ -32,6 +32,11 @@ class ProfileStore extends BaseStore<ProfileRequest> {
     return profile;
   }
 
+  Future<int?> getUserId() async {
+    final profile = await call();
+    return profile.userId;
+  }
+
   Future<void> setGender(String gender) async {
     final current = await call();
     final updated = current.copyWith(gender: gender);
@@ -49,10 +54,12 @@ class ProfileStore extends BaseStore<ProfileRequest> {
     String? birthDay,
     double? bmi,
     String? metrics,
+    int? userId,
     dynamic? activityLevel,
   }) async {
     final current = await call();
     final updated = current.copyWith(
+      userId: userId ?? current.userId,
       name: name ?? current.name,
       email: email ?? current.email,
       goal: goal ?? current.goal,

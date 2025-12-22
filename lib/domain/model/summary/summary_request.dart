@@ -38,6 +38,7 @@ abstract class NutrientData with _$NutrientData {
     required double fat,
     required double protein,
     required double carb,
+    required double weight,
   }) = _NutrientData;
 
   factory NutrientData.fromJson(Map<String, dynamic> json) => _$NutrientDataFromJson(json);

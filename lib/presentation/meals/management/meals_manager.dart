@@ -19,12 +19,14 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
     emit(state.copyWith(meal: meal));
   }
 
-  void fetchMenuItem(DateTime date) {
+  void fetchMenuItem(DateTime date, MealType type) {
     caloriesRepo
-        .fetchMenuItem(date)
+        .fetchMenuItem(date, type.name)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (value) => emit(state.copyWith(menuItems: value, isLoading: false)),
+          onData: (value) {
+            emit(state.copyWith(menuItems: value, isLoading: false));
+          },
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );

@@ -1,5 +1,6 @@
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
@@ -36,11 +37,28 @@ class MealTypeGrid extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: context.colors.backgroundElevation,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.network(mealType.fullImageUrl)),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  mealType.fullImageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) => Image.network(
+                    '$baseUrl$abstractImageUrl',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: mealType.name.text(14, 16, 600).c(context.colors.textStrong),
@@ -48,6 +66,66 @@ class MealTypeGrid extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class FavouriteFoodGrid extends StatelessWidget {
+  final List<FoodModel> foods;
+  final Function(FoodModel) onFoodSelected;
+
+  const FavouriteFoodGrid({super.key, required this.foods, required this.onFoodSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    if (foods.isEmpty) {
+      return Center(child: 'Sevimli ovqatlar yo‘q'.text(14, 18, 500).c(context.colors.textSub));
+    }
+    return GridView.builder(
+      padding: const EdgeInsets.only(top: 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.04,
+      ),
+      itemCount: foods.length,
+      itemBuilder: (context, index) {
+        final food = foods[index];
+        return GestureDetector(
+          onTap: () => onFoodSelected(food),
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.colors.backgroundElevation,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      food.fullImageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Image.network(
+                        '$baseUrl$abstractImageUrl',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: food.name.text(14, 16, 600).c(context.colors.textStrong),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

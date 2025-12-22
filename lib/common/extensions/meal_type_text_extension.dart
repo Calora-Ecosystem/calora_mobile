@@ -5,13 +5,13 @@ import 'package:calora/domain/model/meal/meal_type_data.dart';
 extension MealTypeText on MealType {
   String get title {
     switch (this) {
-      case MealType.breakfast:
+      case MealType.Breakfast:
         return Strings.breakfast;
-      case MealType.lunch:
+      case MealType.Lunch:
         return Strings.lunch;
-      case MealType.snacks:
+      case MealType.Snack:
         return Strings.snacks;
-      case MealType.dinner:
+      case MealType.Dinner:
         return Strings.dinner;
     }
   }

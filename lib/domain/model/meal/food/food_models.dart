@@ -4,40 +4,37 @@ part 'food_models.freezed.dart';
 part 'food_models.g.dart';
 
 @freezed
-abstract class FoodItem with _$FoodItem {
-  const factory FoodItem({
-    required int id,
+abstract class FoodModel with _$FoodModel {
+  const factory FoodModel({
+    int? id,
     required String name,
     required int categoryId,
-    required String categoryName,
+    String? categoryName,
     String? description,
     required String coverUrl,
     required List<Metric> metrics,
-    required bool isUserFood,
+    @Default(false) bool isUserFood,
+    @Default(false) bool isFavourite,
     int? userId,
-  }) = _FoodItem;
+  }) = _FoodModel;
 
-  factory FoodItem.fromJson(Map<String, dynamic> json) => _$FoodItemFromJson(json);
-}
-
-@freezed
-abstract class FoodListItem with _$FoodListItem {
-  const factory FoodListItem({
-    required int id,
-    required String name,
-    required int categoryId,
-    required String categoryName,
-    required String coverUrl,
-    required List<Metric> metrics,
-    required bool isUserFood,
-  }) = _FoodListItem;
-
-  factory FoodListItem.fromJson(Map<String, dynamic> json) => _$FoodListItemFromJson(json);
+  factory FoodModel.fromJson(Map<String, dynamic> json) => _$FoodModelFromJson(json);
 }
 
 @freezed
 abstract class Metric with _$Metric {
-  const factory Metric({required int userId, required String metric, required num value}) = _Metric;
+  const factory Metric({int? userId, required String metric, required num value}) = _Metric;
 
   factory Metric.fromJson(Map<String, dynamic> json) => _$MetricFromJson(json);
+}
+
+@freezed
+abstract class ScannerFood with _$ScannerFood {
+  const factory ScannerFood({
+    required String name,
+    required int weight,
+    required List<Metric> metrics,
+  }) = _ScannerFood;
+
+  factory ScannerFood.fromJson(Map<String, dynamic> json) => _$ScannerFoodFromJson(json);
 }

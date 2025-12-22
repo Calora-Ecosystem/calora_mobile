@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions.dart';
@@ -58,12 +59,12 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
     final request = QuestionsRequest(
       name: profile.name,
       gender: profile.gender?.name,
-      purposeIds: profile.purposeIds,
+      purpose: mapPurpose(profile.purposeIds?.first ?? 0).name,
       birthDate: profile.birthDate,
       height: profile.height,
       weight: profile.weight,
       targetWeight: profile.targetWeight,
-      activityHours: profile.activityHours,
+      activityLevel: profile.activityHours ?? Strings.averageActivity,
       bmi: bmi,
       language: 'Uzbek',
     );
@@ -113,5 +114,11 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
             publish(const QuestionsEffect.withType(QuestionsEffectType.success));
           },
         );
+  }
+
+  Purpose mapPurpose(int value) {
+    if (value == 0) return Purpose.WeightLoss;
+    if (value == 1) return Purpose.SaveCurrent;
+    return Purpose.MuscleDevelopment;
   }
 }

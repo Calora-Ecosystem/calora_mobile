@@ -63,9 +63,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         // 3 - BirthDate
         QuestionWidget(
           questionText: Strings.whenWhereYouBorn,
-          child: DatePickerWidget(
-            onDateChanged: (val) => manager.setAnswer(Questions(birthDate: val)),
-          ),
+          child: DatePickerWidget(onDateChanged: (val) => manager.setAnswer(Questions(birthDate: val))),
           icon: Assets.icons.calendar.svg(),
         ),
 
@@ -109,12 +107,20 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         QuestionWidget(
           questionText: Strings.activePerDay,
           child: PurposesWidget(
-            onPurposeSelected: (val) => manager.setAnswer(Questions(activityHours: val.toString())),
+            onPurposeSelected: (val) => manager.setAnswer(Questions(activityHours: mapActivity(val).name)),
             goals: activities,
           ),
           icon: Assets.icons.activity.svg(),
         ),
       ],
     );
+  }
+
+  ActivityLevel mapActivity(int value) {
+    if (value == 0) return ActivityLevel.Minimal;
+    if (value == 1) return ActivityLevel.Less;
+    if (value == 2) return ActivityLevel.Medium;
+    if (value == 3) return ActivityLevel.High;
+    return ActivityLevel.Maximal;
   }
 }

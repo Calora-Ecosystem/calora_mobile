@@ -21,14 +21,14 @@ class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
   }
 
   void onBreakfastTap() =>
-      publish(CaloriesEffect.openMealPage(MealType.breakfast, state.meals, state.date ?? DateTime.now()));
+      publish(CaloriesEffect.openMealPage(MealType.Breakfast, state.meals, state.date ?? DateTime.now()));
 
-  void onLunchTap() => publish(CaloriesEffect.openMealPage(MealType.lunch, state.meals, state.date ?? DateTime.now()));
+  void onLunchTap() => publish(CaloriesEffect.openMealPage(MealType.Lunch, state.meals, state.date ?? DateTime.now()));
 
-  void onSnackTap() => publish(CaloriesEffect.openMealPage(MealType.snacks, state.meals, state.date ?? DateTime.now()));
+  void onSnackTap() => publish(CaloriesEffect.openMealPage(MealType.Snack, state.meals, state.date ?? DateTime.now()));
 
   void onDinnerTap() =>
-      publish(CaloriesEffect.openMealPage(MealType.dinner, state.meals, state.date ?? DateTime.now()));
+      publish(CaloriesEffect.openMealPage(MealType.Dinner, state.meals, state.date ?? DateTime.now()));
 
   void fetchCaloriesAndMeals(DateTime date) {
     repo
@@ -54,8 +54,6 @@ class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
   }
 
   List<MealInfo> get meals {
-    final canTap = isToday(state.date ?? DateTime.now());
-
     return [
       MealInfo(
         title: Strings.breakfast,

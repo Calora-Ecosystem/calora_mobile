@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -7,7 +8,14 @@ part 'add_meals_management.freezed.dart';
 abstract class AddMealsState with _$AddMealsState {
   const factory AddMealsState({
     @Default(false) bool hasOpenedCreator,
+    @Default(0) int selectedToggleIndex,
     @Default([]) List<MealTypeData> mealCategories,
+    @Default([]) List<FoodModel> favouriteFoods,
+    @Default([]) List<FoodModel> latestFoods,
+    @Default([]) List<ScannerFood> scannedFoods,
+    @Default([]) List<ScannerFood> scannedFoodsByVoice,
+
+    int? addedFoodId,
     @Default(false) bool isLoading,
   }) = _AddMealsState;
 }
@@ -19,4 +27,6 @@ class AddMealsEffect with _$AddMealsEffect {
   const factory AddMealsEffect.openCreatorWithImage() = OpenCreatorWithImage;
 
   const factory AddMealsEffect.openCreatorWithSpeech() = OpenCreatorWithSpeech;
+
+  const factory AddMealsEffect.openAboutPage(FoodModel food, bool isFavourite) = OpenAboutPage;
 }

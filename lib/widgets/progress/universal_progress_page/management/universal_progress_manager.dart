@@ -8,24 +8,51 @@ import 'package:management/management.dart';
 @Injectable()
 class UniversalProgressManager extends Manager<UniversalProgressState, UniversalProgressEffect> {
   Timer? _timer;
+  bool _apiCompleted = false;
 
   UniversalProgressManager() : super(const UniversalProgressState());
 
-  void startProgressAnimation({VoidCallback? onComplete}) {
+  void startProgressAnimation({
+    VoidCallback? onComplete,
+    required Future<void> Function() apiCall,
+  }) {
+    _timer?.cancel();
+    _apiCompleted = false;
+
+    const tickDuration = Duration(milliseconds: 100);
+    const progressIncrement = 0.01;
+
+    apiCall()
+        .then((_) {
+          _apiCompleted = true;
+          _completeProgress();
+        })
+        .catchError((error) {
+          _apiCompleted = true;
+          emit(state.copyWith(hasError: true));
+          _completeProgress();
+        });
+
+    _timer = Timer.periodic(tickDuration, (timer) {
+      final newProgress = (state.progress + progressIncrement).clamp(0.0, 0.90);
+      emit(state.copyWith(progress: newProgress));
+
+      if (_apiCompleted && newProgress >= 0.90) {
+        timer.cancel();
+        _completeProgress();
+      }
+    });
+  }
+
+  void _completeProgress() {
     _timer?.cancel();
 
-    const durationSeconds = 3;
-    const ticksPerSecond = 60;
-    final totalTicks = durationSeconds * ticksPerSecond;
-    int currentTick = 0;
+    const fastTick = Duration(milliseconds: 30);
+    _timer = Timer.periodic(fastTick, (timer) {
+      final newProgress = (state.progress + 0.05).clamp(0.0, 1.0);
+      emit(state.copyWith(progress: newProgress));
 
-    _timer = Timer.periodic(const Duration(milliseconds: 1000 ~/ ticksPerSecond), (timer) {
-      currentTick++;
-      final progress = (currentTick / totalTicks).clamp(0.0, 1.0);
-
-      emit(state.copyWith(progress: progress));
-
-      if (progress >= 1.0) {
+      if (newProgress >= 1.0) {
         timer.cancel();
         emit(state.copyWith(isCompleted: true));
         publish(const UniversalProgressEffect.completed());

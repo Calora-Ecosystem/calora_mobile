@@ -13,10 +13,13 @@ extension ModalSheetExtension on BuildContext {
       context: this,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      enableDrag: true,
+      isDismissible: true,
+      useRootNavigator: false,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        return AnimatedPadding(
+          padding: MediaQuery.of(context).viewInsets,
+          duration: const Duration(milliseconds: 100),
           child: DraggableScrollableSheet(
             expand: false,
             initialChildSize: initialChildSize,
@@ -28,15 +31,16 @@ extension ModalSheetExtension on BuildContext {
                   color: backgroundColor ?? context.colors.white,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 12),
-                      Container(height: 3, width: 40, color: context.colors.neutral200Stroke),
-                      child,
-                    ],
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 12),
+                    Container(height: 3, width: 40, color: context.colors.neutral200Stroke),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView(controller: scrollController, padding: EdgeInsets.zero, children: [child]),
+                    ),
+                  ],
                 ),
               );
             },
