@@ -16,15 +16,25 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
   final String title;
   final String description;
   final VoidCallback? onComplete;
-
   final List<String> steps;
+  final Future<void> Function() apiCall;
 
-  const UniversalProgressPage(this.description, {super.key, required this.title, required this.steps, this.onComplete});
+  const UniversalProgressPage(
+    this.description, {
+    super.key,
+    required this.title,
+    required this.steps,
+    required this.apiCall,
+    this.onComplete,
+  });
 
   @override
   void init(BuildContext context, UniversalProgressManager manager) {
     super.init(context, manager);
-    manager.startProgressAnimation(onComplete: onComplete);
+    manager.startProgressAnimation(
+      onComplete: onComplete,
+      apiCall: apiCall,
+    );
   }
 
   @override
@@ -33,7 +43,14 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
     effect.mapOrNull(
       completed: (_) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (context.mounted) context.router.pop(true);
+          if (context.mounted) {
+            if (manager.state.hasError) {
+              // Xatolik bo'lsa, null qaytarish
+              context.router.pop(null);
+            } else {
+              context.router.pop(manager.state.scannedFood);
+            }
+          }
         });
       },
     );
@@ -52,28 +69,49 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
         child: Column(
           children: [
             const SizedBox(height: 16),
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colors.backgroundElevation,
-                borderRadius: BorderRadius.circular(12),
+            if (state.hasError)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  spacing: 12,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    Expanded(
+                      child: 'Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.'
+                          .text(16, 20, 500)
+                          .c(Colors.red.shade700),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.colors.backgroundElevation,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  spacing: 12,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Assets.icons.informationCircleBlue.svg(),
+                    Expanded(child: description.text(16, 20, 500).c(context.colors.brightBlue)),
+                  ],
+                ),
               ),
-              child: Row(
-                spacing: 12,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Assets.icons.informationCircleBlue.svg(),
-                  Expanded(child: description.text(16, 20, 500).c(context.colors.brightBlue)),
-                ],
-              ),
-            ),
             const SizedBox(height: 20),
             CircularPercentIndicator(
               radius: 90,
               lineWidth: 18,
               percent: state.progress.clamp(0.0, 1.0),
               circularStrokeCap: CircularStrokeCap.round,
-              progressColor: context.colors.accentSub,
+              progressColor: state.hasError ? Colors.red : context.colors.accentSub,
               backgroundColor: context.colors.backgroundElevation,
               center: '${(state.progress * 100).round()}%'.text(32, 40, 700).c(context.colors.textStrong),
             ),
@@ -81,7 +119,6 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
             ...List.generate(steps.length, (index) {
               final threshold = (index + 1) / steps.length;
               final isDone = state.progress >= threshold;
-
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Container(
@@ -93,9 +130,12 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
                   ),
                   child: Row(
                     children: [
-                      isDone
-                          ? Assets.icons.done.svg(width: 24, height: 24)
-                          : const CupertinoActivityIndicator(radius: 12),
+                      if (state.hasError)
+                        Icon(Icons.error_outline, size: 24, color: Colors.red.shade700)
+                      else if (isDone)
+                        Assets.icons.done.svg(width: 24, height: 24)
+                      else
+                        const CupertinoActivityIndicator(radius: 12),
                       const SizedBox(width: 12),
                       Expanded(
                         child: steps[index]

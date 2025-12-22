@@ -4,60 +4,49 @@ import 'package:calora/domain/model/meal/meal_type_data.dart';
 
 import '../../domain/model/course/course_request.dart';
 
-const baseUrl = "https://staging.calora.uz/api/file/";
+const String baseUrl = "https://staging.calora.uz/api/file/";
+const String abstractImageUrl = 'images/abstract.png';
 
 extension CourseRequestX on CourseRequest {
-  String? get mainImage {
-    final url = assets?.firstWhere((a) => a['type'] == 'MainImage', orElse: () => {})['url'];
-    return url != null ? "$baseUrl$url" : null;
+  String? _getAssetUrl(String type) {
+    final asset = assets?.firstWhere((a) => a['type'] == type, orElse: () => {});
+
+    final url = asset?['url'];
+    if (url == null || url.isEmpty) return null;
+
+    return url.startsWith('http') ? url : '$baseUrl$url';
   }
 
-  String? get subCoverImage {
-    final url = assets?.firstWhere((a) => a['type'] == 'SubCoverImage', orElse: () => {})['url'];
-    return url != null ? "$baseUrl$url" : null;
-  }
+  String? get mainImage => _getAssetUrl('MainImage');
+
+  String? get subCoverImage => _getAssetUrl('SubCoverImage');
 }
 
 extension MealTypeDataX on MealTypeData {
-  String get fullImageUrl {
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-    return "$baseUrl$imageUrl";
-  }
+  String get fullImageUrl => imageUrl.startsWith('http') ? imageUrl : '$baseUrl$imageUrl';
 }
 
-extension FoodListItemX on FoodListItem {
-  String get fullImageUrl {
-    if (coverUrl.startsWith('http')) {
-      return coverUrl;
-    }
-    return "$baseUrl$coverUrl";
-  }
+extension FoodModelX on FoodModel {
+  String get fullImageUrl => coverUrl.startsWith('http') ? coverUrl : '$baseUrl$coverUrl';
+}
+
+extension ImageUrlExtension on String {
+  String get imageUrl => startsWith('http') ? this : '$baseUrl$this';
 }
 
 extension LessonAssetsExtension on LessonRequest {
-  String? get videoUrl {
-    try {
-      final videoAsset = assets.firstWhere(
-        (a) => a.type == 'Video',
-        orElse: () => LessonAsset(type: 'Video', url: ''),
-      );
-      return videoAsset.url.isNotEmpty ? 'https://staging.calora.uz/api/file/${videoAsset.url}' : null;
-    } catch (_) {
-      return null;
-    }
+  String? _getAssetUrl(String type) {
+    final asset = assets.firstWhere(
+      (a) => a.type == type,
+      orElse: () => const LessonAsset(type: '', url: ''),
+    );
+
+    if (asset.url.isEmpty) return null;
+
+    return asset.url.startsWith('http') ? asset.url : '$baseUrl${asset.url}';
   }
 
-  String? get coverImageUrl {
-    try {
-      final coverAsset = assets.firstWhere(
-        (a) => a.type == 'CoverImage',
-        orElse: () => LessonAsset(type: 'CoverImage', url: ''),
-      );
-      return coverAsset.url.isNotEmpty ? 'https://staging.calora.uz/api/file/${coverAsset.url}' : null;
-    } catch (_) {
-      return null;
-    }
-  }
+  String? get videoUrl => _getAssetUrl('Video');
+
+  String? get coverImageUrl => _getAssetUrl('CoverImage');
 }

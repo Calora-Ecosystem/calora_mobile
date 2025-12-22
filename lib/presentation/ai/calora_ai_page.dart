@@ -10,12 +10,9 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 @RoutePage()
-class CaloraAiPage
-    extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
-
+class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
   @override
   void listener(
     BuildContext context,
@@ -70,9 +67,7 @@ class CaloraAiPage
                       Assets.icons.informationCircleBlue.svg(),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Strings.takeAPicture
-                            .text(14, 18, 400)
-                            .c(context.colors.brightBlue),
+                        child: Strings.takeAPicture.text(14, 18, 400).c(context.colors.brightBlue),
                       ),
                     ],
                   ),
@@ -82,9 +77,7 @@ class CaloraAiPage
                 const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Strings.takePictureOfYourFaceLikeThis
-                      .text(16, 20, 500)
-                      .c(context.colors.textStrong),
+                  child: Strings.takePictureOfYourFaceLikeThis.text(16, 20, 500).c(context.colors.textStrong),
                 ),
                 const SizedBox(height: 12),
                 buildDotTextRow(context, Strings.standInFrontOfTheCamera),
@@ -131,7 +124,6 @@ class CaloraAiPage
         title: Strings.caloraAi,
         subtitle: Strings.turnYourFaceToThisSquare,
         bottomText: Strings.caloraAi,
-        onImageCaptured: (value) => context.router.replace(CaloraAiCalculateRoute(imagePath: value)),
       ),
     );
   }

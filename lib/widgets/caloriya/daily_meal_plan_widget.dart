@@ -41,16 +41,16 @@ class DailyMealPlanWidget extends StatelessWidget {
             child: icon,
           ),
           const SizedBox(width: 8),
-          title.text(14, 16, 400).c(context.colors.textSub),
+          Expanded(child: title.text(14, 16, 400).c(context.colors.textSub).auto(maxLines: 2, minSize: 14)),
           Spacer(),
           Row(
             children: [
               value.text(20, 24, 600).c(context.colors.textStrong).auto(maxLines: 1, minSize: 16),
               const SizedBox(width: 4),
-              'kkal'
+              Strings.kcal
                   .text(20, 24, 600)
                   .c(context.colors.textSub)
-                  .copyWith(textAlign: TextAlign.end)
+                  .copyWith(textAlign: TextAlign.end, overflow: TextOverflow.ellipsis)
                   .auto(maxLines: 1, minSize: 16),
             ],
           ),

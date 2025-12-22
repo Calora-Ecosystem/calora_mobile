@@ -22,8 +22,7 @@ abstract class AppModule {
   }
 
   @lazySingleton
-  RxSharedPreferences get preferences =>
-      RxSharedPreferences(SharedPreferences.getInstance());
+  RxSharedPreferences get preferences => RxSharedPreferences(SharedPreferences.getInstance());
 
   @lazySingleton
   AppRouter get appRouter => AppRouter();

@@ -17,6 +17,7 @@ abstract class MenuItem with _$MenuItem {
     required String coverUrl,
     required List<Metric> metrics,
     int? userId,
+    required double weight,
   }) = _MenuItem;
 
   factory MenuItem.fromJson(Map<String, dynamic> json) => _$MenuItemFromJson(json);

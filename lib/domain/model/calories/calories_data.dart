@@ -1,10 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'calories_data.freezed.dart';
-
 part 'calories_data.g.dart';
 
-enum MealType { breakfast, lunch, snacks, dinner }
+enum MealType { Breakfast, Lunch, Snack, Dinner }
 
 @freezed
 abstract class MealData with _$MealData {
@@ -24,7 +23,7 @@ abstract class MealData with _$MealData {
 @freezed
 abstract class DailyCalories with _$DailyCalories {
   const factory DailyCalories({required double plan, required double consumed, required double leftover}) =
-  _DailyCalories;
+      _DailyCalories;
 
   factory DailyCalories.fromJson(Map<String, dynamic> json) => _$DailyCaloriesFromJson(json);
 }

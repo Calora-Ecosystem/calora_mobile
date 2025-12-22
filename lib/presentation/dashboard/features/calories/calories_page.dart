@@ -30,7 +30,8 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   void listener(BuildContext context, CaloriesManager manager, CaloriesEffect effect) {
     super.listener(context, manager, effect);
     effect.when(
-      openMealPage: (type, meals, date) => context.pushRoute(MealsRoute(type: type, meals: meals, dateTime: date)),
+      openMealPage: (type, meals, date) =>
+          context.pushRoute(MealsRoute(type: type, meals: meals, dateTime: date, categoryId: 1)),
     );
   }
 

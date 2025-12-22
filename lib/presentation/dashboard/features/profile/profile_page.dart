@@ -41,7 +41,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       surname: state.profile?.name ?? '',
                       name: state.profile?.name ?? '',
                       email: state.profile?.email ?? '',
-                      onEdit: () => _openProfileDetailPage(context, state.profile?.userId ?? ''),
+                      onEdit: () => _openProfileDetailPage(context, state.profile?.userId.toString() ?? ''),
                     ),
                     const SizedBox(height: 16),
                     BmiCard(

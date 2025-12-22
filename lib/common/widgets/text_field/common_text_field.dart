@@ -2,7 +2,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CommonTextField extends StatelessWidget {
+class CommonTextField extends StatefulWidget {
   final String hint;
   final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
@@ -25,21 +25,45 @@ class CommonTextField extends StatelessWidget {
   });
 
   @override
+  State<CommonTextField> createState() => _CommonTextFieldState();
+}
+
+class _CommonTextFieldState extends State<CommonTextField> {
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
+      controller: widget.controller,
+      focusNode: _focusNode,
+      onChanged: widget.onChanged,
+      obscureText: widget.obscureText,
+      keyboardType: widget.keyboardType,
+      inputFormatters: widget.inputFormatters,
+      onTap: () {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted && _focusNode.hasFocus) {
+            Scrollable.ensureVisible(
+              context,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: 0.2,
+            );
+          }
+        });
+      },
       decoration: InputDecoration(
-        hintText: hint,
+        hintText: widget.hint,
         hintStyle: TextStyle(color: context.colors.textSub, fontSize: 16, fontWeight: FontWeight.w400, height: 0.8),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-
-        prefixIcon: prefix,
-        suffixIcon: suffix,
-
+        prefixIcon: widget.prefix,
+        suffixIcon: widget.suffix,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: context.colors.strokeSoft, width: 1.5),

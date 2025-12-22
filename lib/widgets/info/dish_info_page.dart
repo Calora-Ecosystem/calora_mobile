@@ -1,20 +1,32 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
+import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/widgets/carousel/food_carousel.dart';
-import 'package:calora/widgets/steper/food_stepper.dart';
+import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:flutter/material.dart' hide StepperType;
 import 'package:flutter/services.dart';
 
 class DishInfoPage extends StatefulWidget {
-  final FoodItem foodItem;
+  final FoodModel foodItem;
+  final ValueChanged<double> onSave;
+  final bool isFavourite;
+  final ValueChanged<bool> onFavouriteChanged;
 
-  const DishInfoPage({super.key, required this.foodItem});
+  const DishInfoPage({
+    super.key,
+    required this.foodItem,
+    required this.onSave,
+    required this.isFavourite,
+    required this.onFavouriteChanged,
+  });
 
   @override
   State<DishInfoPage> createState() => _DishInfoPageState();
@@ -23,9 +35,18 @@ class DishInfoPage extends StatefulWidget {
 class _DishInfoPageState extends State<DishInfoPage> {
   bool isFavourite = false;
 
+  final TextEditingController _amountController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    isFavourite = widget.isFavourite;
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -37,9 +58,8 @@ class _DishInfoPageState extends State<DishInfoPage> {
           spacing: 8,
           children: [
             SizedBox(height: 4),
-            FoodCarousel(),
+            ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(widget.foodItem.coverUrl.imageUrl)),
             SizedBox(height: 8),
-            FoodStepper(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -55,6 +75,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
                           setState(() {
                             isFavourite = !isFavourite;
                           });
+                          widget.onFavouriteChanged(isFavourite);
                         },
                         child: isFavourite ? Assets.icons.icRedFavourite.svg() : Assets.icons.icFavourite.svg(),
                       ),
@@ -66,55 +87,59 @@ class _DishInfoPageState extends State<DishInfoPage> {
                       buildNutritionItem(
                         padding: EdgeInsets.fromLTRB(0, 8, 12, 8),
                         borderColor: Colors.transparent,
-                        value: widget.foodItem.proteins, // ✅
+                        value: widget.foodItem.cal,
+                        label: Strings.calories,
+                      ),
+                      buildNutritionItem(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        borderColor: context.colors.strokeSoft,
+                        value: widget.foodItem.proteins,
                         label: Strings.proteins,
                       ),
                       buildNutritionItem(
                         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         borderColor: context.colors.strokeSoft,
-                        value: widget.foodItem.carbohydrates, // ✅
+                        value: widget.foodItem.carbohydrates,
                         label: Strings.carbohydrates,
                       ),
                       buildNutritionItem(
                         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         borderColor: context.colors.strokeSoft,
-                        value: widget.foodItem.fats, // ✅
+                        value: widget.foodItem.fats,
                         label: Strings.oils,
                       ),
                     ],
                   ),
-                  widget.foodItem.description.text(14, 16, 400).c(context.colors.textSub),
                   GestureDetector(
                     onTap: () {},
                     child: Strings.moreDetails.text(14, 16, 600).c(context.colors.accentSub),
                   ),
                   Strings.addASpecificAmount.text(14, 16, 600).c(context.colors.textStrong),
-                  TextField(
+                  CommonTextField(
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      hintText: Strings.enterTheAmountOfFoodGr,
-                      hintStyle: TextStyle(
-                        color: context.colors.textSub,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        height: 0.8,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: context.colors.strokeSoft, width: 1.5),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: context.colors.blue, width: 1.5),
-                      ),
-                    ),
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+                    hint: Strings.enterTheAmountOfFoodGr,
+                    controller: _amountController,
                   ),
                   SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
-                    child: Button(onPressed: () {}, text: Strings.save),
+                    child: Button(
+                      onPressed: () {
+                        final text = _amountController.text.trim();
+                        final amount = double.tryParse(text);
+                        if (text.isEmpty) {
+                          CustomSnackBar.show(context, Strings.enterTheAmountOfFoodGr);
+                          return;
+                        }
+                        if (amount == null || amount <= 0) {
+                          CustomSnackBar.show(context, Strings.enterTheAmountOfFoodGr);
+                          return;
+                        }
+                        openConfirmPage(context, amount);
+                      },
+                      text: Strings.save,
+                    ),
                   ),
                 ],
               ),
@@ -140,10 +165,24 @@ class _DishInfoPageState extends State<DishInfoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            "${value.asFixedTruncated(1)} gr".toString().text(16, 20, 500),
-            label.text(14, 18, 400).c(context.colors.textSub),
+            "${value.asFixedTruncated(0)} gr".toString().text(16, 20, 500),
+            label.text(14, 18, 400).c(context.colors.textSub).copyWith(maxLines: 1),
           ],
         ),
+      ),
+    );
+  }
+
+  void openConfirmPage(BuildContext context, double amount) {
+    showDialog(
+      context: context,
+      useRootNavigator: true,
+      builder: (_) => ConfirmPage(
+        title: Strings.shouldTheFoodBeAddedToTheMenu,
+        confirmText: Strings.yesAdd,
+        cancelText: Strings.cancel,
+        onConfirm: () => widget.onSave(amount),
+        onCancel: () => context.router.pop(),
       ),
     );
   }

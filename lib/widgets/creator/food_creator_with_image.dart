@@ -12,9 +12,13 @@ class FoodCreatorWithImage extends StatelessWidget {
   final double oil;
   final double carbohydrates;
   final double calories;
+  final String name;
+  final VoidCallback addButton;
 
   const FoodCreatorWithImage({
     super.key,
+    required this.name,
+    required this.addButton,
     required this.protein,
     required this.oil,
     required this.carbohydrates,
@@ -31,7 +35,10 @@ class FoodCreatorWithImage extends StatelessWidget {
         spacing: 16,
         children: [
           Strings.theValueOfTheFoodDetermined.text(20, 24, 700).c(context.colors.textStrong),
-          CommonTextField(hint: Strings.nameOfTheDish),
+          CommonTextField(
+            hint: Strings.nameOfTheDish,
+            controller: TextEditingController(text: name),
+          ),
           Strings.nutritionalValueOfFood.text(16, 20, 500).c(context.colors.textStrong),
           buildContainer(context: context, value: calories, metric: Strings.kcal),
           Row(
@@ -50,7 +57,13 @@ class FoodCreatorWithImage extends StatelessWidget {
           ),
           SizedBox(
             width: double.infinity,
-            child: Button(onPressed: () => context.router.pop(), text: Strings.add),
+            child: Button(
+              onPressed: () {
+                addButton();
+                context.router.pop();
+              },
+              text: Strings.add,
+            ),
           ),
           SizedBox(
             width: double.infinity,
