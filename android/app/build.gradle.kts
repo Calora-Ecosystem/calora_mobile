@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "ai.calora.calora"
+    namespace = "ai.calora.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -26,7 +26,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "ai.calora.calora"
+        applicationId = "ai.calora.app"
         minSdk = 29
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
