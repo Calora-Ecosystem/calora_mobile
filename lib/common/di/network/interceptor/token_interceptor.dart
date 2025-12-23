@@ -316,6 +316,6 @@ class TokenInterceptor extends Interceptor {
 
   Future<void> _clearTokens() async {
     _log.w('🗑️ Clearing all tokens');
-    await _storage.token.set(const Token());
+    await _storage.token.set(null);
   }
 }

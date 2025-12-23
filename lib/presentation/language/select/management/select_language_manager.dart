@@ -25,4 +25,6 @@ class SelectLanguageManager extends Manager<SelectLanguageState, SelectLanguageE
   }
 
   List<Language> _languages = [Language.UZ, Language.RU, Language.EN];
+
+  void setLanguageSelectedFlag() => _commonRepo.setLanguageSelectedFlag(true);
 }

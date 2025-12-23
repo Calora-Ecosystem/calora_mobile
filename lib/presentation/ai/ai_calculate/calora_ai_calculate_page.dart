@@ -2,62 +2,78 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
-import 'package:calora/presentation/ai/ai/management/calora_ai_calculate_management.dart';
-import 'package:calora/presentation/ai/ai/management/calora_ai_calculate_manager.dart';
+import 'package:calora/presentation/ai/ai_calculate/management/calora_ai_calculate_management.dart';
+import 'package:calora/presentation/ai/ai_calculate/management/calora_ai_calculate_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:screenshot/screenshot.dart';
 
 @RoutePage()
 class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCalculateState, CaloraAiCalculateEffect> {
   final String imagePath;
 
-  const CaloraAiCalculatePage({super.key, required this.imagePath});
+  CaloraAiCalculatePage({super.key, required this.imagePath});
+
+  final screenshotController = ScreenshotController();
 
   @override
   void init(BuildContext context, CaloraAiCalculateManager manager) {
     super.init(context, manager);
-    manager.startProgressAnimation(onComplete: () {});
+    manager.analyzeFace(imagePath);
   }
 
   @override
   void listener(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateEffect effect) {
     effect.when(
-      error: (message) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message))),
+      error: (message) {},
       analysisComplete: () {},
     );
   }
 
   @override
   Widget builder(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateState state) {
-    return Scaffold(
-      backgroundColor: context.colors.white,
-      appBar: CustomAppBar(
-        title: Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
-        onBack: () => _onBack(context),
-      ),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          color: context.colors.white,
-          border: Border(top: BorderSide(color: context.colors.strokeSoft)),
+    return Screenshot(
+      controller: screenshotController,
+      child: Scaffold(
+        backgroundColor: context.colors.white,
+        appBar: CustomAppBar(
+          title: Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
+          onBack: () => _onBack(context),
         ),
-        child: state.isCompleted ? _buildCompletedView(context, manager, state) : _buildAnalyzingView(context, state),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: Button(onPressed: () => manager.completeAnalysis(), text: Strings.share),
+        body: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: context.colors.white,
+            border: Border(top: BorderSide(color: context.colors.strokeSoft)),
+          ),
+          child: AnimatedCrossFade(
+            firstChild: _buildAnalyzingView(context, manager, state),
+            secondChild: _buildCompletedView(context, manager, state),
+            crossFadeState: !state.isCompleted ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            duration: const Duration(milliseconds: 300),
           ),
         ),
+        bottomNavigationBar: (state.isCompleted && state.errorMessage == null)
+            ? SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Button(
+                      text: Strings.share,
+                      loading: state.isSharing,
+                      onPressed: state.isSharing ? null : () => manager.shareResults(screenshotController),
+                    ),
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }
@@ -65,7 +81,6 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
   Widget _buildCompletedView(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateState state) {
     return SingleChildScrollView(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildHeader(context, Strings.bodyAnalysis),
           const SizedBox(height: 20),
@@ -104,10 +119,32 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
     );
   }
 
-  Widget _buildAnalyzingView(BuildContext context, CaloraAiCalculateState state) {
+  Widget _buildAnalyzingView(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateState state) {
+    if (state.errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 20,
+          children: [
+            _buildHeader(context, Strings.caloraAi),
+            const Icon(Icons.error_outline, color: Colors.red, size: 60),
+            Text(
+              state.errorMessage!,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.colors.textSub, fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Button(
+              onPressed: () => manager.analyzeFace(imagePath),
+              text: 'Try Again',
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
       spacing: 20,
       children: [
         _buildHeader(context, Strings.caloraAi),
@@ -211,7 +248,5 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
     return context.colors.errorBase;
   }
 
-  void _onBack(BuildContext context) {
-    context.router.replace(CaloraAiRoute());
-  }
+  void _onBack(BuildContext context) => context.router.pop();
 }

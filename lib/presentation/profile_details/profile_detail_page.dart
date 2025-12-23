@@ -6,18 +6,16 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/automatic_tracking/automatick_tracking.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
+import 'package:calora/presentation/profile_details/management/profile_detail_management.dart';
+import 'package:calora/presentation/profile_details/management/profile_detail_manager.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/social_button/social_button.dart';
 import 'package:calora/widgets/svg_buttons_row/svg_buttons_row.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/profile_detail_management.dart';
-import 'management/profile_detail_manager.dart';
-
 @RoutePage()
-class ProfileDetailPage
-    extends Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
+class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
   final String userId;
   const ProfileDetailPage({required this.userId, super.key});
 
@@ -56,7 +54,6 @@ class ProfileDetailPage
                 SocialButton(
                   label: Strings.throughAppleId,
                   icon: Assets.icons.apple.svg(),
-                  isSelected: false,
                   onTap: () {},
                 ),
                 const SizedBox(height: 16),
@@ -126,9 +123,7 @@ class ProfileDetailPage
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
-                  onTap: () {
-                    manager.logOutDialog();
-                  },
+                  onTap: () => manager.logOutDialog(),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
@@ -155,7 +150,7 @@ class ProfileDetailPage
 
   void logOut(ProfileDetailManager manager, BuildContext context) {
     manager.logOut();
-    context.router.replaceAll([SelectLanguageRoute()]);
+    context.router.replaceAll([const AuthRoute()]);
   }
 
   Widget _buildRow(String label, String value, BuildContext context) {

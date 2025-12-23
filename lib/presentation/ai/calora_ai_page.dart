@@ -10,18 +10,13 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 @RoutePage()
-class CaloraAiPage
-    extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
+class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
+  const CaloraAiPage({super.key});
 
   @override
-  void listener(
-    BuildContext context,
-    CaloraAiManager manager,
-    CaloraAiEffect effect,
-  ) {
+  void listener(BuildContext context, CaloraAiManager manager, CaloraAiEffect effect) {
     effect.mapOrNull(
       showConfirmDialog: (value) => _showConfirmDialog(context, manager),
       navigateToCamera: (_) => imageTaken(context),
@@ -30,11 +25,7 @@ class CaloraAiPage
   }
 
   @override
-  Widget builder(
-    BuildContext context,
-    CaloraAiManager manager,
-    CaloraAiState state,
-  ) {
+  Widget builder(BuildContext context, CaloraAiManager manager, CaloraAiState state) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.colors.white,
@@ -47,7 +38,6 @@ class CaloraAiPage
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
@@ -70,9 +60,7 @@ class CaloraAiPage
                       Assets.icons.informationCircleBlue.svg(),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Strings.takeAPicture
-                            .text(14, 18, 400)
-                            .c(context.colors.brightBlue),
+                        child: Strings.takeAPicture.text(14, 18, 400).c(context.colors.brightBlue),
                       ),
                     ],
                   ),
@@ -82,9 +70,7 @@ class CaloraAiPage
                 const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Strings.takePictureOfYourFaceLikeThis
-                      .text(16, 20, 500)
-                      .c(context.colors.textStrong),
+                  child: Strings.takePictureOfYourFaceLikeThis.text(16, 20, 500).c(context.colors.textStrong),
                 ),
                 const SizedBox(height: 12),
                 buildDotTextRow(context, Strings.standInFrontOfTheCamera),

@@ -75,9 +75,9 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                 spacing: 8,
                                 children: [
                                   DailyMealPlanWidget(
-                                    accordingToPlan: "${state.plan.asFixedTruncated(0)}",
-                                    consumed: "${state.consumed.asFixedTruncated(0)}",
-                                    leftover: "${state.leftover.asFixedTruncated(0)}",
+                                    accordingToPlan: state.plan.asFixedTruncated(0),
+                                    consumed: state.consumed.asFixedTruncated(0),
+                                    leftover: state.leftover.asFixedTruncated(0),
                                   ),
                                   MealCardsGrid(meals: manager.meals),
                                   GestureDetector(

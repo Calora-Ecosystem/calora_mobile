@@ -63,7 +63,7 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
       await widget.onImageCaptured(file.path);
       Navigator.of(context).pop();
     } catch (e) {
-      debugPrint("Foto olishda xatolik: $e");
+      debugPrint('Foto olishda xatolik: $e');
     } finally {
       setState(() => isTaking = false);
     }
@@ -88,7 +88,6 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // CAMERA PREVIEW
           SizedBox.expand(
             child: FittedBox(
               fit: BoxFit.cover,
@@ -100,10 +99,8 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
             ),
           ),
 
-          // UI OVERLAY
           Column(
             children: [
-              // TOP BAR
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 60, left: 20, bottom: 12),
@@ -121,7 +118,6 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
                 ),
               ),
 
-              // DASHED BORDER
               Expanded(
                 child: Stack(
                   children: [
