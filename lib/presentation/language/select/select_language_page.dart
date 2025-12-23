@@ -14,8 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class SelectLanguagePage
-    extends Managed<SelectLanguageManager, SelectLanguageState, SelectLanguageEffect> {
+class SelectLanguagePage extends Managed<SelectLanguageManager, SelectLanguageState, SelectLanguageEffect> {
   const SelectLanguagePage({super.key});
 
   @override
@@ -56,9 +55,7 @@ class SelectLanguagePage
                     SizedBox(
                       width: double.infinity,
                       child: Button(
-                        onPressed: () {
-                          _openOnboarding(context);
-                        },
+                        onPressed: () => _openOnboarding(context),
                         child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
                       ),
                     ),
@@ -79,5 +76,6 @@ class SelectLanguagePage
 
   void _openOnboarding(BuildContext context) {
     context.router.replace(OnboardingRoute());
+    context.read<SelectLanguageManager>().setLanguageSelectedFlag();
   }
 }

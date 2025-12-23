@@ -13,6 +13,4 @@ class FlavorConfig {
       _initialized = true;
     }
   }
-
-  static bool get isLogin => _flavorValues.isLogin;
 }

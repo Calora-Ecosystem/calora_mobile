@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/face_analysis/face_analysis_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -8,9 +9,12 @@ abstract class CaloraAiCalculateState with _$CaloraAiCalculateState {
   const factory CaloraAiCalculateState({
     @Default(false) bool isLoading,
     @Default(0.0) double progressPercent,
-    @Default(0) int finalScore,
     @Default(false) bool isCompleted,
+    @Default(0) int finalScore,
     @Default([]) List<AnalysisItem> analysisItems,
+    FaceAnalysisModel? faceAnalysis,
+    String? errorMessage,
+    @Default(false) bool isSharing,
   }) = _CaloraAiCalculateState;
 
   factory CaloraAiCalculateState.initial() => const CaloraAiCalculateState();

@@ -1,13 +1,14 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/onboarding/onboarding.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/indicator/page_indicator.dart';
 import 'package:flutter/material.dart';
-
-import '../../common/gen/assets.gen.dart';
 
 @RoutePage()
 class OnboardingPage extends StatefulWidget {
@@ -32,9 +33,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -46,22 +45,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: PageIndicator(
-                          currentPage: _currentPage,
-                          pageCount: 4,
-                        ),
-                      ),
+                      Expanded(child: PageIndicator(currentPage: _currentPage, pageCount: 4)),
                       InkWell(
                         onTap: () {
                           _openAuthPage();
+                          _saveOnboardingCompletedFlag();
                         },
                         child: Container(
                           padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
                           child: Assets.icons.icClose.svg(),
                         ),
                       ),
@@ -71,11 +63,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   Expanded(
                     child: PageView(
                       controller: _controller,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
+                      onPageChanged: (index) => setState(() => _currentPage = index),
                       children: [
                         _pageItem(
                           Onboarding(
@@ -124,7 +112,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _pageItem(Onboarding onboarding, BuildContext context, Widget image) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
       children: [
         onboarding.title.text(24, 30, 700).c(context.colors.textStrong),
         SizedBox(height: 16),
@@ -135,7 +122,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  void _openAuthPage() {
-    context.router.replace(AuthRoute());
-  }
+  void _openAuthPage() => {context.router.replace(AuthRoute())};
+  void _saveOnboardingCompletedFlag() async => await getIt<CommonStore>().isOnboardingCompleted.set(true);
 }

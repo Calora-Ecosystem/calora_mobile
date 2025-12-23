@@ -11,4 +11,15 @@ class CommonStore {
     serialize: (value) => value == null ? null : jsonEncode(value.name),
     deserialize: (value) => value == null ? null : Language.fromName(jsonDecode(value)),
   );
+
+  final isLanguageSelected = BaseStore<bool>(
+    'isLanguageSelected',
+    serialize: (value) => value.toString(),
+    deserialize: (value) => value == 'true',
+  );
+  final isOnboardingCompleted = BaseStore<bool>(
+    'isOnboardingCompleted',
+    serialize: (value) => value.toString(),
+    deserialize: (value) => value == 'true',
+  );
 }
