@@ -35,6 +35,5 @@ class ProfileDetailManager extends Manager<ProfileDetailState, ProfileDetailEffe
   void logOut() {
     profileStore.clear();
     authStore.token.set(null);
-    authStore.isLogin.set(false);
   }
 }

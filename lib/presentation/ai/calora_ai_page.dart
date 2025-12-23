@@ -13,12 +13,10 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffect> {
+  const CaloraAiPage({super.key});
+
   @override
-  void listener(
-    BuildContext context,
-    CaloraAiManager manager,
-    CaloraAiEffect effect,
-  ) {
+  void listener(BuildContext context, CaloraAiManager manager, CaloraAiEffect effect) {
     effect.mapOrNull(
       showConfirmDialog: (value) => _showConfirmDialog(context, manager),
       navigateToCamera: (_) => imageTaken(context),
@@ -27,11 +25,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
   }
 
   @override
-  Widget builder(
-    BuildContext context,
-    CaloraAiManager manager,
-    CaloraAiState state,
-  ) {
+  Widget builder(BuildContext context, CaloraAiManager manager, CaloraAiState state) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.colors.white,
@@ -44,7 +38,6 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
@@ -124,6 +117,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
         title: Strings.caloraAi,
         subtitle: Strings.turnYourFaceToThisSquare,
         bottomText: Strings.caloraAi,
+        onImageCaptured: (value) => context.router.replace(CaloraAiCalculateRoute(imagePath: value)),
       ),
     );
   }

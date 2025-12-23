@@ -23,7 +23,12 @@ class CommonRepoImpl extends CommonRepo {
   }
 
   @override
-  Future<bool> isLogin() {
-    return _store.isLogin.call().then((value) => value ?? false);
+  Future<void> setLanguageSelectedFlag(bool value) async {
+    return _commonStore.isLanguageSelected.set(value);
+  }
+
+  @override
+  Future<void> setOnboardingCompletedFlag(bool value) {
+    return _commonStore.isOnboardingCompleted.set(value);
   }
 }

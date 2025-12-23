@@ -1,10 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
-import 'package:calora/common/flavor/flavor_config.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.dart';
-import 'package:calora/common/router/app_router.gr.dart' show DashboardRoute, SelectLanguageRoute;
+import 'package:calora/common/router/custom_navigator_observer.dart';
 import 'package:calora/common/widgets/display/display_widget.dart';
 import 'package:calora/common/widgets/system_ui/remove_status_bar_background.dart';
 import 'package:calora/presentation/app/management/app_management.dart';
@@ -39,7 +38,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: context.theme,
-              routerConfig: appRouter.config(deepLinkBuilder: (_) => DeepLink([_initialRoute()])),
+              routerConfig: appRouter.config(navigatorObservers: () => [CustomNavigatorObserver()]),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
                 return MediaQuery(
@@ -56,14 +55,5 @@ class App extends Managed<AppManager, AppState, AppEffect> {
         },
       ),
     );
-  }
-
-  PageRouteInfo _initialRoute() {
-    final bool isLogin = FlavorConfig.isLogin;
-    if (isLogin) {
-      return DashboardRoute();
-    } else {
-      return SelectLanguageRoute();
-    }
   }
 }

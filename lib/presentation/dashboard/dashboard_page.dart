@@ -63,7 +63,6 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
                           ),
                         ),
                         title: Strings.home,
-                        context: context,
                       ),
                       _buildBottomNavigationBarItem(
                         icon: Assets.icons.icCalories.svg(
@@ -73,7 +72,6 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
                           ),
                         ),
                         title: Strings.calories,
-                        context: context,
                       ),
                       _buildBottomNavigationBarItem(
                         icon: Assets.icons.icVideoPlayer.svg(
@@ -83,7 +81,6 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
                           ),
                         ),
                         title: Strings.course,
-                        context: context,
                       ),
                       _buildBottomNavigationBarItem(
                         icon: Assets.icons.icFootwear.svg(
@@ -93,7 +90,6 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
                           ),
                         ),
                         title: Strings.steps,
-                        context: context,
                       ),
                       _buildBottomNavigationBarItem(
                         icon: Assets.icons.icPersonNeutral.svg(
@@ -103,7 +99,6 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
                           ),
                         ),
                         title: Strings.profile,
-                        context: context,
                       ),
                     ],
                     currentIndex: tabsRouter.activeIndex,
@@ -121,11 +116,7 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
     );
   }
 
-  BottomNavigationBarItem _buildBottomNavigationBarItem({
-    required SvgPicture icon,
-    required String title,
-    required BuildContext context,
-  }) {
+  BottomNavigationBarItem _buildBottomNavigationBarItem({required SvgPicture icon, required String title}) {
     return BottomNavigationBarItem(icon: icon, label: title);
   }
 }

@@ -11,9 +11,4 @@ class AuthStore {
     serialize: (value) => value == null ? null : jsonEncode(value.toJson()),
     deserialize: (value) => value == null ? null : Token.fromJson(jsonDecode(value)),
   );
-  final isLogin = BaseStore<bool?>(
-    'isLogin',
-    serialize: jsonEncode,
-    deserialize: (value) => bool.tryParse(value ?? 'false'),
-  );
 }
