@@ -135,7 +135,7 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
             ),
             const SizedBox(height: 20),
             Button(
-              onPressed: () => manager.analyzeFace(imagePath),
+              onPressed: () => context.router.maybePop(),
               text: 'Try Again',
             ),
           ],

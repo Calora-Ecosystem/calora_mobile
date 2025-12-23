@@ -42,7 +42,6 @@ class CaloraAiCalculateManager extends Manager<CaloraAiCalculateState, CaloraAiC
         return;
       }
 
-      // Success path
       _animationTimer?.cancel();
       _completeAnimation(response.content!);
     } catch (e) {

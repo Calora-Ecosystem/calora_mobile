@@ -268,6 +268,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         subtitle: Strings.placeTheFoodInTheDesignatedAreaAndTakeAPicture,
         bottomText: Strings.food,
         useFrontCamera: false,
+        onImageCaptured: (imagePath) async => context.router.pop(imagePath),
       ),
     );
     if (imagePath == null || !context.mounted) return;

@@ -50,7 +50,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBPDg3HGHnx7qdjiayJOsBZg4GTPciPEOM',
-    appId: '1:638398407864:android:56b1480b60445e197ec04d',
+    appId: '1:638398407864:android:3f9d108e28103b7e7ec04d',
     messagingSenderId: '638398407864',
     projectId: 'calora-a00fa',
     storageBucket: 'calora-a00fa.firebasestorage.app',
@@ -58,10 +58,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBuoIHEPqpGiMBm7ReZeLyEg4CPZJ-xPN8',
-    appId: '1:638398407864:ios:e27e248f22facf587ec04d',
+    appId: '1:638398407864:ios:c9b50c89bef475397ec04d',
     messagingSenderId: '638398407864',
     projectId: 'calora-a00fa',
     storageBucket: 'calora-a00fa.firebasestorage.app',
-    iosBundleId: 'ai_calculate.calora.calora',
+    iosBundleId: 'ai.calora.app',
   );
 }

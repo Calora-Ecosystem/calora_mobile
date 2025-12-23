@@ -1,4 +1,4 @@
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/widgets/painter/dashed_border_painter.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +9,14 @@ class UniversalCameraPage extends StatefulWidget {
   final String subtitle;
   final String bottomText;
   final bool useFrontCamera;
+  final Future<void> Function(String image)? onImageCaptured;
 
   const UniversalCameraPage({
     super.key,
     required this.title,
     required this.subtitle,
     required this.bottomText,
-
+    required this.onImageCaptured,
     this.useFrontCamera = true,
   });
 
@@ -59,7 +60,8 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
     setState(() => isTaking = true);
     try {
       final XFile file = await _controller!.takePicture();
-      Navigator.of(context).pop(file.path);
+      await widget.onImageCaptured?.call(file.path);
+      context.router.pop();
     } catch (e) {
       debugPrint('Foto olishda xatolik: $e');
     } finally {
