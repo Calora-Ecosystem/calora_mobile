@@ -51,7 +51,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   @override
   Widget builder(context, manager, state) {
     final stepValue = state.norms
-        .firstWhere((norm) => norm.metric == "Step", orElse: () => NormsRequest(metric: "Step", value: 0))
+        .firstWhere((norm) => norm.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
         .value;
     return DefaultTabController(
       length: 3,
@@ -99,7 +99,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                         Expanded(
                           child: SingleChildScrollView(
                             child: Column(
-                              mainAxisSize: MainAxisSize.max,
                               children: [
                                 FitnessTrackWidget(
                                   primaryValues: state.primaryValues,
@@ -169,9 +168,12 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => EditStepGoalPage(
-        initialValue: 16000,
+        initialValue: manager.state.norms
+            .firstWhere((norm) => norm.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
+            .value
+            .toInt(),
         onSave: (value) {
-          manager.updateNorm(NormsRequest(metric: "Step", value: value.toDouble()));
+          manager.updateNorm(NormsRequest(metric: 'Step', value: value.toDouble()));
         },
       ),
     );
@@ -194,7 +196,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   @override
   void dispose() {
-    // _pedometerService.dispose();
+    _pedometerService.dispose();
     super.dispose();
   }
 }

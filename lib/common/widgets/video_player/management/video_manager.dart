@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:video_player/video_player.dart';
 
-import 'video_management.dart';
+import 'package:calora/common/widgets/video_player/management/video_management.dart';
 
 @injectable
 class VideoManager extends Manager<VideoState, VideoEffect> {
@@ -138,13 +138,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
 
     emit(
       const VideoState(
-        isInitialized: false,
-        controller: null,
-        isPlaying: false,
-        position: Duration.zero,
-        duration: Duration.zero,
         aspectRatio: 1.0,
-        errorMessage: null,
         isControlsVisible: true,
       ),
     );

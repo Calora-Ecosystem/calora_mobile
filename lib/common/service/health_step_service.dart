@@ -17,55 +17,55 @@ class HealthStepService {
 
       // Check Health Connect status first
       final status = await health.getHealthConnectSdkStatus();
-      log("HealthStep - Health Connect Status: $status");
+      log('HealthStep - Health Connect Status: $status');
 
       // Handle different status cases
       switch (status) {
         case HealthConnectSdkStatus.sdkUnavailable:
-          log("HealthStep - Health Connect SDK is unavailable on this device");
+          log('HealthStep - Health Connect SDK is unavailable on this device');
           _showHealthConnectUnavailableMessage();
           return;
 
         case HealthConnectSdkStatus.sdkAvailable:
-          log("HealthStep - Health Connect is available and installed");
+          log('HealthStep - Health Connect is available and installed');
           // Request permissions for steps
           await _requestStepPermissions();
           break;
 
         default:
-          log("HealthStep - Unknown Health Connect status: $status");
+          log('HealthStep - Unknown Health Connect status: $status');
           break;
       }
     } catch (e) {
-      log("HealthStep - Initialization error: $e");
+      log('HealthStep - Initialization error: $e');
     }
   }
 
   void _showHealthConnectUnavailableMessage() {
     log(
       "HealthStep - This device doesn't support Health Connect. "
-      "Minimum requirement: Android API level 26",
+      'Minimum requirement: Android API level 26',
     );
   }
 
   Future<void> _handleHealthConnectInstallation() async {
     try {
-      log("HealthStep - Prompting user to install/update Health Connect...");
+      log('HealthStep - Prompting user to install/update Health Connect...');
 
       final result = await health.installHealthConnect();
-      log("HealthStep - Installation prompt result: ");
+      log('HealthStep - Installation prompt result: ');
     } catch (e) {
-      log("HealthStep - Installation error: $e");
+      log('HealthStep - Installation error: $e');
       await _openPlayStore();
     }
   }
 
   Future<void> _openPlayStore() async {
     try {
-      const packageName = "com.google.android.apps.healthdata";
-      final playStoreUrl = "market://details?id=$packageName";
+      const packageName = 'com.google.android.apps.healthdata';
+      final playStoreUrl = 'market://details?id=$packageName';
       final webUrl =
-          "https://play.google.com/store/apps/details?id=$packageName";
+          'https://play.google.com/store/apps/details?id=$packageName';
 
       if (await canLaunchUrl(Uri.parse(playStoreUrl))) {
         await launchUrl(Uri.parse(playStoreUrl));
@@ -73,33 +73,33 @@ class HealthStepService {
         await launchUrl(Uri.parse(webUrl));
       } else {
         log(
-          "HealthStep - Please install Health Connect from Play Store: $packageName",
+          'HealthStep - Please install Health Connect from Play Store: $packageName',
         );
       }
     } catch (e) {
-      log("HealthStep - Error opening Play Store: $e");
+      log('HealthStep - Error opening Play Store: $e');
     }
   }
 
   Future<void> _requestStepPermissions() async {
     try {
       // Check if we already have step permissions
-      bool _hasStepPermissions = await hasStepPermissions();
+      final bool _hasStepPermissions = await hasStepPermissions();
 
       if (_hasStepPermissions) {
-        log("HealthStep - Already have step permissions");
+        log('HealthStep - Already have step permissions');
         return;
       }
 
-      log("HealthStep - Requesting step permissions");
+      log('HealthStep - Requesting step permissions');
 
       // Request step authorization
       final granted = await requestStepPermissions();
 
       if (granted) {
-        log("HealthStep - Step permissions granted successfully");
+        log('HealthStep - Step permissions granted successfully');
       } else {
-        log("HealthStep - Step permissions denied by user");
+        log('HealthStep - Step permissions denied by user');
 
         // Check if the denial was due to Health Connect issues
         final status = await getHealthConnectStatus();
@@ -108,7 +108,7 @@ class HealthStepService {
         }
       }
     } catch (e) {
-      log("HealthStep - Step permission request error: $e");
+      log('HealthStep - Step permission request error: $e');
 
       // Check Health Connect status on error
       final status = await getHealthConnectStatus();
@@ -121,39 +121,39 @@ class HealthStepService {
   // Get today's steps
   Future<int> fetchTodaySteps() async {
     try {
-      var now = DateTime.now();
-      var startOfLast24Hours = now.subtract(Duration(hours: 24));
+      final now = DateTime.now();
+      final startOfLast24Hours = now.subtract(Duration(hours: 24));
 
       // Check permissions
-      bool hasPermissions = await hasStepPermissions();
+      final bool hasPermissions = await hasStepPermissions();
       if (!hasPermissions) {
-        log("HealthStep - No step permissions");
+        log('HealthStep - No step permissions');
         return 0;
       }
 
-      List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
+      final List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
         types: _stepDataTypes,
         startTime: startOfLast24Hours,
         endTime: now,
         recordingMethodsToFilter: recordingMethodsToFilter,
       );
 
-      log("HealthStep - ResultDataPoint->${healthData.length}");
+      log('HealthStep - ResultDataPoint->${healthData.length}');
 
       int totalSteps = 0;
       for (var dataPoint in healthData) {
         if (dataPoint.value is NumericHealthValue) {
-          int stepValue = (dataPoint.value as NumericHealthValue).numericValue
+          final int stepValue = (dataPoint.value as NumericHealthValue).numericValue
               .toInt();
           totalSteps += stepValue;
-          log("HealthStep - Step entry: $stepValue at ${dataPoint.dateFrom}");
+          log('HealthStep - Step entry: $stepValue at ${dataPoint.dateFrom}');
         }
       }
 
-      log("HealthStep - Total steps in last 24 hours: $totalSteps");
+      log('HealthStep - Total steps in last 24 hours: $totalSteps');
       return totalSteps;
     } catch (e) {
-      log("HealthStep - Error fetching last 24 hours steps: $e");
+      log('HealthStep - Error fetching last 24 hours steps: $e');
       return 0;
     }
   }
@@ -161,30 +161,30 @@ class HealthStepService {
   // Get steps for last N days
   Future<Map<DateTime, int>> getStepsForDays(int numberOfDays) async {
     try {
-      var now = DateTime.now();
-      var startDate = DateTime(
+      final now = DateTime.now();
+      final startDate = DateTime(
         now.year,
         now.month,
         now.day,
       ).subtract(Duration(days: numberOfDays - 1));
 
-      bool hasPermissions = await hasStepPermissions();
+      final bool hasPermissions = await hasStepPermissions();
       if (!hasPermissions) {
-        log("HealthStep - No step permissions");
+        log('HealthStep - No step permissions');
         return {};
       }
 
-      List<HealthDataPoint> stepsData = await health.getHealthDataFromTypes(
+      final List<HealthDataPoint> stepsData = await health.getHealthDataFromTypes(
         types: _stepDataTypes,
         startTime: startDate,
         endTime: now,
       );
 
-      Map<DateTime, int> dailySteps = {};
+      final Map<DateTime, int> dailySteps = {};
 
       // Initialize all days with 0 steps
       for (int i = 0; i < numberOfDays; i++) {
-        DateTime day = DateTime(
+        final DateTime day = DateTime(
           now.year,
           now.month,
           now.day,
@@ -195,12 +195,12 @@ class HealthStepService {
       // Add actual step data
       for (var dataPoint in stepsData) {
         if (dataPoint.value is NumericHealthValue) {
-          DateTime day = DateTime(
+          final DateTime day = DateTime(
             dataPoint.dateFrom.year,
             dataPoint.dateFrom.month,
             dataPoint.dateFrom.day,
           );
-          int steps = (dataPoint.value as NumericHealthValue).numericValue
+          final int steps = (dataPoint.value as NumericHealthValue).numericValue
               .toInt();
           dailySteps[day] = (dailySteps[day] ?? 0) + steps;
         }
@@ -208,12 +208,12 @@ class HealthStepService {
 
       // Log results
       dailySteps.forEach((date, steps) {
-        log("HealthStep - ${date.day}/${date.month}: $steps steps");
+        log('HealthStep - ${date.day}/${date.month}: $steps steps');
       });
 
       return dailySteps;
     } catch (e) {
-      log("HealthStep - Error getting steps for $numberOfDays days: $e");
+      log('HealthStep - Error getting steps for $numberOfDays days: $e');
       return {};
     }
   }
@@ -221,19 +221,19 @@ class HealthStepService {
   // Get total steps for a specific date range
   Future<int> getTotalStepsInRange(DateTime startDate, DateTime endDate) async {
     try {
-      bool hasPermissions = await hasStepPermissions();
+      final bool hasPermissions = await hasStepPermissions();
       if (!hasPermissions) {
-        log("HealthStep - No step permissions");
+        log('HealthStep - No step permissions');
         return 0;
       }
 
       // Ensure proper time components - VERY IMPORTANT!
-      DateTime adjustedStartDate = DateTime(
+      final DateTime adjustedStartDate = DateTime(
         startDate.year,
         startDate.month,
         startDate.day,
       );
-      DateTime adjustedEndDate = DateTime(
+      final DateTime adjustedEndDate = DateTime(
         endDate.year,
         endDate.month,
         endDate.day,
@@ -243,38 +243,38 @@ class HealthStepService {
       );
 
       log(
-        "HealthStep - Querying steps from $adjustedStartDate to $adjustedEndDate",
+        'HealthStep - Querying steps from $adjustedStartDate to $adjustedEndDate',
       );
 
-      List<HealthDataPoint> stepsData = await health.getHealthDataFromTypes(
+      final List<HealthDataPoint> stepsData = await health.getHealthDataFromTypes(
         types: _stepDataTypes,
         startTime: adjustedStartDate,
         endTime: adjustedEndDate,
         recordingMethodsToFilter: [RecordingMethod.automatic],
       );
 
-      log("HealthStep - Found ${stepsData.length} data points");
+      log('HealthStep - Found ${stepsData.length} data points');
 
       int totalSteps = 0;
       for (var dataPoint in stepsData) {
         if (dataPoint.value is NumericHealthValue) {
-          int stepValue = (dataPoint.value as NumericHealthValue).numericValue
+          final int stepValue = (dataPoint.value as NumericHealthValue).numericValue
               .toInt();
           totalSteps += stepValue;
           log(
-            "HealthStep - Data point: $stepValue steps at ${dataPoint.dateFrom} - ${dataPoint.dateTo}",
+            'HealthStep - Data point: $stepValue steps at ${dataPoint.dateFrom} - ${dataPoint.dateTo}',
           );
         } else {
-          log("HealthStep - Non-numeric value: ${dataPoint.value}");
+          log('HealthStep - Non-numeric value: ${dataPoint.value}');
         }
       }
 
       log(
-        "HealthStep - Total steps from ${startDate.day}/${startDate.month}/${startDate.year} to ${endDate.day}/${endDate.month}/${endDate.year}: $totalSteps",
+        'HealthStep - Total steps from ${startDate.day}/${startDate.month}/${startDate.year} to ${endDate.day}/${endDate.month}/${endDate.year}: $totalSteps',
       );
       return totalSteps;
     } catch (e) {
-      log("HealthStep - Error getting total steps in range: $e");
+      log('HealthStep - Error getting total steps in range: $e');
       return 0;
     }
   }
@@ -284,7 +284,7 @@ class HealthStepService {
     try {
       return await health.hasPermissions(_stepDataTypes) ?? false;
     } catch (e) {
-      log("HealthStep - Error checking permissions: $e");
+      log('HealthStep - Error checking permissions: $e');
       return false;
     }
   }
@@ -294,7 +294,7 @@ class HealthStepService {
     try {
       return await health.requestAuthorization(_stepDataTypes);
     } catch (e) {
-      log("HealthStep - Error requesting permissions: $e");
+      log('HealthStep - Error requesting permissions: $e');
       return false;
     }
   }
@@ -304,7 +304,7 @@ class HealthStepService {
     try {
       return await health.getHealthConnectSdkStatus();
     } catch (e) {
-      log("HealthStep - Error checking Health Connect status: $e");
+      log('HealthStep - Error checking Health Connect status: $e');
       return null;
     }
   }
@@ -320,13 +320,13 @@ class HealthStepService {
       }
 
       // Check and request permissions if needed
-      bool hasPermissions = await hasStepPermissions();
+      final bool hasPermissions = await hasStepPermissions();
 
       if (!hasPermissions) {
-        log("HealthStep - No permissions, requesting...");
-        bool granted = await requestStepPermissions();
+        log('HealthStep - No permissions, requesting...');
+        final bool granted = await requestStepPermissions();
         if (!granted) {
-          log("HealthStep - Permissions denied");
+          log('HealthStep - Permissions denied');
           return 0;
         }
       }
@@ -334,7 +334,7 @@ class HealthStepService {
       // Get today's steps
       return await fetchTodaySteps();
     } catch (e) {
-      log("HealthStep - Error in getStepsWithAutoPermission: $e");
+      log('HealthStep - Error in getStepsWithAutoPermission: $e');
       return 0;
     }
   }
@@ -345,7 +345,7 @@ class HealthStepService {
       final status = await getHealthConnectStatus();
       return status == HealthConnectSdkStatus.sdkAvailable;
     } catch (e) {
-      log("HealthStep - Error checking Health Connect support: $e");
+      log('HealthStep - Error checking Health Connect support: $e');
       return false;
     }
   }
@@ -356,7 +356,7 @@ class HealthStepService {
       // Check if Health Connect is supported
       final isSupported = await isHealthConnectSupported();
       if (!isSupported) {
-        log("HealthStep - Health Connect not supported on this device");
+        log('HealthStep - Health Connect not supported on this device');
         return 0;
       }
 
@@ -364,7 +364,7 @@ class HealthStepService {
       final status = await getHealthConnectStatus();
       if (status != HealthConnectSdkStatus.sdkAvailable) {
         log(
-          "HealthStep - Health Connect not available, prompting installation",
+          'HealthStep - Health Connect not available, prompting installation',
         );
         await _handleHealthConnectInstallation();
         return 0;
@@ -373,7 +373,7 @@ class HealthStepService {
       // Use the auto permission method
       return await getStepsWithAutoPermission();
     } catch (e) {
-      log("HealthStep - Error in getStepsWithFallback: $e");
+      log('HealthStep - Error in getStepsWithFallback: $e');
       return 0;
     }
   }
@@ -385,14 +385,14 @@ class HealthStepService {
       final yesterday = now.subtract(const Duration(hours: 24));
 
       // Fetch health data from the past 24 hours
-      List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
+      final List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
         startTime: yesterday,
         endTime: now,
         types: _stepDataTypes,
       );
 
       // Filter step data
-      List<HealthDataPoint> stepData = healthData
+      final List<HealthDataPoint> stepData = healthData
           .where((point) => point.type == HealthDataType.STEPS)
           .toList();
 
@@ -404,7 +404,7 @@ class HealthStepService {
               .toInt();
         }
       }
-      log("HealthStep Step->$totalSteps");
+      log('HealthStep Step->$totalSteps');
     } catch (e) {}
   }
 }

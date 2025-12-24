@@ -33,22 +33,22 @@ void showAutomaticTrackingSheet(
               "ma'lumotlari Caloraga avtomatik keladi: qadmlar, masofa, kaloriyalar, "
               "mashg'ulot seanslari, yurak urishi (HR), uyqu, hatto vazn (Garmin Index bo'lsa). "
               "Bu ma'lumotlar Caloradagi kunlik maqsadlar, trendlar va tahlillarni boyitadi. "
-              "Tibbiy diagnostika emas.",
+              'Tibbiy diagnostika emas.',
               style: TextStyle(fontSize: 14),
             ),
 
             const SizedBox(height: 12),
-            const Text("Talablar"),
-            const Text("• Garmin qurilmasi (soat/braclet)"),
-            const Text("• Garmin Connect ilovasi (iOS/Android) va login"),
-            const Text("• Internetga ulanish"),
-            const Text("• Calora ilovasining so‘nggi versiyasi"),
+            const Text('Talablar'),
+            const Text('• Garmin qurilmasi (soat/braclet)'),
+            const Text('• Garmin Connect ilovasi (iOS/Android) va login'),
+            const Text('• Internetga ulanish'),
+            const Text('• Calora ilovasining so‘nggi versiyasi'),
 
             const SizedBox(height: 12),
-            const Text("Qanday ulanadi (2 daqiqa)"),
-            const Text("1. Calora -> Profil -> Ulanishlar (Integrations) -> Garmin ni tanlang."),
-            const Text("2. “Garminni ulash” tugmasini bosing."),
-            const Text("3. Garmin Connect oynasida login qiling (yoki tasdiqlang)."),
+            const Text('Qanday ulanadi (2 daqiqa)'),
+            const Text('1. Calora -> Profil -> Ulanishlar (Integrations) -> Garmin ni tanlang.'),
+            const Text('2. “Garminni ulash” tugmasini bosing.'),
+            const Text('3. Garmin Connect oynasida login qiling (yoki tasdiqlang).'),
             const Text("4. Calora so'rayotgan ruxsatlarni ko'rib chiqing."),
             const Text("5. Calora oynasiga qayting: “Ulandi” holatini ko'rasiz."),
             const SizedBox(height: 16),
@@ -56,7 +56,7 @@ void showAutomaticTrackingSheet(
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildIconButton(Assets.images.caloraLogo.image(), "Calora", context),
+                _buildIconButton(Assets.images.caloraLogo.image(), 'Calora', context),
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(

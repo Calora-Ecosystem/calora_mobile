@@ -19,6 +19,7 @@ abstract class ProfileRequest with _$ProfileRequest {
     @JsonKey(name: 'targetWeight') double? targetWeight,
     @JsonKey(name: 'weight') double? weight,
     @JsonKey(name: 'userId') int? userId,
+    @JsonKey(name: 'photo') String? photo,
   }) = _ProfileRequest;
 
   factory ProfileRequest.fromJson(Map<String, dynamic> json) => _$ProfileRequestFromJson(json);

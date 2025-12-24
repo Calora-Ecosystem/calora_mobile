@@ -3,7 +3,7 @@ import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'verify_management.dart';
+import 'package:calora/presentation/auth/verify/management/verify_management.dart';
 
 @injectable
 class VerifyManager extends Manager<VerifyState, VerifyEffect> {
@@ -12,7 +12,7 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
   VerifyManager(this.authRepo) : super(const VerifyState());
 
   Verification _verification = Verification();
-  String _verificationCode = "";
+  String _verificationCode = '';
 
   void setVerification(Verification value) {
     _verification = value;
@@ -24,7 +24,7 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
 
   void resend() {
     authRepo
-        .sendOtp(_verification.email ?? "")
+        .sendOtp(_verification.email ?? '')
         .handle(
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (data) {

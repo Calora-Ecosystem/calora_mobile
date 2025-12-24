@@ -20,12 +20,12 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String initials = name.isNotEmpty
+    final String initials = name.isNotEmpty
         ? name.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase()
-        : "";
-    String initialsSurname = surname.isNotEmpty
+        : '';
+    final String initialsSurname = surname.isNotEmpty
         ? surname.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase()
-        : "";
+        : '';
 
     return Container(
       height: 80,

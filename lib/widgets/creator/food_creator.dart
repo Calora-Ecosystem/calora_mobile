@@ -56,7 +56,7 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
                 child: Strings.addYourOwnFood
                     .text(20, 24, 700)
                     .c(context.colors.textStrong)
-                    .auto(maxLines: 1, minSize: 18),
+                    .auto(minSize: 18),
               ),
               Assets.icons.icCreator.svg(),
             ],

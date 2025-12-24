@@ -10,8 +10,8 @@ import 'package:calora/widgets/builder/detail/info/detail_info_item_builder.dart
 import 'package:flutter/material.dart';
 import 'package:management/management.dart' show Managed;
 
-import 'management/norms_management.dart';
-import 'management/norms_manager.dart';
+import 'package:calora/presentation/norms/management/norms_management.dart';
+import 'package:calora/presentation/norms/management/norms_manager.dart';
 
 @RoutePage()
 class NormsPage extends Managed<NormsManager, NormsState, NormsEffect> {

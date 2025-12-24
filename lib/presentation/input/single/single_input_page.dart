@@ -15,7 +15,7 @@ class SingleInputPage extends StatefulWidget {
     super.key,
     required this.title,
     this.textInputType,
-    this.metrics = "",
+    this.metrics = '',
     required this.message,
     required this.onSave,
   });
@@ -36,7 +36,7 @@ class _SingleInputPageState extends State<SingleInputPage> {
 
     if (widget.message.isNotEmpty) {
       currentText = widget.metrics.isNotEmpty
-          ? "${widget.message} ${widget.metrics}"
+          ? '${widget.message} ${widget.metrics}'
           : widget.message;
     }
 

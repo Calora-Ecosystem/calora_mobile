@@ -11,8 +11,8 @@ import 'package:calora/presentation/log/log_files_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/auth_management.dart';
-import 'management/auth_manager.dart';
+import 'package:calora/presentation/auth/auth/management/auth_management.dart';
+import 'package:calora/presentation/auth/auth/management/auth_manager.dart';
 
 @RoutePage()
 class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {

@@ -7,6 +7,8 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class BulkingPage extends Managed<BulkingManager, BulkingState, BulkingEffect> {
+  const BulkingPage({super.key});
+
   @override
   void init(BuildContext context, BulkingManager manager) {
     manager.getVideoCourses();

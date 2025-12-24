@@ -28,7 +28,6 @@ class SocialButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? context.colors.strokeSoft : context.colors.backgroundElevation,
-            width: 1,
           ),
         ),
         child: Row(

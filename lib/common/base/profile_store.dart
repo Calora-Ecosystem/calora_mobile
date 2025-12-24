@@ -1,10 +1,9 @@
 import 'dart:convert';
 
+import 'package:calora/common/base/base_store.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
-
-import 'base_store.dart';
 
 @lazySingleton
 class ProfileStore extends BaseStore<ProfileRequest> {
@@ -43,6 +42,8 @@ class ProfileStore extends BaseStore<ProfileRequest> {
     await set(updated);
   }
 
+  Future<void> delete() async => await clear();
+
   Future<void> updateProfile({
     String? name,
     String? email,
@@ -55,7 +56,7 @@ class ProfileStore extends BaseStore<ProfileRequest> {
     double? bmi,
     String? metrics,
     int? userId,
-    dynamic? activityLevel,
+    dynamic activityLevel,
   }) async {
     final current = await call();
     final updated = current.copyWith(

@@ -91,7 +91,7 @@ class StepCardWidget extends StatelessWidget {
                 children: [
                   Assets.icons.icDistance.svg(),
                   const SizedBox(height: 4),
-                  '${distanceInKm.asFixedTruncated(2)}'.text(16, 20, 500).c(context.colors.textStrong),
+                  distanceInKm.asFixedTruncated(2).text(16, 20, 500).c(context.colors.textStrong),
                   const SizedBox(height: 2),
                   Strings.distanceInKm.text(14, 20, 400).c(context.colors.textSub),
                 ],

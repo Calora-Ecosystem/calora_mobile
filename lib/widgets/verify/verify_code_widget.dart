@@ -10,14 +10,14 @@ class VerifyCodeWidget extends StatefulWidget {
   final Function(String) resultCode;
   final Function() resend;
 
-  VerifyCodeWidget({required this.resend, required this.resultCode});
+  VerifyCodeWidget({super.key, required this.resend, required this.resultCode});
 
   @override
   State<VerifyCodeWidget> createState() => _VerifyCodeWidgetState();
 }
 
 class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
-  Duration _remainingTime = const Duration(minutes: 3, seconds: 0);
+  Duration _remainingTime = const Duration(minutes: 3);
   Timer? _timer;
 
   @override
@@ -38,7 +38,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
           decoration: BoxDecoration(
             color: context.colors.backgroundBase,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(width: 1, color: context.colors.strokeSoft),
+            border: Border.all(color: context.colors.strokeSoft),
           ),
           child: PinCodeTextField(
             appContext: context,
@@ -80,7 +80,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
                 children: [
                   Strings.resend.text(14, 20, 500).c(context.colors.textSub),
                   SizedBox(width: 4),
-                  "${_formatDuration(_remainingTime)} "
+                  '${_formatDuration(_remainingTime)} '
                       .text(14, 20, 500)
                       .c(context.colors.textStrong),
                 ],
@@ -120,7 +120,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
   void _handleResend() {
     if (_remainingTime.inSeconds == 0) {
       setState(() {
-        _remainingTime = const Duration(minutes: 3, seconds: 0);
+        _remainingTime = const Duration(minutes: 3);
       });
       _startTimer();
     }

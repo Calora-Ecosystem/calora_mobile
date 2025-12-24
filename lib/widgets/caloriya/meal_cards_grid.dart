@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +17,9 @@ class MealInfo {
 
 class MealCardsGrid extends StatelessWidget {
   final List<MealInfo> meals;
+  final bool loading;
 
-  const MealCardsGrid({super.key, required this.meals});
+  const MealCardsGrid({super.key, required this.meals, required this.loading});
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +31,30 @@ class MealCardsGrid extends StatelessWidget {
       mainAxisSpacing: 8,
       childAspectRatio: 1.2,
       children: meals.map((meal) {
-        return _mealCard(
-          context,
-          title: meal.title,
-          value: meal.value,
-          max: meal.max,
-          image: meal.image,
-          onTap: meal.onTap ?? () {},
+        return ShimmerWrapper(
+          loading: loading,
+          type: ShimmerType.backgroundElevation,
+          radius: 12,
+          shimmerChild: _shimmerCard(context),
+          child: _mealCard(
+            context,
+            title: meal.title,
+            value: meal.value,
+            max: meal.max,
+            image: meal.image,
+            onTap: meal.onTap ?? () {},
+          ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _shimmerCard(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.backgroundElevation,
+        borderRadius: BorderRadius.circular(12),
+      ),
     );
   }
 
@@ -62,13 +79,13 @@ class MealCardsGrid extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: title.text(14, 16, 400).c(context.colors.textSub).auto(maxLines: 1, minSize: 12)),
+                    Expanded(child: title.text(14, 16, 400).c(context.colors.textSub).auto(minSize: 12)),
                     Assets.icons.icPlusCircle.svg(),
                     const SizedBox(width: 8),
                   ],
                 ),
                 const Spacer(),
-                '$value kkal'.text(16, 20, 500).c(Colors.black).auto(maxLines: 1, minSize: 12),
+                '$value kkal'.text(16, 20, 500).c(Colors.black).auto(minSize: 12),
                 const SizedBox(height: 4),
                 '$max ${Strings.fromKcal}'.text(14, 16, 600).c(Colors.grey),
               ],

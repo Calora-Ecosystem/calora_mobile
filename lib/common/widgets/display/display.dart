@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'display_message.dart';
+import 'package:calora/common/widgets/display/display_message.dart';
 
 abstract class Display {
   void setOnDisplayListener(void Function(DisplayMessage message) onDisplay);

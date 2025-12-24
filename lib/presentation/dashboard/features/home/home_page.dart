@@ -91,6 +91,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 GestureDetector(
                                   onTap: () => openCalendar(context, manager),
                                   child: DailyPlanWidget(
+                                    loading: state.isLoading,
                                     onBackward: () => manager.updateDay(
                                       (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
                                     ),

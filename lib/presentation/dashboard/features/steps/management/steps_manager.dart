@@ -123,7 +123,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   Future<void> sendDailyData() async {
     await stepRepo
-        .sendDailyData(metric: "Step", value: state.stepCount)
+        .sendDailyData(metric: 'Step', value: state.stepCount)
         .handle(
           onStart: () => emit(state),
           onData: (_) => emit(state),

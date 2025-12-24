@@ -52,7 +52,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
         child: Column(
           spacing: 8,
@@ -160,12 +160,12 @@ class _DishInfoPageState extends State<DishInfoPage> {
       child: Container(
         padding: padding,
         decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: borderColor, width: 1)),
+          border: Border(left: BorderSide(color: borderColor)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            "${value.asFixedTruncated(0)} gr".toString().text(16, 20, 500),
+            '${value.asFixedTruncated(0)} gr'.toString().text(16, 20, 500),
             label.text(14, 18, 400).c(context.colors.textSub).copyWith(maxLines: 1),
           ],
         ),
@@ -176,7 +176,6 @@ class _DishInfoPageState extends State<DishInfoPage> {
   void openConfirmPage(BuildContext context, double amount) {
     showDialog(
       context: context,
-      useRootNavigator: true,
       builder: (_) => ConfirmPage(
         title: Strings.shouldTheFoodBeAddedToTheMenu,
         confirmText: Strings.yesAdd,

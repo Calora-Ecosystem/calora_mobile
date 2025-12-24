@@ -6,7 +6,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/indicator/card_indicator.dart';
 import 'package:flutter/material.dart';
 
-import '../train_level/train_level_page.dart';
+import 'package:calora/widgets/train_level/train_level_page.dart';
 
 class LessonAppBar extends StatelessWidget {
   final ValueChanged<int> onLevelChanged;

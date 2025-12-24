@@ -32,7 +32,7 @@ class NotificationSettingSheet
   Widget builder(BuildContext context, NotificationSettingSheetManager manager, NotificationSettingSheetState state) {
     final isMeal = type == NotificationSettingType.mealReminder;
 
-    List<String> waterItem = [
+    final List<String> waterItem = [
       Strings.every1Hour,
       Strings.every2Hour,
       Strings.every3Hour,
@@ -54,9 +54,9 @@ class NotificationSettingSheet
           children: [
             Strings.settingUpReminders.text(22, 28, 700).c(context.colors.textStrong),
             if (isMeal) ...[
-              _mealItem(context, manager, state, "Breakfast", Strings.breakfastTimeReminder),
-              _mealItem(context, manager, state, "Lunch", Strings.lunchTimeReminder),
-              _mealItem(context, manager, state, "Dinner", Strings.dinnerTimeReminder),
+              _mealItem(context, manager, state, 'Breakfast', Strings.breakfastTimeReminder),
+              _mealItem(context, manager, state, 'Lunch', Strings.lunchTimeReminder),
+              _mealItem(context, manager, state, 'Dinner', Strings.dinnerTimeReminder),
             ] else
               _singleItem(context, manager, state),
             SizedBox(
@@ -81,7 +81,7 @@ class NotificationSettingSheet
       NotificationSettingType.waterReminder => Strings.waterDrinkReminder,
       NotificationSettingType.sleepReminder => Strings.bedtimeReminder,
       NotificationSettingType.thirtyDayChallenges => Strings.reminderOfDailyChallangeTimes,
-      _ => "",
+      _ => '',
     };
 
     return _block(

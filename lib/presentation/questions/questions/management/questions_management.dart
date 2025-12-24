@@ -1,7 +1,7 @@
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../domain/model/questions/questions.dart';
+import 'package:calora/domain/model/questions/questions.dart';
 
 part 'questions_management.freezed.dart';
 

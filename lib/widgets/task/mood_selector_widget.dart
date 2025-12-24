@@ -5,7 +5,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class MoodSelector extends StatefulWidget {
-  const MoodSelector({Key? key}) : super(key: key);
+  const MoodSelector({super.key});
 
   @override
   State<MoodSelector> createState() => _MoodSelectorState();

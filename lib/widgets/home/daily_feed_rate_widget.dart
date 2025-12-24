@@ -74,7 +74,6 @@ class DailyFeedRateWidget extends StatelessWidget {
               return Expanded(
                 child: Column(
                   spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

@@ -12,9 +12,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
   await EasyLocalization.ensureInitialized();
-  await configureDependencies();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FlavorConfig.initialize();
+  await configureDependencies();
 
   await SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.edgeToEdge,

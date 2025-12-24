@@ -6,8 +6,8 @@ import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/inbox_management.dart';
-import 'management/inbox_manager.dart';
+import 'package:calora/presentation/inbox/management/inbox_management.dart';
+import 'package:calora/presentation/inbox/management/inbox_manager.dart';
 
 @RoutePage()
 class InboxPage extends Managed<InboxManager, InboxState, InboxEffect> {

@@ -9,7 +9,7 @@ class MealTypeGrid extends StatelessWidget {
   final List<MealTypeData> mealTypes;
   final Function(MealTypeData meal) onMealTypeSelected;
 
-  const MealTypeGrid({Key? key, required this.mealTypes, required this.onMealTypeSelected}) : super(key: key);
+  const MealTypeGrid({super.key, required this.mealTypes, required this.onMealTypeSelected});
 
   @override
   Widget build(BuildContext context) {

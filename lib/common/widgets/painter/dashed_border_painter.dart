@@ -11,28 +11,28 @@ class DashedBorderPainter extends CustomPainter {
     const radius = 16.0;
     const dashLength = 60.0;
 
-    Path topLeftCorner = Path()
+    final Path topLeftCorner = Path()
       ..moveTo(0, radius + dashLength)
       ..lineTo(0, radius)
       ..arcToPoint(const Offset(radius, 0), radius: const Radius.circular(radius))
       ..lineTo(radius + dashLength, 0);
     canvas.drawPath(topLeftCorner, paint);
 
-    Path topRightCorner = Path()
+    final Path topRightCorner = Path()
       ..moveTo(size.width - radius - dashLength, 0)
       ..lineTo(size.width - radius, 0)
       ..arcToPoint(Offset(size.width, radius), radius: const Radius.circular(radius))
       ..lineTo(size.width, radius + dashLength);
     canvas.drawPath(topRightCorner, paint);
 
-    Path bottomLeftCorner = Path()
+    final Path bottomLeftCorner = Path()
       ..moveTo(0, size.height - radius - dashLength)
       ..lineTo(0, size.height - radius)
       ..arcToPoint(Offset(radius, size.height), radius: const Radius.circular(radius), clockwise: false)
       ..lineTo(radius + dashLength, size.height);
     canvas.drawPath(bottomLeftCorner, paint);
 
-    Path bottomRightCorner = Path()
+    final Path bottomRightCorner = Path()
       ..moveTo(size.width - radius - dashLength, size.height)
       ..lineTo(size.width - radius, size.height)
       ..arcToPoint(Offset(size.width, size.height - radius), radius: const Radius.circular(radius), clockwise: false)

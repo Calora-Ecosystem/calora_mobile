@@ -111,7 +111,7 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
                     );
                   } else {
                     gradient = LinearGradient(
-                      colors: [Colors.grey, Colors.grey],
+                      colors: const [Colors.grey, Colors.grey],
                     );
                   }
                   return Center(

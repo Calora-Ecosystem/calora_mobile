@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'management/profile_management.dart';
+import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 
 @RoutePage()
 class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {

@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 class CalendarSelectorWidget extends StatefulWidget {
   final ValueChanged<DateTime> onDaySelected;
 
-  const CalendarSelectorWidget({Key? key, required this.onDaySelected}) : super(key: key);
+  const CalendarSelectorWidget({super.key, required this.onDaySelected});
 
   @override
   _CalendarSelectorWidgetState createState() => _CalendarSelectorWidgetState();
@@ -42,13 +42,13 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
   }
 
   void _initializeMonths() {
-    DateTime now = DateTime.now();
+    final DateTime now = DateTime.now();
 
     for (int i = 6; i >= 1; i--) {
-      _months.add(DateTime(now.year, now.month - i, 1));
+      _months.add(DateTime(now.year, now.month - i));
     }
     for (int i = 0; i <= 12; i++) {
-      _months.add(DateTime(now.year, now.month + i, 1));
+      _months.add(DateTime(now.year, now.month + i));
     }
   }
 
@@ -121,7 +121,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
   }
 
   Widget _buildMonthView(DateTime month) {
-    List<DateTime> daysInMonth = _getDaysInMonth(month);
+    final List<DateTime> daysInMonth = _getDaysInMonth(month);
     final today = DateTime.now();
 
     return Column(
@@ -141,15 +141,15 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
           ),
           itemCount: daysInMonth.length,
           itemBuilder: (context, index) {
-            DateTime day = daysInMonth[index];
-            bool isCurrentMonth = day.month == month.month;
-            bool isAfterToday = day.isAfter(DateTime(today.year, today.month, today.day));
-            bool isSelected =
+            final DateTime day = daysInMonth[index];
+            final bool isCurrentMonth = day.month == month.month;
+            final bool isAfterToday = day.isAfter(DateTime(today.year, today.month, today.day));
+            final bool isSelected =
                 _selectedDate != null &&
                 day.year == _selectedDate!.year &&
                 day.month == _selectedDate!.month &&
                 day.day == _selectedDate!.day;
-            bool isToday = day.year == today.year && day.month == today.month && day.day == today.day;
+            final bool isToday = day.year == today.year && day.month == today.month && day.day == today.day;
 
             final canSelect = isCurrentMonth && !isAfterToday;
 
@@ -185,14 +185,14 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
     final int year = month.year;
     final int monthNum = month.month;
 
-    DateTime firstDayOfMonth = DateTime(year, monthNum, 1);
-    int firstWeekday = firstDayOfMonth.weekday == 7 ? 0 : firstDayOfMonth.weekday;
+    final DateTime firstDayOfMonth = DateTime(year, monthNum);
+    final int firstWeekday = firstDayOfMonth.weekday == 7 ? 0 : firstDayOfMonth.weekday;
 
     for (int i = 0; i < firstWeekday - 1; i++) {
       days.add(firstDayOfMonth.subtract(Duration(days: firstWeekday - i - 1)));
     }
 
-    DateTime lastDayOfMonth = DateTime(year, monthNum + 1, 0);
+    final DateTime lastDayOfMonth = DateTime(year, monthNum + 1, 0);
     for (int i = 1; i <= lastDayOfMonth.day; i++) {
       days.add(DateTime(year, monthNum, i));
     }

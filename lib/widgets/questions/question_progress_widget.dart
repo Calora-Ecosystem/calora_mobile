@@ -32,7 +32,7 @@ class QuestionProgressWidget extends StatelessWidget {
               children: [
                 title.text(16, 20, 500).c(context.colors.textStrong),
                 Text(
-                  "$current/$total",
+                  '$current/$total',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,

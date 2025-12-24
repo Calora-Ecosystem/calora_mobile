@@ -61,7 +61,7 @@ class FoodCreatorWithSpeech extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Button(onPressed: onAdd, text: Strings.add, type: Type.primary),
+                    child: Button(onPressed: onAdd, text: Strings.add),
                   ),
                 ],
               ),

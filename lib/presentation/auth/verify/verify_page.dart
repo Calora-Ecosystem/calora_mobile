@@ -10,8 +10,8 @@ import 'package:calora/widgets/verify/verify_code_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/verify_management.dart';
-import 'management/verify_manager.dart';
+import 'package:calora/presentation/auth/verify/management/verify_management.dart';
+import 'package:calora/presentation/auth/verify/management/verify_manager.dart';
 
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {

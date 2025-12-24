@@ -16,17 +16,17 @@ class StepsApi {
     required String metrics,
     int skip = 0,
     int take = 7,
-    String sortDirection = "Descending",
-    String sortPropName = "",
+    String sortDirection = 'Descending',
+    String sortPropName = '',
     DateTime? from,
     DateTime? to,
   }) async {
     final queryParams = <String, dynamic>{
-      "metrics": metrics,
-      "skip": skip,
-      "take": take,
-      "sortDirection": sortDirection,
-      "sortPropName": sortPropName,
+      'metrics': metrics,
+      'skip': skip,
+      'take': take,
+      'sortDirection': sortDirection,
+      'sortPropName': sortPropName,
     };
     if (from != null) {
       queryParams['from'] = from.toIso8601String();
@@ -50,23 +50,23 @@ class StepsApi {
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
     final profile = await profileStore.getProfile();
-    final currentEmail = profile.email?.toLowerCase() ?? "";
+    final currentEmail = profile.email?.toLowerCase() ?? '';
     final response = await _dio.get(
-      "/users/steps/stat",
-      queryParameters: {"from": fromUtc.toIso8601String(), "to": toUtc.toIso8601String()},
+      '/users/steps/stat',
+      queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String()},
     );
     final data = response.data;
-    final content = data["content"] as List<dynamic>;
+    final content = data['content'] as List<dynamic>;
     return content.map((json) {
-      final user = json["user"];
-      final userEmail = (user["email"] ?? "").toString().toLowerCase();
+      final user = json['user'];
+      final userEmail = (user['email'] ?? '').toString().toLowerCase();
       return UserStatRequest(
-        firstName: user["name"] ?? "",
-        lastName: "",
-        stepCount: json["sum"] ?? 0,
-        talks: json["count"] ?? 0,
+        firstName: user['name'] ?? '',
+        lastName: '',
+        stepCount: json['sum'] ?? 0,
+        talks: json['count'] ?? 0,
         isMe: userEmail == currentEmail,
-        isWinner: json["index"] == 1,
+        isWinner: json['index'] == 1,
       );
     }).toList();
   }
@@ -92,7 +92,7 @@ class StepsApi {
   }
 
   Future<void> sendDailyData({required String metric, required int value}) async {
-    final body = {"metric": metric, "value": value, "date": DateTime.now().toUtc().toIso8601String()};
+    final body = {'metric': metric, 'value': value, 'date': DateTime.now().toUtc().toIso8601String()};
     await _dio.post('/users/dailies', data: body);
   }
 

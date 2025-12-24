@@ -59,13 +59,10 @@ class ChartWidget extends StatelessWidget {
               maxY: maxY.toDouble(),
               borderData: FlBorderData(show: false),
               gridData: FlGridData(
-                show: true,
-                drawHorizontalLine: true,
-                drawVerticalLine: true,
                 getDrawingVerticalLine: (value) =>
-                    FlLine(color: const Color(0xFFF0F0F0), strokeWidth: 2, dashArray: [2, 2]),
+                    FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
                 getDrawingHorizontalLine: (value) =>
-                    FlLine(color: const Color(0xFFF0F0F0), strokeWidth: 2, dashArray: [2, 2]),
+                    FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
               ),
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
@@ -82,8 +79,8 @@ class ChartWidget extends StatelessWidget {
                     getTitlesWidget: (value, meta) => _buildBottomTitle(context, value.toInt()),
                   ),
                 ),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: AxisTitles(sideTitles: SideTitles()),
+                topTitles: AxisTitles(sideTitles: SideTitles()),
               ),
               barTouchData: BarTouchData(
                 enabled: true,
@@ -150,7 +147,7 @@ class ChartWidget extends StatelessWidget {
       }
       return const SizedBox();
     } else {
-      const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+      const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
       if (index >= 0 && index < days.length) {
         return days[index].text(14, 16, 400).c(context.colors.neutralPrimary);
       }
@@ -160,9 +157,9 @@ class ChartWidget extends StatelessWidget {
 
   String _formatNumber(double value) {
     if (value >= 1000000) {
-      return "${(value / 1000000).toStringAsFixed(1)}M";
+      return '${(value / 1000000).toStringAsFixed(1)}M';
     } else if (value >= 1000) {
-      return "${(value / 1000).toStringAsFixed(0)}k";
+      return '${(value / 1000).toStringAsFixed(0)}k';
     } else {
       return value.toInt().toString();
     }

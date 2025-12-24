@@ -6,7 +6,7 @@ class FoodStepper extends StatefulWidget {
   final int initialValue;
   final ValueChanged<int>? onChanged;
 
-  const FoodStepper({Key? key, this.initialValue = 1, this.onChanged}) : super(key: key);
+  const FoodStepper({super.key, this.initialValue = 1, this.onChanged});
 
   @override
   State<FoodStepper> createState() => _FoodStepperState();

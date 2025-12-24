@@ -11,17 +11,17 @@ class DetailInfo {
   final DetailInfoType type;
 
   DetailInfo({
-    this.title = "",
-    this.id = "",
-    this.message = "",
-    this.metric = "",
+    this.title = '',
+    this.id = '',
+    this.message = '',
+    this.metric = '',
     this.type = DetailInfoType.none,
   });
 
   bool get isHaveMessage => message.isNotEmpty;
 
   String get resultMessage => type != DetailInfoType.birthDay ? isHaveMessage
-      ? "$message $metric"
+      ? '$message $metric'
       : Strings.input :prettyDateVision;
 
   String get prettyDateVision => DateFormatter.getBirthDate(message);

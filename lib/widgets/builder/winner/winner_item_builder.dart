@@ -14,8 +14,6 @@ class WinnerItemBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
       children: [
         SizedBox(height: 12),
         Stack(

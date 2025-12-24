@@ -13,7 +13,7 @@ class CustomTextField extends StatefulWidget {
     this.hintText,
     this.keyboardType,
     required this.onChanged,
-    this.metrics = "",
+    this.metrics = '',
   });
 
   @override

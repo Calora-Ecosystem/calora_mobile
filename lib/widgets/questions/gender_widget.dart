@@ -4,7 +4,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-import '../../../common/gen/assets.gen.dart';
+import 'package:calora/common/gen/assets.gen.dart';
 
 class GenderWidget extends StatefulWidget {
   final Function(Gender)? onGenderSelected;
@@ -59,7 +59,7 @@ class _GenderWidgetState extends State<GenderWidget> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 26),
           decoration: BoxDecoration(
-            border: Border.all(color: isSelected ? borderColor : Colors.transparent, width: 1),
+            border: Border.all(color: isSelected ? borderColor : Colors.transparent),
             color: context.colors.commonBackground,
             borderRadius: BorderRadius.circular(12),
           ),

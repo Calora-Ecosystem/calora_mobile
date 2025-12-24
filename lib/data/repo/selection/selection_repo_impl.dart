@@ -27,22 +27,22 @@ class SelectionRepoImpl extends SelectionRepo {
 
   List<Selection> genders = [
     Selection(name: Strings.male, icon: Assets.icons.icMale.path, isChecked: true),
-    Selection(name: Strings.female, icon: Assets.icons.icFemale.path, isChecked: false),
+    Selection(name: Strings.female, icon: Assets.icons.icFemale.path),
   ];
   List<Selection> goals = [
-    Selection(name: "Vazn yo’qotish (ozish)", isChecked: true, id: '1'),
-    Selection(name: "Tanani xozirgi xolatda saqlash)", isChecked: false, id: '2'),
-    Selection(name: "Mushaklarni rivojlantirish", isChecked: false, id: '3'),
+    Selection(name: 'Vazn yo’qotish (ozish)', isChecked: true, id: '1'),
+    Selection(name: 'Tanani xozirgi xolatda saqlash)', id: '2'),
+    Selection(name: 'Mushaklarni rivojlantirish', id: '3'),
   ];
   List<Selection> activityLevels = [
-    Selection(name: Strings.minActivity, isChecked: false, id: '1'),
-    Selection(name: Strings.lowActivity, isChecked: false, id: '2'),
+    Selection(name: Strings.minActivity, id: '1'),
+    Selection(name: Strings.lowActivity, id: '2'),
     Selection(name: Strings.averageActivity, isChecked: true, id: '3'),
-    Selection(name: Strings.highActivity, isChecked: false, id: '4'),
-    Selection(name: Strings.veryHighActivity, isChecked: false, id: '5'),
+    Selection(name: Strings.highActivity, id: '4'),
+    Selection(name: Strings.veryHighActivity, id: '5'),
   ];
   List<Selection> metrics = [
-    Selection(name: "Funt / fut / mil ", isChecked: false, id: '1'),
-    Selection(name: "km / sm / kg ", isChecked: true, id: '2'),
+    Selection(name: 'Funt / fut / mil ', id: '1'),
+    Selection(name: 'km / sm / kg ', isChecked: true, id: '2'),
   ];
 }

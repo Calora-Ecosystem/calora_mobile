@@ -8,9 +8,9 @@ class Selection {
   final SelectionType type;
 
   Selection({
-    this.id = "",
-    this.name = "",
-    this.icon = "",
+    this.id = '',
+    this.name = '',
+    this.icon = '',
     this.isChecked = false,
     this.type = SelectionType.none,
   });

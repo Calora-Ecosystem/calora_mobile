@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
-import 'display.dart';
-import 'display_message.dart';
-import 'display_type.dart';
+import 'package:calora/common/widgets/display/display.dart';
+import 'package:calora/common/widgets/display/display_message.dart';
+import 'package:calora/common/widgets/display/display_type.dart';
 
 @Singleton(as: Display)
 class DisplayImpl extends Display {

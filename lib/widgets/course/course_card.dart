@@ -15,6 +15,7 @@ class CourseCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        height: 160,
         padding: const EdgeInsets.fromLTRB(16, 16, 0, 0),
         decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(16)),
         child: Column(
@@ -38,7 +39,6 @@ class CourseCard extends StatelessWidget {
                 ),
                 if (course.assets != null)
                   Expanded(
-                    flex: 1,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(

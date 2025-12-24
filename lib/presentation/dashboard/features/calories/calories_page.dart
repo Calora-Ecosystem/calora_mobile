@@ -6,16 +6,16 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/week_day_selector.dart';
+import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
+import 'package:calora/presentation/dashboard/features/calories/management/calories_manager.dart';
 import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
 import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'management/calories_management.dart';
-import 'management/calories_manager.dart';
 
 @RoutePage()
 class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
@@ -52,65 +52,67 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                   }
                   return false;
                 },
-                child: SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: Column(
-                    spacing: 16,
-                    children: [
-                      const SizedBox(height: 40),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: WeekDaysSelector(
-                          onDaySelected: (value) {
-                            manager.fetchCaloriesAndMeals(value);
-                            manager.dateTime(value);
-                          },
+                child: DefaultRefreshIndicator(
+                  onRefresh: () async => manager.fetchCaloriesAndMeals(state.date ?? DateTime.now()),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
+                    child: Column(
+                      spacing: 16,
+                      children: [
+                        const SizedBox(height: 40),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: WeekDaysSelector(
+                            onDaySelected: (value) {
+                              manager.fetchCaloriesAndMeals(value);
+                              manager.dateTime(value);
+                            },
+                          ),
                         ),
-                      ),
-                      state.isLoading
-                          ? Center(child: CircularProgressIndicator())
-                          : Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              decoration: BoxDecoration(color: context.colors.white),
-                              child: Column(
-                                spacing: 8,
-                                children: [
-                                  DailyMealPlanWidget(
-                                    accordingToPlan: state.plan.asFixedTruncated(0),
-                                    consumed: state.consumed.asFixedTruncated(0),
-                                    leftover: state.leftover.asFixedTruncated(0),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          decoration: BoxDecoration(color: context.colors.white),
+                          child: Column(
+                            spacing: 8,
+                            children: [
+                              DailyMealPlanWidget(
+                                accordingToPlan: state.plan.asFixedTruncated(0),
+                                consumed: state.consumed.asFixedTruncated(0),
+                                leftover: state.leftover.asFixedTruncated(0),
+                                loading: state.isLoading,
+                              ),
+                              MealCardsGrid(meals: manager.meals, loading: state.isLoading),
+                              GestureDetector(
+                                onTap: () => _openNotificationSettings(context),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: context.colors.backgroundElevation,
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  MealCardsGrid(meals: manager.meals),
-                                  GestureDetector(
-                                    onTap: () => _openNotificationSettings(context),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: context.colors.backgroundElevation,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
                                         children: [
-                                          Row(
-                                            children: [
-                                              Assets.icons.greenNotification.svg(),
-                                              const SizedBox(width: 8),
-                                              Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
-                                              Spacer(),
-                                              Assets.icons.setting.svg(),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
+                                          Assets.icons.greenNotification.svg(),
+                                          const SizedBox(width: 8),
+                                          Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
+                                          Spacer(),
+                                          Assets.icons.setting.svg(),
                                         ],
                                       ),
-                                    ),
+                                      const SizedBox(height: 4),
+                                      Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                    ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
