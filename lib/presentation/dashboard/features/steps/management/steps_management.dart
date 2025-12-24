@@ -18,7 +18,12 @@ abstract class StepsState with _$StepsState {
     @Default(0) int displayStepCount,
     @Default(0) int period,
     @Default(0) int offset,
-    @Default(false) bool isLoading,
+    @Default(false) bool isGettingSteps,
+    @Default(false) bool isGettingStats,
+    @Default(false) bool isGettingUserMetrics,
+    @Default(false) bool isUpdatingNorm,
+    @Default(false) bool isGettingNorms,
+    @Default(false) bool isDeletingNorm,
   }) = _StepsState;
 
   const StepsState._();

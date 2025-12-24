@@ -39,7 +39,9 @@ class ShimmerWrapper extends StatelessWidget {
         case ShimmerType.white:
           baseColor = color ?? context.colors.white;
           highlightColor = context.colors.strokeSoft;
+
           break;
+
         case ShimmerType.backgroundElevation:
           baseColor = color ?? context.colors.backgroundElevation;
           highlightColor = context.colors.white;

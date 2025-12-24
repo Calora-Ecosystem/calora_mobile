@@ -34,7 +34,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo
         .getSteps(state.period, offset: state.offset)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
+          onStart: () => emit(state.copyWith(isGettingSteps: true)),
           onData: (data) {
             List<double> primaryValues = [];
             int? displayStepCount;
@@ -56,16 +56,16 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
                   steps: data,
                   primaryValues: primaryValues,
                   displayStepCount: displayStepCount,
-                  isLoading: false,
+                  isGettingSteps: false,
                 ),
               );
             } else {
-              emit(state.copyWith(steps: data, primaryValues: primaryValues, isLoading: false));
+              emit(state.copyWith(steps: data, primaryValues: primaryValues, isGettingSteps: false));
             }
           },
-          onDone: () => emit(state.copyWith(isLoading: false)),
+          onDone: () => emit(state.copyWith(isGettingSteps: false)),
           onError: (e) {
-            emit(state.copyWith(isLoading: false));
+            emit(state.copyWith(isGettingSteps: false));
           },
         );
   }
@@ -74,28 +74,28 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo
         .getStats(state.period, offset: state.offset)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) => emit(state.copyWith(userStates: data, isLoading: false)),
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (_) => emit(state.copyWith(isLoading: false)),
+          onStart: () => emit(state.copyWith(isGettingStats: true)),
+          onData: (data) => emit(state.copyWith(userStates: data, isGettingStats: false)),
+          onDone: () => emit(state.copyWith(isGettingStats: false)),
+          onError: (_) => emit(state.copyWith(isGettingStats: false)),
         );
   }
 
   Future<void> getUserMetrics() async {
     await stepRepo.getUserMetrics().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) => emit(state.copyWith(metrics: data, isLoading: false)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (_) => emit(state.copyWith(isLoading: false)),
+      onStart: () => emit(state.copyWith(isGettingUserMetrics: true)),
+      onData: (data) => emit(state.copyWith(metrics: data, isGettingUserMetrics: false)),
+      onDone: () => emit(state.copyWith(isGettingUserMetrics: false)),
+      onError: (_) => emit(state.copyWith(isGettingUserMetrics: false)),
     );
   }
 
   Future<void> getNorms() async {
     await stepRepo.getNorms().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) => emit(state.copyWith(norms: data, isLoading: false)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (_) => emit(state.copyWith(isLoading: false)),
+      onStart: () => emit(state.copyWith(isGettingNorms: true)),
+      onData: (data) => emit(state.copyWith(norms: data, isGettingNorms: false)),
+      onDone: () => emit(state.copyWith(isGettingNorms: false)),
+      onError: (_) => emit(state.copyWith(isGettingNorms: false)),
     );
   }
 
@@ -103,10 +103,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo
         .updateNorm(norm)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
+          onStart: () => emit(state.copyWith(isUpdatingNorm: true)),
           onData: (_) => getNorms(),
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (_) => emit(state.copyWith(isLoading: false)),
+          onDone: () => emit(state.copyWith(isUpdatingNorm: false)),
+          onError: (_) => emit(state.copyWith(isUpdatingNorm: false)),
         );
   }
 
@@ -114,10 +114,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo
         .deleteNorm(metric)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
+          onStart: () => emit(state.copyWith(isDeletingNorm: true)),
           onData: (_) => getNorms(),
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (_) => emit(state.copyWith(isLoading: false)),
+          onDone: () => emit(state.copyWith(isDeletingNorm: false)),
+          onError: (_) => emit(state.copyWith(isDeletingNorm: false)),
         );
   }
 
