@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../food/food_models.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
 
 part 'menu_item.freezed.dart';
 part 'menu_item.g.dart';

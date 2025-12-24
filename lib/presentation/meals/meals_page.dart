@@ -13,10 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
-import '../../common/gen/strings.dart';
-import '../../common/widgets/button/button.dart';
-import 'management/meals_management.dart';
-import 'management/meals_manager.dart' show MealsManager;
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/presentation/meals/management/meals_management.dart';
+import 'package:calora/presentation/meals/management/meals_manager.dart' show MealsManager;
 
 @RoutePage()
 class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
@@ -187,7 +187,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                   : Column(
                       spacing: 8,
                       children: [
-                        Container(
+                        SizedBox(
                           height: 240,
                           width: 240,
                           child: ClipPath(
@@ -226,7 +226,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
     return now.year == date.year && now.month == date.month && now.day == date.day;
   }
 
-  Widget mealInfoCard(BuildContext context, {required String title, required double value, String unit = "gr"}) {
+  Widget mealInfoCard(BuildContext context, {required String title, required double value, String unit = 'gr'}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -240,10 +240,10 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
               spacing: 4,
               children: [
                 Expanded(
-                  child: '${value.asFixedTruncated(1)}'
+                  child: value.asFixedTruncated(1)
                       .text(20, 24, 600)
                       .c(context.colors.textStrong)
-                      .auto(maxLines: 1, minSize: 16),
+                      .auto(minSize: 16),
                 ),
                 unit.text(20, 24, 600).c(context.colors.textSub),
               ],
@@ -258,7 +258,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
 class LeftSideClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    Path path = Path();
+    final Path path = Path();
     path.moveTo(5, 0);
     path.lineTo(size.width, 0);
     path.lineTo(size.width, size.height);

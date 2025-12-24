@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -8,23 +9,35 @@ class DailyMealPlanWidget extends StatelessWidget {
   final String accordingToPlan;
   final String consumed;
   final String leftover;
+  final bool loading;
 
-  const DailyMealPlanWidget({super.key, required this.accordingToPlan, required this.consumed, required this.leftover});
+  const DailyMealPlanWidget({
+    super.key,
+    required this.accordingToPlan,
+    required this.consumed,
+    required this.leftover,
+    required this.loading,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 8,
-        children: [
-          Strings.dailyMealPlan.text(20, 24, 600).c(context.colors.textStrong),
-          _tile(context, icon: Assets.icons.icSms.svg(), title: Strings.accordingToPlan, value: accordingToPlan),
-          _tile(context, icon: Assets.icons.icDoneCircle.svg(), title: Strings.foodConsumed, value: consumed),
-          _tile(context, icon: Assets.icons.icFood.svg(), title: Strings.leftoverFoodPlan, value: leftover),
-        ],
+    return ShimmerWrapper(
+      loading: loading,
+      type: ShimmerType.backgroundElevation,
+      shimmerChild: ShimmerChild(height: 228, width: double.maxFinite, radius: 12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
+          children: [
+            Strings.dailyMealPlan.text(20, 24, 600).c(context.colors.textStrong),
+            _tile(context, icon: Assets.icons.icSms.svg(), title: Strings.accordingToPlan, value: accordingToPlan),
+            _tile(context, icon: Assets.icons.icDoneCircle.svg(), title: Strings.foodConsumed, value: consumed),
+            _tile(context, icon: Assets.icons.icFood.svg(), title: Strings.leftoverFoodPlan, value: leftover),
+          ],
+        ),
       ),
     );
   }
@@ -45,13 +58,13 @@ class DailyMealPlanWidget extends StatelessWidget {
           Spacer(),
           Row(
             children: [
-              value.text(20, 24, 600).c(context.colors.textStrong).auto(maxLines: 1, minSize: 16),
+              value.text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
               const SizedBox(width: 4),
               Strings.kcal
                   .text(20, 24, 600)
                   .c(context.colors.textSub)
                   .copyWith(textAlign: TextAlign.end, overflow: TextOverflow.ellipsis)
-                  .auto(maxLines: 1, minSize: 16),
+                  .auto(minSize: 16),
             ],
           ),
         ],

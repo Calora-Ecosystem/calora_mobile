@@ -10,19 +10,17 @@ class CourseManager extends Manager<CourseState, CourseEffect> {
 
   CourseManager(this._courseRepo) : super(const CourseState());
 
-  void getCourses() {
-    _courseRepo.getCourse().handle(
-      onStart: () {
-        emit(state.copyWith(isLoading: true));
-      },
-      onData: (data) {
-        emit(state.copyWith(courses: data, isLoading: false));
-      },
-      onError: (error) {
-        emit(state.copyWith(isLoading: false));
-      },
-    );
-  }
+  void getCourses() => _courseRepo.getCourse().handle(
+    onStart: () {
+      emit(state.copyWith(isLoading: true));
+    },
+    onData: (data) {
+      emit(state.copyWith(courses: data, isLoading: false));
+    },
+    onError: (error) {
+      emit(state.copyWith(isLoading: false));
+    },
+  );
 
   void getLessonsAndNavigate({required CourseRequest course}) {
     _courseRepo

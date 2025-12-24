@@ -19,7 +19,7 @@ class QuestionsApi {
   }
 
   Future<Response> sendTargetWeight(NormsRequest request) {
-    var result = request.toJson();
+    final result = request.toJson();
     return _dio.post('users/norms', data: result);
   }
 }

@@ -2,7 +2,7 @@ import 'package:calora/domain/model/language/language.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'app_management.dart';
+import 'package:calora/presentation/app/management/app_management.dart';
 
 @injectable
 class AppManager extends Manager<AppState, AppEffect> {

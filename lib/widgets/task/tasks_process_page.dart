@@ -103,7 +103,6 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
                       icon: currentIndex > 0
                           ? Assets.icons.previewIcon.svg()
                           : Assets.icons.softPrevious.svg(),
-                      iconPosition: IconPosition.left,
                       onPressed: currentIndex > 0 ? () => manager.previousTask() : () {},
                       color: context.colors.backgroundElevation,
                       textColor: currentIndex > 0
@@ -149,9 +148,9 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
 
   String formatSeconds(int seconds) {
     final duration = Duration(seconds: seconds);
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final secs = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$secs";
+    return '$minutes:$secs';
   }
 }

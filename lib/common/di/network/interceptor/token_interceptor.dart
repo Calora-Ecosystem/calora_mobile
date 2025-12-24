@@ -30,10 +30,7 @@ class TokenInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
       final language = await _commonStore.language();
       options.headers['Accept-Language'] = language?.code ?? 'UZ';
@@ -310,6 +307,12 @@ class TokenInterceptor extends Interceptor {
       return handler.resolve(response);
     } catch (e, st) {
       _log.e('Retry failed: $e\n$st');
+      if (e is DioException) {
+        if (e.response?.statusCode == 403) {
+          _log.e('⚠️ Retry failed with 403 - CLEARING TOKENS');
+          await _clearTokens();
+        }
+      }
       return handler.next(err);
     }
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'display_type.dart';
+import 'package:calora/common/widgets/display/display_type.dart';
 
 class DisplayMessage {
   final DisplayType type;

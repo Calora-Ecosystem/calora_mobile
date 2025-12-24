@@ -50,8 +50,8 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
   }
 
   Widget _analyzingItem(BuildContext context, String text, double threshold, double currentProgress) {
-    bool done = currentProgress >= threshold;
-    Color textColor = done ? context.colors.textSub : context.colors.textStrong;
+    final bool done = currentProgress >= threshold;
+    final Color textColor = done ? context.colors.textSub : context.colors.textStrong;
 
     return Container(
       padding: const EdgeInsets.all(8),

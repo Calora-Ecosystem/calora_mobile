@@ -17,7 +17,7 @@ extension DoubleExtension on double {
     final numberFormat = NumberFormat(pattern, 'en_US');
     final formatted = numberFormat.format(valueToFormat).replaceAll(',', ' ');
 
-    return currency != null ? "$formatted $currency" : formatted;
+    return currency != null ? '$formatted $currency' : formatted;
   }
 }
 
@@ -36,6 +36,6 @@ extension NumExtension on num {
     final numberFormat = NumberFormat(pattern, 'en_US');
     final formatted = numberFormat.format(valueToFormat).replaceAll(',', ' ');
 
-    return currency != null ? "$formatted $currency" : formatted;
+    return currency != null ? '$formatted $currency' : formatted;
   }
 }

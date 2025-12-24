@@ -7,7 +7,7 @@ part 'steps_stat.g.dart';
 abstract class StepsWithMetricsRequest with _$StepsWithMetricsRequest {
   const factory StepsWithMetricsRequest({
     required DateTime date,
-    @Default("Step") String metric,
+    @Default('Step') String metric,
     required double value,
   }) = _StepsWithMetricsRequest;
 

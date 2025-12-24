@@ -8,8 +8,8 @@ import 'package:calora/widgets/questions/question_progress_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/course_questions_management.dart';
-import 'management/course_questions_manager.dart';
+import 'package:calora/presentation/course_questions/management/course_questions_management.dart';
+import 'package:calora/presentation/course_questions/management/course_questions_manager.dart';
 
 @RoutePage()
 class CourseQuestionsPage

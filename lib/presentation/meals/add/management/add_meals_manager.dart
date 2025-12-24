@@ -9,7 +9,7 @@ import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'add_meals_management.dart';
+import 'package:calora/presentation/meals/add/management/add_meals_management.dart';
 
 @injectable
 class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
@@ -123,13 +123,13 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         )
         .toList();
     for (int i = 0; i < foodRequests.length; i++) {
-      var addedFoodId = await addFood(foodRequests[i]);
+      final addedFoodId = await addFood(foodRequests[i]);
       saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
     }
   }
 
   Future<void> addFoodAndMenuWithVoice(int categoryId, String menu) async {
-    var userId = await profileStore.getUserId();
+    final userId = await profileStore.getUserId();
     final List<FoodRequest> foodRequests = state.scannedFoodsByVoice
         .map(
           (e) => e.toFoodRequest(
@@ -140,7 +140,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         )
         .toList();
     for (int i = 0; i < foodRequests.length; i++) {
-      var addedFoodId = await addFood(foodRequests[i]);
+      final addedFoodId = await addFood(foodRequests[i]);
       saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
     }
   }

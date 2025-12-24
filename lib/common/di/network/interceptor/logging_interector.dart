@@ -46,10 +46,10 @@ class LoggingInterceptor extends Interceptor {
                 await entity.delete();
               }
             }
-          } on FormatException catch (e) {
+          } on FormatException {
             // Skip files with invalid date format
             log('Skipping file with invalid date format: ${entity.path}');
-          } on PathNotFoundException catch (e) {
+          } on PathNotFoundException {
             // File was already deleted or doesn't exist - safe to ignore
             log('File no longer exists: ${entity.path}');
           } catch (e) {

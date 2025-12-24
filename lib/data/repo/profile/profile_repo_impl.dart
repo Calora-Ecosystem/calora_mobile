@@ -28,7 +28,7 @@ class ProfileRepoImpl extends ProfileRepo {
   }
 
   Future<List<DetailInfo>> getDailyNorms() async {
-    var result = await _api.getDailyNorms();
+    final result = await _api.getDailyNorms();
 
     return Future.value([
       result.toDetailCaloriesIntake(),

@@ -9,8 +9,8 @@ import 'package:calora/widgets/questions/questions_body_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/questions_management.dart';
-import 'management/questions_manager.dart';
+import 'package:calora/presentation/questions/questions/management/questions_management.dart';
+import 'package:calora/presentation/questions/questions/management/questions_manager.dart';
 
 @RoutePage()
 class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {

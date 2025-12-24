@@ -12,23 +12,23 @@ class NotificationSettingSheetManager extends Manager<NotificationSettingSheetSt
   NotificationSettingSheetManager(this._repo) : super(const NotificationSettingSheetState());
 
   void init(NotificationSettingType type, List<ReminderRequest> reminders) {
-    Map<String, MealTimeSetting> mealMap = {};
+    final Map<String, MealTimeSetting> mealMap = {};
     bool enabled = false;
     DateTime? single;
 
     for (final r in reminders) {
       final time = _parseTime(r.time);
 
-      if (type == NotificationSettingType.waterReminder && r.type == "Water") {
+      if (type == NotificationSettingType.waterReminder && r.type == 'Water') {
         enabled = true;
         single = time;
-      } else if (type == NotificationSettingType.mealReminder && r.type == "Food" && r.menu != null) {
-        mealMap[r.menu!] = MealTimeSetting(enabled: true, time: time);
+      } else if (type == NotificationSettingType.mealReminder && r.type == 'Food') {
+        mealMap[r.menu] = MealTimeSetting(enabled: true, time: time);
         enabled = true;
-      } else if (type == NotificationSettingType.sleepReminder && r.type == "Sleep") {
+      } else if (type == NotificationSettingType.sleepReminder && r.type == 'Sleep') {
         enabled = true;
         single = time;
-      } else if (type == NotificationSettingType.thirtyDayChallenges && r.type == "DailyChallenge") {
+      } else if (type == NotificationSettingType.thirtyDayChallenges && r.type == 'DailyChallenge') {
         enabled = true;
         single = time;
       }
@@ -73,19 +73,19 @@ class NotificationSettingSheetManager extends Manager<NotificationSettingSheetSt
 
     if (type == NotificationSettingType.waterReminder && state.isEnabled) {
       await _repo.postNotificationSettings(
-        ReminderRequest(time: _format(state.singleTime!), type: "Water", menu: "Breakfast"),
+        ReminderRequest(time: _format(state.singleTime!), type: 'Water', menu: 'Breakfast'),
       );
     } else if (type == NotificationSettingType.mealReminder) {
       for (final e in state.mealTimes.entries) {
-        await _repo.postNotificationSettings(ReminderRequest(time: _format(e.value.time), type: "Food", menu: e.key));
+        await _repo.postNotificationSettings(ReminderRequest(time: _format(e.value.time), type: 'Food', menu: e.key));
       }
     } else if (type == NotificationSettingType.sleepReminder && state.isEnabled) {
       await _repo.postNotificationSettings(
-        ReminderRequest(time: _format(state.singleTime!), type: "Sleep", menu: "Breakfast"),
+        ReminderRequest(time: _format(state.singleTime!), type: 'Sleep', menu: 'Breakfast'),
       );
     } else if (type == NotificationSettingType.thirtyDayChallenges && state.isEnabled) {
       await _repo.postNotificationSettings(
-        ReminderRequest(time: _format(state.singleTime!), type: "DailyChallenge", menu: "Breakfast"),
+        ReminderRequest(time: _format(state.singleTime!), type: 'DailyChallenge', menu: 'Breakfast'),
       );
     }
 

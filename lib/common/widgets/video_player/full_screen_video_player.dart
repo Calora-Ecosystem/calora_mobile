@@ -7,7 +7,7 @@ import 'package:video_player/video_player.dart';
 class FullscreenVideoPlayer extends StatefulWidget {
   final VideoPlayerController controller;
 
-  const FullscreenVideoPlayer({Key? key, required this.controller}) : super(key: key);
+  const FullscreenVideoPlayer({super.key, required this.controller});
 
   @override
   State<FullscreenVideoPlayer> createState() => _FullscreenVideoPlayerState();
@@ -69,13 +69,12 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   String _format(Duration d) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return "${two(d.inMinutes.remainder(60))}:${two(d.inSeconds.remainder(60))}";
+    return '${two(d.inMinutes.remainder(60))}:${two(d.inSeconds.remainder(60))}';
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: GestureDetector(

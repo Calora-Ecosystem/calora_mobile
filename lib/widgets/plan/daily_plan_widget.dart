@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,10 +9,11 @@ import 'package:intl/intl.dart';
 class DailyPlanWidget extends StatelessWidget {
   final VoidCallback onBackward;
   final VoidCallback onForward;
-  final DateTime date; // <<-- Yangicha
+  final DateTime date;
   final String calories;
   final String water;
   final String steps;
+  final bool loading;
 
   const DailyPlanWidget({
     super.key,
@@ -21,6 +23,7 @@ class DailyPlanWidget extends StatelessWidget {
     required this.calories,
     required this.water,
     required this.steps,
+    this.loading = false,
   });
 
   bool get isToday {
@@ -42,16 +45,13 @@ class DailyPlanWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // BACKWARD
                 InkWell(
                   onTap: onBackward,
                   child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
                 ),
 
-                // DATE TEXT
                 Column(
                   children: [
-                    // Agar sana bugungi bo‘lsa, “Bugun” deb chiqaramiz
                     (isToday ? 'Bugun' : '').text(14, 16, 400).c(context.colors.white),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -64,9 +64,8 @@ class DailyPlanWidget extends StatelessWidget {
                   ],
                 ),
 
-                // FORWARD – bugungi sana bo‘lsa YASHIRILADI
                 isToday
-                    ? SizedBox(width: 40)
+                    ? const SizedBox(width: 40)
                     : InkWell(
                         onTap: onForward,
                         child: Padding(padding: const EdgeInsets.only(right: 16), child: Assets.icons.icForward.svg()),
@@ -75,7 +74,6 @@ class DailyPlanWidget extends StatelessWidget {
             ),
           ),
 
-          // Info container
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -85,14 +83,23 @@ class DailyPlanWidget extends StatelessWidget {
               children: [
                 Strings.planForToday.text(20, 24, 600),
                 const SizedBox(height: 12),
-                Row(
-                  spacing: 8,
-                  children: [
-                    _buildCaloriesInfo(context: context, item: calories, icon: Assets.icons.vegetarianFood.svg()),
-                    _buildCaloriesInfo(context: context, item: water, icon: Assets.icons.droplet.svg()),
-                    _buildCaloriesInfo(context: context, item: steps, icon: Assets.icons.workoutRun.svg()),
-                  ],
-                ),
+                loading
+                    ? Row(
+                        spacing: 8,
+                        children: [
+                          _buildCaloriesInfoShimmer(context),
+                          _buildCaloriesInfoShimmer(context),
+                          _buildCaloriesInfoShimmer(context),
+                        ],
+                      )
+                    : Row(
+                        spacing: 8,
+                        children: [
+                          _buildCaloriesInfo(context: context, item: calories, icon: Assets.icons.vegetarianFood.svg()),
+                          _buildCaloriesInfo(context: context, item: water, icon: Assets.icons.droplet.svg()),
+                          _buildCaloriesInfo(context: context, item: steps, icon: Assets.icons.workoutRun.svg()),
+                        ],
+                      ),
               ],
             ),
           ),
@@ -118,6 +125,17 @@ class DailyPlanWidget extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCaloriesInfoShimmer(BuildContext context) {
+    return const Expanded(
+      child: ShimmerWrapper(
+        loading: true,
+        type: ShimmerType.backgroundElevation,
+        shimmerChild: ShimmerChild(height: 36),
+        child: SizedBox.shrink(),
       ),
     );
   }

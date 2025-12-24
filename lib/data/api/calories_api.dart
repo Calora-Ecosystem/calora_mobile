@@ -70,7 +70,7 @@ class CaloriesApi {
   }
 
   Future<List<ScannerFood>> getScannerFoodByVoice(String audioPath) async {
-    log(audioPath + '==================================================');
+    log('$audioPath==================================================');
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(
         audioPath,

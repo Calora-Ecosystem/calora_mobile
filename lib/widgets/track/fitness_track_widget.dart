@@ -47,9 +47,9 @@ class FitnessTrackWidget extends StatefulWidget {
 
 class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
   String _getDateLabel(int index) {
-    if (index == 0) return formatDateLabel(widget.offset, "daily");
-    if (index == 1) return formatDateLabel(widget.offset, "weekly");
-    return formatDateLabel(widget.offset, "monthly");
+    if (index == 0) return formatDateLabel(widget.offset, 'daily');
+    if (index == 1) return formatDateLabel(widget.offset, 'weekly');
+    return formatDateLabel(widget.offset, 'monthly');
   }
 
   @override
@@ -155,7 +155,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 children: [
                                   Assets.icons.icDistance.svg(),
                                   const SizedBox(height: 4),
-                                  '${(widget.metrics.distance).asFixedTruncated(2)}'
+                                  (widget.metrics.distance).asFixedTruncated(2)
                                       .text(16, 20, 500)
                                       .c(context.colors.textStrong),
                                   const SizedBox(height: 2),

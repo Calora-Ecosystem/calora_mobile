@@ -73,7 +73,7 @@ class HelpPage extends StatelessWidget {
   }
 
   Future<void> _launchTelegram() async {
-    final url = Uri.parse("https://t.me/N0d1rbe");
+    final url = Uri.parse('https://t.me/N0d1rbe');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }

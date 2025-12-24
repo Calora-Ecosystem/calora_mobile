@@ -13,9 +13,6 @@ extension ModalSheetExtension on BuildContext {
       context: this,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      enableDrag: true,
-      isDismissible: true,
-      useRootNavigator: false,
       builder: (context) {
         return AnimatedPadding(
           padding: MediaQuery.of(context).viewInsets,

@@ -4,7 +4,7 @@ import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'profile_detail_management.dart';
+import 'package:calora/presentation/profile_details/management/profile_detail_management.dart';
 
 @injectable
 class ProfileDetailManager extends Manager<ProfileDetailState, ProfileDetailEffect> {

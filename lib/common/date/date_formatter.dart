@@ -11,16 +11,16 @@ class DateFormatter {
   }
 
   static String formatDateWithoutSecond(String date) {
-    DateFormat inputDateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
-    DateTime dateTime = inputDateFormat.parse(date);
+    final DateFormat inputDateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+    final DateTime dateTime = inputDateFormat.parse(date);
 
-    DateFormat outputDateFormat = DateFormat('yyyy-MM-dd HH:mm');
+    final DateFormat outputDateFormat = DateFormat('yyyy-MM-dd HH:mm');
     return outputDateFormat.format(dateTime);
   }
 
   static DateTime? parseDateTime({required String dateString}) {
     try {
-      DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+      final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
       return dateFormat.parse(dateString);
     } catch (e) {
       return null;
@@ -29,13 +29,13 @@ class DateFormatter {
 
   static String getDateTimeWithoutHours(DateTime? dateTime) {
     try {
-      DateTime localDateTime = dateTime == null
+      final DateTime localDateTime = dateTime == null
           ? DateTime.now().toLocal()
           : dateTime.toLocal();
-      String formattedDate = DateFormat('yyyy-MM-dd').format(localDateTime);
+      final String formattedDate = DateFormat('yyyy-MM-dd').format(localDateTime);
       return formattedDate;
     } catch (e) {
-      return "${dateTime}";
+      return '${dateTime}';
     }
   }
 

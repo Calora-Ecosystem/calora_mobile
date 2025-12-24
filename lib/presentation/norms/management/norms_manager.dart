@@ -5,7 +5,7 @@ import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'norms_management.dart';
+import 'package:calora/presentation/norms/management/norms_management.dart';
 
 @injectable
 class NormsManager extends Manager<NormsState, NormsEffect> {
@@ -22,7 +22,7 @@ class NormsManager extends Manager<NormsState, NormsEffect> {
   }
 
   void updateDailyNorms(DetailInfo info, String lastResult) {
-    var resultData = state.dailyNormsList.map((e) {
+    final resultData = state.dailyNormsList.map((e) {
       if (e.type == info.type) {
         return e.copyWith(message: lastResult);
       }

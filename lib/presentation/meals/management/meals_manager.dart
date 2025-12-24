@@ -3,7 +3,7 @@ import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:injectable/injectable.dart' show injectable;
 import 'package:management/management.dart';
 
-import 'meals_management.dart';
+import 'package:calora/presentation/meals/management/meals_management.dart';
 
 @injectable
 class MealsManager extends Manager<MealsState, MealsEffect> {

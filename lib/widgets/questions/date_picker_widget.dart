@@ -58,18 +58,17 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         GestureDetector(
           onTap: () => _showDatePicker(context),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildDatePart("Kun", _selectedDate?.day.toString()),
+              _buildDatePart('Kun', _selectedDate?.day.toString()),
               const SizedBox(width: 8),
-              _buildDatePart("Oy", _selectedDate?.month.toString()),
+              _buildDatePart('Oy', _selectedDate?.month.toString()),
               const SizedBox(width: 8),
-              _buildDatePart("Yil", _selectedDate?.year.toString()),
+              _buildDatePart('Yil', _selectedDate?.year.toString()),
             ],
           ),
         ),

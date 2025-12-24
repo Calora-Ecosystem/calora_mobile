@@ -40,7 +40,7 @@ class StepsIndicatorWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              (Strings.goal + ':' + goal.toString()).text(14, 16, 600).c(context.colors.textSub),
+              ('${Strings.goal}:$goal').text(14, 16, 600).c(context.colors.textSub),
 
               GestureDetector(onTap: onEditTap, child: Assets.icons.edit.svg()),
             ],

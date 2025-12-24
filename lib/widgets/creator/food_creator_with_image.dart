@@ -85,7 +85,7 @@ class FoodCreatorWithImage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       width: double.infinity,
       decoration: BoxDecoration(color: context.colors.blackWithOpacity, borderRadius: BorderRadius.circular(12)),
-      child: "${value.asFixedTruncated(1)}$metric"
+      child: '${value.asFixedTruncated(1)}$metric'
           .text(14, 16, 400)
           .c(context.colors.textStrong)
           .copyWith(textAlign: TextAlign.center),

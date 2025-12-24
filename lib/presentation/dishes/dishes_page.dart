@@ -13,8 +13,8 @@ import 'package:calora/widgets/info/dish_info_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/dishes_management.dart';
-import 'management/dishes_manager.dart';
+import 'package:calora/presentation/dishes/management/dishes_management.dart';
+import 'package:calora/presentation/dishes/management/dishes_manager.dart';
 
 @RoutePage()
 class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {

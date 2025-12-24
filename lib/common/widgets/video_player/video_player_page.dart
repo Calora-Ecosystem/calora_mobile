@@ -60,7 +60,7 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
-          child: const Center(child: Text("Error: Video not initialized")),
+          child: const Center(child: Text('Error: Video not initialized')),
         ),
       );
     }

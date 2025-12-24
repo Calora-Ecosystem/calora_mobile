@@ -39,6 +39,6 @@ class BaseStore<T> {
 
   Stream<T> watch() async* {
     final suffixed = key + await suffixer();
-    yield* _preferences.getStringStream(suffixed).map((e) => deserialize(e));
+    yield* _preferences.getStringStream(suffixed).map(deserialize);
   }
 }

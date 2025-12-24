@@ -8,8 +8,8 @@ class NotificationSetting {
 
   NotificationSetting({
     this.value = '',
-    this.title = "",
-    this.id = "",
+    this.title = '',
+    this.id = '',
     this.type = NotificationSettingType.none,
   });
 }

@@ -22,10 +22,10 @@ class HealthAppService {
       await health.installHealthConnect();
 
   Future<void> getHealthConnectSdkStatus() async {
-    assert(Platform.isAndroid, "This is only available on Android");
+    assert(Platform.isAndroid, 'This is only available on Android');
 
     final status = await health.getHealthConnectSdkStatus();
-    log("HealthAppService - Status $status");
+    log('HealthAppService - Status $status');
   }
 
   /// Authorize, i.e. get permissions to access relevant health data.
@@ -63,10 +63,10 @@ class HealthAppService {
         // request access in background
         await health.requestHealthDataInBackgroundAuthorization();
       } catch (error) {
-        log("HealthAppService - Exception in authorize: $error");
+        log('HealthAppService - Exception in authorize: $error');
       }
     }
-    log("HealthAppServiceAuthorized->$authorized");
+    log('HealthAppServiceAuthorized->$authorized');
   }
 
   Future<void> fetchStepData() async {
@@ -78,30 +78,30 @@ class HealthAppService {
     ];
     // Check current permission status
     bool? hasPermissions = await health.hasPermissions([HealthDataType.STEPS]);
-    log("HealthAppService - Initial permission check: $hasPermissions");
+    log('HealthAppService - Initial permission check: $hasPermissions');
 
     if (hasPermissions != true) {
-      log("HealthAppService - Requesting steps authorization...");
-      bool authorized = await health.requestAuthorization(
+      log('HealthAppService - Requesting steps authorization...');
+      final bool authorized = await health.requestAuthorization(
         [HealthDataType.STEPS],
         permissions: [HealthDataAccess.READ],
       );
-      log("HealthAppService - Authorization result: $authorized");
+      log('HealthAppService - Authorization result: $authorized');
 
       // Check again after request
       hasPermissions = await health.hasPermissions([HealthDataType.STEPS]);
-      log("HealthAppService - Permission check after request: $hasPermissions");
+      log('HealthAppService - Permission check after request: $hasPermissions');
     }
 
     if (hasPermissions == true) {
       try {
-        int? steps = await health.getTotalStepsInInterval(midnight, now);
+        final int? steps = await health.getTotalStepsInInterval(midnight, now);
         log('HealthAppService - Total steps: $steps');
       } catch (error) {
-        log("HealthAppService - Exception: $error");
+        log('HealthAppService - Exception: $error');
       }
     } else {
-      log("HealthAppService - Final authorization check failed");
+      log('HealthAppService - Final authorization check failed');
     }
   }
 }

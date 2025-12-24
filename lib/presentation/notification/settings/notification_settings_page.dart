@@ -17,6 +17,8 @@ import 'package:management/management.dart';
 @RoutePage()
 class NotificationSettingsPage
     extends Managed<NotificationSettingsManager, NotificationSettingsState, NotificationSettingsEffect> {
+  const NotificationSettingsPage({super.key});
+
   @override
   void init(context, manager) {
     manager.getNotificationSettings();

@@ -2,9 +2,9 @@ import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 
-import '../../domain/model/course/course_request.dart';
+import 'package:calora/domain/model/course/course_request.dart';
 
-const String baseUrl = "https://staging.calora.uz/api/file/";
+const String baseUrl = 'https://staging.calora.uz/api/file/';
 const String abstractImageUrl = 'images/abstract.png';
 
 extension CourseRequestX on CourseRequest {

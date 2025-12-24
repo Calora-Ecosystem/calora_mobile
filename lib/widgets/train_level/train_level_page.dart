@@ -18,7 +18,7 @@ class _TrainLevelPageState extends State<TrainLevelPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> degrees = [
+    final List<String> degrees = [
       Strings.easyStart,
       Strings.withoutOverload,
       Strings.returnToActivity,

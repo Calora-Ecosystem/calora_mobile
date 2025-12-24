@@ -5,7 +5,7 @@ import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:calora/domain/repo/course/course_repo.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../domain/model/course/course_request.dart' show CourseRequest;
+import 'package:calora/domain/model/course/course_request.dart' show CourseRequest;
 
 @Injectable(as: CourseRepo)
 class CourseRepoImpl implements CourseRepo {
@@ -88,7 +88,6 @@ class CourseRepoImpl implements CourseRepo {
       duration: 8,
       calories: 150,
       level: 0.5,
-      isLocked: true,
       tasks: [
         TaskInfo(count: '8', title: 'Ishlar qaleee', isCompleted: true),
         TaskInfo(count: '00:30', title: 'Salom'),
@@ -101,7 +100,6 @@ class CourseRepoImpl implements CourseRepo {
       duration: 8,
       calories: 150,
       level: 0.5,
-      isLocked: true,
       tasks: [
         TaskInfo(count: '8', title: 'Salom'),
         TaskInfo(count: '00:30', title: 'Salom'),

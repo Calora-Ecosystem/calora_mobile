@@ -28,7 +28,7 @@ class LanguageWidget extends StatelessWidget {
         return LanguageItemBuilder(
           language: language,
           isChecked: isSelected,
-          onTap: (data) => onLanguageSelected(data),
+          onTap: onLanguageSelected,
         );
       },
     );

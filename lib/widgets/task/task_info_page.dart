@@ -100,17 +100,17 @@ class DescriptionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Planka mashqi — tanani to‘g‘ri holatda ushlab turishni talab qiladigan statik mashq. "
-          "Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.",
+          'Planka mashqi — tanani to‘g‘ri holatda ushlab turishni talab qiladigan statik mashq. '
+          'Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.',
         ),
-        const Text("• Bajarilish tartibi:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        _bullet("a. Tizzadan turib, tirsaklarni yelkalar ostiga qo‘ying."),
-        _bullet("b. Oyoqlarni orqaga cho‘zib, tanani tekis chiziqda ushlang."),
-        _bullet("c. Qorin mushaklarini tarang qilib, belni bukmasdan yoki ko‘tarmasdan ushlang."),
-        _bullet("d. Belgilangan vaqt davomida (masalan, 30–60 soniya) shu holatda turing."),
-        const Text("• Asosiy foydasi:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        _bullet("Qorin mushaklarini kuchaytiradi"),
-        _bullet("Bel va orqa qismini mustahkamlaydi"),
+        const Text('• Bajarilish tartibi:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        _bullet('a. Tizzadan turib, tirsaklarni yelkalar ostiga qo‘ying.'),
+        _bullet('b. Oyoqlarni orqaga cho‘zib, tanani tekis chiziqda ushlang.'),
+        _bullet('c. Qorin mushaklarini tarang qilib, belni bukmasdan yoki ko‘tarmasdan ushlang.'),
+        _bullet('d. Belgilangan vaqt davomida (masalan, 30–60 soniya) shu holatda turing.'),
+        const Text('• Asosiy foydasi:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        _bullet('Qorin mushaklarini kuchaytiradi'),
+        _bullet('Bel va orqa qismini mustahkamlaydi'),
       ],
     );
   }
@@ -121,7 +121,7 @@ class DescriptionWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("• ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text('• ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
         ],
       ),

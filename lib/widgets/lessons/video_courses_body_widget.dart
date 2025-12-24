@@ -12,7 +12,7 @@ import 'package:calora/widgets/task/task_parametrs_widget.dart';
 import 'package:calora/widgets/video/about_video_page.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/model/lesson/lesson_request.dart' show LessonRequest;
+import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonRequest;
 
 @RoutePage()
 class LessonBodyWidgetPage extends StatefulWidget {
@@ -68,7 +68,6 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
                       ),
                       const SizedBox(height: 16),
                       Flexible(
-                        fit: FlexFit.loose,
                         child: ListView.separated(
                           itemCount: widget.lessons.length,
                           separatorBuilder: (context, index) => Padding(

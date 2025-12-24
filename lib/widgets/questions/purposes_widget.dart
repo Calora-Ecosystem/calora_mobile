@@ -56,7 +56,6 @@ class _PurposesWidgetState extends State<PurposesWidget> {
         decoration: BoxDecoration(
           border: Border.all(
             color: isSelected ? context.colors.accentSub : Colors.transparent,
-            width: 1,
           ),
           color: context.colors.commonBackground,
           borderRadius: BorderRadius.circular(12),

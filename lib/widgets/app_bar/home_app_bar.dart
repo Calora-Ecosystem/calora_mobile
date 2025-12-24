@@ -15,15 +15,14 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = profile?.name;
-    String initials = (name != null && name.isNotEmpty)
+    final String initials = (name != null && name.isNotEmpty)
         ? name.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase()
-        : "";
+        : '';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 45, 20, 16),
       decoration: BoxDecoration(color: isScrolled ? context.colors.white : Colors.transparent),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
