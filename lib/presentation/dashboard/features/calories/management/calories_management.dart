@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/calories/calories_data.dart';
+import 'package:calora/domain/model/summary/summary_request.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'calories_management.freezed.dart';
@@ -11,6 +12,7 @@ abstract class CaloriesState with _$CaloriesState {
     @Default(0) double consumed,
     @Default(0) double leftover,
     @Default([]) List<MealData> meals,
+    SummaryRequest? summary,
     @Default(false) bool isLoading,
     DateTime? date,
   }) = _CaloriesState;

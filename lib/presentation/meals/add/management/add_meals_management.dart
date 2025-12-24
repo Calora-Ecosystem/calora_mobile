@@ -29,4 +29,8 @@ class AddMealsEffect with _$AddMealsEffect {
   const factory AddMealsEffect.openCreatorWithSpeech() = OpenCreatorWithSpeech;
 
   const factory AddMealsEffect.openAboutPage(FoodModel food, bool isFavourite) = OpenAboutPage;
+
+  const factory AddMealsEffect.showSuccessDialog(String message) = ShowSuccessDialog;
+
+  const factory AddMealsEffect.showErrorDialog(String message) = ShowErrorDialog;
 }

@@ -6,8 +6,12 @@ part 'meals_management.freezed.dart';
 
 @freezed
 abstract class MealsState with _$MealsState {
-  const factory MealsState({@Default([]) List<MenuItem> menuItems, @Default(false) bool isLoading, MealData? meal}) =
-      _MealsState;
+  const factory MealsState({
+    @Default([]) List<MenuItem> menuItems,
+    @Default(false) bool isLoading,
+    MealData? meal,
+    @Default([]) List<MealData> meals,
+  }) = _MealsState;
 }
 
 @freezed

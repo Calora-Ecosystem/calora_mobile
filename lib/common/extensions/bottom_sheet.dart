@@ -8,14 +8,12 @@ extension ModalSheetExtension on BuildContext {
     double minChildSize = 0.6,
     double maxChildSize = 0.95,
     Color? backgroundColor,
+    ScrollController? scrollController,
   }) {
     return showModalBottomSheet<T>(
       context: this,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      enableDrag: true,
-      isDismissible: true,
-      useRootNavigator: false,
       builder: (context) {
         return AnimatedPadding(
           padding: MediaQuery.of(context).viewInsets,
@@ -25,7 +23,7 @@ extension ModalSheetExtension on BuildContext {
             initialChildSize: initialChildSize,
             minChildSize: minChildSize,
             maxChildSize: maxChildSize,
-            builder: (context, scrollController) {
+            builder: (context, innerScrollController) {
               return Container(
                 decoration: BoxDecoration(
                   color: backgroundColor ?? context.colors.white,
@@ -38,7 +36,11 @@ extension ModalSheetExtension on BuildContext {
                     Container(height: 3, width: 40, color: context.colors.neutral200Stroke),
                     const SizedBox(height: 12),
                     Expanded(
-                      child: ListView(controller: scrollController, padding: EdgeInsets.zero, children: [child]),
+                      child: ListView(
+                        controller: scrollController ?? innerScrollController,
+                        padding: EdgeInsets.zero,
+                        children: [child],
+                      ),
                     ),
                   ],
                 ),

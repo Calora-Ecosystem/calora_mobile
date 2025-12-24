@@ -5,22 +5,15 @@ part 'summary_request.g.dart';
 
 @freezed
 abstract class SummaryRequest with _$SummaryRequest {
-  const factory SummaryRequest({required SummaryContent content}) = _SummaryRequest;
-
-  factory SummaryRequest.fromJson(Map<String, dynamic> json) => _$SummaryRequestFromJson(json);
-}
-
-@freezed
-abstract class SummaryContent with _$SummaryContent {
-  const factory SummaryContent({
+  const factory SummaryRequest({
     required KcalNorm kcalNorm,
     required Map<String, NutrientData> nutrientsNorm,
     required Map<String, NutrientData> nutrients,
     required double sumKcal,
     required DateTime date,
-  }) = _SummaryContent;
+  }) = _SummaryRequest;
 
-  factory SummaryContent.fromJson(Map<String, dynamic> json) => _$SummaryContentFromJson(json);
+  factory SummaryRequest.fromJson(Map<String, dynamic> json) => _$SummaryRequestFromJson(json);
 }
 
 @freezed

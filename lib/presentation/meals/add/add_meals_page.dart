@@ -9,6 +9,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/button/toggle_buttons.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
@@ -67,7 +68,10 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   Widget builder(BuildContext context, AddMealsManager manager, AddMealsState state) {
     return Scaffold(
       backgroundColor: context.colors.white,
-      appBar: CustomAppBar(title: Strings.add),
+      appBar: CustomAppBar(
+        title: Strings.add,
+        onBack: () => context.router.pop(true),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -166,13 +170,15 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         onFavouriteChanged: (value) {
           if (value) manager.addFavourite(food.id ?? 0);
         },
-        onSave: (value) {
+        onSave: (value) async {
           manager.addFavourite(food.id ?? 0);
-          manager.saveMenuItem(
+          final success = await manager.saveMenuItem(
             MenuInfo(menu: type.name, date: DateTime.now(), foodId: food.id ?? 0, weightInGr: value.toInt()),
           );
-          if (context.mounted) {
-            context.router.pop(true);
+          if (context.mounted) context.router.pop();
+
+          if (success) {
+            _showInfoDialog(context);
           }
         },
       ),
@@ -206,11 +212,16 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               userId: userId,
             ),
           );
-          manager.saveMenuItem(
-            MenuInfo(menu: type.name, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
-          );
-          if (context.mounted) {
-            context.router.pop(true);
+
+          bool success = false;
+          if (addedFoodId != null) {
+            success = await manager.saveMenuItem(
+              MenuInfo(menu: type.name, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
+            );
+          }
+          if (context.mounted) context.router.pop();
+          if (success) {
+            _showInfoDialog(context);
           }
         },
       ),
@@ -226,9 +237,10 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
       child: FoodCreatorWithImage(
         name: food.name,
         addButton: () async {
-          await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
-          if (context.mounted) {
-            context.router.pop(true);
+          final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
+          if (context.mounted) context.router.pop();
+          if (success) {
+            _showInfoDialog(context);
           }
         },
         protein: MetricsHelper.getMetricValue(metrics, MetricType.protein),
@@ -249,9 +261,10 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             .map((e) => '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
             .toList(),
         onAdd: () async {
-          await manager.addMultipleFoodsAndMenuWithImage(foods, categoryId, type.name);
-          if (context.mounted) {
-            context.router.pop(true);
+          final success = await manager.addFoodAndMenuWithVoice(categoryId, type.name);
+          if (context.mounted) context.router.pop();
+          if (success) {
+            _showInfoDialog(context);
           }
         },
       ),
@@ -368,6 +381,40 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           ),
         ),
       ),
+    );
+  }
+
+  void _showInfoDialog(
+    BuildContext context,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: context.colors.lightGreen,
+            ),
+            child: Assets.icons.twoDone.svg(),
+          ),
+          content: Strings.yourDataHasBeenSavedSuccessfully
+              .text(16, 20, 400)
+              .c(context.colors.textStrong)
+              .copyWith(textAlign: TextAlign.center),
+          actions: [
+            Center(
+              child: Button(
+                onPressed: () => dialogContext.pop(),
+                text: Strings.close,
+                textColor: context.colors.textStrong,
+                type: Type.secondary,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

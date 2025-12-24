@@ -1,12 +1,15 @@
-import 'package:calora/data/repo/calories/calories_repo_impl.dart';
+import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
 import 'package:calora/domain/model/meal/menu/menu_item.dart';
+import 'package:calora/domain/model/summary/summary_request.dart';
 
 abstract class CaloriesRepo {
   Future<SummaryResult> fetchSummary(DateTime date);
+
+  Future<SummaryRequest> getSummary(DateTime date);
 
   Future<List<MealTypeData>> fetchFoodCategory();
 

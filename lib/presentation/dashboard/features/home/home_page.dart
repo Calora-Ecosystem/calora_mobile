@@ -34,6 +34,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     manager.getUserInfo();
     manager.getStepNorm();
     manager.requestPedometerPermissions();
+
     _initializePedometerService(manager);
   }
 
@@ -97,7 +98,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                     onForward: () =>
                                         manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1))),
                                     date: state.day ?? DateTime.now(),
-                                    calories: '${state.targetKcal} kkal',
+                                    calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
                                     water: '${state.targetLiters} litr',
                                     steps: state.targetSteps.toString(),
                                   ),
@@ -135,10 +136,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 ),
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
-                                  normCalories: state.targetKcal.asFixedTruncated(1).toString(),
+                                  normCalories: state.targetKcal.asFixedTruncated(0).toString(),
                                   nutrients: state.nutrients,
                                   progressPercent: state.remainedCalories / state.targetKcal,
-                                  remainedCalories: state.remainedCalories.asFixedTruncated(1).toString(),
+                                  remainedCalories: state.remainedCalories.asFixedTruncated(0).toString(),
                                 ),
                                 StepCardWidget(
                                   currentSteps: state.currentSteps,
@@ -148,7 +149,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   caloriesBurned: state.caloriesBurned,
                                 ),
                                 WaterIntakeSelector(
-                                  onCountChanged: (count) => manager.updateWaterIntake(count * 0.5),
+                                  onCountChanged: (count) => manager.updateWaterIntake(count * 0.25),
                                   bottleCapacity: state.bottleCapacity,
                                   targetLiters: state.targetLiters,
                                   currentIntake: state.waterIntake,
@@ -170,7 +171,11 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   }
 
   void openCalendar(BuildContext context, HomeManager manager) {
-    context.showAppBottomSheet(child: CalendarSelectorWidget(onDaySelected: (date) => manager.updateDay(date)));
+    context.showAppBottomSheet(
+      child: CalendarSelectorWidget(
+        onDaySelected: (date) => manager.updateDay(date),
+      ),
+    );
   }
 
   void openCaloriesPage(BuildContext context) {

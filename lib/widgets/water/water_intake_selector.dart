@@ -29,7 +29,7 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
   @override
   void initState() {
     super.initState();
-    final minBottles = (widget.targetLiters / widget.bottleCapacity).ceil();
+    final minBottles = ((widget.targetLiters / 1000) / widget.bottleCapacity).ceil();
     displayCount = minBottles < 10 ? 10 : minBottles + 2;
   }
 
@@ -45,12 +45,12 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
 
   bool _isTargetReached() {
     final totalLiters = selectedCount * widget.bottleCapacity;
-    return totalLiters >= widget.targetLiters;
+    return totalLiters >= widget.targetLiters / 1000;
   }
 
   @override
   Widget build(BuildContext context) {
-    final targetBottles = (widget.targetLiters / widget.bottleCapacity).ceil();
+    final targetBottles = ((widget.targetLiters / 1000) / widget.bottleCapacity).ceil();
 
     return Container(
       width: double.infinity,
@@ -64,14 +64,14 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
             children: [
               Strings.yourWaterIntake.text(20, 24, 600).c(context.colors.textStrong),
               Expanded(
-                child: '${widget.targetLiters.toStringAsFixed(1)} L'
+                child: '${widget.targetLiters / 1000} L'
                     .text(20, 24, 600)
                     .c(context.colors.textSub)
                     .copyWith(overflow: TextOverflow.ellipsis, maxLines: 1, textAlign: TextAlign.end),
               ),
             ],
           ),
-          '${widget.currentIntake.toStringAsFixed(1)} L'.text(20, 24, 600).c(context.colors.textStrong),
+          '${widget.currentIntake} L'.text(20, 24, 600).c(context.colors.textStrong),
           Wrap(
             spacing: 16,
             runSpacing: 16,
@@ -80,7 +80,6 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
               final isNextToSelect = index == selectedCount;
               final isTargetBottle = index == targetBottles - 1;
               final shouldShowDone = isTargetBottle && _isTargetReached();
-
               return GestureDetector(
                 onTap: () {
                   if (isNextToSelect) {
@@ -122,7 +121,7 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
           else if (isAfterNext)
             Assets.icons.softBotl.svg(),
           if (showPlusButton) Positioned(top: -3, right: -3, child: Assets.icons.badge.svg()),
-          if (showDone) Positioned(bottom: -1.5, right: 0, child: Assets.icons.circleBadg.svg()),
+          if (showDone) Positioned(bottom: -4, right: -3, child: Assets.icons.circleBadg.svg()),
         ],
       ),
     );

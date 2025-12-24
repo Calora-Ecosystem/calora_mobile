@@ -24,6 +24,7 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   @override
   void init(context, manager) {
     manager.fetchCaloriesAndMeals(DateTime.now());
+    manager.getSummary(DateTime.now());
   }
 
   @override
@@ -31,7 +32,14 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
     super.listener(context, manager, effect);
     effect.when(
       openMealPage: (type, meals, date) =>
-          context.pushRoute(MealsRoute(type: type, meals: meals, dateTime: date, categoryId: 1)),
+          context.pushRoute<bool>(MealsRoute(type: type, dateTime: date, categoryId: 1)).then(
+            (value) {
+              if (value == true) {
+                manager.fetchCaloriesAndMeals(date);
+                manager.getSummary(date);
+              }
+            },
+          ),
     );
   }
 
@@ -63,6 +71,7 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                         child: WeekDaysSelector(
                           onDaySelected: (value) {
                             manager.fetchCaloriesAndMeals(value);
+                            manager.getSummary(value);
                             manager.dateTime(value);
                           },
                         ),

@@ -35,14 +35,22 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     );
   }
 
-  void saveMenuItem(MenuInfo item) {
-    _repo
+  Future<bool> saveMenuItem(MenuInfo item) async {
+    bool success = false;
+    await _repo
         .saveMenuItem(item)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (_) {
+            success = true;
+          },
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            success = false;
+            emit(state.copyWith(isLoading: false));
+          },
         );
+    return success;
   }
 
   void addFavourite(int id) {
@@ -100,7 +108,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         );
   }
 
-  Future<void> addFoodAndMenuWithImage(ScannerFood food, int categoryId, String menu) async {
+  Future<bool> addFoodAndMenuWithImage(ScannerFood food, int categoryId, String menu) async {
     final userId = await profileStore.getUserId() ?? 0;
     final foodRequest = food.toFoodRequest(
       categoryId: categoryId,
@@ -108,10 +116,13 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
       coverUrl: abstractImageUrl,
     );
     final addedFoodId = await addFood(foodRequest);
-    saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+    if (addedFoodId != null) {
+      return saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+    }
+    return false;
   }
 
-  Future<void> addMultipleFoodsAndMenuWithImage(List<ScannerFood> foods, int categoryId, String menu) async {
+  Future<bool> addMultipleFoodsAndMenuWithImage(List<ScannerFood> foods, int categoryId, String menu) async {
     final userId = await profileStore.getUserId() ?? 0;
     final List<FoodRequest> foodRequests = foods
         .map(
@@ -124,11 +135,14 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         .toList();
     for (int i = 0; i < foodRequests.length; i++) {
       var addedFoodId = await addFood(foodRequests[i]);
-      saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+      if (addedFoodId == null) return false;
+      var success = await saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+      if (!success) return false;
     }
+    return true;
   }
 
-  Future<void> addFoodAndMenuWithVoice(int categoryId, String menu) async {
+  Future<bool> addFoodAndMenuWithVoice(int categoryId, String menu) async {
     var userId = await profileStore.getUserId();
     final List<FoodRequest> foodRequests = state.scannedFoodsByVoice
         .map(
@@ -141,12 +155,15 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         .toList();
     for (int i = 0; i < foodRequests.length; i++) {
       var addedFoodId = await addFood(foodRequests[i]);
-      saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+      if (addedFoodId == null) return false;
+      var success = await saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+      if (!success) return false;
     }
+    return true;
   }
 
-  Future<int> addFood(FoodRequest food) async {
-    int foodId = 0;
+  Future<int?> addFood(FoodRequest food) async {
+    int? foodId;
     await _repo
         .addFood(food)
         .handle(
@@ -156,9 +173,11 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
             emit(state.copyWith(addedFoodId: id, isLoading: false));
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            foodId = null;
+          },
         );
-
     return foodId;
   }
 

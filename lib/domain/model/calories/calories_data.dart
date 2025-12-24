@@ -27,3 +27,10 @@ abstract class DailyCalories with _$DailyCalories {
 
   factory DailyCalories.fromJson(Map<String, dynamic> json) => _$DailyCaloriesFromJson(json);
 }
+
+class SummaryResult {
+  final DailyCalories dailyCalories;
+  final List<MealData> meals;
+
+  SummaryResult({required this.dailyCalories, required this.meals});
+}

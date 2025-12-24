@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'food_models.freezed.dart';
@@ -37,4 +38,14 @@ abstract class ScannerFood with _$ScannerFood {
   }) = _ScannerFood;
 
   factory ScannerFood.fromJson(Map<String, dynamic> json) => _$ScannerFoodFromJson(json);
+}
+
+class MealInfo {
+  final String title;
+  final String value;
+  final String max;
+  final Widget image;
+  final VoidCallback? onTap;
+
+  MealInfo({required this.title, required this.value, required this.max, required this.image, required this.onTap});
 }

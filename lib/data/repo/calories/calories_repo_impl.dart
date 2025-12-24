@@ -17,9 +17,8 @@ class CaloriesRepoImpl extends CaloriesRepo {
 
   @override
   Future<SummaryResult> fetchSummary(DateTime date) async {
-    final response = await _api.getDailyCalories(date);
-    final summary = SummaryRequest.fromJson(response.data);
-    final content = summary.content;
+    final response = await _api.getSummary(date);
+    final content = SummaryRequest.fromJson(response.data['content']);
 
     final dailyCalories = DailyCalories(
       plan: content.kcalNorm.value.toDouble(),
@@ -161,11 +160,10 @@ class CaloriesRepoImpl extends CaloriesRepo {
     final response = await _api.getScannerFoodByVoice(filePath);
     return response;
   }
-}
 
-class SummaryResult {
-  final DailyCalories dailyCalories;
-  final List<MealData> meals;
-
-  SummaryResult({required this.dailyCalories, required this.meals});
+  @override
+  Future<SummaryRequest> getSummary(DateTime date) async {
+    final response = await _api.getSummary(date);
+    return SummaryRequest.fromJson(response.data['content']);
+  }
 }

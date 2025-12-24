@@ -126,7 +126,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
             context.router.push(
               MealsRoute(
                 type: type,
-                meals: meals,
+
                 dateTime: dateTime,
                 categoryId: categoryId,
                 key: ValueKey(DateTime.now().millisecondsSinceEpoch),

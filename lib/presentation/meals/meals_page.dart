@@ -21,13 +21,12 @@ import 'management/meals_manager.dart' show MealsManager;
 @RoutePage()
 class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
   final MealType type;
-  final List<MealData> meals;
   final DateTime dateTime;
   final int categoryId;
 
   const MealsPage({
     required this.type,
-    required this.meals,
+
     super.key,
     required this.dateTime,
     required this.categoryId,
@@ -35,8 +34,8 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
 
   @override
   void init(BuildContext context, MealsManager manager) {
-    manager.setMealFromList(type, meals);
     manager.fetchMenuItem(dateTime, type);
+    manager.fetchSummary(dateTime, type);
     super.init(context, manager);
   }
 
@@ -46,12 +45,15 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
     effect.mapOrNull(
       openAddMealPage: (value) {
         context
-            .pushRoute<bool>(AddMealsRoute(type: type, meals: meals, dateTime: dateTime, categoryId: categoryId))
+            .pushRoute<bool>(
+              AddMealsRoute(type: type, meals: manager.state.meals, dateTime: dateTime, categoryId: categoryId),
+            )
             .then((result) {
-          if (result == true && context.mounted) {
-            manager.fetchMenuItem(dateTime, type);
-          }
-        });
+              if (result == true && context.mounted) {
+                manager.fetchMenuItem(dateTime, type);
+                manager.fetchSummary(dateTime, type);
+              }
+            });
       },
     );
   }
@@ -60,7 +62,10 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
   Widget builder(BuildContext context, MealsManager manager, MealsState state) {
     return Scaffold(
       backgroundColor: context.colors.white,
-      appBar: CustomAppBar(title: Strings.addFood),
+      appBar: CustomAppBar(
+        title: Strings.addFood,
+        onBack: () => context.router.pop(true),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -84,7 +89,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                         Row(
                           spacing: 4,
                           children: [
-                            '${state.meal?.mass.asFixedTruncated(1)}'.text(20, 24, 600).c(context.colors.textStrong),
+                            '${state.meal?.mass.asFixedTruncated(0)}'.text(20, 24, 600).c(context.colors.textStrong),
                             'gr'.text(20, 24, 600).c(context.colors.textSub),
                           ],
                         ),
@@ -258,7 +263,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
 class LeftSideClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    Path path = Path();
+    final Path path = Path();
     path.moveTo(5, 0);
     path.lineTo(size.width, 0);
     path.lineTo(size.width, size.height);

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:calora/domain/model/meal/food/food_models.dart' show ScannerFood;
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
@@ -13,7 +11,7 @@ class CaloriesApi {
 
   CaloriesApi(this._dio);
 
-  Future<Response> getDailyCalories(DateTime date) {
+  Future<Response> getSummary(DateTime date) {
     return _dio.get('/food/summary', queryParameters: {'date': date.toIso8601String()});
   }
 
@@ -53,9 +51,7 @@ class CaloriesApi {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(
         filePath,
-        filename: filePath
-            .split('/')
-            .last,
+        filename: filePath.split('/').last,
       ),
     });
 
@@ -70,13 +66,10 @@ class CaloriesApi {
   }
 
   Future<List<ScannerFood>> getScannerFoodByVoice(String audioPath) async {
-    log(audioPath + '==================================================');
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(
         audioPath,
-        filename: audioPath
-            .split('/')
-            .last,
+        filename: audioPath.split('/').last,
         contentType: MediaType('audio', 'mpeg'),
       ),
     });

@@ -11,14 +11,6 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
 
   MealsManager(this.caloriesRepo) : super(const MealsState());
 
-  void setMealFromList(MealType type, List<MealData> meals) {
-    final meal = meals.firstWhere(
-      (m) => m.type == type,
-      orElse: () => MealData(type: type, max: 0, value: 0, mass: 0, carbohydrates: 0, proteins: 0, oils: 0),
-    );
-    emit(state.copyWith(meal: meal));
-  }
-
   void fetchMenuItem(DateTime date, MealType type) {
     caloriesRepo
         .fetchMenuItem(date, type.name)
@@ -26,6 +18,32 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (value) {
             emit(state.copyWith(menuItems: value, isLoading: false));
+          },
+          onDone: () => emit(state.copyWith(isLoading: false)),
+          onError: (error) => emit(state.copyWith(isLoading: false)),
+        );
+  }
+
+  MealData? getMealByType(MealType type, List<MealData> meals) {
+    for (final meal in meals) {
+      if (meal.type == type) return meal;
+    }
+    return null;
+  }
+
+  void fetchSummary(DateTime date, MealType type) {
+    caloriesRepo
+        .fetchSummary(date)
+        .handle(
+          onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (result) {
+            var meal = getMealByType(type, result.meals);
+            emit(
+              state.copyWith(
+                meal: meal,
+                isLoading: false,
+              ),
+            );
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),

@@ -1,18 +1,9 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
-
-class MealInfo {
-  final String title;
-  final String value;
-  final String max;
-  final Widget image;
-  final VoidCallback? onTap;
-
-  MealInfo({required this.title, required this.value, required this.max, required this.image, required this.onTap});
-}
 
 class MealCardsGrid extends StatelessWidget {
   final List<MealInfo> meals;
