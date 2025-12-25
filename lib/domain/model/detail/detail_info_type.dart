@@ -7,7 +7,7 @@ enum DetailInfoType {
   gender,
   goal,
   activityLevel,
-  metrics,
+
   email,
   targetWeight,
   bmi,

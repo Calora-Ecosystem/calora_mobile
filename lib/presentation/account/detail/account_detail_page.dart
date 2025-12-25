@@ -88,9 +88,6 @@ class AccountDetailPage
       case DetailInfoType.gender:
         _openSingleSelectionGender(info, context, manager);
         break;
-      case DetailInfoType.metrics:
-        _openSingleSelectionMetrics(info, context, manager);
-        break;
       case DetailInfoType.birthDay:
         _openSelectCalendar(info, context, manager);
         break;
@@ -138,29 +135,6 @@ class AccountDetailPage
           selection: Selection(type: SelectionType.goal),
           onSave: (data) {
             // manager.updateProfileDetail(info, data.name);
-            _dismiss(context);
-          },
-        );
-      },
-    );
-  }
-
-  void _openSingleSelectionMetrics(
-    DetailInfo info,
-    BuildContext context,
-    AccountDetailManager manager,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: context.colors.white,
-      builder: (context) {
-        return SingleSelectionPage(
-          title: Strings.chooseMetrics,
-          selection: Selection(type: SelectionType.metrics),
-          onSave: (data) {
-            profileStore.updateProfile(metrics: data.name);
-            manager.updateProfileDetail(info, data.name);
             _dismiss(context);
           },
         );
