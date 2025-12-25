@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
@@ -127,16 +129,12 @@ class _DishInfoPageState extends State<DishInfoPage> {
                     child: Button(
                       onPressed: () {
                         final text = _amountController.text.trim();
-                        final amount = double.tryParse(text);
-                        if (text.isEmpty) {
-                          CustomSnackBar.show(context, Strings.enterTheAmountOfFoodGr);
-                          return;
+                        double? amount = double.tryParse(text);
+
+                        if (text.isEmpty || amount == null || amount <= 0) {
+                          amount = widget.foodItem.weight;
                         }
-                        if (amount == null || amount <= 0) {
-                          CustomSnackBar.show(context, Strings.enterTheAmountOfFoodGr);
-                          return;
-                        }
-                        openConfirmPage(context, amount);
+                        openConfirmPage(context, amount!);
                       },
                       text: Strings.save,
                     ),
