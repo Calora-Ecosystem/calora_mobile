@@ -11,7 +11,7 @@ class DailyFeedRateWidget extends StatelessWidget {
   final String normCalories;
   final String remainedCalories;
   final double progressPercent;
-  final List<NutrientData> nutrients;
+  final List<NutrientInfo> nutrients;
   final VoidCallback onAddFoodTap;
 
   const DailyFeedRateWidget({

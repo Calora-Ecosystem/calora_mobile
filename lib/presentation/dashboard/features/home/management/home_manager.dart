@@ -1,6 +1,10 @@
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
+import 'package:calora/domain/model/summary/summary_request.dart';
+import 'package:calora/domain/repo/home/home_repo.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
@@ -12,8 +16,9 @@ import 'package:permission_handler/permission_handler.dart';
 class HomeManager extends Manager<HomeState, HomeEffect> {
   final ProfileRepo _profileRepo;
   final StepRepo _stepRepo;
+  final HomeRepo _homeRepo;
 
-  HomeManager(this._profileRepo, this._stepRepo) : super(HomeState());
+  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo) : super(HomeState());
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
     onStart: () => emit(state.copyWith(isLoading: true)),
@@ -41,6 +46,29 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     emit(state.copyWith(waterIntake: liters));
   }
 
+  void postWater() {
+    _homeRepo.postWater(
+      DailiesRequest(
+        metric: 'Water',
+        value: state.waterIntake,
+        date: DateTime.now().toIso8601String(),
+      ),
+    );
+  }
+
+  void getSummary() {
+    _homeRepo
+        .getSummary(state.day ?? DateTime.now())
+        .handle(
+          onStart: () => emit(state.copyWith(isSummaryLoading: true)),
+          onData: (data) {
+            emit(state.copyWith(summary: data, isSummaryLoading: false));
+            updateNutrientsPercent(data);
+          },
+          onError: (error) => emit(state.copyWith(isSummaryLoading: false)),
+        );
+  }
+
   void getStepNorm() {
     _stepRepo.getNorms().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
@@ -66,11 +94,6 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
         emit(
           state.copyWith(
-            nutrients: [
-              NutrientData(name: 'Protein', value: proteinValue, percent: 0.5),
-              NutrientData(name: 'Fat', value: fatValue, percent: 0.3),
-              NutrientData(name: 'Carb', value: carbsValue, percent: 0.2),
-            ],
             norms: data,
             isLoading: false,
             targetSteps: stepValue.toInt(),
@@ -80,6 +103,49 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         );
       },
       onError: (error) => emit(state.copyWith(isLoading: false)),
+    );
+  }
+
+  void updateNutrientsPercent(SummaryRequest summary) {
+    final proteinNorm = state.norms
+        .firstWhere(
+          (e) => e.metric == "Protein",
+          orElse: () => NormsRequest(metric: "Protein", value: 1),
+        )
+        .value;
+    final fatNorm = state.norms
+        .firstWhere(
+          (e) => e.metric == "Fat",
+          orElse: () => NormsRequest(metric: "Fat", value: 1),
+        )
+        .value;
+    final carbNorm = state.norms
+        .firstWhere(
+          (e) => e.metric == "Carb",
+          orElse: () => NormsRequest(metric: "Carb", value: 1),
+        )
+        .value;
+
+    emit(
+      state.copyWith(
+        nutrients: [
+          NutrientInfo(
+            name: Strings.proteins,
+            value: summary.sum.Protein,
+            percent: proteinNorm > 0 ? (summary.sum.Protein / proteinNorm).clamp(0.0, 1.0) : 0,
+          ),
+          NutrientInfo(
+            name: Strings.oils,
+            value: summary.sum.Fat,
+            percent: fatNorm > 0 ? (summary.sum.Fat / fatNorm).clamp(0.0, 1.0) : 0,
+          ),
+          NutrientInfo(
+            name: Strings.carbohydrates,
+            value: summary.sum.Carb,
+            percent: carbNorm > 0 ? (summary.sum.Carb / carbNorm).clamp(0.0, 1.0) : 0,
+          ),
+        ],
+      ),
     );
   }
 }

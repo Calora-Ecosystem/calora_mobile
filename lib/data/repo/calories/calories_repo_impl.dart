@@ -22,8 +22,8 @@ class CaloriesRepoImpl extends CaloriesRepo {
 
     final dailyCalories = DailyCalories(
       plan: content.kcalNorm.value.toDouble(),
-      consumed: content.sumKcal.toDouble(),
-      leftover: (content.kcalNorm.value - content.sumKcal).toDouble(),
+      consumed: content.sum.Kcal,
+      leftover: (content.kcalNorm.value - content.sum.Kcal).toDouble(),
     );
 
     final meals = MealType.values.map((mealType) {
@@ -35,7 +35,7 @@ class CaloriesRepoImpl extends CaloriesRepo {
         max: nutrientNorm?.kcal.toDouble() ?? 0,
         value: nutrient?.kcal.toDouble() ?? 0,
         type: mealType,
-        mass: nutrientNorm?.weight.toDouble() ?? 0,
+        mass: nutrient?.weight.toDouble() ?? 0,
         carbohydrates: nutrient?.carb.toDouble() ?? 0,
         proteins: nutrient?.protein.toDouble() ?? 0,
         oils: nutrient?.fat.toDouble() ?? 0,

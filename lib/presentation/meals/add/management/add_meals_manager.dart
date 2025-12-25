@@ -17,28 +17,6 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
 
   AddMealsManager(this._repo) : super(const AddMealsState());
 
-  Timer? _debounce;
-
-  void onSearchFocusChanged(bool isFocused) {
-    emit(state.copyWith(isSearching: isFocused));
-    if (!isFocused) {
-      // Clear search results when losing focus
-      emit(state.copyWith(searchFoods: []));
-    }
-  }
-
-  void onSearchQueryChanged(String query) {
-    if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (query.length >= 3) {
-        fetchSearchFood(query);
-      } else {
-        // Clear results if query is too short
-        emit(state.copyWith(searchFoods: [], isSearchLoading: false));
-      }
-    });
-  }
-
   void fetchFoodCategory() {
     _repo.fetchFoodCategory().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
@@ -133,7 +111,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         .fetchFoods(true)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (foods) => emit(state.copyWith(latestFoods: foods, isLoading: false)), // FoodModel
+          onData: (foods) => emit(state.copyWith(latestFoods: foods, isLoading: false)),
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
@@ -151,28 +129,6 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
       return saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
     }
     return false;
-  }
-
-  Future<bool> addMultipleFoodsAndMenuWithImage(List<ScannerFood> foods, int categoryId, String menu) async {
-    final userId = await profileStore.getUserId() ?? 0;
-    final List<FoodRequest> foodRequests = foods
-        .map(
-          (e) => e.toFoodRequest(
-            categoryId: categoryId,
-            userId: userId,
-            coverUrl: abstractImageUrl,
-          ),
-        )
-        .toList();
-    for (int i = 0; i < foodRequests.length; i++) {
-      var addedFoodId = await addFood(foodRequests[i]);
-      if (addedFoodId == null) return false;
-      var success = await saveMenuItem(
-        MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
-      );
-      if (!success) return false;
-    }
-    return true;
   }
 
   Future<bool> addFoodAndMenuWithVoice(int categoryId, String menu) async {
@@ -220,11 +176,42 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     _repo
         .fetchSearchFood(name)
         .handle(
-          onStart: () => emit(state.copyWith(isSearchLoading: true)),
-          onData: (foods) => emit(state.copyWith(searchFoods: foods, isSearchLoading: false)),
-          onDone: () => emit(state.copyWith(isSearchLoading: false)),
-          onError: (error) => emit(state.copyWith(isSearchLoading: false)),
+          onStart: () => emit(state.copyWith(isSearch: true)),
+          onData: (foods) => emit(state.copyWith(searchFoods: foods, isSearch: false)),
+          onDone: () => emit(state.copyWith(isSearch: false)),
+          onError: (error) => emit(state.copyWith(isSearch: false)),
         );
+  }
+
+  void onSearchChanged(String text) {
+    final query = text.trim();
+
+    if (query.isEmpty) {
+      // Text bo'sh bo'lsa, search mode'dan chiqish
+      emit(
+        state.copyWith(
+          isSearchMode: false,
+          isSearch: false,
+          searchFoods: [],
+        ),
+      );
+      return;
+    }
+
+    if (query.length >= 3) {
+      // Search mode'ga kirish va qidiruv boshlash
+      emit(state.copyWith(isSearchMode: true));
+      fetchSearchFood(query);
+    } else {
+      // 3 ta harfdan kam bo'lsa, faqat search mode'ga kirish
+      emit(
+        state.copyWith(
+          isSearchMode: true,
+          isSearch: false,
+          searchFoods: [],
+        ),
+      );
+    }
   }
 
   void openDishesPage(MealTypeData meal) {

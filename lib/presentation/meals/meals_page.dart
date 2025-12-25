@@ -3,20 +3,20 @@ import 'package:calora/common/extensions/foods_extension.dart';
 import 'package:calora/common/extensions/meal_type_text_extension.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
+import 'package:calora/widgets/meals/empty_food_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
-import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/widgets/button/button.dart';
-import 'package:calora/presentation/meals/management/meals_management.dart';
-import 'package:calora/presentation/meals/management/meals_manager.dart' show MealsManager;
+import '../../common/gen/strings.dart';
+import '../../common/widgets/button/button.dart';
+import 'management/meals_management.dart';
+import 'management/meals_manager.dart' show MealsManager;
 
 @RoutePage()
 class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
@@ -189,24 +189,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                             .toList(),
                       ],
                     )
-                  : Column(
-                      spacing: 8,
-                      children: [
-                        SizedBox(
-                          height: 240,
-                          width: 240,
-                          child: ClipPath(
-                            clipper: LeftSideClipper(),
-                            child: Assets.images.empty.image(fit: BoxFit.fill),
-                          ),
-                        ),
-                        Strings.mealsAreNotAvailable.text(16, 20, 500).c(context.colors.textStrong),
-                        Strings.addYourLastMealsHere
-                            .text(14, 18, 400)
-                            .c(context.colors.textSub)
-                            .copyWith(textAlign: TextAlign.center),
-                      ],
-                    ),
+                  : EmptyFoodScreen(message: Strings.addYourLastMealsHere),
             ],
           ),
         ),
@@ -245,10 +228,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
               spacing: 4,
               children: [
                 Expanded(
-                  child: value.asFixedTruncated(1)
-                      .text(20, 24, 600)
-                      .c(context.colors.textStrong)
-                      .auto(minSize: 16),
+                  child: value.asFixedTruncated(1).text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
                 ),
                 unit.text(20, 24, 600).c(context.colors.textSub),
               ],
@@ -258,20 +238,4 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
       ),
     );
   }
-}
-
-class LeftSideClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final Path path = Path();
-    path.moveTo(5, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(5, size.height);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

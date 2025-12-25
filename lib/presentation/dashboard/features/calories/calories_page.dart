@@ -88,6 +88,7 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                     accordingToPlan: state.plan.asFixedTruncated(0),
                                     consumed: state.consumed.asFixedTruncated(0),
                                     leftover: state.leftover.asFixedTruncated(0),
+                                    loading: state.isLoading,
                                   ),
                                   MealCardsGrid(meals: manager.meals),
                                   GestureDetector(

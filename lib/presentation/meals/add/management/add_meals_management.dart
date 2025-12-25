@@ -16,10 +16,10 @@ abstract class AddMealsState with _$AddMealsState {
     @Default([]) List<ScannerFood> scannedFoodsByVoice,
     @Default([]) List<FoodModel> userFoods,
     int? addedFoodId,
-    @Default(false) bool isSearching,
     @Default(false) bool isLoading,
     @Default([]) List<FoodModel> searchFoods,
-    @Default(false) bool isSearchLoading,
+    @Default(false) bool isSearch,
+    @Default(false) bool isSearchMode,
   }) = _AddMealsState;
 }
 

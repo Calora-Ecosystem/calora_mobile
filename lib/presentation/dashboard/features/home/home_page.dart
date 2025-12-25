@@ -34,6 +34,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     manager.getUserInfo();
     manager.getStepNorm();
     manager.requestPedometerPermissions();
+    manager.getSummary();
 
     _initializePedometerService(manager);
   }
@@ -93,11 +94,16 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   onTap: () => openCalendar(context, manager),
                                   child: DailyPlanWidget(
                                     loading: state.isLoading,
-                                    onBackward: () => manager.updateDay(
-                                      (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
-                                    ),
-                                    onForward: () =>
-                                        manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1))),
+                                    onBackward: () {
+                                      manager.updateDay(
+                                        (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
+                                      );
+                                      manager.getSummary();
+                                    },
+                                    onForward: () {
+                                      manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
+                                      manager.getSummary();
+                                    },
                                     date: state.day ?? DateTime.now(),
                                     calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
                                     water: '${state.targetLiters} litr',
@@ -137,10 +143,13 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 ),
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
-                                  normCalories: state.targetKcal.asFixedTruncated(0).toString(),
+                                  normCalories: (state.summary?.kcalNorm.value ?? 0).asFixedTruncated(0).toString(),
                                   nutrients: state.nutrients,
-                                  progressPercent: state.remainedCalories / state.targetKcal,
-                                  remainedCalories: state.remainedCalories.asFixedTruncated(0).toString(),
+                                  progressPercent:
+                                      (state.summary?.sum.Kcal ?? 0) / (state.summary?.kcalNorm.value ?? 0),
+                                  remainedCalories:
+                                      ((state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0))
+                                          .toString(),
                                 ),
                                 StepCardWidget(
                                   currentSteps: state.currentSteps,
@@ -150,7 +159,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   caloriesBurned: state.caloriesBurned,
                                 ),
                                 WaterIntakeSelector(
-                                  onCountChanged: (count) => manager.updateWaterIntake(count * 0.25),
+                                  onCountChanged: (count) {
+                                    manager.updateWaterIntake(count * 0.25);
+                                    manager.postWater();
+                                  },
                                   bottleCapacity: state.bottleCapacity,
                                   targetLiters: state.targetLiters,
                                   currentIntake: state.waterIntake,
@@ -174,7 +186,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void openCalendar(BuildContext context, HomeManager manager) {
     context.showAppBottomSheet(
       child: CalendarSelectorWidget(
-        onDaySelected: (date) => manager.updateDay(date),
+        onDaySelected: (date) {
+          manager.updateDay(date);
+          manager.getSummary();
+        },
       ),
     );
   }

@@ -9,7 +9,7 @@ abstract class SummaryRequest with _$SummaryRequest {
     required KcalNorm kcalNorm,
     required Map<String, NutrientData> nutrientsNorm,
     required Map<String, NutrientData> nutrients,
-    required double sumKcal,
+    required SumData sum,
     required DateTime date,
   }) = _SummaryRequest;
 
@@ -18,7 +18,11 @@ abstract class SummaryRequest with _$SummaryRequest {
 
 @freezed
 abstract class KcalNorm with _$KcalNorm {
-  const factory KcalNorm({required int userId, required String metric, required double value}) = _KcalNorm;
+  const factory KcalNorm({
+    required int userId,
+    required String metric,
+    required double value,
+  }) = _KcalNorm;
 
   factory KcalNorm.fromJson(Map<String, dynamic> json) => _$KcalNormFromJson(json);
 }
@@ -35,4 +39,16 @@ abstract class NutrientData with _$NutrientData {
   }) = _NutrientData;
 
   factory NutrientData.fromJson(Map<String, dynamic> json) => _$NutrientDataFromJson(json);
+}
+
+@freezed
+abstract class SumData with _$SumData {
+  const factory SumData({
+    required double Kcal,
+    required double Carb,
+    required double Protein,
+    required double Fat,
+  }) = _SumData;
+
+  factory SumData.fromJson(Map<String, dynamic> json) => _$SumDataFromJson(json);
 }
