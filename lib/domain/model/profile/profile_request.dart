@@ -9,7 +9,7 @@ abstract class ProfileRequest with _$ProfileRequest {
     @JsonKey(name: 'entryWeight') double? entryWeight,
     @JsonKey(name: 'name') String? name,
     @JsonKey(name: 'birthDate') String? birthDay,
-    @JsonKey(name: 'goal') String? goal,
+    @JsonKey(name: 'purpose') String? goal,
     @JsonKey(name: 'activityLevel') dynamic activityLevel,
     @JsonKey(name: 'metrics') String? metrics,
     @JsonKey(name: 'email') String? email,
