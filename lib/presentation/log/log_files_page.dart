@@ -39,7 +39,6 @@ class LogFilesPage extends StatelessWidget {
                 final logFiles = snapshot.data!;
                 return SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  scrollDirection: Axis.vertical,
                   child: ListView.separated(
                     shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),
@@ -82,7 +81,7 @@ class LogFilesPage extends StatelessWidget {
   }
 
   void _shareFile(File file) async {
-    await Share.shareXFiles([XFile(file.path)], text: "Log file");
+    await Share.shareXFiles([XFile(file.path)], text: 'Log file');
   }
 
   Future<List<File>> getLogFiles() async {

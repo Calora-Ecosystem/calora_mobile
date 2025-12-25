@@ -11,7 +11,7 @@ import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'questions_management.dart';
+import 'package:calora/presentation/questions/questions/management/questions_management.dart';
 
 @injectable
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {

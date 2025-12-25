@@ -1,7 +1,7 @@
 import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../../domain/model/course/course_request.dart';
+import 'package:calora/domain/model/course/course_request.dart';
 
 part 'course_management.freezed.dart';
 

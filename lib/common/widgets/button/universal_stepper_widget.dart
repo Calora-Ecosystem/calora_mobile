@@ -50,7 +50,7 @@ class _UniversalStepperWidgetState extends State<UniversalStepperWidget> {
 
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    return "${twoDigits(d.inMinutes)}:${twoDigits(d.inSeconds.remainder(60))}";
+    return '${twoDigits(d.inMinutes)}:${twoDigits(d.inSeconds.remainder(60))}';
   }
 
   void _increment() {
@@ -83,7 +83,7 @@ class _UniversalStepperWidgetState extends State<UniversalStepperWidget> {
   Widget build(BuildContext context) {
     final textWidget = widget.type == StepperType.int
         ? Text(
-            "$value/${widget.totalInt}",
+            '$value/${widget.totalInt}',
             style:
                 widget.styleInt ??
                 const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, height: 0.8),

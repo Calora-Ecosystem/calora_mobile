@@ -3,11 +3,13 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/slimming_management.dart';
-import 'management/slimming_manager.dart';
+import 'package:calora/presentation/slimming/management/slimming_management.dart';
+import 'package:calora/presentation/slimming/management/slimming_manager.dart';
 
 @RoutePage()
 class SlimmingPage extends Managed<SlimmingManager, SlimmingState, SlimmingEffect> {
+  const SlimmingPage({super.key});
+
   @override
   void init(BuildContext context, SlimmingManager manager) {
     manager.getVideoCourses();

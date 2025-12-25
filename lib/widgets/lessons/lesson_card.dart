@@ -26,14 +26,14 @@ class LessonCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ("${lessonInfo.id}-${Strings.day.toLowerCase()}")
+                ('${lessonInfo.id}-${Strings.day.toLowerCase()}')
                     .text(16, 20, 500)
                     .c(context.colors.textStrong),
                 const SizedBox(height: 8),
                 if (lessonInfo.isDayOff)
                   Strings.youCanRelaxTuday.text(14, 18, 500).c(context.colors.textSub)
                 else
-                  ("${lessonInfo.duration} minut • ${lessonInfo.calories} kkal")
+                  ('${lessonInfo.duration} minut • ${lessonInfo.calories} kkal')
                       .text(14, 18, 500)
                       .c(context.colors.textSub),
               ],
@@ -62,7 +62,7 @@ class LessonCard extends StatelessWidget {
                     progressColor: context.colors.accentSub,
                   ),
                   const SizedBox(width: 8),
-                  ("${(lessonInfo.level * 100).toInt()}%")
+                  ('${(lessonInfo.level * 100).toInt()}%')
                       .text(14, 18, 500)
                       .c(context.colors.textSub),
                 ],
@@ -84,7 +84,7 @@ class LessonCard extends StatelessWidget {
                 children: [
                   taskInfo.title.text(16, 20, 500).c(context.colors.textStrong),
                   const SizedBox(height: 8),
-                  ("${taskInfo.count}").text(14, 18, 500).c(context.colors.textSub),
+                  (taskInfo.count).text(14, 18, 500).c(context.colors.textSub),
                 ],
               ),
             ),

@@ -23,19 +23,18 @@ class StepRepoImpl extends StepRepo {
         : 30;
     final skip = offset * take;
 
-    Map<String, DateTime> datePeriod = getDatePeriods(period, offset);
-    DateTime from = datePeriod["from"]!;
-    DateTime to = datePeriod["to"]!;
+    final Map<String, DateTime> datePeriod = getDatePeriods(period, offset);
+    final DateTime from = datePeriod['from']!;
+    final DateTime to = datePeriod['to']!;
 
-    log("GetSteps - period: $period, offset: $offset");
-    log("From: ${from.toIso8601String()}, To: ${to.toIso8601String()}");
+    log('GetSteps - period: $period, offset: $offset');
+    log('From: ${from.toIso8601String()}, To: ${to.toIso8601String()}');
 
     final response = await _stepsApi.getSteps(
-      metrics: "Step",
+      metrics: 'Step',
       skip: skip,
       take: take,
-      sortDirection: "Descending",
-      sortPropName: isSortDate ? "date" : "",
+      sortPropName: isSortDate ? 'date' : '',
       from: from,
       to: to,
     );
@@ -51,11 +50,11 @@ class StepRepoImpl extends StepRepo {
 
   @override
   Future<List<UserStatRequest>> getStats(int period, {int offset = 0}) async {
-    log("ResultRepoImp: $period, $offset");
+    log('ResultRepoImp: $period, $offset');
 
     final datePeriod = getDatePeriods(period, offset);
 
-    final response = await _stepsApi.getStats(datePeriod["from"]!, datePeriod["to"]!);
+    final response = await _stepsApi.getStats(datePeriod['from']!, datePeriod['to']!);
     return response;
   }
 
@@ -96,14 +95,14 @@ class StepRepoImpl extends StepRepo {
       from = weekStart.add(Duration(days: 7 * offset));
       to = from.add(const Duration(days: 7)).subtract(const Duration(seconds: 1));
     } else {
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      from = DateTime(startOfMonth.year, startOfMonth.month + offset, 1);
-      to = DateTime(from.year, from.month + 1, 1).subtract(const Duration(seconds: 1));
+      final startOfMonth = DateTime(now.year, now.month);
+      from = DateTime(startOfMonth.year, startOfMonth.month + offset);
+      to = DateTime(from.year, from.month + 1).subtract(const Duration(seconds: 1));
     }
 
-    log("Period: $period, Offset: $offset");
-    log("From: ${from.toIso8601String()}, To: ${to.toIso8601String()}");
+    log('Period: $period, Offset: $offset');
+    log('From: ${from.toIso8601String()}, To: ${to.toIso8601String()}');
 
-    return {"from": from, "to": to};
+    return {'from': from, 'to': to};
   }
 }

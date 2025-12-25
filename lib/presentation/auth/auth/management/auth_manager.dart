@@ -7,7 +7,7 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:url_launcher/url_launcher.dart' show launchUrl, LaunchMode;
 
-import 'auth_management.dart';
+import 'package:calora/presentation/auth/auth/management/auth_management.dart';
 
 @injectable
 class AuthManager extends Manager<AuthState, AuthEffect> {

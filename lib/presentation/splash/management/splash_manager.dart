@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/token/token.dart';
@@ -11,8 +10,8 @@ import 'package:management/management.dart';
 class SplashManager extends Manager<SplashState, SplashEffect> {
   final AuthStore _authStore;
   final CommonStore _commonStore;
-
-  SplashManager(this._authStore, this._commonStore) : super(const SplashState()) {
+  final ProfileStore _profileStore;
+  SplashManager(this._authStore, this._commonStore, this._profileStore) : super(const SplashState()) {
     checkAuth();
   }
 
@@ -24,10 +23,16 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
       Future.delayed(const Duration(seconds: 2)),
     ]);
 
-    final Token? token = results[0] as Token?;
+    Token? token = results[0] as Token?;
     final bool isLanguageSelected = results[1] as bool;
     final bool isOnboardingCompleted = results[2] as bool;
-    log("refresh token:======${token}");
+
+    if (token?.refreshTokenExpireAt != null && token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
+      await _authStore.token.clear();
+      await _profileStore.clear();
+      token = null;
+    }
+
     if (token != null && token.accessToken != null) {
       publish(const SplashEffect.dashboard());
     } else {

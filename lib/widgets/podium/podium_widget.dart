@@ -10,9 +10,9 @@ class PodiumWidget extends StatelessWidget {
     this.height = 70,
     this.width = 100,
     this.horizontalSpacing = 3,
-    this.firstRankingText = "1",
-    this.secondRankingText = "2",
-    this.thirdRankingText = "3",
+    this.firstRankingText = '1',
+    this.secondRankingText = '2',
+    this.thirdRankingText = '3',
   });
 
   ///Defines the widget for the first position podium in the center.

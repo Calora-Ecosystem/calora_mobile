@@ -51,7 +51,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
         child: Column(
           spacing: 8,
@@ -154,7 +154,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
       child: Container(
         padding: padding,
         decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: borderColor, width: 1)),
+          border: Border(left: BorderSide(color: borderColor)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

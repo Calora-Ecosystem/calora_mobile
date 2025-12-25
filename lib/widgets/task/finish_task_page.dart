@@ -8,7 +8,7 @@ import 'package:calora/presentation/tasks/management/tasks_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'mood_selector_widget.dart';
+import 'package:calora/widgets/task/mood_selector_widget.dart';
 
 @RoutePage()
 class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
@@ -42,7 +42,6 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(height: 200, width: 200, child: Assets.images.finishIcon.image()),
                   SizedBox(height: 16),

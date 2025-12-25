@@ -45,7 +45,7 @@ class AboutPage extends StatelessWidget {
                     }
                     final version = snapshot.data!.version;
                     final buildNumber = snapshot.data!.buildNumber;
-                    return "$version+$buildNumber".text(14, 16, 400).c(context.colors.textStrong);
+                    return '$version+$buildNumber'.text(14, 16, 400).c(context.colors.textStrong);
                   },
                 ),
               ],

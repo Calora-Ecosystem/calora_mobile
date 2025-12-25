@@ -25,7 +25,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
 
   Future<void> getSteps() async {
     await _stepRepo
-        .getSteps(0, offset: 0, isSortDate: true)
+        .getSteps(0)
         .handle(
           onStart: () => {},
           onData: (data) => {
@@ -50,16 +50,15 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
 
   void _getRangeSteps(DateTime fromDate, DateTime toDate) async {
     final toDate = DateTime.now();
-    Map<DateTime, int> result = await _pedometerService.getDailyStepsForRange(
+    final Map<DateTime, int> result = await _pedometerService.getDailyStepsForRange(
       fromDate,
       toDate,
     );
-    List<StepsWithMetricsRequest> steps = [];
+    final List<StepsWithMetricsRequest> steps = [];
     for (var entry in result.entries) {
       steps.add(
         StepsWithMetricsRequest(
           date: entry.key,
-          metric: "Step",
           value: entry.value.toDouble(),
         ),
       );
@@ -82,9 +81,9 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   }
 
   void sendDailyData() async {
-    int todayCounts = await _pedometerService.getTodaySteps();
+    final int todayCounts = await _pedometerService.getTodaySteps();
     await _stepRepo
-        .sendDailyData(metric: "Step", value: todayCounts)
+        .sendDailyData(metric: 'Step', value: todayCounts)
         .handle(
           onStart: () => emit(state),
           onData: (_) => emit(state),

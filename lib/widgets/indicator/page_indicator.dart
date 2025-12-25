@@ -6,17 +6,17 @@ class PageIndicator extends StatelessWidget {
   final int pageCount;
 
   const PageIndicator({
-    Key? key,
+    super.key,
     required this.currentPage,
     required this.pageCount,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(pageCount, (index) {
-        bool isActive = index == currentPage;
+        final bool isActive = index == currentPage;
         return AnimatedContainer(
           duration: Duration(milliseconds: 300),
           margin: EdgeInsets.symmetric(horizontal: 4),

@@ -28,8 +28,8 @@ import 'package:calora/widgets/meals/meals_type_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'management/add_meals_management.dart';
-import 'management/add_meals_manager.dart';
+import 'package:calora/presentation/meals/add/management/add_meals_management.dart';
+import 'package:calora/presentation/meals/add/management/add_meals_manager.dart';
 
 @RoutePage()
 class AddMealsPage extends StatefulWidget {
@@ -287,7 +287,7 @@ class _AddMealsPageState extends State<AddMealsPage> {
   }
 
   void openCreatorWithImage(BuildContext context, AddMealsManager manager, ScannerFood food) {
-    var metrics = food.metrics;
+    final metrics = food.metrics;
     context.showAppBottomSheet(
       child: FoodCreatorWithImage(
         name: food.name,

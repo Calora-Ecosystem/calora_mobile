@@ -17,7 +17,6 @@ class LeaveQuestionsPage extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Strings.whyDidYouFinishTheExercises.text(20, 24, 700).c(context.colors.textStrong),
             const SizedBox(height: 16),

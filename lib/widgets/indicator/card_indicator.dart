@@ -23,7 +23,7 @@ class CardIndicator extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Strings.done.text(10, 12, 500),
-              "${(percent * 100).toInt()}%".text(10, 12, 500),
+              '${(percent * 100).toInt()}%'.text(10, 12, 500),
             ],
           ),
           const SizedBox(height: 8),
@@ -35,7 +35,6 @@ class CardIndicator extends StatelessWidget {
             progressColor: context.colors.informationBase,
             backgroundColor: context.colors.informationLighter,
             animation: true,
-            animationDuration: 500,
           ),
         ],
       ),

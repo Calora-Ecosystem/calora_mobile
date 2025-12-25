@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 class ColorIndicatorBar extends StatelessWidget {
   final double bmi;
 
-  const ColorIndicatorBar({Key? key, required this.bmi}) : super(key: key);
+  const ColorIndicatorBar({super.key, required this.bmi});
 
   @override
   Widget build(BuildContext context) {
-    List<Color> colors = [
+    final List<Color> colors = [
       context.colors.blue,
       context.colors.green,
       context.colors.yellow,
@@ -25,7 +25,7 @@ class ColorIndicatorBar extends StatelessWidget {
             Align(
               alignment: Alignment((_calculateIndicatorPosition(bmi) * 2) - 1, 0),
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 0),
+                padding: const EdgeInsets.only(),
                 child: CustomPaint(
                   painter: TrianglePainter(color: context.colors.iconSub, pointingUp: false),
                   child: SizedBox(width: 14, height: 7),

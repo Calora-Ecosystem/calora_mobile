@@ -9,7 +9,7 @@ class LanguageItemBuilder extends StatelessWidget {
   final bool isChecked;
   final Function(Language) onTap;
 
-  LanguageItemBuilder({
+  LanguageItemBuilder({super.key, 
     required this.language,
     required this.isChecked,
     required this.onTap,
@@ -30,7 +30,6 @@ class LanguageItemBuilder extends StatelessWidget {
             color: context.colors.backgroundBase,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              width: 1,
               color: isChecked
                   ? context.colors.accentSub
                   : context.colors.strokeSoft,

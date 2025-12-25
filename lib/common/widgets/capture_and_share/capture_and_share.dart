@@ -9,12 +9,12 @@ import 'package:share_plus/share_plus.dart';
 
 Future<void> captureAndShare(GlobalKey globalKey) async {
   try {
-    RenderRepaintBoundary boundary =
+    final RenderRepaintBoundary boundary =
         globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
 
-    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List pngBytes = byteData!.buffer.asUint8List();
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
     final codec = await ui.instantiateImageCodec(pngBytes);
     final frame = await codec.getNextFrame();
@@ -41,6 +41,6 @@ Future<void> captureAndShare(GlobalKey globalKey) async {
 
     await Share.shareXFiles([XFile(imagePath.path)], text: 'Check out this widget!');
   } catch (e) {
-    debugPrint("Screenshot error: $e");
+    debugPrint('Screenshot error: $e');
   }
 }

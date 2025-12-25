@@ -59,7 +59,7 @@ class HealthDataService {
       // For Android, check Health Connect availability first
       if (Platform.isAndroid) {
         // Check if Health Connect is installed
-        bool healthConnectAvailable = await _health.isDataTypeAvailable(
+        final bool healthConnectAvailable = await _health.isDataTypeAvailable(
           HealthDataType.STEPS,
         );
         if (kDebugMode) {
@@ -75,7 +75,7 @@ class HealthDataService {
       }
 
       // Request authorization with explicit permissions
-      bool granted = await _health.requestAuthorization(
+      final bool granted = await _health.requestAuthorization(
         _healthDataTypes,
         permissions: _permissions,
       );
@@ -102,9 +102,9 @@ class HealthDataService {
       return granted;
     } catch (e) {
       if (kDebugMode) {
-        print("Health permission request error: $e");
+        print('Health permission request error: $e');
       }
-      onError("Health permission request error: $e");
+      onError('Health permission request error: $e');
       return false;
     }
   }
@@ -119,7 +119,7 @@ class HealthDataService {
       // Check if health data is supported on this platform
       if (Platform.isAndroid) {
         // For Android, verify Health Connect is available
-        bool available = await _health.isDataTypeAvailable(
+        final bool available = await _health.isDataTypeAvailable(
           HealthDataType.STEPS,
         );
         if (!available) {
@@ -178,12 +178,12 @@ class HealthDataService {
       try {
         // Check data type availability
         for (var type in _healthDataTypes) {
-          bool available = await _health.isDataTypeAvailable(type);
+          final bool available = await _health.isDataTypeAvailable(type);
           print('$type available: $available');
         }
 
         // Check permissions
-        bool hasPermissions =
+        final bool hasPermissions =
             await _health.hasPermissions(
               _healthDataTypes,
               permissions: _permissions,
@@ -192,7 +192,7 @@ class HealthDataService {
         print('Has permissions: $hasPermissions');
 
         if (Platform.isAndroid) {
-          var activityStatus = await Permission.activityRecognition.status;
+          final activityStatus = await Permission.activityRecognition.status;
           print('Activity recognition: $activityStatus');
         }
       } catch (e) {
@@ -213,7 +213,7 @@ class HealthDataService {
       }
 
       // Fetch health data from the past 24 hours
-      List<HealthDataPoint> healthData = await _health.getHealthDataFromTypes(
+      final List<HealthDataPoint> healthData = await _health.getHealthDataFromTypes(
         startTime: yesterday,
         endTime: now,
         types: _healthDataTypes,
@@ -224,7 +224,7 @@ class HealthDataService {
       }
 
       // Filter step data
-      List<HealthDataPoint> stepData = healthData
+      final List<HealthDataPoint> stepData = healthData
           .where((point) => point.type == HealthDataType.STEPS)
           .toList();
 
@@ -255,14 +255,14 @@ class HealthDataService {
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(hours: 24));
 
-      List<Map<String, dynamic>> hourlyData = [];
+      final List<Map<String, dynamic>> hourlyData = [];
 
       // Fetch data hour by hour for better granularity
       for (int i = 0; i < 24; i++) {
         final hourStart = yesterday.add(Duration(hours: i));
         final hourEnd = yesterday.add(Duration(hours: i + 1));
 
-        List<HealthDataPoint> hourData = await _health.getHealthDataFromTypes(
+        final List<HealthDataPoint> hourData = await _health.getHealthDataFromTypes(
           startTime: hourStart,
           endTime: hourEnd,
           types: [HealthDataType.STEPS],
@@ -299,7 +299,7 @@ class HealthDataService {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
 
-      List<HealthDataPoint> todayData = await _health.getHealthDataFromTypes(
+      final List<HealthDataPoint> todayData = await _health.getHealthDataFromTypes(
         types: [HealthDataType.STEPS],
         startTime: startOfDay,
         endTime: now,
@@ -326,7 +326,7 @@ class HealthDataService {
     DateTime end,
   ) async {
     try {
-      List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
+      final List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
         types: [HealthDataType.STEPS],
         startTime: start,
         endTime: end,
@@ -383,7 +383,7 @@ class HealthDataService {
 
   // Method to get detailed permission status
   Future<Map<String, bool>> getPermissionStatus() async {
-    Map<String, bool> status = {};
+    final Map<String, bool> status = {};
 
     try {
       status['health_data'] = await _health.requestAuthorization(

@@ -3,7 +3,7 @@ import 'package:calora/common/widgets/display/display_message.dart';
 import 'package:calora/common/widgets/display/message_widget.dart';
 import 'package:flutter/material.dart';
 
-import 'display.dart';
+import 'package:calora/common/widgets/display/display.dart';
 
 class DisplayWidget extends StatefulWidget {
   const DisplayWidget({super.key, required this.child});

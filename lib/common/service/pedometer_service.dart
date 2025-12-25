@@ -66,7 +66,6 @@ class PedometerService {
     return DateTime(
       now.year,
       now.month,
-      1,
     ).copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0);
   }
 
@@ -186,7 +185,7 @@ class PedometerService {
             log('Initial daily steps: $_dailySteps');
           } else {
             // Calculate steps since last update
-            int stepsSinceLastUpdate = steps - _lastStepCount;
+            final int stepsSinceLastUpdate = steps - _lastStepCount;
 
             if (stepsSinceLastUpdate > 0) {
               // Add the new steps to today's total

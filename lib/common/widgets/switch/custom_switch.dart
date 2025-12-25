@@ -5,7 +5,7 @@ class CustomSwitch extends StatefulWidget {
   final Function(bool result) result;
   bool value;
 
-  CustomSwitch({Key? key, this.value = false, required this.result}) : super(key: key);
+  CustomSwitch({super.key, this.value = false, required this.result});
 
   @override
   State<CustomSwitch> createState() => _CustomSwitchState();

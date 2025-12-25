@@ -14,7 +14,7 @@ class SingleSelectionPage
   final Function(Selection) onSave;
   final String title;
 
-  SingleSelectionPage({super.key, this.title = "", required this.selection, required this.onSave});
+  SingleSelectionPage({super.key, this.title = '', required this.selection, required this.onSave});
 
   @override
   void init(context, manager) {

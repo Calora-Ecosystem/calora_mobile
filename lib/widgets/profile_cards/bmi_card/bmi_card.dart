@@ -33,7 +33,6 @@ class BmiCard extends StatelessWidget {
             Strings.bodyMassIndex.text(16, 20, 500).c(context.colors.textStrong),
             const SizedBox(height: 12),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 formatBmi(bmi).text(20, 24, 600).c(context.colors.textStrong),
                 const SizedBox(width: 8),
@@ -50,9 +49,9 @@ class BmiCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _infoBox("Progress", "${(entryWeight - weight).abs()}", context),
+                _infoBox('Progress', '${(entryWeight - weight).abs()}', context),
                 SizedBox(width: 16),
-                _infoBox(Strings.remained, (weight - targetWeight).abs().toString() + ' kg', context),
+                _infoBox(Strings.remained, '${(weight - targetWeight).abs()} kg', context),
               ],
             ),
             const SizedBox(height: 16),

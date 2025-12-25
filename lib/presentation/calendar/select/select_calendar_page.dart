@@ -11,7 +11,7 @@ class SelectCalendarPage extends StatefulWidget {
 
   SelectCalendarPage({
     super.key,
-    this.title = "",
+    this.title = '',
     required this.selectedDate,
     required this.onSave,
   });

@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import 'management/universal_progress_management.dart';
-import 'management/universal_progress_manager.dart';
+import 'package:calora/widgets/progress/universal_progress_page/management/universal_progress_management.dart';
+import 'package:calora/widgets/progress/universal_progress_page/management/universal_progress_manager.dart';
 
 @RoutePage()
 class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalProgressState, UniversalProgressEffect> {
@@ -46,7 +46,7 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
           if (context.mounted) {
             if (manager.state.hasError) {
               // Xatolik bo'lsa, null qaytarish
-              context.router.pop(null);
+              context.router.pop();
             } else {
               context.router.pop(manager.state.scannedFood);
             }

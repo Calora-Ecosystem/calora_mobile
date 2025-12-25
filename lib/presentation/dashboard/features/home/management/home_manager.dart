@@ -15,17 +15,15 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   HomeManager(this._profileRepo, this._stepRepo) : super(HomeState());
 
-  void getUserInfo() {
-    _profileRepo.getProfile().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (profile) {
-        emit(state.copyWith(profile: profile, isLoading: false));
-        profileStore.clear();
-        profileStore.set(profile);
-      },
-      onError: (error) => emit(state.copyWith(isLoading: false)),
-    );
-  }
+  Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
+    onStart: () => emit(state.copyWith(isLoading: true)),
+    onError: (error) => emit(state.copyWith(isLoading: false)),
+    onData: (profile) {
+      emit(state.copyWith(profile: profile, isLoading: false));
+      profileStore.clear();
+      profileStore.set(profile);
+    },
+  );
 
   Future<void> requestPedometerPermissions() async {
     await [Permission.activityRecognition, Permission.sensors, Permission.locationWhenInUse].request();
@@ -48,30 +46,30 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       onStart: () => emit(state.copyWith(isLoading: true)),
       onData: (data) {
         final stepValue = data
-            .firstWhere((e) => e.metric == "Step", orElse: () => NormsRequest(metric: "Step", value: 0))
+            .firstWhere((e) => e.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
             .value;
         final waterValue = data
-            .firstWhere((e) => e.metric == "Water", orElse: () => NormsRequest(metric: "Water", value: 0))
+            .firstWhere((e) => e.metric == 'Water', orElse: () => NormsRequest(metric: 'Water', value: 0))
             .value;
         final kcalValue = data
-            .firstWhere((e) => e.metric == "Kcal", orElse: () => NormsRequest(metric: "Kcal", value: 0))
+            .firstWhere((e) => e.metric == 'Kcal', orElse: () => NormsRequest(metric: 'Kcal', value: 0))
             .value;
         final proteinValue = data
-            .firstWhere((e) => e.metric == "Protein", orElse: () => NormsRequest(metric: "Protein", value: 0))
+            .firstWhere((e) => e.metric == 'Protein', orElse: () => NormsRequest(metric: 'Protein', value: 0))
             .value;
         final fatValue = data
-            .firstWhere((e) => e.metric == "Fat", orElse: () => NormsRequest(metric: "Fat", value: 0))
+            .firstWhere((e) => e.metric == 'Fat', orElse: () => NormsRequest(metric: 'Fat', value: 0))
             .value;
         final carbsValue = data
-            .firstWhere((e) => e.metric == "Carb", orElse: () => NormsRequest(metric: "Carb", value: 0))
+            .firstWhere((e) => e.metric == 'Carb', orElse: () => NormsRequest(metric: 'Carb', value: 0))
             .value;
 
         emit(
           state.copyWith(
             nutrients: [
-              NutrientData(name: "Protein", value: proteinValue, percent: 0.5),
-              NutrientData(name: "Fat", value: fatValue, percent: 0.3),
-              NutrientData(name: "Carb", value: carbsValue, percent: 0.2),
+              NutrientData(name: 'Protein', value: proteinValue, percent: 0.5),
+              NutrientData(name: 'Fat', value: fatValue, percent: 0.3),
+              NutrientData(name: 'Carb', value: carbsValue, percent: 0.2),
             ],
             norms: data,
             isLoading: false,

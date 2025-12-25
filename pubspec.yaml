@@ -70,7 +70,12 @@ dependencies:
   custom_refresh_indicator: ^4.0.1
   image: ^4.7.2
   screenshot: ^3.0.0
+  shimmer: ^3.0.0
 
+  vector_graphics: any
+  intl: any
+  video_player: any
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

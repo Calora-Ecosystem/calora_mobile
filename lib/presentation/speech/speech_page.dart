@@ -13,7 +13,7 @@ import 'package:record/record.dart';
 class ModernVoiceRecorder extends StatefulWidget {
   final ValueChanged<String> onFinished;
 
-  const ModernVoiceRecorder({Key? key, required this.onFinished}) : super(key: key);
+  const ModernVoiceRecorder({super.key, required this.onFinished});
 
   @override
   State<ModernVoiceRecorder> createState() => _ModernVoiceRecorderState();
@@ -83,7 +83,7 @@ class _ModernVoiceRecorderState extends State<ModernVoiceRecorder> {
   String _formatTime(int sec) {
     final m = (sec ~/ 60).toString().padLeft(2, '0');
     final s = (sec % 60).toString().padLeft(2, '0');
-    return "$m:$s";
+    return '$m:$s';
   }
 
   @override
@@ -117,7 +117,7 @@ class _ModernVoiceRecorderState extends State<ModernVoiceRecorder> {
             child: Button(
               text: Strings.continueBtn,
               onPressed: () {
-                log("OnClickSpeech");
+                log('OnClickSpeech');
                 if (_isRecording) {
                   _stopRecording();
                 } else {

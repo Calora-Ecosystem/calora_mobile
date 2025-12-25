@@ -3,7 +3,7 @@ import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'dishes_management.dart';
+import 'package:calora/presentation/dishes/management/dishes_management.dart';
 
 @injectable
 class DishesManager extends Manager<DishesState, DishesEffect> {
