@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
@@ -9,7 +10,7 @@ class MealTypeGrid extends StatelessWidget {
   final List<MealTypeData> mealTypes;
   final Function(MealTypeData meal) onMealTypeSelected;
 
-  const MealTypeGrid({Key? key, required this.mealTypes, required this.onMealTypeSelected}) : super(key: key);
+  const MealTypeGrid({super.key, required this.mealTypes, required this.onMealTypeSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +48,12 @@ class MealTypeGrid extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  mealType.fullImageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: mealType.fullImageUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) => Image.network(
+                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => Image.network(
                     '$baseUrl$abstractImageUrl',
                     fit: BoxFit.cover,
                     width: double.infinity,
@@ -105,11 +107,12 @@ class FavouriteFoodGrid extends StatelessWidget {
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      food.fullImageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: food.fullImageUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) => Image.network(
+                      placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => Image.network(
                         '$baseUrl$abstractImageUrl',
                         fit: BoxFit.cover,
                         width: double.infinity,

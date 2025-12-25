@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
@@ -8,7 +6,6 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
-import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -130,11 +127,10 @@ class _DishInfoPageState extends State<DishInfoPage> {
                       onPressed: () {
                         final text = _amountController.text.trim();
                         double? amount = double.tryParse(text);
-
                         if (text.isEmpty || amount == null || amount <= 0) {
                           amount = widget.foodItem.weight;
                         }
-                        openConfirmPage(context, amount!);
+                        openConfirmPage(context, amount);
                       },
                       text: Strings.save,
                     ),
@@ -163,7 +159,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            "${value.asFixedTruncated(0)} gr".toString().text(16, 20, 500),
+            '${value.asFixedTruncated(0)} gr'.toString().text(16, 20, 500),
             label.text(14, 18, 400).c(context.colors.textSub).copyWith(maxLines: 1),
           ],
         ),
@@ -174,7 +170,6 @@ class _DishInfoPageState extends State<DishInfoPage> {
   void openConfirmPage(BuildContext context, double amount) {
     showDialog(
       context: context,
-      useRootNavigator: true,
       builder: (_) => ConfirmPage(
         title: Strings.shouldTheFoodBeAddedToTheMenu,
         confirmText: Strings.yesAdd,
