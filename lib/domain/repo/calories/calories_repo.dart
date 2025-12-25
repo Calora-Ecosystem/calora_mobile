@@ -30,4 +30,8 @@ abstract class CaloriesRepo {
   Future<List<ScannerFood>> getScannerFood(String filePath);
 
   Future<List<ScannerFood>> getScannerFoodByVoice(String filePath);
+
+  Future<List<FoodModel>> fetchUserFoods();
+
+  Future<List<FoodModel>> fetchSearchFood(String name);
 }

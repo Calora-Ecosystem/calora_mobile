@@ -166,4 +166,18 @@ class CaloriesRepoImpl extends CaloriesRepo {
     final response = await _api.getSummary(date);
     return SummaryRequest.fromJson(response.data['content']);
   }
+
+  @override
+  Future<List<FoodModel>> fetchUserFoods() async {
+    final response = await _api.fetchUserFoods();
+    final List content = response.data['content'];
+    return content.map((e) => FoodModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  @override
+  Future<List<FoodModel>> fetchSearchFood(String name) async {
+    final response = await _api.fetchSearchFood(name);
+    final List content = response.data['content'];
+    return content.map((e) => FoodModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
 }

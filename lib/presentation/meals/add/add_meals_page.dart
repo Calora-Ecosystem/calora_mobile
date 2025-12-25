@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/di/dii.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
@@ -31,7 +32,7 @@ import 'management/add_meals_management.dart';
 import 'management/add_meals_manager.dart';
 
 @RoutePage()
-class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffect> {
+class AddMealsPage extends StatefulWidget {
   final bool shouldOpenCreator;
   final MealType type;
   final List<MealData> meals;
@@ -48,117 +49,171 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   });
 
   @override
-  void init(BuildContext context, AddMealsManager manager) {
-    super.init(context, manager);
+  State<AddMealsPage> createState() => _AddMealsPageState();
+}
+
+class _AddMealsPageState extends State<AddMealsPage> {
+  late final AddMealsManager manager;
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  StreamSubscription? _effectSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = getIt<AddMealsManager>();
     manager.fetchFoodCategory();
+
+    _searchFocusNode.addListener(() {
+      manager.onSearchFocusChanged(_searchFocusNode.hasFocus);
+    });
+
+    _searchController.addListener(() {
+      manager.onSearchQueryChanged(_searchController.text);
+    });
+
+    _effectSubscription = manager.effects.listen((effect) {
+      effect.mapOrNull(
+        openDishesPage: (e) => context.pushRoute(
+          DishesRoute(data: e.meal, type: widget.type, categoryId: widget.categoryId, meals: widget.meals, dateTime: widget.dateTime),
+        ),
+        openAboutPage: (e) => openAboutDishPage(context, e.food, manager, e.isFavourite),
+      );
+    });
   }
 
   @override
-  void listener(BuildContext context, AddMealsManager manager, AddMealsEffect effect) {
-    super.listener(context, manager, effect);
-    effect.mapOrNull(
-      openDishesPage: (e) => context.pushRoute(
-        DishesRoute(data: e.meal, type: type, categoryId: categoryId, meals: meals, dateTime: dateTime),
-      ),
-      openAboutPage: (e) => openAboutDishPage(context, e.food, manager, e.isFavourite),
-    );
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    _effectSubscription?.cancel();
+    manager.dispose();
+    super.dispose();
   }
 
   @override
-  Widget builder(BuildContext context, AddMealsManager manager, AddMealsState state) {
-    return Scaffold(
-      backgroundColor: context.colors.white,
-      appBar: CustomAppBar(
-        title: Strings.add,
-        onBack: () => context.router.pop(true),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            spacing: 12,
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  hintText: Strings.searchForFoodOrProduct,
-                  hintStyle: TextStyle(
-                    color: context.colors.textSub,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    height: 0.8,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: context.colors.strokeSoft, width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: context.colors.blue, width: 1.5),
-                  ),
-                ),
-              ),
-              Row(
-                spacing: 8,
+  Widget build(BuildContext context) {
+    return StreamBuilder<AddMealsState>(
+      stream: manager.stream,
+      builder: (context, snapshot) {
+        final state = snapshot.data ?? const AddMealsState();
+        return Scaffold(
+          backgroundColor: context.colors.white,
+          appBar: CustomAppBar(
+            title: Strings.add,
+            onBack: () => context.router.pop(true),
+          ),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                spacing: 12,
                 children: [
-                  buildActionCard(
-                    onTap: () => openCreatePage(context, manager),
-                    context: context,
-                    icon: Assets.icons.icPlusCircle.svg(),
-                    text: Strings.creation,
-                    textColor: context.colors.textStrong,
+                  TextField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    decoration: InputDecoration(
+                      hintText: Strings.searchForFoodOrProduct,
+                      hintStyle: TextStyle(
+                        color: context.colors.textSub,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        height: 0.8,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: context.colors.strokeSoft, width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: context.colors.blue, width: 1.5),
+                      ),
+                    ),
                   ),
-                  buildActionCard(
-                    onTap: () => openCameraPage(context, manager),
-                    context: context,
-                    icon: Assets.icons.icScan.svg(),
-                    text: Strings.scanning,
-                    textColor: context.colors.textWhite,
-                    useGradient: true,
-                  ),
-                  buildActionCard(
-                    onTap: () => openSpeechPage(context, manager),
-                    context: context,
-                    icon: Assets.icons.icChat.svg(),
-                    text: Strings.byVoice,
-                    textColor: context.colors.textWhite,
-                    useGradient: true,
+                  if (!state.isSearching) ...[
+                    Row(
+                      spacing: 8,
+                      children: [
+                        buildActionCard(
+                          onTap: () => openCreatePage(context, manager),
+                          context: context,
+                          icon: Assets.icons.icPlusCircle.svg(),
+                          text: Strings.creation,
+                          textColor: context.colors.textStrong,
+                        ),
+                        buildActionCard(
+                          onTap: () => openCameraPage(context, manager),
+                          context: context,
+                          icon: Assets.icons.icScan.svg(),
+                          text: Strings.scanning,
+                          textColor: context.colors.textWhite,
+                          useGradient: true,
+                        ),
+                        buildActionCard(
+                          onTap: () => openSpeechPage(context, manager),
+                          context: context,
+                          icon: Assets.icons.icChat.svg(),
+                          text: Strings.byVoice,
+                          textColor: context.colors.textWhite,
+                          useGradient: true,
+                        ),
+                      ],
+                    ),
+                    ToggleButtonsWidget(
+                      onChanged: (value) => manager.onToggleChanged(value),
+                      titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
+                    ),
+                  ],
+                  Expanded(
+                    child: Builder(
+                      builder: (_) {
+                        if (state.isSearching) {
+                          if (state.isSearchLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          if (state.searchFoods.isEmpty && _searchController.text.length >= 3) {
+                            return Center(child: 'Bundan ovqat mavjud emas'.text(16));
+                          }
+                          return FavouriteFoodGrid(
+                            foods: state.searchFoods,
+                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                          );
+                        }
+                        if (state.isLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (state.selectedToggleIndex == 3) {
+                          return FavouriteFoodGrid(
+                            foods: state.favouriteFoods,
+                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                          );
+                        }
+                        if (state.selectedToggleIndex == 1) {
+                          return FavouriteFoodGrid(
+                            foods: state.latestFoods,
+                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                          );
+                        }
+                        if (state.selectedToggleIndex == 2) {
+                          return FavouriteFoodGrid(
+                            foods: state.userFoods,
+                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                          );
+                        }
+                        return MealTypeGrid(
+                          mealTypes: state.mealCategories,
+                          onMealTypeSelected: (meal) => manager.openDishesPage(meal),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
-              ToggleButtonsWidget(
-                onChanged: (value) => manager.onToggleChanged(value),
-                titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
-              ),
-              Expanded(
-                child: Builder(
-                  builder: (_) {
-                    if (state.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (state.selectedToggleIndex == 3) {
-                      return FavouriteFoodGrid(
-                        foods: state.favouriteFoods,
-                        onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                      );
-                    }
-                    if (state.selectedToggleIndex == 1) {
-                      return FavouriteFoodGrid(
-                        foods: state.latestFoods,
-                        onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                      );
-                    }
-                    return MealTypeGrid(
-                      mealTypes: state.mealCategories,
-                      onMealTypeSelected: (meal) => manager.openDishesPage(meal),
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -173,7 +228,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         onSave: (value) async {
           manager.addFavourite(food.id ?? 0);
           final success = await manager.saveMenuItem(
-            MenuInfo(menu: type.name, date: DateTime.now(), foodId: food.id ?? 0, weightInGr: value.toInt()),
+            MenuInfo(menu: widget.type.name, date: DateTime.now(), foodId: food.id ?? 0, weightInGr: value.toInt()),
           );
           if (context.mounted) context.router.pop();
 
@@ -200,7 +255,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           final int userId = await profileStore.getUserId() ?? 0;
           final addedFoodId = await manager.addFood(
             FoodRequest(
-              categoryId: categoryId,
+              categoryId: widget.categoryId,
               name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
               coverUrl: abstractImageUrl,
               metrics: [
@@ -216,7 +271,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           bool success = false;
           if (addedFoodId != null) {
             success = await manager.saveMenuItem(
-              MenuInfo(menu: type.name, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
+              MenuInfo(menu: widget.type.name, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
             );
           }
           if (context.mounted) context.router.pop();
@@ -237,7 +292,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
       child: FoodCreatorWithImage(
         name: food.name,
         addButton: () async {
-          final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
+          final success = await manager.addFoodAndMenuWithImage(food, widget.categoryId, widget.type.name);
           if (context.mounted) context.router.pop();
           if (success) {
             _showInfoDialog(context);
@@ -261,7 +316,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             .map((e) => '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
             .toList(),
         onAdd: () async {
-          final success = await manager.addFoodAndMenuWithVoice(categoryId, type.name);
+          final success = await manager.addFoodAndMenuWithVoice(widget.categoryId, widget.type.name);
           if (context.mounted) context.router.pop();
           if (success) {
             _showInfoDialog(context);
@@ -295,7 +350,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           Strings.theAmountOfFoodIsMeasured,
           Strings.theCalorieContentOfTheFoodIsBeingMeasured,
         ],
-        apiCall: () => manager.getScannerFood(imagePath, categoryId),
+        apiCall: () => manager.getScannerFood(imagePath, widget.categoryId),
       ),
     );
 
@@ -329,7 +384,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                 Strings.theAmountOfFoodIsMeasured,
                 Strings.theCalorieContentOfTheFoodIsBeingMeasured,
               ],
-              apiCall: () => manager.getScannerFoodByVoice(value, categoryId),
+              apiCall: () => manager.getScannerFoodByVoice(value, widget.categoryId),
             ),
           );
           if (context.mounted) {

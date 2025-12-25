@@ -20,7 +20,15 @@ class CaloriesApi {
   }
 
   Future<Response> fetchFoods(bool latest) {
-    return _dio.get('/food', queryParameters: {'latest': latest});
+    return _dio.get('/food', queryParameters: {'Latest': latest});
+  }
+
+  Future<Response> fetchUserFoods() {
+    return _dio.get('/food', queryParameters: {'IsUserFood': true});
+  }
+
+  Future<Response> fetchSearchFood(String name) {
+    return _dio.get('/food', queryParameters: {'FilteringExpression': 'name\$\$${name}'});
   }
 
   Future<Response> addFood(FoodRequest food) {

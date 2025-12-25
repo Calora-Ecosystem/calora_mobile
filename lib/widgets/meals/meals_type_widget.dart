@@ -1,6 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -20,7 +19,6 @@ class MealTypeGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.04,
       ),
       itemCount: mealTypes.length,
       itemBuilder: (context, index) {
@@ -38,6 +36,7 @@ class MealTypeGrid extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        height: 152,
         decoration: BoxDecoration(
           color: context.colors.backgroundElevation,
           borderRadius: BorderRadius.circular(16),
@@ -45,21 +44,10 @@ class MealTypeGrid extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: CachedNetworkImage(
-                  imageUrl: mealType.fullImageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                  errorWidget: (context, url, error) => Image.network(
-                    '$baseUrl$abstractImageUrl',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                  ),
-                ),
-              ),
+            CustomCachedNetworkImage.banner(
+              height: 120,
+              radius: 16,
+              imageUrl: mealType.imageUrl,
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -89,7 +77,6 @@ class FavouriteFoodGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.04,
       ),
       itemCount: foods.length,
       itemBuilder: (context, index) {
@@ -97,6 +84,7 @@ class FavouriteFoodGrid extends StatelessWidget {
         return GestureDetector(
           onTap: () => onFoodSelected(food),
           child: Container(
+            height: 152,
             decoration: BoxDecoration(
               color: context.colors.backgroundElevation,
               borderRadius: BorderRadius.circular(16),
@@ -104,21 +92,10 @@ class FavouriteFoodGrid extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: CachedNetworkImage(
-                      imageUrl: food.fullImageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) => Image.network(
-                        '$baseUrl$abstractImageUrl',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    ),
-                  ),
+                CustomCachedNetworkImage.banner(
+                  radius: 16,
+                  height: 120,
+                  imageUrl: food.coverUrl,
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),

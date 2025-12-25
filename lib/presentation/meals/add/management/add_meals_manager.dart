@@ -17,6 +17,28 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
 
   AddMealsManager(this._repo) : super(const AddMealsState());
 
+  Timer? _debounce;
+
+  void onSearchFocusChanged(bool isFocused) {
+    emit(state.copyWith(isSearching: isFocused));
+    if (!isFocused) {
+      // Clear search results when losing focus
+      emit(state.copyWith(searchFoods: []));
+    }
+  }
+
+  void onSearchQueryChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (query.length >= 3) {
+        fetchSearchFood(query);
+      } else {
+        // Clear results if query is too short
+        emit(state.copyWith(searchFoods: [], isSearchLoading: false));
+      }
+    });
+  }
+
   void fetchFoodCategory() {
     _repo.fetchFoodCategory().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
@@ -61,6 +83,15 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
+  }
+
+  void fetchUserFoods() {
+    _repo.fetchUserFoods().handle(
+      onStart: () => emit(state.copyWith(isLoading: true)),
+      onData: (foods) => emit(state.copyWith(userFoods: foods, isLoading: false)),
+      onDone: () => emit(state.copyWith(isLoading: false)),
+      onError: (error) => emit(state.copyWith(isLoading: false)),
+    );
   }
 
   Future<List<ScannerFood>> getScannerFood(String filePath, int categoryId) async {
@@ -136,7 +167,9 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     for (int i = 0; i < foodRequests.length; i++) {
       var addedFoodId = await addFood(foodRequests[i]);
       if (addedFoodId == null) return false;
-      var success = await saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+      var success = await saveMenuItem(
+        MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
+      );
       if (!success) return false;
     }
     return true;
@@ -156,7 +189,9 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     for (int i = 0; i < foodRequests.length; i++) {
       var addedFoodId = await addFood(foodRequests[i]);
       if (addedFoodId == null) return false;
-      var success = await saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+      var success = await saveMenuItem(
+        MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
+      );
       if (!success) return false;
     }
     return true;
@@ -181,6 +216,17 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     return foodId;
   }
 
+  void fetchSearchFood(String name) {
+    _repo
+        .fetchSearchFood(name)
+        .handle(
+          onStart: () => emit(state.copyWith(isSearchLoading: true)),
+          onData: (foods) => emit(state.copyWith(searchFoods: foods, isSearchLoading: false)),
+          onDone: () => emit(state.copyWith(isSearchLoading: false)),
+          onError: (error) => emit(state.copyWith(isSearchLoading: false)),
+        );
+  }
+
   void openDishesPage(MealTypeData meal) {
     publish(AddMealsEffect.openDishesPage(meal));
   }
@@ -202,6 +248,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         break;
 
       case 2:
+        fetchUserFoods();
         break;
 
       case 3:
