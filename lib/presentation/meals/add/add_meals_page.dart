@@ -458,7 +458,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                 onPressed: () => dialogContext.pop(),
                 text: Strings.close,
                 textColor: context.colors.textStrong,
-                type: Type.secondary,
+                type: ButtonType.secondary,
               ),
             ),
           ],

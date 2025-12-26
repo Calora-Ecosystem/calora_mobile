@@ -158,7 +158,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
                 onPressed: () => dialogContext.pop(),
                 text: Strings.close,
                 textColor: context.colors.textStrong,
-                type: Type.secondary,
+                type: ButtonType.secondary,
               ),
             ),
           ],
