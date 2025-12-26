@@ -43,8 +43,8 @@ class StepRepoImpl extends StepRepo {
   }
 
   @override
-  Future<MetricsRequest> getUserMetrics() async {
-    final response = await _stepsApi.getUserMetrics();
+  Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {
+    final response = await _stepsApi.getUserMetrics(from: from, to: to);
     return response;
   }
 
@@ -104,5 +104,10 @@ class StepRepoImpl extends StepRepo {
     log('From: ${from.toIso8601String()}, To: ${to.toIso8601String()}');
 
     return {'from': from, 'to': to};
+  }
+
+  @override
+  Future<bool> deleteUserDailyData({required String date}) async {
+    return await _stepsApi.deleteUserDailyData(date: date);
   }
 }

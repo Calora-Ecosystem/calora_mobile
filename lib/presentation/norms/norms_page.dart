@@ -5,13 +5,12 @@ import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/input/single/single_input_page.dart';
+import 'package:calora/presentation/norms/management/norms_management.dart';
+import 'package:calora/presentation/norms/management/norms_manager.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/builder/detail/info/detail_info_item_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart' show Managed;
-
-import 'package:calora/presentation/norms/management/norms_management.dart';
-import 'package:calora/presentation/norms/management/norms_manager.dart';
 
 @RoutePage()
 class NormsPage extends Managed<NormsManager, NormsState, NormsEffect> {

@@ -324,4 +324,8 @@ notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj
 should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
 yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
 please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
+your_data_has_been_saved_successfully,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
+no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
 please_enter_food_metrics,"Please, enter food metrics","Please, enter food metrics","Пожалуйста, введите показатели качества продуктов питания."
+fillBlank,Fill in the blank,Bo'sh jo'yni to'ldiring,Вставьте пропуск

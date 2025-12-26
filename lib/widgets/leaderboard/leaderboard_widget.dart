@@ -17,6 +17,7 @@ class LeaderboardWidget extends StatelessWidget {
       decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(12)),
       child: ListView.builder(
         shrinkWrap: true,
+        padding: EdgeInsets.zero,
         physics: NeverScrollableScrollPhysics(),
         itemCount: users.length,
         itemBuilder: (context, index) {
@@ -28,7 +29,10 @@ class LeaderboardWidget extends StatelessWidget {
                 leading: (index + 4).toString().text(16, 20, 500).c(context.colors.neutralPrimary),
                 title: Row(
                   children: [
-                    AvatarWithFlagWidget(initials: user.getInitials(), flagAsset: Assets.icons.circleFlag.svg()),
+                    AvatarWithFlagWidget(
+                      initials: user.getInitials(),
+                      flagAsset: Assets.icons.circleFlag.svg(),
+                    ),
                     const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

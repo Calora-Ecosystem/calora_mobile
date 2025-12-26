@@ -10,12 +10,7 @@ class StepsIndicatorWidget extends StatelessWidget {
   final int goal;
   final VoidCallback? onEditTap;
 
-  const StepsIndicatorWidget({
-    super.key,
-    required this.current,
-    required this.goal,
-    this.onEditTap,
-  });
+  const StepsIndicatorWidget({super.key, required this.current, required this.goal, this.onEditTap});
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +32,15 @@ class StepsIndicatorWidget extends StatelessWidget {
           const SizedBox(height: 8),
           current.toInt().toString().text(32, 40, 700).c(context.colors.textStrong),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ('${Strings.goal}:$goal').text(14, 16, 600).c(context.colors.textSub),
-
-              GestureDetector(onTap: onEditTap, child: Assets.icons.edit.svg()),
-            ],
+          GestureDetector(
+            onTap: onEditTap,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ('${Strings.goal}:$goal').text(14, 16, 600).c(context.colors.textSub),
+                Assets.icons.edit.svg(),
+              ],
+            ),
           ),
         ],
       ),

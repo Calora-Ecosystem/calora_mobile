@@ -11,16 +11,23 @@ class SingleSelectionManager extends Manager<SingleSelectionState, SingleSelecti
   SingleSelectionManager(this._selectionRepo) : super(const SingleSelectionState());
   Selection _currentSelection = Selection();
 
-  void setSelection(Selection value) {
+  String? _initialSelectedValue;
+
+  void setSelection(Selection value, {String? initialSelectedValue}) {
     _currentSelection = value;
+    _initialSelectedValue = initialSelectedValue;
   }
+
 
   void getSelections() async {
     await _selectionRepo
         .getSelections(_currentSelection)
         .handle(
           onStart: () => emit(state.copyWith(loading: true)),
-          onData: (data) => emit(state.copyWith(selections: data)),
+          onData: (data) {
+            final updatedData = data.map((item) => item.copyWith(isChecked: item.name == _initialSelectedValue)).toList();
+            emit(state.copyWith(selections: updatedData));
+          },
           onDone: () => emit(state.copyWith(loading: false)),
         );
   }

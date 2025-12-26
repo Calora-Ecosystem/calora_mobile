@@ -8,11 +8,7 @@ class EditStepGoalPage extends StatefulWidget {
   final int initialValue;
   final ValueChanged<int> onSave;
 
-  const EditStepGoalPage({
-    super.key,
-    required this.initialValue,
-    required this.onSave,
-  });
+  const EditStepGoalPage({super.key, required this.initialValue, required this.onSave});
 
   @override
   State<EditStepGoalPage> createState() => _EditStepGoalPageState();
@@ -31,10 +27,22 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
   @override
   void initState() {
     super.initState();
-    _selectedValue = widget.initialValue;
-    _controller = FixedExtentScrollController(
-      initialItem: (_selectedValue ~/ 1000) - 1,
-    );
+    int initialValue = widget.initialValue;
+
+    if (initialValue <= 0) {
+      initialValue = 10000;
+    }
+
+    int initialItemIndex = (initialValue / 1000).round() - 1;
+
+    if (initialItemIndex < 0) {
+      initialItemIndex = 0;
+    } else if (initialItemIndex >= 50) {
+      initialItemIndex = 49;
+    }
+
+    _selectedValue = (initialItemIndex + 1) * 1000;
+    _controller = FixedExtentScrollController(initialItem: initialItemIndex);
   }
 
   @override
@@ -51,17 +59,12 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
           Container(
             width: 24,
             height: 3,
-            decoration: BoxDecoration(
-              color: Colors.grey[400],
-              borderRadius: BorderRadius.circular(2),
-            ),
+            decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
           ),
           SizedBox(height: 12),
           Align(
             alignment: AlignmentGeometry.topLeft,
-            child: Strings.stepsToSetAGoal
-                .text(20, 24, 700)
-                .c(context.colors.textStrong),
+            child: Strings.stepsToSetAGoal.text(20, 24, 700).c(context.colors.textStrong),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -71,9 +74,7 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
               itemExtent: 40,
               physics: const FixedExtentScrollPhysics(),
               onSelectedItemChanged: (index) {
-                setState(() {
-                  _selectedValue = (index + 1) * 1000;
-                });
+                setState(() => _selectedValue = (index + 1) * 1000);
               },
               childDelegate: ListWheelChildBuilderDelegate(
                 builder: (context, index) {
@@ -115,11 +116,7 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
                     );
                   }
                   return Center(
-                    child: value
-                        .toString()
-                        .text(32, 40, 700)
-                        .c(context.colors.defaultText)
-                        .gradient(gradient),
+                    child: value.toString().text(32, 40, 700).c(context.colors.defaultText).gradient(gradient),
                   );
                 },
                 childCount: 50,
@@ -139,10 +136,7 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
                 color: context.colors.accentSub,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Strings.save
-                  .text(16, 20, 500)
-                  .c(context.colors.white)
-                  .copyWith(textAlign: TextAlign.center),
+              child: Strings.save.text(16, 20, 500).c(context.colors.white).copyWith(textAlign: TextAlign.center),
             ),
           ),
           SizedBox(height: 28),

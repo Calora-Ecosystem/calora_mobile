@@ -8,10 +8,9 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
+import 'package:calora/presentation/questions/questions/management/questions_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
-
-import 'package:calora/presentation/questions/questions/management/questions_management.dart';
 
 @injectable
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
@@ -116,9 +115,9 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
         );
   }
 
-  Purpose mapPurpose(int value) {
-    if (value == 0) return Purpose.WeightLoss;
-    if (value == 1) return Purpose.SaveCurrent;
-    return Purpose.MuscleDevelopment;
+  PurposeEnum mapPurpose(int value) {
+    if (value == 0) return PurposeEnum.WeightLoss;
+    if (value == 1) return PurposeEnum.SaveCurrent;
+    return PurposeEnum.MuscleDevelopment;
   }
 }

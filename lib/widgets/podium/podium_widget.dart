@@ -9,6 +9,7 @@ class PodiumWidget extends StatelessWidget {
     required this.thirdPosition,
     this.height = 70,
     this.width = 100,
+    this.loading = false,
     this.horizontalSpacing = 3,
     this.firstRankingText = '1',
     this.secondRankingText = '2',
@@ -46,6 +47,7 @@ class PodiumWidget extends StatelessWidget {
   ///Defines the third position ranking text inside the podium bar.
   ///NEEDS LEADING AND TRAILING SPACES TO ENSURE PROPER ALIGNMENT.
   final String thirdRankingText;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {

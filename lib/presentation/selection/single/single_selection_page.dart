@@ -1,5 +1,6 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/domain/model/selection/Selection.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/selection/single/management/single_selection_management.dart';
@@ -8,17 +9,25 @@ import 'package:calora/widgets/builder/selection/single/single_selection_item_bu
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-class SingleSelectionPage
-    extends Managed<SingleSelectionManager, SingleSelectionState, SingleSelectionEffect> {
+class SingleSelectionPage extends Managed<SingleSelectionManager, SingleSelectionState, SingleSelectionEffect> {
   final Selection selection;
   final Function(Selection) onSave;
   final String title;
+  final String? initialSelectedValue;
+  final bool loading;
 
-  SingleSelectionPage({super.key, this.title = '', required this.selection, required this.onSave});
+  SingleSelectionPage({
+    super.key,
+    this.title = '',
+    required this.selection,
+    required this.onSave,
+    this.initialSelectedValue,
+    this.loading = false,
+  });
 
   @override
   void init(context, manager) {
-    manager.setSelection(selection);
+    manager.setSelection(selection, initialSelectedValue: initialSelectedValue);
     manager.getSelections();
   }
 
@@ -48,27 +57,15 @@ class SingleSelectionPage
               final currentSelection = state.selections[index];
               return SingleSelectionItemBuilder(
                 selection: currentSelection,
-                onClicked: (data) {
-                  manager.updateSelectionItem(data);
-                },
+                onClicked: (data) => manager.updateSelectionItem(data),
               );
             },
           ),
           const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () => onSave(manager.getSelectedItem() ?? Selection()),
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.colors.accentSub,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Strings.save
-                  .text(16, 20, 500)
-                  .c(context.colors.white)
-                  .copyWith(textAlign: TextAlign.center),
-            ),
+          Button(
+            loading: loading,
+            text: Strings.save,
+            onPressed: () => onSave(manager.getSelectedItem() ?? Selection()),
           ),
           const SizedBox(height: 16),
         ],
