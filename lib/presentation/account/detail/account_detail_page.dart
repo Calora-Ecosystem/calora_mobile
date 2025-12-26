@@ -18,8 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class AccountDetailPage
-    extends Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
+class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
   AccountDetailPage({super.key});
 
   @override
