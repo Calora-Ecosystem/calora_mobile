@@ -35,7 +35,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     manager.getStepNorm();
     manager.requestPedometerPermissions();
     manager.getSummary();
-
+    manager.getWater();
+    manager.getMetrics();
+    manager.getDailyStep();
     _initializePedometerService(manager);
   }
 
@@ -83,7 +85,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                           return false;
                         },
                         child: DefaultRefreshIndicator(
-                          onRefresh: () async => manager.getUserInfo(),
+                          onRefresh: () async {
+                            manager.getUserInfo();
+                            manager.getSummary();
+                            manager.getStepNorm();
+                            manager.getWater();
+                            manager.getMetrics();
+                            manager.getDailyStep();
+                          },
                           child: SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
                             padding: const EdgeInsets.all(20.0),
@@ -99,10 +108,16 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                         (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
                                       );
                                       manager.getSummary();
+                                      manager.getWater();
+                                      manager.getMetrics();
+                                      manager.getDailyStep();
                                     },
                                     onForward: () {
                                       manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
                                       manager.getSummary();
+                                      manager.getWater();
+                                      manager.getMetrics();
+                                      manager.getDailyStep();
                                     },
                                     date: state.day ?? DateTime.now(),
                                     calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
@@ -150,15 +165,19 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   remainedCalories:
                                       ((state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0))
                                           .toString(),
+                                  loading: state.isSummaryLoading,
                                 ),
                                 StepCardWidget(
+                                  loading: state.isMetricsLoading,
                                   currentSteps: state.currentSteps,
                                   targetSteps: state.targetSteps,
                                   timeInSeconds: state.timeInSeconds,
-                                  distanceInKm: state.distanceInKm,
-                                  caloriesBurned: state.caloriesBurned,
+                                  distanceInKm: state.metrics?.distance ?? 0,
+                                  caloriesBurned: state.metrics?.kcal ?? 0,
                                 ),
                                 WaterIntakeSelector(
+                                  loading: state.isWaterLoading,
+                                  date: state.day ?? DateTime.now(),
                                   onCountChanged: (count) {
                                     manager.updateWaterIntake(count * 0.25);
                                     manager.postWater();

@@ -2,19 +2,20 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/dishes/management/dishes_management.dart';
+import 'package:calora/presentation/dishes/management/dishes_manager.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/info/dish_info_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'package:calora/presentation/dishes/management/dishes_management.dart';
-import 'package:calora/presentation/dishes/management/dishes_manager.dart';
 
 @RoutePage()
 class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
@@ -107,34 +108,62 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
 
   void openAboutDishPage(BuildContext context, FoodModel food, DishesManager manager, bool isFavourite) {
     context.showAppBottomSheet(
+      initialChildSize: 0.75,
       child: DishInfoPage(
         isFavourite: isFavourite,
         foodItem: food,
         onFavouriteChanged: (value) {
           if (value) manager.addFavourite(food.id ?? 0);
         },
-        onSave: (value) {
+        onSave: (value) async {
           manager.addFavourite(food.id ?? 0);
-          manager.saveMenuItem(
-            MenuInfo(menu: type.name, date: DateTime.now(), foodId: food.id ?? 0, weightInGr: value.toInt()),
+          final success = await manager.saveMenuItem(
+            MenuInfo(
+              menu: type.name,
+              date: DateTime.now(),
+              foodId: food.id ?? 0,
+              weightInGr: value.toInt(),
+            ),
           );
-          if (context.mounted) {
-            context.router.pop();
-            context.router.pop();
-            context.router.pop();
-            context.router.pop();
-            context.router.push(
-              MealsRoute(
-                type: type,
+          if (context.mounted) context.router.pop();
 
-                dateTime: dateTime,
-                categoryId: categoryId,
-                key: ValueKey(DateTime.now().millisecondsSinceEpoch),
-              ),
-            );
+          if (success) {
+            _showInfoDialog(context);
           }
         },
       ),
+    );
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: context.colors.lightGreen,
+            ),
+            child: Assets.icons.twoDone.svg(),
+          ),
+          content: Strings.yourDataHasBeenSavedSuccessfully
+              .text(16, 20, 400)
+              .c(context.colors.textStrong)
+              .copyWith(textAlign: TextAlign.center),
+          actions: [
+            Center(
+              child: Button(
+                onPressed: () => dialogContext.pop(),
+                text: Strings.close,
+                textColor: context.colors.textStrong,
+                type: Type.secondary,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

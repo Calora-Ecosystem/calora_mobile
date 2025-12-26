@@ -1,6 +1,7 @@
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
+import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/summary/summary_request.dart' hide NutrientData;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -21,12 +22,13 @@ abstract class HomeState with _$HomeState {
     @Default(0) int targetSteps,
     @Default(0) double targetKcal,
     @Default(0) int timeInSeconds,
-    @Default(0) double distanceInKm,
-    @Default(0) int caloriesBurned,
+    MetricsRequest? metrics,
     @Default(0.25) double bottleCapacity,
     @Default(0) double targetLiters,
     @Default(false) bool isSummaryLoading,
     SummaryRequest? summary,
+    @Default(false) bool isWaterLoading,
+    @Default(false) bool isMetricsLoading,
   }) = _HomeState;
 
   factory HomeState.initial() => HomeState(day: DateTime.now());

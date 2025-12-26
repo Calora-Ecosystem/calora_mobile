@@ -1,9 +1,8 @@
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
+import 'package:calora/presentation/meals/management/meals_management.dart';
 import 'package:injectable/injectable.dart' show injectable;
 import 'package:management/management.dart';
-
-import 'package:calora/presentation/meals/management/meals_management.dart';
 
 @injectable
 class MealsManager extends Manager<MealsState, MealsEffect> {
@@ -35,18 +34,18 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
     caloriesRepo
         .fetchSummary(date)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
+          onStart: () => emit(state.copyWith(isSummary: true)),
           onData: (result) {
             var meal = getMealByType(type, result.meals);
             emit(
               state.copyWith(
                 meal: meal,
-                isLoading: false,
+                isSummary: false,
               ),
             );
           },
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onDone: () => emit(state.copyWith(isSummary: false)),
+          onError: (error) => emit(state.copyWith(isSummary: false)),
         );
   }
 

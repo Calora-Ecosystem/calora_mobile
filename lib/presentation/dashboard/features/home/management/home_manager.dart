@@ -56,6 +56,30 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     );
   }
 
+  void getDailyStep() {
+    _homeRepo
+        .getDailiesSteps(state.day ?? DateTime.now())
+        .handle(
+          onStart: () => emit(state.copyWith(isMetricsLoading: true)),
+          onData: (data) {
+            emit(state.copyWith(currentSteps: data.value.toInt(), isMetricsLoading: false));
+          },
+          onError: (error) => emit(state.copyWith(isMetricsLoading: false)),
+        );
+  }
+
+  void getWater() {
+    _homeRepo
+        .getDailiesWater(state.day ?? DateTime.now())
+        .handle(
+          onStart: () => emit(state.copyWith(isWaterLoading: true)),
+          onData: (data) {
+            emit(state.copyWith(waterIntake: data.value, isWaterLoading: false));
+          },
+          onError: (error) => emit(state.copyWith(isWaterLoading: false)),
+        );
+  }
+
   void getSummary() {
     _homeRepo
         .getSummary(state.day ?? DateTime.now())
@@ -66,6 +90,18 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
             updateNutrientsPercent(data);
           },
           onError: (error) => emit(state.copyWith(isSummaryLoading: false)),
+        );
+  }
+
+  void getMetrics() {
+    _homeRepo
+        .getMetrics(state.day ?? DateTime.now())
+        .handle(
+          onStart: () => emit(state.copyWith(isMetricsLoading: true)),
+          onData: (data) {
+            emit(state.copyWith(metrics: data, isMetricsLoading: false));
+          },
+          onError: (error) => emit(state.copyWith(isMetricsLoading: false)),
         );
   }
 

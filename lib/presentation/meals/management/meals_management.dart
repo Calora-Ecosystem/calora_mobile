@@ -9,6 +9,7 @@ abstract class MealsState with _$MealsState {
   const factory MealsState({
     @Default([]) List<MenuItem> menuItems,
     @Default(false) bool isLoading,
+    @Default(false) bool isSummary,
     MealData? meal,
     @Default([]) List<MealData> meals,
   }) = _MealsState;
