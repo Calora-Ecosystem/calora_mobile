@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:calora/common/base/base_store.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
@@ -70,7 +71,6 @@ class ProfileStore extends BaseStore<ProfileRequest> {
       targetWeight: targetWeight ?? current.targetWeight,
       birthDay: birthDay ?? current.birthDay,
       bmi: bmi ?? current.bmi,
-      metrics: metrics ?? current.metrics,
       activityLevel: activityLevel ?? current.activityLevel,
     );
     await set(updated);
@@ -79,4 +79,52 @@ class ProfileStore extends BaseStore<ProfileRequest> {
 
 final profileStore = GetIt.I<ProfileStore>();
 
-enum Gender { Male, Female }
+enum Gender {
+  Male,
+  Female,
+  Unknown
+  ;
+
+  bool get isMale => this == Gender.Male;
+  bool get isFemale => this == Gender.Female;
+  bool get isUnknown => this == Gender.Unknown;
+
+  String get displayName {
+    switch (this) {
+      case Gender.Male:
+        return Strings.male;
+      case Gender.Female:
+        return Strings.female;
+      case Gender.Unknown:
+        return 'Unknown';
+    }
+  }
+
+  String toApi() {
+    switch (this) {
+      case Gender.Male:
+        return 'Male';
+      case Gender.Female:
+        return 'Female';
+      case Gender.Unknown:
+        return 'Unknown';
+    }
+  }
+
+  static Gender fromApi(String? value) {
+    switch (value) {
+      case 'Male':
+        return Gender.Male;
+      case 'Female':
+        return Gender.Female;
+      default:
+        return Gender.Unknown;
+    }
+  }
+
+  static Gender fromDisplayName(String? value) {
+    if (value == Strings.male) return Gender.Male;
+    if (value == Strings.female) return Gender.Female;
+    return Gender.Unknown;
+  }
+}

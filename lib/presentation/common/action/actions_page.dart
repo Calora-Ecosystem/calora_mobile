@@ -29,24 +29,18 @@ class ActionsPage extends StatelessWidget {
             title: Strings.actions.text(20, 24, 700).c(context.colors.textStrong),
             dense: true,
           ),
-
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: Assets.icons.delete.svg(),
-            title: Strings.dataCleaning.text(14, 18, 400).c(context.colors.textPrimary),
-            onTap: () {
-              Navigator.pop(context);
-              onTapDelete?.call();
-            },
-          ),
+          if (onTapDelete != null)
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              leading: Assets.icons.delete.svg(),
+              title: Strings.dataCleaning.text(14, 18, 400).c(context.colors.textPrimary),
+              onTap: onTapDelete,
+            ),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: Assets.icons.share.svg(),
             title: Strings.share.text(14, 18, 400).c(context.colors.textPrimary),
-            onTap: () {
-              Navigator.pop(context);
-              onTapShare?.call();
-            },
+            onTap: onTapShare,
           ),
           const SizedBox(height: 8),
         ],

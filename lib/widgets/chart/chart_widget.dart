@@ -29,10 +29,6 @@ class ChartWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        (type == ChartType.monthly ? Strings.monthlyResults : Strings.weeklyResults)
-            .text(14, 18, 600)
-            .c(context.colors.neutralPrimary),
-        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [

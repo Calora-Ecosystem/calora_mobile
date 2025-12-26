@@ -68,7 +68,7 @@ class FoodCreatorWithImage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: Button(
-              type: Type.secondary,
+              type: ButtonType.secondary,
               enabled: false,
               onPressed: () => context.router.pop(),
               text: Strings.cancel,

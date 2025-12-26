@@ -25,6 +25,8 @@ class AccountDetailManager extends Manager<AccountDetailState, AccountDetailEffe
   }
 
   void updateProfileDetail(DetailInfo info, String lastResult) async {
+    emit(state.copyWith(updatingType: info.type));
+
     final updatedInfos = state.detailInfos?.map((element) {
       if (element.type == info.type) {
         if (info.type == DetailInfoType.gender) {
@@ -43,25 +45,22 @@ class AccountDetailManager extends Manager<AccountDetailState, AccountDetailEffe
 
     emit(state.copyWith(detailInfos: updatedInfos));
 
-    await _saveToServer();
-  }
-
-  Future<void> _saveToServer() async {
-    if (state.detailInfos == null) return;
+    if (state.detailInfos == null) {
+      emit(state.copyWith(updatingType: null));
+      return;
+    }
 
     final profileRequest = _buildProfileRequestFromDetailInfos(state.detailInfos!);
 
     await profileRepo
         .updateProfile(profileRequest)
         .handle(
-          onStart: () => emit(state.copyWith(loading: true)),
           onData: (_) {
-            emit(state.copyWith(loading: false));
+            emit(state.copyWith(updatingType: null));
           },
           onError: (error) {
-            emit(state.copyWith(loading: false));
+            emit(state.copyWith(updatingType: null));
           },
-          onDone: () => emit(state.copyWith(loading: false)),
         );
   }
 

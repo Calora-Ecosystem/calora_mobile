@@ -1,5 +1,7 @@
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
-import 'package:calora/common/gen/strings.dart';
+import 'package:calora/domain/model/questions/questions.dart';
+import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/model/selection/Selection.dart';
 import 'package:calora/domain/model/selection/selection_type.dart';
 import 'package:calora/domain/repo/selection/selection_repo.dart';
@@ -14,10 +16,8 @@ class SelectionRepoImpl extends SelectionRepo {
         return Future.value(activityLevels);
       case SelectionType.goal:
         return Future.value(goals);
-
       case SelectionType.gender:
         return Future.value(genders);
-
       case SelectionType.metrics:
         return Future.value(metrics);
       default:
@@ -26,20 +26,20 @@ class SelectionRepoImpl extends SelectionRepo {
   }
 
   List<Selection> genders = [
-    Selection(name: Strings.male, icon: Assets.icons.icMale.path, isChecked: true),
-    Selection(name: Strings.female, icon: Assets.icons.icFemale.path),
+    Selection(name: Gender.Male.displayName, icon: Assets.icons.icMale.path, isChecked: true),
+    Selection(name: Gender.Female.displayName, icon: Assets.icons.icFemale.path),
   ];
   List<Selection> goals = [
-    Selection(name: 'Vazn yo’qotish (ozish)', isChecked: true, id: '1'),
-    Selection(name: 'Tanani xozirgi xolatda saqlash)', id: '2'),
-    Selection(name: 'Mushaklarni rivojlantirish', id: '3'),
+    Selection(name: PurposeEnum.WeightLoss.displayName, isChecked: true, id: '1'),
+    Selection(name: PurposeEnum.SaveCurrent.displayName, id: '2'),
+    Selection(name: PurposeEnum.MuscleDevelopment.displayName, id: '3'),
   ];
   List<Selection> activityLevels = [
-    Selection(name: Strings.minActivity, id: '1'),
-    Selection(name: Strings.lowActivity, id: '2'),
-    Selection(name: Strings.averageActivity, isChecked: true, id: '3'),
-    Selection(name: Strings.highActivity, id: '4'),
-    Selection(name: Strings.veryHighActivity, id: '5'),
+    Selection(name: ActivityLevelEnum.Minimal.displayName, id: '1'),
+    Selection(name: ActivityLevelEnum.Less.displayName, id: '2'),
+    Selection(name: ActivityLevelEnum.Medium.displayName, isChecked: true, id: '3'),
+    Selection(name: ActivityLevelEnum.High.displayName, id: '4'),
+    Selection(name: ActivityLevelEnum.Maximal.displayName, id: '5'),
   ];
   List<Selection> metrics = [
     Selection(name: 'Funt / fut / mil ', id: '1'),

@@ -7,12 +7,11 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/auth/auth/management/auth_management.dart';
+import 'package:calora/presentation/auth/auth/management/auth_manager.dart';
 import 'package:calora/presentation/log/log_files_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'package:calora/presentation/auth/auth/management/auth_management.dart';
-import 'package:calora/presentation/auth/auth/management/auth_manager.dart';
 
 @RoutePage()
 class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
@@ -73,9 +72,8 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                   ),
                   const SizedBox(height: 32),
                   Button(
-                    type: Type.secondary,
-                    onPressed: () {
-                    },
+                    type: ButtonType.secondary,
+                    onPressed: () {},
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -87,7 +85,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                   ),
                   const SizedBox(height: 16),
                   Button(
-                    type: Type.secondary,
+                    type: ButtonType.secondary,
                     onPressed: () {},
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

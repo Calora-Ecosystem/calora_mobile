@@ -105,10 +105,10 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                     loading: manager.state.isGettingSteps,
                     shimmerChild: ShimmerChild(
                       height: index == 0
-                          ? 344
+                          ? 358
                           : index == 1
-                          ? 386
-                          : 446,
+                          ? 370
+                          : 430,
                       width: double.maxFinite,
                       radius: 20,
                     ),
@@ -123,11 +123,24 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                         child: Column(
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                ((index == 1)
+                                        ? Strings.weeklyResults
+                                        : index == 2
+                                        ? Strings.monthlyResults
+                                        : '')
+                                    .text(14, 18, 600)
+                                    .c(context.colors.neutralPrimary),
                                 InkWell(
                                   onTap: widget.onClickMoreVert,
-                                  child: SizedBox(height: 18, width: 18, child: Assets.icons.icMoreVert.svg()),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    color: Colors.transparent,
+                                    height: 32,
+                                    width: 32,
+                                    child: Assets.icons.icMoreVert.svg(),
+                                  ),
                                 ),
                               ],
                             ),

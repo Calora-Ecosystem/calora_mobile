@@ -23,7 +23,7 @@ class WinnerItemBuilder extends StatelessWidget {
           children: [
             AvatarWithFlagWidget(
               initials: userStat.getInitials(),
-              flagAsset: Assets.icons.circleFlag.svg(),
+              flagAsset: userStat.firstName == '-' ? null : Assets.icons.circleFlag.svg(),
               loading: loading,
             ),
             if (userStat.isWinner) Positioned(top: -10, right: -10, child: Assets.icons.crown.svg()),

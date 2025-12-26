@@ -6,10 +6,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class AvatarWithFlagWidget extends StatelessWidget {
   final String initials;
-  final SvgPicture flagAsset;
+  final SvgPicture? flagAsset; // Changed to nullable
   final bool loading;
 
-  const AvatarWithFlagWidget({super.key, required this.initials, required this.flagAsset, this.loading = false});
+  const AvatarWithFlagWidget({super.key, required this.initials, this.flagAsset, this.loading = false}); // Updated constructor
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +31,16 @@ class AvatarWithFlagWidget extends StatelessWidget {
             child: Center(child: initials.text(20, 24, 600).c(context.colors.accentSub)),
           ),
         ),
-        Positioned(
-          bottom: -2,
-          right: -2,
-          child: ShimmerWrapper(
-            loading: loading,
-            shimmerChild: ShimmerChild(height: 20, width: 20, radius: 100),
-            child: flagAsset,
+        if (flagAsset != null) // Conditional rendering of the flag
+          Positioned(
+            bottom: -2,
+            right: -2,
+            child: ShimmerWrapper(
+              loading: loading,
+              shimmerChild: ShimmerChild(height: 20, width: 20, radius: 100),
+              child: flagAsset!, // Use ! as we checked for null
+            ),
           ),
-        ),
       ],
     );
   }

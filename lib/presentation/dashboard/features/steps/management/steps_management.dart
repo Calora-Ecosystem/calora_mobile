@@ -18,12 +18,15 @@ abstract class StepsState with _$StepsState {
     @Default(0) int displayStepCount,
     @Default(0) int period,
     @Default(0) int offset,
+    @Default('') String from,
+    @Default('') String to,
     @Default(false) bool isGettingSteps,
     @Default(false) bool isGettingStats,
     @Default(false) bool isGettingUserMetrics,
     @Default(false) bool isUpdatingNorm,
     @Default(false) bool isGettingNorms,
     @Default(false) bool isDeletingNorm,
+    @Default(false) bool isDeletingUserDailyData,
   }) = _StepsState;
 
   const StepsState._();
@@ -34,7 +37,6 @@ abstract class StepsState with _$StepsState {
   }
 
   bool get canGoForward => offset < 0;
-
 
   int get currentStepCount {
     if (period == 0 && offset == 0) {

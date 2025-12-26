@@ -116,11 +116,11 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
     );
   }
 
-  ActivityLevel mapActivity(int value) {
-    if (value == 0) return ActivityLevel.Minimal;
-    if (value == 1) return ActivityLevel.Less;
-    if (value == 2) return ActivityLevel.Medium;
-    if (value == 3) return ActivityLevel.High;
-    return ActivityLevel.Maximal;
+  ActivityLevelEnum mapActivity(int value) {
+    if (value == 0) return ActivityLevelEnum.Minimal;
+    if (value == 1) return ActivityLevelEnum.Less;
+    if (value == 2) return ActivityLevelEnum.Medium;
+    if (value == 3) return ActivityLevelEnum.High;
+    return ActivityLevelEnum.Maximal;
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -19,6 +20,7 @@ import 'package:calora/widgets/leaderboard/leaderboard_widget.dart';
 import 'package:calora/widgets/podium/podium_widget.dart';
 import 'package:calora/widgets/tab/tab_bar_item_widget.dart';
 import 'package:calora/widgets/track/fitness_track_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -32,11 +34,11 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   @override
   void init(context, manager) {
-    manager.getUserMetrics();
     manager.getNorms();
     manager.getSteps();
     manager.getStats(3);
     manager.start();
+    manager.getUserMetrics();
     _initializePedometerService(manager);
   }
 
@@ -65,11 +67,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
     return DefaultRefreshIndicator(
       onRefresh: () async {
-        manager.getUserMetrics();
-        manager.getNorms();
-        manager.getSteps();
-        manager.getStats(3);
-        manager.start();
+        await manager.getNorms();
+        await manager.getSteps();
+        await manager.getStats(3);
+        await manager.getUserMetrics();
       },
       child: DefaultTabController(
         length: 3,
@@ -135,7 +136,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                     offset: state.offset,
                                     onClickBackward: () => manager.changeOffset(-1),
                                     onClickForward: () => manager.changeOffset(1),
-                                    onClickMoreVert: () => _showActionsSheet(context),
+                                    onClickMoreVert: () => _showActionsSheet(context, manager),
                                     onClickPause: () {},
                                     onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
                                   ),
@@ -164,6 +165,13 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                       ),
                     ),
                   ),
+                  if (state.isDeletingUserDailyData)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black.withOpacity(0.5),
+                        child: const Center(child: CupertinoActivityIndicator()),
+                      ),
+                    ),
                 ],
               ),
             );
@@ -173,15 +181,34 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     );
   }
 
-  void _showConfirmDialog(BuildContext context) {
+  void _showConfirmDialog(BuildContext context, StepsManager manager) {
     showDialog(
       context: context,
-      builder: (_) => ConfirmPage(
-        onConfirm: () {},
-        onCancel: () {},
-        cancelText: Strings.cleaning,
-        confirmText: Strings.rejection,
-        title: Strings.areYouSureDeleteStatistic,
+      builder: (dialogContext) => ManagerBuilder<StepsState, StepsEffect>(
+        manager: manager,
+        properties: (state) => [state.isDeletingUserDailyData],
+        builder: (context, state) {
+          return ConfirmPage(
+            loading: state.isDeletingUserDailyData,
+            onCancel: () {
+              if (!state.isDeletingUserDailyData) {
+                manager.deleteUserDailyData().then((_) {
+                  if (dialogContext.mounted) {
+                    dialogContext.router.maybePop();
+                  }
+                });
+              }
+            },
+            onConfirm: () {
+              if (!state.isDeletingUserDailyData) {
+                dialogContext.router.maybePop();
+              }
+            },
+            confirmText: Strings.rejection,
+            cancelText: Strings.cleaning,
+            title: Strings.areYouSureDeleteStatistic,
+          );
+        },
       ),
     );
   }
@@ -203,20 +230,35 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     );
   }
 
-  void _showActionsSheet(BuildContext context) {
+  void _showActionsSheet(BuildContext context, StepsManager manager) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (context) => ActionsPage(
-        onTapDelete: () => _showConfirmDialog(context),
-        onTapShare: () => captureAndShare(globalKey),
-      ),
+      builder: (sheetContext) {
+        final fromDate = DateTime.parse(manager.state.from);
+        return ActionsPage(
+          onTapDelete:
+              manager.state.period == 0 &&
+                  DateTime(fromDate.year, fromDate.month, fromDate.day).toIso8601String() ==
+                      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).toIso8601String()
+              ? () async {
+                  sheetContext.router.maybePop();
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  _showConfirmDialog(context, manager);
+                }
+              : null,
+          onTapShare: () {
+            sheetContext.router.maybePop();
+            captureAndShare(globalKey);
+          },
+        );
+      },
     );
   }
 
   @override
   void dispose() {
-    _pedometerService.dispose();
+    // _pedometerService.dispose();
     super.dispose();
   }
 }
