@@ -5,7 +5,7 @@ part 'calculate_management.freezed.dart';
 @freezed
 abstract class CalculateState with _$CalculateState {
   const factory CalculateState({
-    @Default([]) List<int> dailyGoals,
+    @Default([]) List<double> dailyGoals,
     @Default(false) bool isLoading,
     @Default(0.0) double progressPercent,
   }) = _CalculateState;

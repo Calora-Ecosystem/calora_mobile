@@ -164,7 +164,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                       (state.summary?.sum.Kcal ?? 0) / (state.summary?.kcalNorm.value ?? 0),
                                   remainedCalories:
                                       ((state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0))
-                                          .toString(),
+                                          .asFixedTruncated(0),
                                   loading: state.isSummaryLoading,
                                 ),
                                 StepCardWidget(

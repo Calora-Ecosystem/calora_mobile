@@ -313,10 +313,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             .toList(),
         onAdd: () async {
           final success = await manager.addFoodAndMenuWithVoice(categoryId, type.name);
-          context.router.pop();
-          if (success) {
-            _showInfoDialog(context);
-          }
+          if (success) _showInfoDialog(context);
         },
       ),
       initialChildSize: 0.55,
@@ -384,7 +381,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             ),
           );
           if (context.mounted) {
-            context.router.pop();
             final scannedFoods = manager.state.scannedFoodsByVoice;
             if (scannedFoods.isEmpty) {
               CustomSnackBar.show(context, 'No food found in image');

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -48,7 +49,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                         _buildIconTextRow(
                           context,
                           icon: Assets.icons.vegetarianFood.svg(),
-                          count: '${state.dailyGoals[0]} kkal',
+                          count: '${state.dailyGoals[0].asFixedTruncated(0)} ${Strings.kcal}',
                           title: Strings.mealPlan,
                           subtitle: Strings.dailyGoal,
                         ),

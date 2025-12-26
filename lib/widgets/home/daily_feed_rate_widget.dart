@@ -30,55 +30,66 @@ class DailyFeedRateWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerWrapper(
       loading: loading,
-      shimmerChild: ShimmerChild(
+      shimmerChild: const ShimmerChild(
         height: 272,
         radius: 20,
       ),
       child: Container(
         height: 272,
-        padding: const EdgeInsets.all(16),
         width: double.infinity,
-        decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: context.colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Column(
           spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Strings.dailyFeedRate.text(20, 24, 600),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  spacing: 8,
-                  children: [
-                    Strings.norm.text(14, 16, 400),
-                    Row(spacing: 4, children: [normCalories.text(16, 20, 500), Strings.kcal.text(12, 14, 400)]),
-                  ],
-                ),
-                SizedBox(
-                  height: 100,
-                  width: 100,
-                  child: CircularPercentIndicator(
-                    animateFromLastPercent: true,
-                    radius: 50,
-                    lineWidth: 10,
-                    percent: safePercent(progressPercent),
-                    circularStrokeCap: CircularStrokeCap.round,
-                    progressColor: context.colors.accentSub,
-                    backgroundColor: context.colors.backgroundElevation,
-                    center: '${(safePercent(progressPercent) * 100).round()}%'
-                        .text(16, 20, 500)
-                        .c(context.colors.textStrong),
+
+            SizedBox(
+              height: 100,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: CircularPercentIndicator(
+                      animateFromLastPercent: true,
+                      radius: 50,
+                      lineWidth: 10,
+                      percent: safePercent(progressPercent),
+                      circularStrokeCap: CircularStrokeCap.round,
+                      progressColor: context.colors.accentSub,
+                      backgroundColor: context.colors.backgroundElevation,
+                      center: '${(safePercent(progressPercent) * 100).round()}%'
+                          .text(16, 20, 500)
+                          .c(context.colors.textStrong),
+                    ),
                   ),
-                ),
-                Column(
-                  spacing: 8,
-                  children: [
-                    Strings.remained.text(14, 16, 400),
-                    Row(spacing: 4, children: [remainedCalories.text(16, 20, 500), Strings.kcal.text(12, 14, 400)]),
-                  ],
-                ),
-              ],
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _SideCalories(
+                      title: Strings.norm,
+                      value: normCalories,
+                    ),
+                  ),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _SideCalories(
+                      title: Strings.remained,
+                      value: remainedCalories,
+                      alignRight: true,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
             Row(
               spacing: 16,
               children: nutrients.map((nutrient) {
@@ -97,7 +108,7 @@ class DailyFeedRateWidget extends StatelessWidget {
                       LinearPercentIndicator(
                         animateFromLastPercent: true,
                         animation: true,
-                        percent: nutrient.percent,
+                        percent: nutrient.percent.clamp(0, 1),
                         lineHeight: 8,
                         progressColor: context.colors.blueAccent,
                         backgroundColor: context.colors.backgroundElevation,
@@ -110,12 +121,16 @@ class DailyFeedRateWidget extends StatelessWidget {
                 );
               }).toList(),
             ),
+
             GestureDetector(
               onTap: onAddFoodTap,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 6),
                 width: double.infinity,
-                decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(16)),
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: context.colors.accentSub,
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Strings.addFood.text(16, 20, 500).c(context.colors.white).copyWith(textAlign: TextAlign.center),
               ),
             ),
@@ -126,9 +141,53 @@ class DailyFeedRateWidget extends StatelessWidget {
   }
 
   double safePercent(double percent) {
-    if (percent.isNaN || percent.isInfinite) return 0.0;
-    if (percent < 0) return 0.0;
-    if (percent > 1) return 1.0;
-    return percent;
+    if (percent.isNaN || percent.isInfinite) return 0;
+    return percent.clamp(0, 1);
+  }
+}
+
+class _SideCalories extends StatelessWidget {
+  final String title;
+  final String value;
+  final bool alignRight;
+
+  const _SideCalories({
+    required this.title,
+    required this.value,
+    this.alignRight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 90),
+      child: Column(
+        mainAxisAlignment: .center,
+        spacing: 6,
+        children: [
+          title
+              .text(14, 16, 400)
+              .copyWith(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: value
+                    .text(16, 20, 500)
+                    .copyWith(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+              ),
+              const SizedBox(width: 4),
+              Strings.kcal.text(12, 14, 400),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
