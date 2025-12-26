@@ -59,12 +59,9 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
 
   void _onSearchChanged(AddMealsManager manager) {
     final text = _searchController.text.trim();
-
-    // Cancel qilish oldingi timer
     _debounce?.cancel();
 
     if (text.isEmpty) {
-      // Agar text bo'sh bo'lsa darhol search mode'dan chiqish
       manager.onSearchChanged('');
       return;
     }
@@ -166,28 +163,29 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                 Expanded(
                   child: Builder(
                     builder: (_) {
-                      if (state.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
                       if (state.selectedToggleIndex == 3) {
                         return FavouriteFoodGrid(
+                          isLoading: state.isFavourite,
                           foods: state.favouriteFoods,
                           onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
                         );
                       }
                       if (state.selectedToggleIndex == 1) {
                         return FavouriteFoodGrid(
+                          isLoading: state.isLatest,
                           foods: state.latestFoods,
                           onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
                         );
                       }
                       if (state.selectedToggleIndex == 2) {
                         return FavouriteFoodGrid(
+                          isLoading: state.isUserFoods,
                           foods: state.userFoods,
                           onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
                         );
                       }
                       return MealTypeGrid(
+                        isLoading: state.isMealCategory,
                         mealTypes: state.mealCategories,
                         onMealTypeSelected: (meal) => manager.openDishesPage(meal),
                       );
@@ -199,10 +197,8 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                 Expanded(
                   child: Builder(
                     builder: (_) {
-                      if (state.isSearch) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
                       return FavouriteFoodGrid(
+                        isLoading: state.isSearch,
                         foods: state.searchFoods,
                         onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
                       );
@@ -218,6 +214,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
 
   void openAboutDishPage(BuildContext context, FoodModel food, AddMealsManager manager, bool isFavourite) {
     context.showAppBottomSheet(
+      initialChildSize: 0.75,
       child: DishInfoPage(
         isFavourite: isFavourite,
         foodItem: food,

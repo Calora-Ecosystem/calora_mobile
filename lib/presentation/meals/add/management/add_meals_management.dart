@@ -20,6 +20,10 @@ abstract class AddMealsState with _$AddMealsState {
     @Default([]) List<FoodModel> searchFoods,
     @Default(false) bool isSearch,
     @Default(false) bool isSearchMode,
+    @Default(false) bool isMealCategory,
+    @Default(false) bool isLatest,
+    @Default(false) bool isUserFoods,
+    @Default(false) bool isFavourite,
   }) = _AddMealsState;
 }
 

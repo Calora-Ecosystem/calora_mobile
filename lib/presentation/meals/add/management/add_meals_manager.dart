@@ -19,19 +19,19 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
 
   void fetchFoodCategory() {
     _repo.fetchFoodCategory().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (categories) => emit(state.copyWith(mealCategories: categories, isLoading: false)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
+      onStart: () => emit(state.copyWith(isMealCategory: true)),
+      onData: (categories) => emit(state.copyWith(mealCategories: categories, isMealCategory: false)),
+      onDone: () => emit(state.copyWith(isMealCategory: false)),
+      onError: (error) => emit(state.copyWith(isMealCategory: false)),
     );
   }
 
   void fetchFavouriteFoods() {
     _repo.getFavouriteFoods().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (foods) => emit(state.copyWith(favouriteFoods: foods, isLoading: false)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
+      onStart: () => emit(state.copyWith(isFavourite: true)),
+      onData: (foods) => emit(state.copyWith(favouriteFoods: foods, isFavourite: false)),
+      onDone: () => emit(state.copyWith(isFavourite: false)),
+      onError: (error) => emit(state.copyWith(isFavourite: false)),
     );
   }
 
@@ -110,10 +110,10 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     _repo
         .fetchFoods(true)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (foods) => emit(state.copyWith(latestFoods: foods, isLoading: false)),
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onStart: () => emit(state.copyWith(isLatest: true)),
+          onData: (foods) => emit(state.copyWith(latestFoods: foods, isLatest: false)),
+          onDone: () => emit(state.copyWith(isLatest: false)),
+          onError: (error) => emit(state.copyWith(isLatest: false)),
         );
   }
 
@@ -187,7 +187,6 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     final query = text.trim();
 
     if (query.isEmpty) {
-      // Text bo'sh bo'lsa, search mode'dan chiqish
       emit(
         state.copyWith(
           isSearchMode: false,
@@ -199,11 +198,9 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     }
 
     if (query.length >= 3) {
-      // Search mode'ga kirish va qidiruv boshlash
       emit(state.copyWith(isSearchMode: true));
       fetchSearchFood(query);
     } else {
-      // 3 ta harfdan kam bo'lsa, faqat search mode'ga kirish
       emit(
         state.copyWith(
           isSearchMode: true,
