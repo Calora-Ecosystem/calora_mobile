@@ -71,10 +71,11 @@ class StepsApi {
     }).toList();
   }
 
-  Future<MetricsRequest> getUserMetrics() async {
-    final response = await _dio.get('users/steps/metrics');
-    final data = response.data as Map<String, dynamic>;
-    return MetricsRequest(foots: 100, distance: 100, kcal: 50);
+  Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {
+    final int? userId = await profileStore.getUserId();
+    final query = {'from': from, 'to': to, 'userId': userId};
+    final response = await _dio.get('users/steps/metrics', queryParameters: query);
+    return MetricsRequest.fromJson(response.data['content']);
   }
 
   Future<List<NormsRequest>> getNorms() async {
@@ -99,5 +100,14 @@ class StepsApi {
   Future<void> sendStepDataDateRange({List<StepsWithMetricsRequest> steps = const []}) async {
     final payload = steps.map((element) => element.toJson()).toList();
     await _dio.post('/users/dailies/batch', data: payload);
+  }
+
+  Future<bool> deleteUserDailyData({required String date}) async {
+    try {
+      final response = await _dio.delete('/users/dailies/reset', queryParameters: {'date': date});
+      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
+    } on DioException {
+      return false;
+    }
   }
 }

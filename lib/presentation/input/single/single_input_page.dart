@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/metrics_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,7 @@ class SingleInputPage extends StatefulWidget {
   final String message;
   final String metrics;
   final Function(String) onSave;
+  final bool loading;
 
   const SingleInputPage({
     super.key,
@@ -18,6 +20,7 @@ class SingleInputPage extends StatefulWidget {
     this.metrics = '',
     required this.message,
     required this.onSave,
+    this.loading = false,
   });
 
   @override
@@ -99,29 +102,18 @@ class _SingleInputPageState extends State<SingleInputPage> {
             ),
           ),
           const SizedBox(height: 50),
-          GestureDetector(
-            onTap: () {
+          Button(
+            loading: widget.loading,
+            text: Strings.save,
+            onPressed: () {
               // Remove metrics before saving if they exist
               String textToSave = controller.text;
               if (widget.metrics.isNotEmpty && textToSave.endsWith(widget.metrics)) {
-                textToSave = textToSave
-                    .substring(0, textToSave.length - widget.metrics.length)
-                    .trim();
+                textToSave =
+                    textToSave.substring(0, textToSave.length - widget.metrics.length).trim();
               }
               widget.onSave(textToSave);
             },
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.colors.accentSub,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Strings.save
-                  .text(16, 20, 500)
-                  .c(context.colors.white)
-                  .copyWith(textAlign: TextAlign.center),
-            ),
           ),
           const SizedBox(height: 16),
         ],

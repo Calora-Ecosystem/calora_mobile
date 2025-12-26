@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ConfirmPage extends StatelessWidget {
@@ -17,6 +18,7 @@ class ConfirmPage extends StatelessWidget {
   final Color? confirmBackgroundColor;
   final Color? confirmTextColor;
   final Color? titleColor;
+  final bool loading;
 
   const ConfirmPage({
     super.key,
@@ -33,6 +35,7 @@ class ConfirmPage extends StatelessWidget {
     this.confirmBackgroundColor,
     this.confirmTextColor,
     this.titleColor,
+    this.loading = false,
   });
 
   @override
@@ -61,30 +64,26 @@ class ConfirmPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      onCancel();
-                    },
+                    onTap: onCancel,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       decoration: BoxDecoration(
                         color: cancelBackgroundColor ?? colors.errorLighter,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: cancelText
-                          .text(16, 20, 500)
-                          .c(cancelTextColor ?? colors.errorBase)
-                          .copyWith(textAlign: TextAlign.center),
+                      child: loading
+                          ? const CupertinoActivityIndicator()
+                          : cancelText
+                                .text(16, 20, 500)
+                                .c(cancelTextColor ?? colors.errorBase)
+                                .copyWith(textAlign: TextAlign.center),
                     ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      onConfirm();
-                    },
+                    onTap: onConfirm,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       decoration: BoxDecoration(

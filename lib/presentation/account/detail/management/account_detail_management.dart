@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/detail/detail_info.dart';
+import 'package:calora/domain/model/detail/detail_info_type.dart';
 import 'package:calora/domain/model/selection/Selection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -11,6 +12,7 @@ abstract class AccountDetailState with _$AccountDetailState {
     @Default(false) bool saving,
     List<DetailInfo>? detailInfos,
     Selection? selected,
+    DetailInfoType? updatingType,
   }) = _AccountDetailState;
 }
 

@@ -1,0 +1,331 @@
+str,en_US,uz_UZ,ru_RU
+emailAddress,Email manzil,Email manzil,Email manzil
+doContinue,Davom etish,Davom etish,Davom etish
+or,yoki,yoki,yoki
+continueWithApple,Apple orqali davom etish,Apple orqali davom etish,Apple orqali davom etish
+continueWithGoogle,Google orqali davom etish,Google orqali davom etish,Google orqali davom etish
+termsOfUse,"Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman","Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman","Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman"
+resend,Qayta yuborish,Qayta yuborish,Отправить повторно
+select_language,Select the language,Tilni tanlang,Выберите язык
+changing_lifestyle,Lifestyle change,Hayot tarzini o’zgartirish,Изменение образа жизни
+changing_lifestyle_desc,Don't delay changing your lifestyle. Take your first step today.,Hayot tarzini o‘zgartirishni kechiktirma. Bugun birinchi qadamingni qo‘y.,Не откладывайте изменение образа жизни. Сделайте первый шаг уже сегодня.
+healthy_eating,Healthy eating,Sog’lom ovqatlanish,Здоровое питание
+healthy_eating_desc,"It's now easy to track what you eat every day. Just open your phone, turn on the camera - we'll count it all. ","Har kuni nima yeyotganingni nazorat qilish endi oson. Telefoningni och, kamerani yoq – biz hammasini hisoblab beramiz","Теперь легко отслеживать, что вы едите каждый день. Просто откройте телефон, включите камеру — мы всё посчитаем."
+enough_day,30 days is enough for change,30 kun o‘zgarish uchun yetarli,30 дней достаточно для изменений
+enough_day_desc,"Workout at home, join the 30-day challenge, and see the results for yourself.","Uyda mashq qil, 30 kunlik challenge’ga qo‘shil va natijani o‘zing ko‘r.","Тренируйтесь дома, присоединяйтесь к 30-дневному марафону и оцените результаты сами."
+daily_water_norm,Daily water intake is very important!,Kunlik suv normasi bu juda muhim !,Ежедневное потребление воды очень важно!
+daily_water_norm_desc,"Don't forget to drink water, we'll count your steps. While we remind you, you just keep going.","Suv ichishni unutib qo‘yma, qadamlaringni ham sanaymiz. Biz eslatar ekanmiz, sen faqat davom et.","Не забывайте пить воду, мы будем считать ваши шаги. Пока мы напоминаем, просто продолжайте идти."
+we_have_questions,We have a few questions for you !,Sizga bir neshta savollarimiz bor !,У нас есть к вам несколько вопросов !
+what_is_your_name,What is your name ?,Ismingiz nima ?,Как вас зовут ?
+what_is_your_gender,What is your gender ?,Jinsingiz nima ?,Ваш пол ?
+male,Male,Erkak kishi,Мужской
+female,Female,Ayol kishi,Женщина
+choose_your_goals,Choose your goals ?,Maqsadlaringizni tanlang ?,Выберите свои цели ?
+weight_loss,Weight loss,Vazn yo'qotish (ozish),Потеря веса
+maintaining_body,Maintaining the body in its current state,Tanani xozirgi xolatda saqlash,Поддержание тела в его текущем состоянии
+muscle_development,Muscle development (weight gain),Mushaklarni rivojlantirish (vazn olish),Развитие мышц (увеличение веса)
+previous,Previous,Oldingi,Предыдущий
+next,Next,Keyingi,Следующий
+when_where_you_born,When were you born ?,Qachon tug’ilgansiz ?,Когда вы родились ?
+day,Day,Kun,День
+month,Month,Oy,Месяц
+year,Year,Yil,Год
+what_is_your_height,What is your height ?,Bo’yingizni o‘lchami qancha ?,Какой у вас рост ?
+how_many_kilograms,How many kilograms do you weigh ?,Vazningiz necha kilogram ?,Сколько килограммов вы весите ?
+weight_change,How much did you aim to change your weight ?,Vazningizni qanchaga o’zgartirishni maqsad qildingiz ?,Насколько вы стремились изменить свой вес ?
+active_per_day,How much time do you spend being active per day ?,Kunlik qancha vaqt aktiv harakatda bo‘lasiz ?,Сколько времени в день вы тратите на активную деятельность?
+planning_daily_schedule,We are planning your daily schedule...,Biz sizning kunlik rejangizni tuzayabmiz...,Мы планируем ваш ежедневный график...
+analyzing_activity_level,We are analyzing your activity level...,Faollig darajangizni tahlil qilayabmiz...,Мы анализируем ваш уровень активности...
+smart_reminder_plan,Configuring Smart Reminder Plan...,Smart eslatma rejasi sozlanmoqda ...,Настройка плана умных напоминаний...
+home,Home,Uy,Дом
+calories,Calories,Kaloriya,Калории
+course,Course,Kurs,Курс
+steps,Steps,Qadamlar,Шаги
+profile,Profile,Profil,Профиль
+finish,Conclusion,Yakunlash,Заключение
+daily ,Daily,Kunlik,Ежедневно
+weekly,Weekly,Haftalik,Еженедельно
+monthly,Monthly,Oylik,Ежемесячно
+on_time,On time,Vaqtda,Вовремя
+distance_in_km,Distance in km,Km masofaga,Расстояние в км
+calorie,Calorie,Kaloriya,Калории
+min_activity,Minimum activity,Minimal aktivlik,Минимальная активность
+low_activity,Low activity,Kam aktivlik,Низкая активность
+average_activity,Average activity,O'rtacha aktivlik,Средняя активность
+high_activity,High activity,Yuqori aktivlik,Высокая активность
+very_high_activity,Very high activity,Juda yuqori aktivlik,Очень высокая активность
+goal,Goal,Maqsad,Цель
+weekly_results,Weekly results,Haftalik natijalar,Еженедельные результаты
+avarage,Average,O'rtacha,Средний
+total,Total,Jami,Общий
+compared_to_last_week,Compared to last week,O'tgan haftaga nisbatan,По сравнению с прошлой неделей
+monthly_results,Monthly results,Oylik natijalar,Ежемесячные результаты
+compared_to_last_month,Compared to last month,O'tgan oyga nisbatan,По сравнению с прошлым месяцем
+in_km_distance,In km distance,Km masofa ,В км расстояние
+calories,Calories,Kaloriya,Калории
+on_time,On time,Vaqtda,Вовремя
+data_cleaning,Data cleaning,Malumotlarni tozalash,Очистка данных
+share,Share,Ulashish,Делиться
+share_app,Share the app,Ilovani ulashish,Поделитесь приложением
+cleaning,Cleaning,Tozalash,Уборка
+rejection,Rejection,Rad etish,Отклонение
+are_you_sure_delete_statistic,Are you sure you want to clear these statistics?,"Ushbu statistikani tozalamoqchisiz, rostdan ishonchingiz komilmi ?","Вы уверены, что хотите очистить эту статистику?"
+steps_to_set_a_goal,Steps to set a goal,Qadamlar maqsadni sozlash,Шаги для постановки цели
+actions,Actions,Amallar,Действия
+save,Save,Saqlash,Сохранять
+body_mass_index,Body mass index,Tana massasi indeksi,Индекс массы тела
+progress,Progress,Progress,Прогресс
+remained,Remained,Qoldi,Остался
+account_information,Account information,Hisob ma'lumotlari,Информация об учетной записи
+norms,Norms,Normalar,Нормы
+application_language,Application language,Ilova tili,Язык приложения
+setting_up_notification,Setting up notifications,Bildirishnomalarni sozlash,Настройка уведомлений
+make_an_offer,Make an offer,Taklif qilish,Сделать предложение
+about_calora,About Calora,Calora haqida,О Калоре
+help,Help,Yordam,Помощь
+name,Name,Ism,Имя
+last_name,Last name,Familiya,Фамилия
+birthday,Birthday,Tug’ilgan kun,День рождения
+height,Height,Bo'y,Высота
+weight,Weight,Vazn,Масса
+gender,Gender,Jins,Пол
+activity_level,Activity level,Aktivlik darajasi,Уровень активности
+metrics,Metrics,Metrikalar,Метрики
+input,Input,Kiritish,Вход
+through_apple_id,Through Apple ID,Apple ID orqali,Через Apple ID
+by_mail,By mail,Pochta orqali,По почте
+via_google,Via Google,Google orqali,Через Google
+verified_mail,Verified by mail,Pochta orqali tasdiqlangan,Подтверждено по почте
+verified_google_account,Google account verified,Google akkaunti tasdiqlangan,Аккаунт Google подтвержден
+verified_apple,Verified by Apple ID,Apple ID orqali tasdiqlangan,Подтверждено Apple ID
+automatic_tracking,Automatic tracking,Avtomatik kuzatish,Автоматическое отслеживание
+subscribe,Subscribe,Obuna,Подписаться
+restore_purchase,Restore purchase,Xaridni tiklash,Восстановить покупку
+connect,Connect,Bog‘lash,Соединять
+log_out,Log out,Hisobdan chiqish,Выйти
+exit,Exit,Chiqish,Выход
+are_you_sure_want_log_out,Are you sure you want to log out of your app account?,Rostdan ham ilovadagi hisobingizdan chiqmoqchisiz ?,"Вы уверены, что хотите выйти из своей учетной записи приложения?"
+write_help,"If you encounter any problems, write to our telegram bot or email address. We will answer you soon!",Muammolarga duch kelsangiz telegram botimiz  yoki elektron manzilimizga yozing.Tezda sizga javob beramiz ! ,"Если у вас возникнут проблемы, напишите нам в Telegram или на почту. Мы ответим вам в ближайшее время!"
+help_desk,Help desk,Yordam xizmati,Справочная служба 
+calora_about_text,"Calora is an innovative platform designed to make self-assessment easier for users. The app helps users analyze their learning outcomes and provides them with the resources they need to achieve their goals. Calora’s UI is intuitive, making it easy for users to navigate. The app also offers a variety of tools and features to make the self-assessment process more effective and engaging for users.","Calora ilovasi, foydalanuvchilarga o'z-o'zini baholash jarayonini osonlashtirish uchun mo'ljallangan innovatsion platformadir. Bu ilova o'qish jarayonidagi natijalarni tahlil qilishda yordam beradi, shuningdek, foydalanuvchilarga o'z maqsadlariga erishish uchun zarur bo'lgan resurslarni taqdim etadi. Calora UI intuitiv interfeysi bilan ajralib turadi, bu esa foydalanuvchilarga oson navigatsiya qilish imkonini beradi. Ilova, shuningdek, foydalanuvchilarning o'z-o'zini baholash jarayonini yanada samarali va qiziqarli qilish uchun turli xil vositalar va funksiyalarni taklif etadi.",
+welcome_to_healthy_life,Welcome to a healthy life!,Sog’lom hayotga xush kelibsiz !,Добро пожаловать в здоровую жизнь!
+version,Application version,Ilova versiyasi,Версия приложения
+daily_calorie_intake,Daily calorie intake,Kunlik kaloriya normasi,Суточная норма потребления калорий
+enter_your_daily_calorie,Enter your daily calorie intake,Kunlik kaloriya normasini kiriting,Введите вашу суточную норму потребления калорий
+daily_protein_intake,Daily protein intake,Kunlik oqsil normasi,Суточное потребление белка
+enter_your_daily_protein,Enter your daily protein intake,Kunlik oqsil normasini kiriting,Введите вашу суточную норму потребления белка
+daily_carbohydrade_intake,Daily carbohydrate intake,Kunlik uglevod normasi,Суточное потребление углеводов
+enter_your_daily_carbohydrate,Enter your daily carbohydrate intake,Kunlik uglevod normasini kiriting,Введите вашу суточную норму потребления углеводов
+daily_water_intake,Daily water intake,Kunlik suv normasi,Ежедневное потребление воды
+enter_your_daily_water,Enter your daily water intake.,Kunlik suv normasini kiriting,Укажите суточную норму потребления воды.
+daily_step_rate,Daily step rate,Kunlik qadamlar normasi,Ежедневная скорость шага
+enter_your_daily_step_goal,Enter your daily step goal,Kunlik qadamlar normasini kiriting,Введите вашу ежедневную цель по количеству шагов
+enter_your_daily_fat,Enter your daily fat intake,Kunlik yog' normasini kiriting,Введите ваше ежедневное потребление жиров
+daily_fat_intake,Daily fat intake,Kunlik yog' normasi,Суточное потребление жиров
+january,January,Yanvar,Январь
+february,February,Fevral,Февраль
+march,March,Mart,Март 
+april,April,Aprel,Апрель
+may,May,May,Май
+june,June,Iyun,Июнь
+july,July,Iyul,Июль
+august,August,Avgust,Август
+september,September,Sentabr,Сентябрь
+october,October,Oktabr,Октябрь
+november,November,Noyabr,Ноябрь
+december,December,Dekabr,Декабрь
+male,Male,Erkak,Мужской
+female,Female,Ayol,Женский
+choose_gender,Choose gender,Jinsni tanlang,Выберите пол
+choose_goal,Choose goal,Maqsadni tanlang,Выберите цель
+choose_activity_level,Choose activity level,Aktivlik tarajasini tanlang,Выберите уровень активности
+choose_metrics,Choose metrics,Metrikalarni tanlang,Выберите метрики
+setting_up_reminders,Setting up reminders,Eslatmalarni sozlash,Настройка напоминаний
+water_drink_reminder,Water drinking reminder,Suv ichish vaqtini eslatish,Напоминание о питье воды
+every_1_hour,Every 1 hour,Har 1 soatda,Каждый 1 час
+every_2_hour,Every 2 hour,Har 2 soatda,Каждый 2 час
+every_3_hour,Every 3 hour,Har 3 soatda,Каждый 3 час
+every_4_hour,Every 4 hour,Har 4 soatda,Каждый 4 час
+every_5_hour,Every 5 hour,Har 5 soatda,Каждый 5 час
+before_10_min,10 minutes before,10 daqiqa oldin,За 10 минут до
+before_20_min,20 minutes before,20 daqiqa oldin,За 20 минут до
+before_30_min,30 minutes before,30 daqiqa oldin,За 30 минут до
+before_40_min,40 minutes before,40 daqiqa oldin,За 40 минут до
+before_50_min,50 minutes before,50 daqiqa oldin,За 50 минут до
+bedtime_reminder,Bedtime reminder,Uxlash vaqtini eslatish ,Напоминание о времени отхода ко сну
+reminder_of_daily_challange_times,Reminder of daily challenge times,Kunlik chellenj vaqtlarini eslatish,Напоминание о времени ежедневных испытаний
+lunch_time_reminder,Lunch time reminder,Tushlik vaqtini eslatish,Напоминание о времени обеда
+dinner_time_reminder,Dinner time reminder,Kechki tamaddi vaqtini eslatish,Напоминание о времени ужина
+breakfast_time_reminder,Breakfast time reminder,Nonushta vaqtini eslatish,Напоминание о завтраке
+all_courses,All courses,Barcha kurslar,Все курсы
+healthy_weight_loss_classes,Healthy weight loss classes,Sog’lom ozish darslari,Здоровые занятия по снижению веса
+video_lessons_onlosing_weight,Video lessons on losing weight through proper nutrition,Tog'ri ovqatlanish orqali ozishga bag'ishlangan video darslar,Видеоуроки по похудению с помощью правильного питания
+healthy_mass_gain_classes,Healthy mass gain classes,Sog‘lom massa olish darslari,Здоровые занятия по набору массы
+video_lessons_onbuilding_body,Video lessons on building body and muscle mass,Tana va mushak massasini oshirishga baģishlangan video darslar,Видеоуроки по наращиванию тела и мышечной массы
+day_30_weight_loss_workout,30 day weight loss workout,30 kunlik ozish mashqlar,30-дневная тренировка для похудения
+day_30_exercise_weight_loss_program,30-day exercise weight loss program,30 kunlik mashqlar orqali vazn kamaytirish dasturi,30-дневная программа упражнений для похудения
+participation,Participation,Qatnashish,Участие
+enter_your_physical_condition,Enter your physical condition.,Jismoniy xolatingizni kiriting,Укажите свое физическое состояние.
+i_am_fine,"I am fine, I am healthy.","Menda hammasi yaxshi, sog’lomman","У меня все хорошо, я здоров."
+minimum_load,Minimum load (recommended for those who are overweight),"Minimal yuk, (ortiqcha vazni borlar uchun tavsiya qilinadi)",Минимальная нагрузка (рекомендуется для людей с избыточным весом)
+choose_your_workout_level,Choose your workout level!,Mashq darajasini tanlang !,Выберите свой уровень тренировки!
+easy_start,Easy start (5-7 minutes),Yengil boshlash (5-7 daqiqa),Легкий старт (5-7 минут)
+without_overload,Without overload (8-11 minutes),Ortiqcha yuklamasiz (8-11 daqiqa),Без перегрузки (8-11 минут)
+return_to_activity,Return to activity (12-15 minutes),Faollikga qaytish (12-15 daqiqa),Возврат к деятельности (12–15 минут)
+increase_activity,Increase activity (15-20 minutes),Faollikni oshirish (15-20 daqiqa),Увеличьте активность (15-20 минут)
+high_level_activity,High-level activity (20-30 minutes),Yuqori darajadagi faollik (20-30 daqiqa),Активность высокого уровня (20-30 минут)
+enter_workout_time,Enter workout time,Mashq vaqtini kiriting,Введите время тренировки
+change_within_30_days,Change within 30 days,30 kun ichida o'zgaring,Изменение в течение 30 дней
+start,Start,Boshlash,Начинать
+start_easy,Easy start,Yengil boshlash,Легкий старт
+done,Done,Bajarildi,Сделанный
+you_can_relax_tuday,You can relax today,Bugun dam olishingiz mumkin,Сегодня вы можете расслабиться.
+degree,Degree,Daraja,Степень
+duration,Duration,Davomiyligi,Продолжительность
+your_body_and_muscless_need_to_rest,Your body and muscles need to rest.,Sizning tanangiz va mushaklaringiz dam olishlari kerak.,Вашему телу и мышцам необходим отдых.
+close,Close,Yopish,Закрывать
+change,Change,O‘zgartirish,Изменять
+exercises,Exercises,Mashqlar,Упражнения
+animation,Animation,Animatsiya,Анимация
+video_exercises,Video exercises,Video mashqlar,Видео упражнения
+postpone,Postpone,Keyinga qoldirish,Откладывать
+why_did_you_finish_the_exercises,Why did you finish the exercises?,Nega mashqlarni yakunladingiz ?,Почему вы закончили упражнения?
+i_just_wanted_to_see,I just wanted to see.,Shunchaki ko’rmoqchi edim,Я просто хотел посмотреть.
+exercises_are_very_easy,The exercises are very easy.,Mashqlar juda oson,Упражнения очень легкие.
+exercises_are_very_dificult,The exercises are very difficult.,Mashqlar juda qiyin,Упражнения очень сложные.
+next_exercise,Next exercise,Keyingi mashq,Следующее упражнение
+congratulations,Congratulations!,Tabriklayman !,Поздравляю!
+your_training_is_over,Your training is over!,Mashg‘ulotingiz yakunlandi !,Ваше обучение окончено!
+how_are_you_feeling,How are you feeling?,O‘zingizni qanaqa xis qilyabsiz ?,Как вы себя чувствуете?
+heavy,Heavy,Og‘ir,Тяжелый
+average,Average,O'rtacha,Средний
+good,Good,Yaxshi,Хороший
+get_ready,Get ready,Tayyorlaning,Будьте готовы
+will_you_finish_the_exercises,Will you finish the exercises?,Mashqlarni yakunlaysizmi ?,Вы закончите упражнения?
+you_made_a_good_start,"You've made a good start, will you keep going?","Yaxshi boshlab oldingiz, xarakatda davom etasizmi ?",Вы хорошо начали. Будете продолжать?
+continue_btn,Continue,Davom etish,Продолжать
+we_started_the_exercises,We started the exercises !,Mashqlarni boshladik !,Мы приступили к упражнениям !
+i_read_and_agree,I have read and agree to the,Men,Я ознакомился и согласен с
+terms_of_use_link,Terms of Use,Foydalanuvchi shartlarini,Условиями использования
+read_and_agree_end,,o'rganib chiqdim va roziman,
+your_program_is_ready,Your program is ready!,Sizning programmangiz tayyor!,Ваша программа готова!
+meal_plan,Meal plan,Ovqatlanish rejasi,План питания
+daily_goal,Daily goal:,Kunlik maqsad:,Ежедневная цель:
+before_starting_any_diet,"Before starting any diet, consult your doctor to make sure it is safe for you.","Har qanday parhezni boshlashdan oldin, u siz uchun xavfsiz ekanligiga ishonch hosil qilish uchun shifokoringiz bilan maslahatlashing.","Прежде чем начинать какую-либо диету, проконсультируйтесь с врачом, чтобы убедиться, что она безопасна для вас."
+water,Water,Suv,Вода
+activity,Activity,Aktivlik,Активность
+enter_email_address,Enter email address,Email manzilini kiriting,Введите адрес электронной почты
+email_address_is_wrong_format,Email address is in the wrong format.,Email manzili noto'g'ro formatda,Адрес электронной почты имеет неправильный формат.
+you_must_agree_to_the_terms,You must agree to the terms of use.,Foydalanish shartlariga rozilik berishingiz kerak,Вы должны согласиться с условиями использования.
+brief_information,Brief information about the course!,Kurs haqida qisqacha ma’lumot !,Краткая информация о курсе!
+weight_loss_course,Weight loss course,Ozish kursi,Курс похудения
+videos,Videos,Videolar,Видео
+to_watch_this_video,"To watch this video, first watch the previous video and finish it!",Ushbu videoni ko'rish uchun avvalo oldingi videoni ko'ring va uni tugating!,"Чтобы посмотреть это видео, сначала посмотрите предыдущее видео и досмотрите его до конца!"
+mass_gain_course,Mass gain course,Massani oshirish kursi,Курс набора массы
+obesity_stage_1,Obesity stage I,Semirib ketish I bosqichi,Ожирение I стадии
+obesity_stage_2,Obesity stage Ill,Semirib ketish II bosqichi,Ожирение Il стадии
+obesity_stage_3,Obesity stage Ill,Semirib ketish IIl bosqichi,Ожирение Ill стадии
+thinnes,Thinness,Ozg‘inlik,Худоба
+normal,Normal,Normal,Нормальный
+over_weight,Overweight,Ortiqcha vazn,Избыточный вес
+hello,Hello !,Assalomu alaykum !,Привет !
+plan_for_today,Our plan for today!,Bugungi rejamiz !,Наш план на сегодня!
+try_it_for_free,Try it for free !,Bepul sinab ko’ring !,Попробуйте бесплатно!
+daily_feed_rate,Daily feed rate,Kunlik ozuqa normasi,Суточная норма кормления
+norm,Norm,Norma,Норма
+proteins,Proteins,Oqsillar,Белки
+carbohydrates,Carbohydrates,Uglevodlar,Углеводы
+oils,Oils,Yog’lar,Масла
+add_food,Add food,Ovqat qo‘shish,Добавить еду
+your_step,Your step,Sizning qadamingiz,Твой шаг
+your_water_intake,Your water intake,Sizning suv normangiz,Ваше потребление воды
+choose_day,Choose a day,Kun tanlang,Выберите день
+take_a_picture,Take a picture of your face and analyze your health through artificial intelligence,Yuzingizni suratga oling va sun’iy intellekt orqali sog’ligingizni tahlil qiling,Сфотографируйте свое лицо и проанализируйте состояние здоровья с помощью искусственного интеллекта
+take_picture_of_your_face_like_this,Take a picture of your face like this!,Yuzingizni quyidagicha suratga oling !,Сфотографируйте свое лицо вот так!
+stand_in_front_of_the_camera,Stand in front of the camera !,Kamera qarshida tik turing !,Встаньте перед камерой!
+make_sure_the_lighting_is_good,Make sure the lighting is good !,Yorug’lik yaxshi bo’lishiga e’tibor bering !,"Убедитесь, что освещение хорошее!"
+let_your_face_be_fully_visible,Let your face be fully visible !,Yuzingiz to’liq ko’rinsin !,Пусть ваше лицо будет полностью видно!
+allow_access_to_your_camera,Allow access to your camera to use Calora AI,Calora AIdan foydanlanish uchun kamerangizdan foydalanishga ruxsat bering,Разрешите доступ к вашей камере для использования Calora AI
+allow,Allow,Ruxsat berish,Позволять
+turn_your_face_to_this_square,Turn your face to this square !,Yuzingizni ushbu maydonga to’g’irlang !,Повернитесь лицом к этому квадрату!
+your_facial_features_are_being_analyzed,Your facial features are being analyzed...,Yuzingizdagi belgilar tahlil qilinmoqda...,Ваши черты лица анализируются...
+the_things_your_eyes_analyzed,The signs in your eyes are being analyzed...,Ko’zingizdagi belgilar tahlil qilinmoqda...,Знаки в ваших глазах анализируются...
+additional_information_is_being_analyzed,Additional information is being analyzed...,Qo’shimcha ma’lumotlar analiz qilinmoqda...,Дополнительная информация анализируется...
+analyzing_your_photo,"Calora AI is analyzing your photo, this may take a few seconds!",Calora AI sizning rasmingizni tahlil qilmoqda bu bir-necha sekund vaqt olishi mumkin !,Calora AI анализирует вашу фотографию. Это может занять несколько секунд!
+your_physical_health_level,Your physical health level,Sizning tana sog’lomlik darajangiz,Ваш уровень физического здоровья
+body_analysis,Body analysis via Calora AI,Calora AI orqali tana tahlili,Анализ тела с помощью Calora AI
+notification,Notification,Bildirishnoma,Уведомление
+calora_ai,Calora Ai,Calora Ai,Calora Ai
+according_to_plan,According to plan,Reja bo‘yicha,Согласно плану
+food_consumed,Food consumed,Iste’mol qilingan ozuqa,Потребляемая пища
+leftover_food_plan,Leftover food plan,Qoldiq ozuqa rejasi,План питания из остатков еды
+breakfast,Breakfast,Nonushta,Завтрак
+lunch,Lunch,Tushlik,Обед
+snacks,Snacks,Aperatiflar,Закуски
+dinner,Dinner,Kechki ovqat,Ужин
+from_kcal,from kcal,kkaldan,из ккал
+to_remind_you_of_meal_times,To remind you of meal times,Ovqat vaqtlarini eslatish uchun,Чтобы напомнить вам о времени приема пищи
+add_food,Add food,Ovqatni qo’shish,Добавить еду
+meals_are_not_available,Meals are not available.,Ovqatlar mavjud emas,Питание не предоставляется.
+add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь укажите ваши последние приемы пищи.
+search_for_food_or_product,Search for food or product,Ovqat yoki maxsulotni qidirish,Поиск продуктов питания или товаров
+creation,Creation,Yaratish,Творение
+scanning,Scanning,Skanerlash,Сканирование
+by_voice,By voice,Ovoz orqali,Голосом
+all_dishes,All dishes,Barcha taomlar,Все блюда
+last_eaten,Last eaten,So‘nggi yeyilganlar,Последний съеденный
+favorite_foods,Favorite foods,Sevimli taomlar,Любимые блюда
+those_i_created,Those I created,Men yaratganlar,"Те, которых я создал."
+liquid_foods,Liquid foods,Suyuq taomlar,Жидкие продукты
+deep_dishes,Deep dishes,Quyuq taomlar,Глубокие тарелки
+drinks,Drinks,Ichimliklar,Напитки
+breakfast,Breakfast,Nonushta,Завтрак
+fast_food,Fast food,Fast foodlar,Быстрое питание
+added,Added,Qo’shildi,Добавлен
+the_composition_of_the_food_is_being_determined,The composition of the food is being determined...,Ovqatning tarkibi aniqlanmoqda...,Состав продуктов питания находится в стадии определения...
+the_amount_of_food_is_measured,The amount of food is measured...,Ovqat miqdori o’lchanyabdi...,Количество пищи измеряется...
+the_calorie_content_of_the_food_is_being_measured,The calorie content of the food is being measured...,Ovqatning kaloriyasi o’lchanmoqda...,Измеряется калорийность продуктов питания...
+the_data_in_the_image_is_being_processed_we_will_announce_the_results_soon,"The data in the image is being processed, we will announce the results soon!","Rasmdagi ma’lumotlar qayta ishlanmoqda , tez orada natijasini e’lon qilamiz !","Данные на изображении обрабатываются, результаты мы сообщим в ближайшее время!"
+scanning,Scanning,Skanerlash,Сканирование
+place_the_food_in_the_designated_area_and_take_a_picture,Place the food in the designated area and take a picture!,Taomni belgilangan maydonga to’g’irlab rasmga oling!,Разложите еду в отведенном месте и сфотографируйте!
+the_value_of_the_food_determined,The value of the food determined,Aniqlangan ovqatning qiymati,Определена стоимость продуктов питания.
+nutritional_value_of_food,Nutritional value of food,Ovqatning ozuqaviyligi,Пищевая ценность продуктов питания
+name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
+tell_me_what_you_ate_say_something_like_coffee_300_grams_of_white_bread_3_eggs,"Tell me what you ate: Say something like coffee, 300 grams of white bread, 3 eggs.","Nima ovqat yeganingizni ayting: Qahva, 300 gr oq non, 3 ta tuxum kabi ayting.","Расскажите, что вы ели: например, кофе, 300 грамм белого хлеба и 3 яйца."
+the_information_in_your_voicemail_is_being_analyzed,The information in your voicemail is being analyzed!,Ovozli xabaringizdagi ma’lumotlar tahlil qilinyabdi !,Информация из вашей голосовой почты анализируется!
+daily_meal_plan,Daily meal plan,Kunlik ozuqa rejasi,Ежедневный план питания
+add,Add,Qo'shish,Добавлять
+more_details,More details,Batafsill,Более подробная информация
+add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённую сумму
+enter_the_amount_of_food_gr,"Enter the amount of food, gr.","Ovqat miqdorini kiriting, gr","Введите количество еды, гр."
+make_your_own_food,Make your own food,O‘zingizni ovqatingizni yarating,Готовьте еду сами
+name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
+calorie_content_kcal,"Calorie content, kcal","Kaloriya tarkibi, kkal","Калорийность, ккал"
+protein_gr,"Protein, gr","Oqsil,gr","Белок, г"
+oil_gr,"Oil, gr.","Yog’,gr","Масло, гр."
+carbohydrate_gr,"Carbohydrate, gr","Uglevod,gr","Углеводы, г"
+food,Food,Taom,Еда
+add_by_voice,Add by voice,Ovoz orqali qo’shish,Добавить голосом
+step,step,qadam,шаг
+add_your_own_food,Add your own food,O’zingizni ovqatingizni qo’shing,Добавьте свою еду
+protein,protein,oqsil,белок
+oil,oil,yog',масло
+carbohydrate,carbohydrate,uglevod,углеводы
+kcal,kcal,kkal,ккал
+cancel,Cancel,Bekor qilish,Отмена
+meals,Meals,Ovqatlar,Питание
+foods_identified_by_voice_message,Foods identified by voice message,Ovozli habar orqali aniqlangan ovqatlar,"Продукты, идентифицированные по голосовому сообщению."
+i,I,Men,я
+you,You,Siz,Ты
+meal_reminders,Meal reminders,Ovqatlanish uchun eslatmalar,Напоминания о еде
+reminders_to_drink_water,Reminders to drink water,Suv ichish uchun eslatmalar,Напоминания о необходимости пить воду
+sleep_reminders,Sleep reminders,Uxlash uchun eslatmalar,Напоминания о сне
+notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj uchun eslatmalar,Заметки к 30-дневному челленджу
+should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
+yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
+please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
+your_data_has_been_saved_successfully,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
+no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
+please_enter_food_metrics,"Please, enter food metrics","Please, enter food metrics","Пожалуйста, введите показатели качества продуктов питания."
+fillBlank,Fill in the blank,Bo'sh jo'yni to'ldiring,Вставьте пропуск

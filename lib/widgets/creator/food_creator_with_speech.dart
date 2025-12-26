@@ -56,7 +56,7 @@ class FoodCreatorWithSpeech extends StatelessWidget {
                     child: Button(
                       onPressed: () => context.router.pop(),
                       text: Strings.cancel,
-                      type: Type.secondary,
+                      type: ButtonType.secondary,
                       textColor: context.colors.textStrong,
                     ),
                   ),

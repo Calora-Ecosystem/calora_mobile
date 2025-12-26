@@ -3,11 +3,14 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/date_and_time/date_and_time.dart';
+import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
 import 'package:calora/widgets/chart/chart_widget.dart';
 import 'package:calora/widgets/steps/steps_indicator_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:management/management.dart';
 
 class FitnessTrackWidget extends StatefulWidget {
   const FitnessTrackWidget({
@@ -25,6 +28,7 @@ class FitnessTrackWidget extends StatefulWidget {
     this.selectedDate,
     this.canGoForward = true,
     this.offset = 0,
+    this.loading = false,
   });
 
   final int stepCount;
@@ -40,6 +44,7 @@ class FitnessTrackWidget extends StatefulWidget {
   final DateTime? selectedDate;
   final bool canGoForward;
   final int offset;
+  final bool loading;
 
   @override
   State<FitnessTrackWidget> createState() => _FitnessTrackWidgetState();
@@ -55,6 +60,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
   @override
   Widget build(BuildContext context) {
     final tabController = DefaultTabController.of(context);
+    final StepsManager manager = context.read<StepsManager>();
 
     return AnimatedBuilder(
       animation: tabController,
@@ -68,7 +74,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
               padding: const EdgeInsets.only(top: 8),
               decoration: BoxDecoration(
                 color: context.colors.accentSub,
-                borderRadius: const BorderRadius.all(Radius.circular(16)),
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
               ),
               child: Column(
                 children: [
@@ -79,7 +85,6 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                         onTap: widget.onClickBackward,
                         child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
                       ),
-                      // Sana
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [_getDateLabel(index).text(14, 16, 400).c(context.colors.textWhite)],
@@ -96,85 +101,109 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.colors.white,
-                      borderRadius: const BorderRadius.all(Radius.circular(16)),
+                  ShimmerWrapper(
+                    loading: manager.state.isGettingSteps,
+                    shimmerChild: ShimmerChild(
+                      height: index == 0
+                          ? 358
+                          : index == 1
+                          ? 370
+                          : 430,
+                      width: double.maxFinite,
+                      radius: 20,
                     ),
-                    child: RepaintBoundary(
-                      key: widget.globalKey,
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              InkWell(
-                                onTap: widget.onClickMoreVert,
-                                child: SizedBox(height: 18, width: 18, child: Assets.icons.icMoreVert.svg()),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          if (index == 0)
-                            StepsIndicatorWidget(
-                              current: widget.stepCount.toDouble(),
-                              goal: widget.goal,
-                              onEditTap: () {
-                                widget.onClickEditStepGoal();
-                              },
-                            )
-                          else if (index == 1)
-                            ChartWidget(
-                              type: ChartType.weekly,
-                              primaryValues: widget.primaryValues,
-                              target: widget.goal.toDouble(),
-                            )
-                          else
-                            ChartWidget(
-                              type: ChartType.monthly,
-                              primaryValues: widget.primaryValues,
-                              target: widget.goal.toDouble(),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.colors.white,
+                        borderRadius: const BorderRadius.all(Radius.circular(20)),
+                      ),
+                      child: RepaintBoundary(
+                        key: widget.globalKey,
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ((index == 1)
+                                        ? Strings.weeklyResults
+                                        : index == 2
+                                        ? Strings.monthlyResults
+                                        : '')
+                                    .text(14, 18, 600)
+                                    .c(context.colors.neutralPrimary),
+                                InkWell(
+                                  onTap: widget.onClickMoreVert,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    color: Colors.transparent,
+                                    height: 32,
+                                    width: 32,
+                                    child: Assets.icons.icMoreVert.svg(),
+                                  ),
+                                ),
+                              ],
                             ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Assets.icons.icStopwatch.svg(),
-                                  const SizedBox(height: 4),
-                                  '0 S'.text(16, 20, 500).c(context.colors.textStrong),
-                                  const SizedBox(height: 2),
-                                  Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
-                                ],
+                            const SizedBox(height: 12),
+                            if (index == 0)
+                              StepsIndicatorWidget(
+                                current: widget.stepCount.toDouble(),
+                                goal: widget.goal,
+                                onEditTap: () => widget.onClickEditStepGoal(),
+                              )
+                            else if (index == 1)
+                              ChartWidget(
+                                type: ChartType.weekly,
+                                primaryValues: widget.primaryValues,
+                                target: widget.goal.toDouble(),
+                              )
+                            else
+                              ChartWidget(
+                                type: ChartType.monthly,
+                                primaryValues: widget.primaryValues,
+                                target: widget.goal.toDouble(),
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Assets.icons.icDistance.svg(),
-                                  const SizedBox(height: 4),
-                                  (widget.metrics.distance).asFixedTruncated(2)
-                                      .text(16, 20, 500)
-                                      .c(context.colors.textStrong),
-                                  const SizedBox(height: 2),
-                                  Strings.distanceInKm.text(14, 20, 400).c(context.colors.textSub),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Assets.icons.icCalorie.svg(),
-                                  const SizedBox(height: 4),
-                                  '${widget.metrics.kcal}'.text(16, 20, 500).c(context.colors.textStrong),
-                                  const SizedBox(height: 2),
-                                  Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Assets.icons.icStopwatch.svg(),
+                                    const SizedBox(height: 4),
+                                    '0 S'.text(16, 20, 500).c(context.colors.textStrong),
+                                    const SizedBox(height: 2),
+                                    Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Assets.icons.icDistance.svg(),
+                                    const SizedBox(height: 4),
+                                    (widget.metrics.distance)
+                                        .asFixedTruncated(2)
+                                        .text(16, 20, 500)
+                                        .c(context.colors.textStrong),
+                                    const SizedBox(height: 2),
+                                    Strings.distanceInKm.text(14, 20, 400).c(context.colors.textSub),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Assets.icons.icCalorie.svg(),
+                                    const SizedBox(height: 4),
+                                    '${widget.metrics.kcal}'.text(16, 20, 500).c(context.colors.textStrong),
+                                    const SizedBox(height: 2),
+                                    Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -17,30 +17,18 @@ class ChartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final int itemCount = type == ChartType.weekly ? 7 : 30;
 
-    // 🔹 Agar kam bo‘lsa, 0 bilan to‘ldiramiz
-    final values = List<double>.generate(
-      itemCount,
-      (i) => i < primaryValues.length ? primaryValues[i] : 0,
-    );
+    final values = List<double>.generate(itemCount, (i) => i < primaryValues.length ? primaryValues[i] : 0);
 
     final average = values.isNotEmpty ? values.reduce((a, b) => a + b) / values.length : 0;
     final total = values.isNotEmpty ? values.reduce((a, b) => a + b) : 0;
 
-    final maxValue = [
-      ...values,
-      if (target != null) target!,
-      average,
-    ].reduce((a, b) => a > b ? a : b);
+    final maxValue = [...values, if (target != null) target!, average].reduce((a, b) => a > b ? a : b);
 
     final maxY = maxValue == 0 ? 10 : maxValue * 1.1;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        (type == ChartType.monthly ? Strings.monthlyResults : Strings.weeklyResults)
-            .text(14, 18, 600)
-            .c(context.colors.neutralPrimary),
-        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -53,16 +41,12 @@ class ChartWidget extends StatelessWidget {
           height: type == ChartType.monthly ? 220 : 160,
           child: BarChart(
             BarChartData(
-              alignment: type == ChartType.monthly
-                  ? BarChartAlignment.spaceBetween
-                  : BarChartAlignment.spaceAround,
+              alignment: type == ChartType.monthly ? BarChartAlignment.spaceBetween : BarChartAlignment.spaceAround,
               maxY: maxY.toDouble(),
               borderData: FlBorderData(show: false),
               gridData: FlGridData(
-                getDrawingVerticalLine: (value) =>
-                    FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
-                getDrawingHorizontalLine: (value) =>
-                    FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
+                getDrawingVerticalLine: (value) => FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
+                getDrawingHorizontalLine: (value) => FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
               ),
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
@@ -89,19 +73,14 @@ class ChartWidget extends StatelessWidget {
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
                       rod.toY.toStringAsFixed(0),
-                      TextStyle(
-                        color: context.colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                      TextStyle(color: context.colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                     );
                   },
                 ),
               ),
               extraLinesData: ExtraLinesData(
                 horizontalLines: [
-                  if (target != null)
-                    HorizontalLine(y: target!, color: context.colors.iconSoft, strokeWidth: 1),
+                  if (target != null) HorizontalLine(y: target!, color: context.colors.iconSoft, strokeWidth: 1),
                 ],
               ),
               barGroups: values.asMap().entries.map((entry) {

@@ -35,29 +35,28 @@ class PodiumBarWidget extends StatelessWidget {
               ..rotateX(3.14 / 10),
             alignment: FractionalOffset.center,
             child: Container(
-                height: 10,
-                width: width - 3,
-                decoration: BoxDecoration(color: context.colors.accentDisabled)
+              height: 10,
+              width: width - 3,
+              decoration: BoxDecoration(color: context.colors.accentDisabled),
             ),
           ),
         ),
         Container(
           width: width,
           height: height,
-          decoration: BoxDecoration(gradient: LinearGradient(
-          colors: [
-    context.colors.accentLightSub,
-    context.colors.accentGreenWhite
-    ], begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,)),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [context.colors.accentLightSub, context.colors.accentGreenWhite],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               RotatedBox(
                 quarterTurns: 0,
-                child: rankingText
-                    .text(24, 32, 700)
-                    .c(context.colors.textWhite),
+                child: rankingText.text(24, 32, 700).c(context.colors.textWhite),
               ),
             ],
           ),

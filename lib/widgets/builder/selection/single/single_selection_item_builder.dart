@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/domain/model/selection/Selection.dart';
@@ -20,26 +18,16 @@ class SingleSelectionItemBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        selection.isChecked ? null : onClicked(selection);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+      onTap: () => selection.isChecked ? null : onClicked(selection),
+      child: SizedBox(
+        height: 48,
         child: Row(
           children: [
-            selection.isHaveIcon
-                ? SvgPicture.asset(selection.icon)
-                : const SizedBox(),
+            selection.isHaveIcon ? SvgPicture.asset(selection.icon) : const SizedBox(),
             SizedBox(width: 4),
-            Expanded(
-              child: selection.name
-                  .text(14, 16, 400)
-                  .c(context.colors.textPrimary),
-            ),
+            Expanded(child: selection.name.text(14, 16, 400).c(context.colors.textPrimary)),
             SizedBox(width: 12),
-            selection.isChecked
-                ? Assets.icons.icSingleCheck.svg()
-                : const SizedBox(),
+            selection.isChecked ? Assets.icons.icSingleCheck.svg() : const SizedBox(),
           ],
         ),
       ),

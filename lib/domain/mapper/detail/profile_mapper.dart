@@ -14,7 +14,7 @@ extension ProfileRequestToDetailInfos on ProfileRequest {
         message: activityLevel?.toString() ?? '',
         type: DetailInfoType.activityLevel,
       ),
-      DetailInfo(title: Strings.metrics, message: metrics ?? '', type: DetailInfoType.metrics),
+
       // DetailInfo(title: Strings.emailAddress, message: email ?? "", type: DetailInfoType.email),
       // DetailInfo(title: 'Bmi', message: bmi?.toString() ?? "", type: DetailInfoType.bmi),
       DetailInfo(title: Strings.gender, message: gender ?? '', type: DetailInfoType.gender),
