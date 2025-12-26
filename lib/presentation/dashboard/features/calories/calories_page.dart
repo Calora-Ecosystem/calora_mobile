@@ -9,13 +9,14 @@ import 'package:calora/common/widgets/calendar/week_day_selector.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
-import 'package:calora/presentation/dashboard/features/calories/management/calories_manager.dart';
 import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
 import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
+
+import 'management/calories_management.dart';
+import 'management/calories_manager.dart';
 
 @RoutePage()
 class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
@@ -24,6 +25,7 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   @override
   void init(context, manager) {
     manager.fetchCaloriesAndMeals(DateTime.now());
+    manager.getSummary(DateTime.now());
   }
 
   @override
@@ -31,31 +33,41 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
     super.listener(context, manager, effect);
     effect.when(
       openMealPage: (type, meals, date) =>
-          context.pushRoute(MealsRoute(type: type, meals: meals, dateTime: date, categoryId: 1)),
+          context.pushRoute<bool>(MealsRoute(type: type, dateTime: date, categoryId: 1)).then(
+            (value) {
+              if (value == true) {
+                manager.fetchCaloriesAndMeals(date);
+                manager.getSummary(date);
+              }
+            },
+          ),
     );
   }
 
   @override
   Widget builder(context, manager, state) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
-          Container(
-            color: state.isScrolled ? context.colors.softGray : Colors.transparent,
-            child: SafeArea(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  if (notification.metrics.axis == Axis.horizontal) return false;
-                  if (notification is ScrollUpdateNotification) {
-                    manager.setScrolled(notification.metrics.pixels > 0);
-                  }
-                  return false;
-                },
-                child: DefaultRefreshIndicator(
-                  onRefresh: () async => manager.fetchCaloriesAndMeals(state.date ?? DateTime.now()),
+      body: DefaultRefreshIndicator(
+        onRefresh: () async {
+          manager.fetchCaloriesAndMeals(state.date ?? DateTime.now());
+          manager.getSummary(state.date ?? DateTime.now());
+        },
+        child: Stack(
+          children: [
+            Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+            Container(
+              color: state.isScrolled ? context.colors.softGray : Colors.transparent,
+              child: SafeArea(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification.metrics.axis == Axis.horizontal) return false;
+                    if (notification is ScrollUpdateNotification) {
+                      manager.setScrolled(notification.metrics.pixels > 0);
+                    }
+                    return false;
+                  },
                   child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
+                    physics: AlwaysScrollableScrollPhysics(),
                     child: Column(
                       spacing: 16,
                       children: [
@@ -65,6 +77,7 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                           child: WeekDaysSelector(
                             onDaySelected: (value) {
                               manager.fetchCaloriesAndMeals(value);
+                              manager.getSummary(value);
                               manager.dateTime(value);
                             },
                           ),
@@ -81,7 +94,10 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                 leftover: state.leftover.asFixedTruncated(0),
                                 loading: state.isLoading,
                               ),
-                              MealCardsGrid(meals: manager.meals, loading: state.isLoading),
+                              MealCardsGrid(
+                                meals: manager.meals,
+                                isLoading: state.isLoading,
+                              ),
                               GestureDetector(
                                 onTap: () => _openNotificationSettings(context),
                                 child: Container(
@@ -117,8 +133,8 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

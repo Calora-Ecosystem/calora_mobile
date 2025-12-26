@@ -21,53 +21,77 @@ class DailyMealPlanWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShimmerWrapper(
-      loading: loading,
-      type: ShimmerType.backgroundElevation,
-      shimmerChild: ShimmerChild(height: 228, width: double.maxFinite, radius: 12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 8,
-          children: [
-            Strings.dailyMealPlan.text(20, 24, 600).c(context.colors.textStrong),
-            _tile(context, icon: Assets.icons.icSms.svg(), title: Strings.accordingToPlan, value: accordingToPlan),
-            _tile(context, icon: Assets.icons.icDoneCircle.svg(), title: Strings.foodConsumed, value: consumed),
-            _tile(context, icon: Assets.icons.icFood.svg(), title: Strings.leftoverFoodPlan, value: leftover),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          Strings.dailyMealPlan.text(20, 24, 600).c(context.colors.textStrong),
+          _tile(
+            context,
+            icon: Assets.icons.icSms.svg(),
+            title: Strings.accordingToPlan,
+            value: accordingToPlan,
+            loading: loading,
+          ),
+          _tile(
+            context,
+            icon: Assets.icons.icDoneCircle.svg(),
+            title: Strings.foodConsumed,
+            value: consumed,
+            loading: loading,
+          ),
+          _tile(
+            context,
+            icon: Assets.icons.icFood.svg(),
+            title: Strings.leftoverFoodPlan,
+            value: leftover,
+            loading: loading,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _tile(BuildContext context, {required Widget icon, required String title, required String value}) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(12)),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(12)),
-            child: icon,
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: title.text(14, 16, 400).c(context.colors.textSub).auto(maxLines: 2, minSize: 14)),
-          Spacer(),
-          Row(
-            children: [
-              value.text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
-              const SizedBox(width: 4),
-              Strings.kcal
-                  .text(20, 24, 600)
-                  .c(context.colors.textSub)
-                  .copyWith(textAlign: TextAlign.end, overflow: TextOverflow.ellipsis)
-                  .auto(minSize: 16),
-            ],
-          ),
-        ],
+  Widget _tile(
+    BuildContext context, {
+    required Widget icon,
+    required String title,
+    required String value,
+    required bool loading,
+  }) {
+    return ShimmerWrapper(
+      loading: loading,
+      shimmerChild: ShimmerChild(height: 52),
+      child: Container(
+        height: 52,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(12)),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(12)),
+              child: icon,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: title.text(14, 16, 400).c(context.colors.textSub).auto(maxLines: 2, minSize: 14)),
+            Spacer(),
+            Row(
+              children: [
+                value.text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
+                const SizedBox(width: 4),
+                Strings.kcal
+                    .text(20, 24, 600)
+                    .c(context.colors.textSub)
+                    .copyWith(textAlign: TextAlign.end, overflow: TextOverflow.ellipsis)
+                    .auto(minSize: 16),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

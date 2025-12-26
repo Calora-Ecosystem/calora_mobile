@@ -9,7 +9,7 @@ import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'package:calora/presentation/meals/add/management/add_meals_management.dart';
+import 'add_meals_management.dart';
 
 @injectable
 class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
@@ -19,30 +19,38 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
 
   void fetchFoodCategory() {
     _repo.fetchFoodCategory().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (categories) => emit(state.copyWith(mealCategories: categories, isLoading: false)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
+      onStart: () => emit(state.copyWith(isMealCategory: true)),
+      onData: (categories) => emit(state.copyWith(mealCategories: categories, isMealCategory: false)),
+      onDone: () => emit(state.copyWith(isMealCategory: false)),
+      onError: (error) => emit(state.copyWith(isMealCategory: false)),
     );
   }
 
   void fetchFavouriteFoods() {
     _repo.getFavouriteFoods().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (foods) => emit(state.copyWith(favouriteFoods: foods, isLoading: false)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
+      onStart: () => emit(state.copyWith(isFavourite: true)),
+      onData: (foods) => emit(state.copyWith(favouriteFoods: foods, isFavourite: false)),
+      onDone: () => emit(state.copyWith(isFavourite: false)),
+      onError: (error) => emit(state.copyWith(isFavourite: false)),
     );
   }
 
-  void saveMenuItem(MenuInfo item) {
-    _repo
+  Future<bool> saveMenuItem(MenuInfo item) async {
+    bool success = false;
+    await _repo
         .saveMenuItem(item)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (_) {
+            success = true;
+          },
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            success = false;
+            emit(state.copyWith(isLoading: false));
+          },
         );
+    return success;
   }
 
   void addFavourite(int id) {
@@ -53,6 +61,15 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
+  }
+
+  void fetchUserFoods() {
+    _repo.fetchUserFoods().handle(
+      onStart: () => emit(state.copyWith(isLoading: true)),
+      onData: (foods) => emit(state.copyWith(userFoods: foods, isLoading: false)),
+      onDone: () => emit(state.copyWith(isLoading: false)),
+      onError: (error) => emit(state.copyWith(isLoading: false)),
+    );
   }
 
   Future<List<ScannerFood>> getScannerFood(String filePath, int categoryId) async {
@@ -93,14 +110,14 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     _repo
         .fetchFoods(true)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (foods) => emit(state.copyWith(latestFoods: foods, isLoading: false)), // FoodModel
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onStart: () => emit(state.copyWith(isLatest: true)),
+          onData: (foods) => emit(state.copyWith(latestFoods: foods, isLatest: false)),
+          onDone: () => emit(state.copyWith(isLatest: false)),
+          onError: (error) => emit(state.copyWith(isLatest: false)),
         );
   }
 
-  Future<void> addFoodAndMenuWithImage(ScannerFood food, int categoryId, String menu) async {
+  Future<bool> addFoodAndMenuWithImage(ScannerFood food, int categoryId, String menu) async {
     final userId = await profileStore.getUserId() ?? 0;
     final foodRequest = food.toFoodRequest(
       categoryId: categoryId,
@@ -108,28 +125,14 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
       coverUrl: abstractImageUrl,
     );
     final addedFoodId = await addFood(foodRequest);
-    saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
-  }
-
-  Future<void> addMultipleFoodsAndMenuWithImage(List<ScannerFood> foods, int categoryId, String menu) async {
-    final userId = await profileStore.getUserId() ?? 0;
-    final List<FoodRequest> foodRequests = foods
-        .map(
-          (e) => e.toFoodRequest(
-            categoryId: categoryId,
-            userId: userId,
-            coverUrl: abstractImageUrl,
-          ),
-        )
-        .toList();
-    for (int i = 0; i < foodRequests.length; i++) {
-      final addedFoodId = await addFood(foodRequests[i]);
-      saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+    if (addedFoodId != null) {
+      return saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
     }
+    return false;
   }
 
-  Future<void> addFoodAndMenuWithVoice(int categoryId, String menu) async {
-    final userId = await profileStore.getUserId();
+  Future<bool> addFoodAndMenuWithVoice(int categoryId, String menu) async {
+    var userId = await profileStore.getUserId();
     final List<FoodRequest> foodRequests = state.scannedFoodsByVoice
         .map(
           (e) => e.toFoodRequest(
@@ -140,13 +143,18 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         )
         .toList();
     for (int i = 0; i < foodRequests.length; i++) {
-      final addedFoodId = await addFood(foodRequests[i]);
-      saveMenuItem(MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400));
+      var addedFoodId = await addFood(foodRequests[i]);
+      if (addedFoodId == null) return false;
+      var success = await saveMenuItem(
+        MenuInfo(menu: menu, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
+      );
+      if (!success) return false;
     }
+    return true;
   }
 
-  Future<int> addFood(FoodRequest food) async {
-    int foodId = 0;
+  Future<int?> addFood(FoodRequest food) async {
+    int? foodId;
     await _repo
         .addFood(food)
         .handle(
@@ -156,10 +164,51 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
             emit(state.copyWith(addedFoodId: id, isLoading: false));
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            foodId = null;
+          },
         );
-
     return foodId;
+  }
+
+  void fetchSearchFood(String name) {
+    _repo
+        .fetchSearchFood(name)
+        .handle(
+          onStart: () => emit(state.copyWith(isSearch: true)),
+          onData: (foods) => emit(state.copyWith(searchFoods: foods, isSearch: false)),
+          onDone: () => emit(state.copyWith(isSearch: false)),
+          onError: (error) => emit(state.copyWith(isSearch: false)),
+        );
+  }
+
+  void onSearchChanged(String text) {
+    final query = text.trim();
+
+    if (query.isEmpty) {
+      emit(
+        state.copyWith(
+          isSearchMode: false,
+          isSearch: false,
+          searchFoods: [],
+        ),
+      );
+      return;
+    }
+
+    if (query.length >= 3) {
+      emit(state.copyWith(isSearchMode: true));
+      fetchSearchFood(query);
+    } else {
+      emit(
+        state.copyWith(
+          isSearchMode: true,
+          isSearch: false,
+          searchFoods: [],
+        ),
+      );
+    }
   }
 
   void openDishesPage(MealTypeData meal) {
@@ -183,6 +232,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         break;
 
       case 2:
+        fetchUserFoods();
         break;
 
       case 3:

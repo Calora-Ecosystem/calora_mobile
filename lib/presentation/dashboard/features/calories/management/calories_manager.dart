@@ -2,9 +2,9 @@ import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
-import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -48,6 +48,8 @@ class CaloriesManager extends Manager<CaloriesState, CaloriesEffect> {
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
   }
+
+  void getSummary(DateTime date) {}
 
   void dateTime(DateTime date) {
     emit(state.copyWith(date: date));

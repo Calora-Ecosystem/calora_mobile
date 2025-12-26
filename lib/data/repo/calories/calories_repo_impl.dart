@@ -17,14 +17,13 @@ class CaloriesRepoImpl extends CaloriesRepo {
 
   @override
   Future<SummaryResult> fetchSummary(DateTime date) async {
-    final response = await _api.getDailyCalories(date);
-    final summary = SummaryRequest.fromJson(response.data);
-    final content = summary.content;
+    final response = await _api.getSummary(date);
+    final content = SummaryRequest.fromJson(response.data['content']);
 
     final dailyCalories = DailyCalories(
       plan: content.kcalNorm.value.toDouble(),
-      consumed: content.sumKcal.toDouble(),
-      leftover: (content.kcalNorm.value - content.sumKcal).toDouble(),
+      consumed: content.sum.Kcal,
+      leftover: (content.kcalNorm.value - content.sum.Kcal).toDouble(),
     );
 
     final meals = MealType.values.map((mealType) {
@@ -36,7 +35,7 @@ class CaloriesRepoImpl extends CaloriesRepo {
         max: nutrientNorm?.kcal.toDouble() ?? 0,
         value: nutrient?.kcal.toDouble() ?? 0,
         type: mealType,
-        mass: nutrientNorm?.weight.toDouble() ?? 0,
+        mass: nutrient?.weight.toDouble() ?? 0,
         carbohydrates: nutrient?.carb.toDouble() ?? 0,
         proteins: nutrient?.protein.toDouble() ?? 0,
         oils: nutrient?.fat.toDouble() ?? 0,
@@ -161,11 +160,24 @@ class CaloriesRepoImpl extends CaloriesRepo {
     final response = await _api.getScannerFoodByVoice(filePath);
     return response;
   }
-}
 
-class SummaryResult {
-  final DailyCalories dailyCalories;
-  final List<MealData> meals;
+  @override
+  Future<SummaryRequest> getSummary(DateTime date) async {
+    final response = await _api.getSummary(date);
+    return SummaryRequest.fromJson(response.data['content']);
+  }
 
-  SummaryResult({required this.dailyCalories, required this.meals});
+  @override
+  Future<List<FoodModel>> fetchUserFoods() async {
+    final response = await _api.fetchUserFoods();
+    final List content = response.data['content'];
+    return content.map((e) => FoodModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  @override
+  Future<List<FoodModel>> fetchSearchFood(String name) async {
+    final response = await _api.fetchSearchFood(name);
+    final List content = response.data['content'];
+    return content.map((e) => FoodModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
 }

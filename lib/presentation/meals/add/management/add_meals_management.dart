@@ -14,9 +14,16 @@ abstract class AddMealsState with _$AddMealsState {
     @Default([]) List<FoodModel> latestFoods,
     @Default([]) List<ScannerFood> scannedFoods,
     @Default([]) List<ScannerFood> scannedFoodsByVoice,
-
+    @Default([]) List<FoodModel> userFoods,
     int? addedFoodId,
     @Default(false) bool isLoading,
+    @Default([]) List<FoodModel> searchFoods,
+    @Default(false) bool isSearch,
+    @Default(false) bool isSearchMode,
+    @Default(false) bool isMealCategory,
+    @Default(false) bool isLatest,
+    @Default(false) bool isUserFoods,
+    @Default(false) bool isFavourite,
   }) = _AddMealsState;
 }
 
@@ -29,4 +36,8 @@ class AddMealsEffect with _$AddMealsEffect {
   const factory AddMealsEffect.openCreatorWithSpeech() = OpenCreatorWithSpeech;
 
   const factory AddMealsEffect.openAboutPage(FoodModel food, bool isFavourite) = OpenAboutPage;
+
+  const factory AddMealsEffect.showSuccessDialog(String message) = ShowSuccessDialog;
+
+  const factory AddMealsEffect.showErrorDialog(String message) = ShowErrorDialog;
 }

@@ -1,16 +1,13 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
-import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:flutter/material.dart' hide StepperType;
 import 'package:flutter/services.dart';
 
@@ -58,7 +55,10 @@ class _DishInfoPageState extends State<DishInfoPage> {
           spacing: 8,
           children: [
             SizedBox(height: 4),
-            ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(widget.foodItem.coverUrl.imageUrl)),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CustomCachedNetworkImage.banner(imageUrl: widget.foodItem.coverUrl, height: 160),
+            ),
             SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -127,16 +127,11 @@ class _DishInfoPageState extends State<DishInfoPage> {
                     child: Button(
                       onPressed: () {
                         final text = _amountController.text.trim();
-                        final amount = double.tryParse(text);
-                        if (text.isEmpty) {
-                          CustomSnackBar.show(context, Strings.enterTheAmountOfFoodGr);
-                          return;
+                        double? amount = double.tryParse(text);
+                        if (text.isEmpty || amount == null || amount <= 0) {
+                          amount = widget.foodItem.weight;
                         }
-                        if (amount == null || amount <= 0) {
-                          CustomSnackBar.show(context, Strings.enterTheAmountOfFoodGr);
-                          return;
-                        }
-                        openConfirmPage(context, amount);
+                        widget.onSave(amount);
                       },
                       text: Strings.save,
                     ),
@@ -169,19 +164,6 @@ class _DishInfoPageState extends State<DishInfoPage> {
             label.text(14, 18, 400).c(context.colors.textSub).copyWith(maxLines: 1),
           ],
         ),
-      ),
-    );
-  }
-
-  void openConfirmPage(BuildContext context, double amount) {
-    showDialog(
-      context: context,
-      builder: (_) => ConfirmPage(
-        title: Strings.shouldTheFoodBeAddedToTheMenu,
-        confirmText: Strings.yesAdd,
-        cancelText: Strings.cancel,
-        onConfirm: () => widget.onSave(amount),
-        onCancel: () => context.router.pop(),
       ),
     );
   }

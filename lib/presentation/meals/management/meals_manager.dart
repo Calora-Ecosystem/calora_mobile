@@ -1,23 +1,14 @@
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
+import 'package:calora/presentation/meals/management/meals_management.dart';
 import 'package:injectable/injectable.dart' show injectable;
 import 'package:management/management.dart';
-
-import 'package:calora/presentation/meals/management/meals_management.dart';
 
 @injectable
 class MealsManager extends Manager<MealsState, MealsEffect> {
   final CaloriesRepo caloriesRepo;
 
   MealsManager(this.caloriesRepo) : super(const MealsState());
-
-  void setMealFromList(MealType type, List<MealData> meals) {
-    final meal = meals.firstWhere(
-      (m) => m.type == type,
-      orElse: () => MealData(type: type, max: 0, value: 0, mass: 0, carbohydrates: 0, proteins: 0, oils: 0),
-    );
-    emit(state.copyWith(meal: meal));
-  }
 
   void fetchMenuItem(DateTime date, MealType type) {
     caloriesRepo
@@ -29,6 +20,32 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
+        );
+  }
+
+  MealData? getMealByType(MealType type, List<MealData> meals) {
+    for (final meal in meals) {
+      if (meal.type == type) return meal;
+    }
+    return null;
+  }
+
+  void fetchSummary(DateTime date, MealType type) {
+    caloriesRepo
+        .fetchSummary(date)
+        .handle(
+          onStart: () => emit(state.copyWith(isSummary: true)),
+          onData: (result) {
+            var meal = getMealByType(type, result.meals);
+            emit(
+              state.copyWith(
+                meal: meal,
+                isSummary: false,
+              ),
+            );
+          },
+          onDone: () => emit(state.copyWith(isSummary: false)),
+          onError: (error) => emit(state.copyWith(isSummary: false)),
         );
   }
 
