@@ -30,13 +30,12 @@ class _SelectCalendarPageState extends State<SelectCalendarPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize selectedDate from widget parameter
     if (widget.selectedDate != null && widget.selectedDate!.isNotEmpty) {
       try {
         _selectedDate = DateTime.parse(widget.selectedDate!);
       } catch (e) {
         _selectedDate = DateTime(
-          DateTime.now().year - 5,
+          DateTime.now().year,
           DateTime.now().month,
           DateTime.now().day,
         );
@@ -75,9 +74,9 @@ class _SelectCalendarPageState extends State<SelectCalendarPage> {
               mode: CupertinoDatePickerMode.date,
               dateOrder: DatePickerDateOrder.dmy,
               initialDateTime:
-              _selectedDate ??
+                  _selectedDate ??
                   DateTime(
-                    DateTime.now().year - 5,
+                    DateTime.now().year,
                     DateTime.now().month,
                     DateTime.now().day,
                   ),
@@ -87,7 +86,7 @@ class _SelectCalendarPageState extends State<SelectCalendarPage> {
                 });
               },
               minimumYear: 1900,
-              maximumYear: DateTime.now().year - 5,
+              maximumYear: DateTime.now().year,
             ),
           ),
 

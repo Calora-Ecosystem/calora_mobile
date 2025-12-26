@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/base/profile_store.dart';
@@ -88,6 +86,7 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: context.colors.white,
       builder: (context) {
         return ManagerBuilder<AccountDetailState, AccountDetailEffect>(
@@ -113,6 +112,7 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
   void _openSingleSelectionGoal(DetailInfo info, BuildContext context, AccountDetailManager manager) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
       builder: (context) {
@@ -138,6 +138,7 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
   void _openSingleSelectionGender(DetailInfo info, BuildContext context, AccountDetailManager manager) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
       builder: (context) {
@@ -169,6 +170,7 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
   void _openInputPage(DetailInfo info, BuildContext context, AccountDetailManager manager) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
       builder: (context) {
@@ -202,6 +204,7 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: context.colors.white,
       builder: (context) {
         return ManagerBuilder<AccountDetailState, AccountDetailEffect>(

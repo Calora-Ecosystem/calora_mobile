@@ -162,7 +162,7 @@ class _SideCalories extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 90),
       child: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         spacing: 6,
         children: [
           title
