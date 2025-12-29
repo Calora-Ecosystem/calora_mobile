@@ -49,7 +49,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                         _buildIconTextRow(
                           context,
                           icon: Assets.icons.vegetarianFood.svg(),
-                          count: '${state.dailyGoals[0].asFixedTruncated(0)} ${Strings.kcal}',
+                          count: '${state.dailyGoals[0].toDouble().asFixedTruncated(0)} ${Strings.kcal}',
                           title: Strings.mealPlan,
                           subtitle: Strings.dailyGoal,
                         ),

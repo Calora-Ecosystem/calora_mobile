@@ -13,63 +13,32 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class CoursePage extends StatefulWidget {
-  const CoursePage({super.key});
+class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
+  CoursePage({super.key});
+
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<bool> _isScrolled = ValueNotifier(false);
 
   @override
-  State<CoursePage> createState() => _CoursePageState();
-}
-
-class _CoursePageState extends State<CoursePage> {
-  final _scrollController = ScrollController();
-  bool _isScrolled = false;
-
-  @override
-  void initState() {
-    super.initState();
+  void init(BuildContext context, CourseManager manager) {
+    manager.getCourses();
     _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    _isScrolled.value = _scrollController.offset > 20;
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _isScrolled.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    final offset = _scrollController.offset;
-    if (offset > 20 && !_isScrolled) {
-      setState(() => _isScrolled = true);
-    } else if (offset <= 20 && _isScrolled) {
-      setState(() => _isScrolled = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _CoursePageManaged(scrollController: _scrollController, isScrolled: _isScrolled);
-  }
-}
-
-class _CoursePageManaged extends Managed<CourseManager, CourseState, CourseEffect> {
-  final ScrollController scrollController;
-  final bool isScrolled;
-
-  const _CoursePageManaged({required this.scrollController, required this.isScrolled});
-
-  @override
-  void init(BuildContext context, CourseManager manager) {
-    manager.getCourses();
   }
 
   @override
   void listener(BuildContext context, CourseManager manager, CourseEffect effect) {
-    effect.when(
-      navigateToLessons: (course, lessons) {
-        context.router.push(LessonBodyWidgetRoute(course: course, lessons: lessons));
-      },
-    );
     super.listener(context, manager, effect);
   }
 
@@ -80,25 +49,37 @@ class _CoursePageManaged extends Managed<CourseManager, CourseState, CourseEffec
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             top: false,
             child: CustomScrollView(
-              controller: scrollController,
-              physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              ),
               slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  backgroundColor: isScrolled ? context.colors.white : Colors.transparent,
-                  elevation: isScrolled ? 4 : 0,
-                  scrolledUnderElevation: 4,
-                  shadowColor: context.colors.black.withValues(alpha: 0.2),
-                  surfaceTintColor: context.colors.white,
-                  foregroundColor: Colors.transparent,
-                  centerTitle: true,
-                  title: Strings.allCourses.text(17, 22, 600).c(context.colors.textStrong),
+                /// ✅ APP BAR
+                ValueListenableBuilder<bool>(
+                  valueListenable: _isScrolled,
+                  builder: (_, isScrolled, __) {
+                    return SliverAppBar(
+                      pinned: true,
+                      backgroundColor: isScrolled ? context.colors.white : context.colors.transparent,
+                      elevation: isScrolled ? 4 : 0,
+                      scrolledUnderElevation: 4,
+                      shadowColor: context.colors.black.withValues(alpha: 0.2),
+                      surfaceTintColor: context.colors.white,
+                      centerTitle: true,
+                      title: Strings.allCourses.text(17, 22, 600).c(context.colors.textStrong),
+                    );
+                  },
                 ),
-                const SliverPadding(padding: EdgeInsets.only(top: 16)),
+
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 16),
+                ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   sliver: SliverList.separated(
@@ -110,16 +91,22 @@ class _CoursePageManaged extends Managed<CourseManager, CourseState, CourseEffec
                         loading: state.isLoading,
                         type: ShimmerType.backgroundElevation,
                         radius: 12,
-                        shimmerChild: const ShimmerChild(height: 160, width: double.infinity, radius: 16),
+                        shimmerChild: const ShimmerChild(
+                          height: 160,
+                          width: double.infinity,
+                          radius: 16,
+                        ),
                         child: CourseCard(
                           course: course,
-                          onTap: () => manager.getLessonsAndNavigate(course: course),
+                          onTap: () => context.router.push(LessonBodyWidgetRoute(course: course)),
                         ),
                       );
                     },
                   ),
                 ),
-                const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+                const SliverPadding(
+                  padding: EdgeInsets.only(bottom: 24),
+                ),
               ],
             ),
           ),

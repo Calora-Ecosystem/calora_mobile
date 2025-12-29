@@ -61,7 +61,6 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
     try {
       final XFile file = await _controller!.takePicture();
       await widget.onImageCaptured?.call(file.path);
-      context.router.pop();
     } catch (e) {
       debugPrint('Foto olishda xatolik: $e');
     } finally {

@@ -1,4 +1,3 @@
-import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/domain/repo/course/course_repo.dart';
 import 'package:calora/presentation/dashboard/features/course/management/course_management.dart';
 import 'package:injectable/injectable.dart';
@@ -21,17 +20,4 @@ class CourseManager extends Manager<CourseState, CourseEffect> {
       emit(state.copyWith(isLoading: false));
     },
   );
-
-  void getLessonsAndNavigate({required CourseRequest course}) {
-    _courseRepo
-        .getLessonsById(course.id ?? 0)
-        .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (lessons) {
-            emit(state.copyWith(isLoading: false, lessons: lessons));
-            publish(CourseEffect.navigateToLessons(course: course, lessons: lessons));
-          },
-          onError: (_) => emit(state.copyWith(isLoading: false)),
-        );
-  }
 }

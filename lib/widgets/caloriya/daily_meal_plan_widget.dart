@@ -30,6 +30,7 @@ class DailyMealPlanWidget extends StatelessWidget {
         children: [
           Strings.dailyMealPlan.text(20, 24, 600).c(context.colors.textStrong),
           _tile(
+            textColor: context.colors.textStrong,
             context,
             icon: Assets.icons.icSms.svg(),
             title: Strings.accordingToPlan,
@@ -37,6 +38,7 @@ class DailyMealPlanWidget extends StatelessWidget {
             loading: loading,
           ),
           _tile(
+            textColor: context.colors.textStrong,
             context,
             icon: Assets.icons.icDoneCircle.svg(),
             title: Strings.foodConsumed,
@@ -44,10 +46,11 @@ class DailyMealPlanWidget extends StatelessWidget {
             loading: loading,
           ),
           _tile(
+            textColor: double.parse(leftover) < 0 ? context.colors.red : context.colors.textStrong,
             context,
             icon: Assets.icons.icFood.svg(),
             title: Strings.leftoverFoodPlan,
-            value: leftover,
+            value: leftover.toString(),
             loading: loading,
           ),
         ],
@@ -61,6 +64,7 @@ class DailyMealPlanWidget extends StatelessWidget {
     required String title,
     required String value,
     required bool loading,
+    required Color textColor,
   }) {
     return ShimmerWrapper(
       loading: loading,
@@ -81,7 +85,7 @@ class DailyMealPlanWidget extends StatelessWidget {
             Spacer(),
             Row(
               children: [
-                value.text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
+                value.text(20, 24, 600).c(textColor).auto(minSize: 16),
                 const SizedBox(width: 4),
                 Strings.kcal
                     .text(20, 24, 600)

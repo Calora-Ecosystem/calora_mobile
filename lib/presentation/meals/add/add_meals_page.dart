@@ -312,8 +312,19 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             .map((e) => '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
             .toList(),
         onAdd: () async {
-          final success = await manager.addFoodAndMenuWithVoice(categoryId, type.name);
-          if (success) _showInfoDialog(context);
+          bool allSucceeded = true;
+          for (final food in foods) {
+            final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
+            if (!success) {
+              allSucceeded = false;
+            }
+          }
+          if (context.mounted) {
+            context.router.pop();
+            if (allSucceeded) {
+              _showInfoDialog(context);
+            }
+          }
         },
       ),
       initialChildSize: 0.55,
@@ -383,7 +394,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           if (context.mounted) {
             final scannedFoods = manager.state.scannedFoodsByVoice;
             if (scannedFoods.isEmpty) {
-              CustomSnackBar.show(context, 'No food found in image');
+              CustomSnackBar.show(context, 'No food found in voice');
               return;
             }
             if (scannedFoods.length == 1) {

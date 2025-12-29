@@ -5,36 +5,49 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/course/course_request.dart';
+import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonRequest;
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/courses_app_bar.dart';
 import 'package:calora/widgets/info/course_info_widget.dart';
 import 'package:calora/widgets/task/task_parametrs_widget.dart';
 import 'package:calora/widgets/video/about_video_page.dart';
 import 'package:flutter/material.dart';
+import 'package:management/management.dart';
 
-import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonRequest;
+import 'management/lesson_body_management.dart';
+import 'management/lesson_body_manager.dart';
 
 @RoutePage()
-class LessonBodyWidgetPage extends StatefulWidget {
+class LessonBodyWidgetPage extends Managed<LessonBodyManager, LessonBodyState, LessonBodyEffect> {
   final CourseRequest course;
-  final List<LessonRequest> lessons;
   final bool isPurchased;
 
-  const LessonBodyWidgetPage({super.key, required this.course, required this.lessons, this.isPurchased = false});
+  LessonBodyWidgetPage({
+    super.key,
+    required this.course,
+    this.isPurchased = false,
+  }) : super();
 
   @override
-  State<LessonBodyWidgetPage> createState() => _LessonBodyWidgetPageState();
-}
+  void listener(BuildContext context, LessonBodyManager manager, LessonBodyEffect effect) {
+    super.listener(context, manager, effect);
+    effect.when(
+      openInfoSheet: (description) => _openInfoSheet(context, description),
+      openVideo: (lesson, index) => _openVideo(context, lesson, index),
+    );
+  }
 
-class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
   @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, LessonBodyManager manager, LessonBodyState state) {
+    final course = state.course;
+    if (course == null) return const SizedBox.shrink();
+
     return Scaffold(
       body: Stack(
         children: [
           CoursesAppBar(
-            openInfoSheet: () => openInfoSheet(context, widget.course.description ?? ''),
-            imageUrl: widget.course.subCoverImage ?? '',
+            openInfoSheet: manager.onInfoTapped,
+            imageUrl: course.subCoverImage ?? '',
           ),
           Column(
             children: [
@@ -53,33 +66,31 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
                       TaskParametersWidget(
                         title: Row(
                           children: [
-                            Expanded(child: widget.course.title.text(24, 32, 700)),
+                            Expanded(child: course.title.text(24, 32, 700)),
                             const SizedBox(width: 8),
-                            Assets.icons.lock.svg(),
+                            if (!state.isPurchased) Assets.icons.lock.svg(),
                           ],
                         ),
                         parameters: [
-                          ParameterItem(name: 'Narxi', value: '${widget.course.price} so‘m'),
-                          ParameterItem(name: 'Darslar soni', value: '${widget.lessons.length} ta'),
-                          ParameterItem(name: Strings.duration, value: getTotalDuration()),
+                          ParameterItem(name: 'Narxi', value: '${course.price} so‘m'),
+                          ParameterItem(name: 'Darslar soni', value: '${state.lessons.length} ta'),
+                          ParameterItem(name: Strings.duration, value: _getTotalDuration(state.lessons)),
                         ],
                         bottomLabel: Strings.videos,
-                        bottomCount: widget.lessons.length,
+                        bottomCount: state.lessons.length,
                       ),
                       const SizedBox(height: 16),
                       Flexible(
                         child: ListView.separated(
-                          itemCount: widget.lessons.length,
+                          itemCount: state.lessons.length,
                           separatorBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Divider(color: context.colors.neutral200Stroke, thickness: 1, height: 1),
                           ),
                           itemBuilder: (context, index) {
-                            final lesson = widget.lessons[index];
+                            final lesson = state.lessons[index];
                             return GestureDetector(
-                              onTap: () {
-                                if (lesson.isFree) openVideo(context, lesson, index);
-                              },
+                              onTap: () => manager.onVideoTapped(lesson, index),
                               child: Row(
                                 children: [
                                   Container(
@@ -101,7 +112,7 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
                                       ],
                                     ),
                                   ),
-                                  if (!lesson.isFree) Assets.icons.lock.svg(),
+                                  if (!lesson.isFree && !state.isPurchased) Assets.icons.lock.svg(),
                                 ],
                               ),
                             );
@@ -119,22 +130,22 @@ class _LessonBodyWidgetPageState extends State<LessonBodyWidgetPage> {
     );
   }
 
-  void openInfoSheet(BuildContext context, String description) {
+  void _openInfoSheet(BuildContext context, String description) {
     context.showAppBottomSheet(
       child: CourseInfoWidget(description: description),
       backgroundColor: context.colors.white,
     );
   }
 
-  void openVideo(BuildContext context, LessonRequest lesson, int index) {
+  void _openVideo(BuildContext context, LessonRequest lesson, int index) {
     context.showAppBottomSheet(
       child: AboutVideoPage(lesson: lesson, index: index),
     );
   }
 
-  String getTotalDuration() {
-    if (widget.lessons.isEmpty) return '0 min';
-    final totalMinutes = widget.lessons.fold<int>(0, (sum, e) {
+  String _getTotalDuration(List<LessonRequest> lessons) {
+    if (lessons.isEmpty) return '0 min';
+    final totalMinutes = lessons.fold<int>(0, (sum, e) {
       final parts = e.duration.split(':');
       if (parts.length == 2) {
         final h = int.tryParse(parts[0]) ?? 0;
