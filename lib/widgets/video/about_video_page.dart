@@ -23,7 +23,6 @@ class AboutVideoPage extends StatelessWidget {
         spacing: 12,
         children: [
           VideoPlayerPage(videoUrl: lesson.videoUrl ?? ''),
-
           Row(
             spacing: 8,
             children: [
@@ -38,7 +37,6 @@ class AboutVideoPage extends StatelessWidget {
               customIconTextBox(context: context, icon: Assets.icons.icNext.svg(), text: Strings.next, onTap: () {}),
             ],
           ),
-
           Strings.briefInformation.text(16, 20, 500).c(context.colors.textStrong),
           lesson.description.text(14, 18, 400),
         ],

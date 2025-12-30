@@ -1,8 +1,7 @@
+import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
-
-import 'package:calora/domain/model/course/course_request.dart';
 
 const String baseUrl = 'https://staging.calora.uz/api/file/';
 const String abstractImageUrl = 'images/abstract.png';
@@ -14,7 +13,7 @@ extension CourseRequestX on CourseRequest {
     final url = asset?['url'];
     if (url == null || url.isEmpty) return null;
 
-    return url.startsWith('http') ? url : '$baseUrl$url';
+    return url.startsWith('http') ? url : url;
   }
 
   String? get mainImage => _getAssetUrl('MainImage');

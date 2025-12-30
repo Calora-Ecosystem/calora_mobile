@@ -1,10 +1,9 @@
 import 'dart:async';
 
+import 'package:calora/common/widgets/video_player/management/video_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:video_player/video_player.dart';
-
-import 'package:calora/common/widgets/video_player/management/video_management.dart';
 
 @injectable
 class VideoManager extends Manager<VideoState, VideoEffect> {
@@ -103,7 +102,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
     if (_controller == null) return;
     final newPosition = state.position + const Duration(seconds: 10);
     _controller!.seekTo(newPosition);
-    emit(state.copyWith(position: newPosition)); // Holatni yangilash
+    emit(state.copyWith(position: newPosition));
     _startHideControlsTimer();
   }
 
@@ -111,7 +110,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
     if (_controller == null) return;
     final newPosition = state.position - const Duration(seconds: 10);
     _controller!.seekTo(newPosition);
-    emit(state.copyWith(position: newPosition)); // Holatni yangilash
+    emit(state.copyWith(position: newPosition));
     _startHideControlsTimer();
   }
 

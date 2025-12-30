@@ -60,7 +60,6 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                 parent: ClampingScrollPhysics(),
               ),
               slivers: [
-                /// ✅ APP BAR
                 ValueListenableBuilder<bool>(
                   valueListenable: _isScrolled,
                   builder: (_, isScrolled, __) {
@@ -98,7 +97,11 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                         ),
                         child: CourseCard(
                           course: course,
-                          onTap: () => context.router.push(LessonBodyWidgetRoute(course: course)),
+                          onTap: () {
+                            course.type == 'Workout'
+                                ? context.router.push(LessonsRoute())
+                                : context.router.push(VideoCourseBodyWidgetRoute(course: course));
+                          },
                         ),
                       );
                     },
