@@ -148,7 +148,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
             ),
             child: Assets.icons.twoDone.svg(),
           ),
-          content: Strings.yourDataHasBeenSuccessfullySaved
+          content: Strings.yourDataHasBeenSaved
               .text(16, 20, 400)
               .c(context.colors.textStrong)
               .copyWith(textAlign: TextAlign.center),

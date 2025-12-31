@@ -1,67 +1,98 @@
+import 'package:calora/common/extensions/color_extension.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class CustomSwitch extends StatefulWidget {
-  final Function(bool result) result;
-  bool value;
+  final bool initialValue;
+  final void Function(bool)? onChanged;
+  final double width;
+  final double height;
+  final Color? activeColor;
+  final Color? inactiveColor;
+  final Duration duration;
+  final EdgeInsets margin;
 
-  CustomSwitch({super.key, this.value = false, required this.result});
+  const CustomSwitch({
+    super.key,
+    required this.initialValue,
+    this.onChanged,
+    this.width = 51,
+    this.height = 31,
+    this.activeColor,
+    this.inactiveColor,
+    this.duration = const Duration(milliseconds: 200),
+    this.margin = EdgeInsets.zero,
+  });
 
   @override
   State<CustomSwitch> createState() => _CustomSwitchState();
 }
 
 class _CustomSwitchState extends State<CustomSwitch> {
+  late bool isOn;
+
+  @override
+  void initState() {
+    super.initState();
+    isOn = widget.initialValue;
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomSwitch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      setState(() => isOn = widget.initialValue);
+    }
+  }
+
+  void toggleSwitch() {
+    final newValue = !isOn;
+    setState(() => isOn = newValue);
+    widget.onChanged?.call(newValue);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          widget.value = !widget.value;
-        });
-        widget.result(widget.value);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: 44.0,
-        height: 24.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-          color: widget.value ? context.colors.accentSub : context.colors.backgroundElevation,
-        ),
-        child: Stack(
-          children: <Widget>[
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeIn,
-              top: 2.0,
-              bottom: 2.0,
-              left: widget.value ? 20.0 : 0.0,
-              right: widget.value ? 0.0 : 20.0,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return ScaleTransition(child: child, scale: animation);
-                },
-                child: Container(
-                  height: 20.0,
-                  width: 20.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 1,
-                        blurRadius: 2,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+    return Padding(
+      padding: widget.margin,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: toggleSwitch,
+        child: AnimatedContainer(
+          duration: widget.duration,
+          width: widget.width,
+          height: widget.height,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: isOn
+                ? (widget.activeColor ?? context.colors.accentSub)
+                : (widget.inactiveColor ?? context.colors.zirkon),
+            borderRadius: BorderRadius.circular(widget.height / 2),
+          ),
+          child: AnimatedAlign(
+            duration: widget.duration,
+            alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              width: widget.height - 8,
+              height: widget.height - 8,
+              decoration: BoxDecoration(
+                color: context.colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(0, 3),
+                    blurRadius: 1,
+                    color: Colors.black.withOpacityLevel(0.06),
                   ),
-                ),
+                  BoxShadow(
+                    offset: const Offset(0, 3),
+                    blurRadius: 8,
+                    color: Colors.black.withOpacityLevel(0.15),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

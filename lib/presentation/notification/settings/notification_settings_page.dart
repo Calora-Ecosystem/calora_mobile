@@ -1,14 +1,14 @@
-// notification_settings_page.dart
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/extensions/bottom_sheet.dart';
+import 'package:calora/common/enums/notification_setting_type.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/widgets/loadable/loadable.dart';
-import 'package:calora/domain/model/notification/notificaiton_setting.dart';
-import 'package:calora/domain/model/notification/reminder_request.dart';
+import 'package:calora/common/widgets/sheets/default_bottom_sheet.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
 import 'package:calora/presentation/notification/settings/management/notification_settings_management.dart';
 import 'package:calora/presentation/notification/settings/management/notification_settings_manager.dart';
+import 'package:calora/presentation/notification/settings/widgets/daily_challanges_settings_sheet.dart';
+import 'package:calora/presentation/notification/settings/widgets/food_notification_settings_sheet.dart';
+import 'package:calora/presentation/notification/settings/widgets/sleep_notifications_settings_sheet.dart';
+import 'package:calora/presentation/notification/settings/widgets/water_notification_settings_sheet.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/builder/notification/setting/notification_setting_item_builder.dart';
 import 'package:flutter/material.dart';
@@ -19,70 +19,81 @@ class NotificationSettingsPage
     extends Managed<NotificationSettingsManager, NotificationSettingsState, NotificationSettingsEffect> {
   const NotificationSettingsPage({super.key});
 
-  @override
-  void init(context, manager) {
-    manager.getNotificationSettings();
-    manager.getReminders();
-  }
+  static const _settings = [
+    ReminderSettingTypeEnum.food,
+    ReminderSettingTypeEnum.water,
+    ReminderSettingTypeEnum.sleep,
+    ReminderSettingTypeEnum.dailyChallenge,
+  ];
 
   @override
-  void listener(context, manager, effect) {}
+  void init(BuildContext context, NotificationSettingsManager manager) {}
 
   @override
-  Widget builder(context, manager, state) {
+  void listener(BuildContext context, NotificationSettingsManager manager, NotificationSettingsEffect effect) {}
+
+  @override
+  Widget builder(BuildContext context, NotificationSettingsManager manager, NotificationSettingsState state) {
     return Scaffold(
       backgroundColor: context.colors.white,
-      appBar: CustomAppBar(
-        title: Strings.settingUpNotification,
-        onBack: () {
-          _back(context);
+      appBar: CustomAppBar(title: Strings.settingUpNotification, onBack: () => context.router.pop()),
+      body: ListView.separated(
+        padding: const EdgeInsets.only(top: 16),
+        itemCount: _settings.length,
+        separatorBuilder: (_, __) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Divider(thickness: 1, color: context.colors.strokeSoft),
+        ),
+        itemBuilder: (context, index) {
+          final type = _settings[index];
+          return NotificationSettingItemBuilder(
+            notificationName: type.displayName,
+            onClickItem: () => _onItemClick(context: context, type: type, manager: manager),
+          );
         },
       ),
-      body: _uiBuilder(state, context, manager),
     );
   }
 
-  Widget _uiBuilder(NotificationSettingsState state, BuildContext context, NotificationSettingsManager manager) {
-    if (state.loading) {
-      return Loadable(
-        builder: (context) {
-          return SizedBox();
-        },
+  void _onItemClick({
+    required BuildContext context,
+    required ReminderSettingTypeEnum type,
+    required NotificationSettingsManager manager,
+  }) {
+    if (type.isFood)
+      _showBottomSheet(
+        context: context,
+        title: type.displayName,
+        child: FoodNotificationSettingsSheet(manager: manager),
       );
-    } else {
-      return ListView.separated(
-        separatorBuilder: (_, __) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Divider(height: 1, color: context.colors.strokeSoft),
-        ),
-        physics: const BouncingScrollPhysics(),
-        itemCount: state.notificationSettings.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          final notificationSetting = state.notificationSettings[index];
-          return NotificationSettingItemBuilder(
-            notificationSetting: notificationSetting,
-            onClickItem: (data) {
-              _openInputManagePage(notificationSetting, context, state.reminders);
-            },
-          );
-        },
+    else if (type.isWater) {
+      _showBottomSheet(
+        context: context,
+        title: type.displayName,
+        child: WaterNotificationSettingsSheet(manager: manager),
+      );
+    } else if (type.isSleep) {
+      _showBottomSheet(
+        context: context,
+        title: type.displayName,
+        child: SleepNotificationSettingsSheet(manager: manager),
+      );
+    } else if (type.isDailyChallenge) {
+      _showBottomSheet(
+        context: context,
+        title: type.displayName,
+        child: DailyChallengesNotificationSettingsSheet(manager: manager),
       );
     }
   }
 
-  void _openInputManagePage(
-    NotificationSetting notificationSetting,
-    BuildContext context,
-    List<ReminderRequest> reminders,
-  ) {
-    context.showAppBottomSheet(
-      initialChildSize: 0.6,
-      child: NotificationSettingSheet(type: notificationSetting.type, reminders: reminders),
+  void _showBottomSheet({required BuildContext context, required Widget child, required String title}) {
+    final manager = context.read<NotificationSettingsManager>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => DefaultBottomSheet(padding: EdgeInsets.zero, title: title, child: child),
     );
-  }
-
-  void _back(BuildContext context) {
-    context.router.pop();
   }
 }

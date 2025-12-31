@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -7,9 +6,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/week_day_selector.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
-import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
 import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
 import 'package:flutter/material.dart';
@@ -99,7 +96,9 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                 isLoading: state.isLoading,
                               ),
                               GestureDetector(
-                                onTap: () => _openNotificationSettings(context),
+                                onTap: () => {
+                                  //! TODO: Implement notification settings for calories here
+                                },
                                 child: Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
@@ -136,15 +135,6 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
           ],
         ),
       ),
-    );
-  }
-
-  void _openNotificationSettings(BuildContext context) {
-    context.showAppBottomSheet(
-      maxChildSize: 0.5,
-      initialChildSize: 0.5,
-      minChildSize: 0.4,
-      child: NotificationSettingSheet(type: NotificationSettingType.mealReminder, reminders: List.empty()),
     );
   }
 }

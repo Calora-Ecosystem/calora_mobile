@@ -6,11 +6,14 @@ part 'reminder_request.g.dart';
 @freezed
 abstract class ReminderRequest with _$ReminderRequest {
   const factory ReminderRequest({
-    required String time,
-    required String type,
-    required String menu,
     int? id,
+    String? time,
+    String? type,
+    String? menu,
   }) = _ReminderRequest;
 
   factory ReminderRequest.fromJson(Map<String, dynamic> json) => _$ReminderRequestFromJson(json);
+
+  static List<ReminderRequest> fromJsonList(List<dynamic> json) =>
+      json.map((e) => ReminderRequest.fromJson(e)).toList();
 }
