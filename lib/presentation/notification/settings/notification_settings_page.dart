@@ -19,13 +19,6 @@ class NotificationSettingsPage
     extends Managed<NotificationSettingsManager, NotificationSettingsState, NotificationSettingsEffect> {
   const NotificationSettingsPage({super.key});
 
-  static const _settings = [
-    ReminderSettingTypeEnum.food,
-    ReminderSettingTypeEnum.water,
-    ReminderSettingTypeEnum.sleep,
-    ReminderSettingTypeEnum.dailyChallenge,
-  ];
-
   @override
   void init(BuildContext context, NotificationSettingsManager manager) {}
 
@@ -39,17 +32,19 @@ class NotificationSettingsPage
       appBar: CustomAppBar(title: Strings.settingUpNotification, onBack: () => context.router.pop()),
       body: ListView.separated(
         padding: const EdgeInsets.only(top: 16),
-        itemCount: _settings.length,
+        itemCount: ReminderSettingTypeEnum.values.length,
         separatorBuilder: (_, __) => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Divider(thickness: 1, color: context.colors.strokeSoft),
         ),
         itemBuilder: (context, index) {
-          final type = _settings[index];
-          return NotificationSettingItemBuilder(
-            notificationName: type.displayName,
-            onClickItem: () => _onItemClick(context: context, type: type, manager: manager),
-          );
+          final type = ReminderSettingTypeEnum.values[index];
+          return type.isNone
+              ? const SizedBox.shrink()
+              : NotificationSettingItemBuilder(
+                  notificationName: type.displayName,
+                  onClickItem: () => _onItemClick(context: context, type: type, manager: manager),
+                );
         },
       ),
     );
