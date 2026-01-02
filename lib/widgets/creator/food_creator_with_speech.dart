@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 class FoodCreatorWithSpeech extends StatelessWidget {
   final List<String> meals;
   final VoidCallback onAdd;
+  final bool isLoading;
 
-  const FoodCreatorWithSpeech({super.key, required this.meals, required this.onAdd});
+  const FoodCreatorWithSpeech({super.key, required this.meals, required this.onAdd, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +55,7 @@ class FoodCreatorWithSpeech extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Button(
+                      loading: isLoading,
                       onPressed: () => context.router.pop(),
                       text: Strings.cancel,
                       type: ButtonType.secondary,

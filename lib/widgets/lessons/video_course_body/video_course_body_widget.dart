@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
@@ -40,7 +42,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
     super.listener(context, manager, effect);
     effect.when(
       openInfoSheet: (description) => _openInfoSheet(context, description),
-      openVideo: (lesson, index) => _openVideo(context, lesson, index),
+      openVideo: (lesson, index) => _openVideo(context, lesson, index, manager),
     );
   }
 
@@ -158,9 +160,16 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
     );
   }
 
-  void _openVideo(BuildContext context, LessonRequest lesson, int index) {
+  void _openVideo(BuildContext context, LessonRequest lesson, int index, VideoCourseBodyManager manager) {
     context.showAppBottomSheet(
-      child: AboutVideoPage(lesson: lesson, index: index),
+      child: AboutVideoPage(
+        onVideoCompleted: () {
+          log('message');
+          manager.videoCompleted(lesson.id);
+        },
+        lesson: lesson,
+        index: index,
+      ),
     );
   }
 

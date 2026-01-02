@@ -286,6 +286,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     final metrics = food.metrics;
     context.showAppBottomSheet(
       child: FoodCreatorWithImage(
+        isLoading: manager.state.isLoading,
         name: food.name,
         addButton: () async {
           final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
@@ -308,6 +309,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   void openCreatorWithSpeech(BuildContext context, AddMealsManager manager, List<ScannerFood> foods) {
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
+        isLoading: manager.state.isLoading,
         meals: foods
             .map((e) => '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
             .toList(),
@@ -391,6 +393,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               apiCall: () => manager.getScannerFoodByVoice(value, categoryId),
             ),
           );
+          context.router.pop();
           if (context.mounted) {
             final scannedFoods = manager.state.scannedFoodsByVoice;
             if (scannedFoods.isEmpty) {
