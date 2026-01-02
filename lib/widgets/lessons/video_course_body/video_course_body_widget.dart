@@ -12,13 +12,12 @@ import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonReque
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/courses_app_bar.dart';
 import 'package:calora/widgets/info/course_info_widget.dart';
+import 'package:calora/widgets/lessons/video_course_body/management/video_course_body_management.dart';
+import 'package:calora/widgets/lessons/video_course_body/management/video_course_body_manager.dart';
 import 'package:calora/widgets/task/task_parametrs_widget.dart';
 import 'package:calora/widgets/video/about_video_page.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'management/video_course_body_management.dart';
-import 'management/video_course_body_manager.dart';
 
 @RoutePage()
 class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCourseBodyState, VideoCourseBodyEffect> {
