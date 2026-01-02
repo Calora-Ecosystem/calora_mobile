@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -19,8 +21,9 @@ class HomeAppBar extends StatelessWidget {
         ? name.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase()
         : '';
 
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 45, 20, 16),
+      padding: EdgeInsets.fromLTRB(20, Platform.isAndroid ? 45 : 60, 20, 16),
       decoration: BoxDecoration(color: isScrolled ? context.colors.white : Colors.transparent),
       child: Row(
         children: [

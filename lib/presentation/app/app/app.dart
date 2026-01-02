@@ -6,8 +6,9 @@ import 'package:calora/common/router/app_router.dart';
 import 'package:calora/common/router/custom_navigator_observer.dart';
 import 'package:calora/common/widgets/display/display_widget.dart';
 import 'package:calora/common/widgets/system_ui/remove_status_bar_background.dart';
-import 'package:calora/presentation/app/management/app_management.dart';
-import 'package:calora/presentation/app/management/app_manager.dart';
+import 'package:calora/presentation/app/app/management/app_management.dart';
+import 'package:calora/presentation/app/app/management/app_manager.dart';
+import 'package:calora/presentation/app/connectivity/connectivity_overlay.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_localization_loader/easy_localization_loader.dart';
@@ -41,12 +42,14 @@ class App extends Managed<AppManager, AppState, AppEffect> {
               routerConfig: appRouter.config(navigatorObservers: () => [CustomNavigatorObserver()]),
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);
-                return MediaQuery(
-                  data: mediaQuery.copyWith(
-                    textScaler: mediaQuery.textScaler.clamp(minScaleFactor: 0.8, maxScaleFactor: 1.2),
-                  ),
-                  child: RemoveStatusBarBackground(
-                    child: DisplayWidget(key: ValueKey(state.language), child: child!),
+                return ConnectivityOverlay(
+                  child: MediaQuery(
+                    data: mediaQuery.copyWith(
+                      textScaler: mediaQuery.textScaler.clamp(minScaleFactor: 0.8, maxScaleFactor: 1.2),
+                    ),
+                    child: RemoveStatusBarBackground(
+                      child: DisplayWidget(key: ValueKey(state.language), child: child!),
+                    ),
                   ),
                 );
               },

@@ -16,7 +16,7 @@ class Button extends StatelessWidget {
     this.type = ButtonType.primary,
     this.width = double.infinity,
     this.height = 48,
-    this.radius = 8,
+    this.radius = 12,
     this.padding = EdgeInsets.zero,
   });
 
