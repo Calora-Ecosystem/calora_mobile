@@ -1,23 +1,34 @@
 import 'dart:async';
+import 'dart:ui';
 
+import 'package:calora/common/widgets/video_player/management/video_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:video_player/video_player.dart';
-
-import 'package:calora/common/widgets/video_player/management/video_management.dart';
 
 @injectable
 class VideoManager extends Manager<VideoState, VideoEffect> {
   VideoPlayerController? _controller;
   Timer? _controlsTimer;
 
+  VoidCallback? _onVideoComplete;
+  bool _hasCalledOnComplete = false; // Flag to prevent multiple calls
+
   VideoManager() : super(const VideoState());
+
+  void setOnVideoCompleteListener(VoidCallback? listener) {
+    _onVideoComplete = listener;
+  }
 
   Future<void> initializeVideo(String videoUrl) async {
     try {
       if (_controller != null) {
         await _controller!.dispose();
       }
+
+      // Reset the flag when initializing a new video
+      _hasCalledOnComplete = false;
+
       _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
 
       await _controller!.initialize();
@@ -45,20 +56,46 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
   }
 
   void _onVideoUpdate() {
-    if (_controller != null && _controller!.value.isInitialized) {
-      emit(
-        state.copyWith(
-          position: _controller!.value.position,
-          duration: _controller!.value.duration,
-          isPlaying: _controller!.value.isPlaying,
-        ),
-      );
-    }
-    if (_controller != null &&
-        _controller!.value.duration != Duration.zero &&
-        _controller!.value.position >= _controller!.value.duration &&
-        _controller!.value.isPlaying) {
-      emit(state.copyWith(isPlaying: false));
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    final value = _controller!.value;
+    final currentPosition = value.position;
+    final videoDuration = value.duration;
+
+    emit(
+      state.copyWith(
+        position: currentPosition,
+        duration: videoDuration,
+        isPlaying: value.isPlaying,
+      ),
+    );
+
+    // Check if video is 2 seconds away from completion
+    if (!_hasCalledOnComplete && videoDuration != Duration.zero && videoDuration.inSeconds > 0) {
+      final remainingSeconds = (videoDuration - currentPosition).inSeconds;
+
+      if (remainingSeconds <= 2 && remainingSeconds >= 0) {
+        _hasCalledOnComplete = true;
+
+        print('Video completing: remaining $remainingSeconds seconds');
+        print('onVideoComplete callback is null: ${_onVideoComplete == null}');
+
+        // Call the onVideoComplete callback immediately
+        if (_onVideoComplete != null) {
+          print('Calling onVideoComplete callback now!');
+          _onVideoComplete!();
+        } else {
+          print('Warning: onVideoComplete callback is null!');
+        }
+
+        publish(const VideoEffect.videoCompleted());
+
+        emit(
+          state.copyWith(
+            isCompleted: true,
+          ),
+        );
+      }
     }
   }
 
@@ -103,7 +140,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
     if (_controller == null) return;
     final newPosition = state.position + const Duration(seconds: 10);
     _controller!.seekTo(newPosition);
-    emit(state.copyWith(position: newPosition)); // Holatni yangilash
+    emit(state.copyWith(position: newPosition));
     _startHideControlsTimer();
   }
 
@@ -111,7 +148,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
     if (_controller == null) return;
     final newPosition = state.position - const Duration(seconds: 10);
     _controller!.seekTo(newPosition);
-    emit(state.copyWith(position: newPosition)); // Holatni yangilash
+    emit(state.copyWith(position: newPosition));
     _startHideControlsTimer();
   }
 
@@ -134,8 +171,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
     _controller?.removeListener(_onVideoUpdate);
     await _controller?.dispose();
     _controller = null;
-    print('VideoManager closed/disposed');
-
+    _hasCalledOnComplete = false;
     emit(
       const VideoState(
         aspectRatio: 1.0,

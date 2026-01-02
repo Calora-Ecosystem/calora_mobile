@@ -1,9 +1,7 @@
 import 'package:auto_route/annotations.dart';
-import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
-import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/lessons/management/lessons_management.dart';
 import 'package:calora/presentation/lessons/management/lessons_manager.dart';
@@ -34,65 +32,57 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
   }
 
   @override
-  void init(context, manager) {
-    manager.getLessons();
+  void init(BuildContext context, LessonsManager manager) {
+    manager.getWorkout();
+    super.init(context, manager);
   }
 
   @override
   Widget builder(BuildContext context, LessonsManager manager, LessonsState state) {
-    return StreamBuilder<ProfileRequest>(
-      stream: profileStore.watch(),
-      builder: (context, snapshot) {
-        final profile = snapshot.data;
-        final genderString = profile?.gender.toString() ?? 'Male';
-        final isFemale = genderString == 'Female';
-        return Scaffold(
-          backgroundColor: context.colors.accentDisabled,
-          body: Stack(
+    return Scaffold(
+      backgroundColor: context.colors.accentDisabled,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: SizedBox(
+                height: 200,
+                width: 200,
+                child: Assets.images.courseImage.image(fit: BoxFit.cover),
+              ),
+            ),
+          ),
+          Column(
             children: [
-              SafeArea(
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: SizedBox(
-                    height: 200,
-                    width: 200,
-                    child: isFemale
-                        ? Assets.images.femaleCourseImage.image(fit: BoxFit.cover)
-                        : Assets.images.courseImage.image(fit: BoxFit.cover),
+              LessonAppBar(
+                title: Strings.changeWithin30Days,
+                level: _mapIntToLevel(state.levelIndex),
+                onLevelChanged: (value) => manager.setLevel(value),
+              ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: context.colors.white,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  child: Column(
+                    children: [
+                      Assets.images.yandexBanner.image(),
+                      LessonsCards(
+                        isLoading: state.isLoading,
+                        workouts: state.workouts,
+                        level: _mapIntToLevel(state.levelIndex),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Column(
-                children: [
-                  LessonAppBar(
-                    title: Strings.changeWithin30Days,
-                    level: _mapIntToLevel(state.levelIndex),
-                    onLevelChanged: (value) => manager.setLevel(value),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: context.colors.white,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                      ),
-                      child: Column(
-                        children: [
-                          Assets.images.yandexBanner.image(),
-                          LessonsCards(
-                            lessons: state.lessons,
-                            level: _mapIntToLevel(state.levelIndex),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

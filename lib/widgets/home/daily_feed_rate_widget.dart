@@ -62,14 +62,13 @@ class DailyFeedRateWidget extends StatelessWidget {
                       lineWidth: 10,
                       percent: safePercent(progressPercent),
                       circularStrokeCap: CircularStrokeCap.round,
-                      progressColor: context.colors.accentSub,
+                      progressColor: safePercent(progressPercent) >= 1 ? context.colors.red : context.colors.accentSub,
                       backgroundColor: context.colors.backgroundElevation,
                       center: '${(safePercent(progressPercent) * 100).round()}%'
                           .text(16, 20, 500)
                           .c(context.colors.textStrong),
                     ),
                   ),
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _SideCalories(
@@ -77,7 +76,6 @@ class DailyFeedRateWidget extends StatelessWidget {
                       value: normCalories,
                     ),
                   ),
-
                   Align(
                     alignment: Alignment.centerRight,
                     child: _SideCalories(
@@ -110,7 +108,9 @@ class DailyFeedRateWidget extends StatelessWidget {
                         animation: true,
                         percent: nutrient.percent.clamp(0, 1),
                         lineHeight: 8,
-                        progressColor: context.colors.blueAccent,
+                        progressColor: nutrient.percent.clamp(0, 1) >= 1
+                            ? context.colors.red
+                            : context.colors.blueAccent,
                         backgroundColor: context.colors.backgroundElevation,
                         padding: EdgeInsets.zero,
                         barRadius: const Radius.circular(6),

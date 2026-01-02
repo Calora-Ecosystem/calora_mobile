@@ -286,6 +286,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     final metrics = food.metrics;
     context.showAppBottomSheet(
       child: FoodCreatorWithImage(
+        isLoading: manager.state.isLoading,
         name: food.name,
         addButton: () async {
           final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
@@ -308,12 +309,24 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   void openCreatorWithSpeech(BuildContext context, AddMealsManager manager, List<ScannerFood> foods) {
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
+        isLoading: manager.state.isLoading,
         meals: foods
             .map((e) => '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
             .toList(),
         onAdd: () async {
-          final success = await manager.addFoodAndMenuWithVoice(categoryId, type.name);
-          if (success) _showInfoDialog(context);
+          bool allSucceeded = true;
+          for (final food in foods) {
+            final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
+            if (!success) {
+              allSucceeded = false;
+            }
+          }
+          if (context.mounted) {
+            context.router.pop();
+            if (allSucceeded) {
+              _showInfoDialog(context);
+            }
+          }
         },
       ),
       initialChildSize: 0.55,
@@ -380,10 +393,11 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               apiCall: () => manager.getScannerFoodByVoice(value, categoryId),
             ),
           );
+          context.router.pop();
           if (context.mounted) {
             final scannedFoods = manager.state.scannedFoodsByVoice;
             if (scannedFoods.isEmpty) {
-              CustomSnackBar.show(context, 'No food found in image');
+              CustomSnackBar.show(context, 'No food found in voice');
               return;
             }
             if (scannedFoods.length == 1) {

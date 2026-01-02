@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 class DailyPlanWidget extends StatelessWidget {
   final VoidCallback onBackward;
   final VoidCallback onForward;
+  final VoidCallback onDateTap;
   final DateTime date;
   final String calories;
   final String water;
@@ -24,6 +25,7 @@ class DailyPlanWidget extends StatelessWidget {
     required this.water,
     required this.steps,
     this.loading = false,
+    required this.onDateTap,
   });
 
   bool get isToday {
@@ -49,19 +51,21 @@ class DailyPlanWidget extends StatelessWidget {
                   onTap: onBackward,
                   child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
                 ),
-
-                Column(
-                  children: [
-                    (isToday ? 'Bugun' : '').text(14, 16, 400).c(context.colors.white),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        date.day.toString().text(14, 16, 400).c(context.colors.textWhite),
-                        const SizedBox(width: 4),
-                        formattedMonth.text(14, 16, 400).c(context.colors.white),
-                      ],
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: onDateTap,
+                  child: Column(
+                    children: [
+                      (isToday ? Strings.today : '').text(14, 16, 400).c(context.colors.white),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          date.day.toString().text(14, 16, 400).c(context.colors.textWhite),
+                          const SizedBox(width: 4),
+                          formattedMonth.text(14, 16, 400).c(context.colors.white),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
 
                 isToday

@@ -120,7 +120,10 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
             children: [
               IconButton(icon: Assets.icons.replay10.svg(), onPressed: _skipBackward),
               const SizedBox(width: 50),
-              IconButton(icon: Assets.icons.start.svg(), onPressed: _togglePlayPause),
+              IconButton(
+                icon: widget.controller.value.isPlaying ? Assets.icons.icPause.svg() : Assets.icons.start.svg(),
+                onPressed: _togglePlayPause,
+              ),
               const SizedBox(width: 50),
               IconButton(icon: Assets.icons.forward10.svg(), onPressed: _skipForward),
             ],

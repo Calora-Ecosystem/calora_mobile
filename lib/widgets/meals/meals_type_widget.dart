@@ -114,7 +114,12 @@ class FavouriteFoodGrid extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: food.name.text(14, 16, 600).c(context.colors.textStrong),
+                    child: food.name
+                        .text(14, 16, 600)
+                        .c(context.colors.textStrong)
+                        .copyWith(
+                          overflow: TextOverflow.ellipsis,
+                        ),
                   ),
                 ],
               ),

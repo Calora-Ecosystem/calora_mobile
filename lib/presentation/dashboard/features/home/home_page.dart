@@ -99,31 +99,29 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                             child: Column(
                               spacing: 16,
                               children: [
-                                GestureDetector(
-                                  onTap: () => openCalendar(context, manager),
-                                  child: DailyPlanWidget(
-                                    loading: state.isLoading,
-                                    onBackward: () {
-                                      manager.updateDay(
-                                        (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
-                                      );
-                                      manager.getSummary();
-                                      manager.getWater();
-                                      manager.getMetrics();
-                                      manager.getDailyStep();
-                                    },
-                                    onForward: () {
-                                      manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
-                                      manager.getSummary();
-                                      manager.getWater();
-                                      manager.getMetrics();
-                                      manager.getDailyStep();
-                                    },
-                                    date: state.day ?? DateTime.now(),
-                                    calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
-                                    water: '${state.targetLiters} litr',
-                                    steps: state.targetSteps.toString(),
-                                  ),
+                                DailyPlanWidget(
+                                  onDateTap: () => openCalendar(context, manager),
+                                  loading: state.isLoading,
+                                  onBackward: () {
+                                    manager.updateDay(
+                                      (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
+                                    );
+                                    manager.getSummary();
+                                    manager.getWater();
+                                    manager.getMetrics();
+                                    manager.getDailyStep();
+                                  },
+                                  onForward: () {
+                                    manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
+                                    manager.getSummary();
+                                    manager.getWater();
+                                    manager.getMetrics();
+                                    manager.getDailyStep();
+                                  },
+                                  date: state.day ?? DateTime.now(),
+                                  calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
+                                  water: '${state.targetLiters} ${Strings.liter}',
+                                  steps: state.targetSteps.toString(),
                                 ),
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
@@ -205,9 +203,13 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void openCalendar(BuildContext context, HomeManager manager) {
     context.showAppBottomSheet(
       child: CalendarSelectorWidget(
+        initialDate: manager.state.day ?? DateTime.now(),
         onDaySelected: (date) {
           manager.updateDay(date);
           manager.getSummary();
+          manager.getWater();
+          manager.getMetrics();
+          manager.getDailyStep();
         },
       ),
     );

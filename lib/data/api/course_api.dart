@@ -16,4 +16,12 @@ class CourseApi {
   Future<Response> getLessonsById(int id) async {
     return _dio.get('/lessons', queryParameters: {'courseId': id});
   }
+
+  Future<Response> getLessonById() async {
+    return _dio.get('/workouts');
+  }
+
+  Future<void> updateVideoCourseFinished(int id) async {
+    await _dio.put('/lessons/finish/${id}');
+  }
 }

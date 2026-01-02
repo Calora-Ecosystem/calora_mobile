@@ -6,14 +6,18 @@ import 'package:management/management.dart';
 @injectable
 class LessonsManager extends Manager<LessonsState, LessonsEffect> {
   final CourseRepo _courseRepo;
+
   LessonsManager(this._courseRepo) : super(const LessonsState());
 
   void setLevel(int index) {
     emit(state.copyWith(levelIndex: index));
   }
 
-  Future<void> getLessons() async {
-    final lessons = await _courseRepo.getLessons();
-    emit(state.copyWith(lessons: lessons));
+  void getWorkout() {
+    _courseRepo.getWorkout().handle(
+      onStart: () => emit(state.copyWith(isLoading: true)),
+      onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
+      onError: (error) => emit(state.copyWith(isLoading: false)),
+    );
   }
 }

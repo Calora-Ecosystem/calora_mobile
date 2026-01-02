@@ -14,6 +14,7 @@ class FoodCreatorWithImage extends StatelessWidget {
   final double calories;
   final String name;
   final VoidCallback addButton;
+  final bool isLoading;
 
   const FoodCreatorWithImage({
     super.key,
@@ -23,6 +24,7 @@ class FoodCreatorWithImage extends StatelessWidget {
     required this.oil,
     required this.carbohydrates,
     required this.calories,
+    required this.isLoading,
   });
 
   @override
@@ -58,10 +60,8 @@ class FoodCreatorWithImage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: Button(
-              onPressed: () {
-                addButton();
-                context.router.pop();
-              },
+              loading: isLoading,
+              onPressed: addButton,
               text: Strings.add,
             ),
           ),

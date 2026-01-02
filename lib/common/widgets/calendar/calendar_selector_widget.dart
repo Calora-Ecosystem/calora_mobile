@@ -7,8 +7,9 @@ import 'package:intl/intl.dart';
 
 class CalendarSelectorWidget extends StatefulWidget {
   final ValueChanged<DateTime> onDaySelected;
+  final DateTime initialDate;
 
-  const CalendarSelectorWidget({super.key, required this.onDaySelected});
+  const CalendarSelectorWidget({super.key, required this.onDaySelected, required this.initialDate});
 
   @override
   _CalendarSelectorWidgetState createState() => _CalendarSelectorWidgetState();
@@ -24,7 +25,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
     super.initState();
     _scrollController = ScrollController();
     _initializeMonths();
-    _selectedDate = DateTime.now();
+    _selectedDate = widget.initialDate;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentMonth();
@@ -32,13 +33,22 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
   }
 
   void _scrollToCurrentMonth() {
-    const currentMonthIndex = 5;
+    if (_selectedDate == null) return;
 
-    _scrollController.animateTo(
-      currentMonthIndex * 330,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
+    final selected = _selectedDate!;
+    final index = _months.indexWhere(
+      (m) => m.year == selected.year && m.month == selected.month,
     );
+
+    if (index != -1) {
+      final targetIndex = (index - 1).clamp(0, _months.length - 1);
+
+      _scrollController.animateTo(
+        targetIndex * 330,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   void _initializeMonths() {
@@ -159,7 +169,9 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? context.colors.backgroundElevation
-                      : (isToday && isCurrentMonth ? context.colors.backgroundElevation6 : Colors.transparent),
+                      : isToday
+                      ? context.colors.backgroundElevation6
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
