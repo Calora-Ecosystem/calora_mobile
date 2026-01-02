@@ -29,13 +29,13 @@ class ActionsPage extends StatelessWidget {
             title: Strings.actions.text(20, 24, 700).c(context.colors.textStrong),
             dense: true,
           ),
-          if (onTapDelete != null)
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              leading: Assets.icons.delete.svg(),
-              title: Strings.dataCleaning.text(14, 18, 400).c(context.colors.textPrimary),
-              onTap: onTapDelete,
-            ),
+          // if (onTapDelete != null)
+          //   ListTile(
+          //     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          //     leading: Assets.icons.delete.svg(),
+          //     title: Strings.dataCleaning.text(14, 18, 400).c(context.colors.textPrimary),
+          //     onTap: onTapDelete,
+          //   ),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: Assets.icons.share.svg(),

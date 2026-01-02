@@ -9,7 +9,7 @@ import 'package:calora/presentation/notification/settings/management/notificatio
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-@injectable
+@lazySingleton
 class NotificationSettingsManager extends Manager<NotificationSettingsState, NotificationSettingsEffect> {
   final NotificationRepo _notificationRepo;
 
@@ -62,7 +62,7 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
   ReminderTypesEnum _getReminderTypeFromRequest(ReminderRequest request) {
     final settingType = ReminderSettingTypeEnum.fromApi(request.type);
     final menuType = MenuTypeEnum.fromApi(request.menu);
-    return ReminderTypesEnum.fromReminderSettings(menu: menuType ?? MenuTypeEnum.breakfast, type: settingType);
+    return ReminderTypesEnum.fromReminderSettings(menu: menuType, type: settingType);
   }
 
   Future<void> saveAllReminderChanges({required Map<ReminderTypesEnum, ReminderRequest> originalReminders}) async {

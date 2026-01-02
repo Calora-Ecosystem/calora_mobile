@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
+import 'package:calora/common/extensions/color_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -39,6 +40,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.getStats(3);
     manager.start();
     manager.getUserMetrics();
+    manager.sendDailyData();
     _initializePedometerService(manager);
   }
 
@@ -71,6 +73,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         await manager.getSteps();
         await manager.getStats(3);
         await manager.getUserMetrics();
+        await manager.sendDailyData();
       },
       child: DefaultTabController(
         length: 3,
@@ -168,7 +171,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                   if (state.isDeletingUserDailyData)
                     Positioned.fill(
                       child: Container(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withOpacityLevel(0.5),
                         child: const Center(child: CupertinoActivityIndicator()),
                       ),
                     ),
