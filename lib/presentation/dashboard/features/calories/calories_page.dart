@@ -1,22 +1,17 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
-import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
-import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/week_day_selector.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
-import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
+import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
+import 'package:calora/presentation/dashboard/features/calories/management/calories_manager.dart';
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
 import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
+import 'package:calora/widgets/notification_widgets/calory_notification_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'management/calories_management.dart';
-import 'management/calories_manager.dart';
 
 @RoutePage()
 class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
@@ -94,36 +89,8 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                 leftover: state.leftover.asFixedTruncated(0),
                                 loading: state.isLoading,
                               ),
-                              MealCardsGrid(
-                                meals: manager.meals,
-                                isLoading: state.isLoading,
-                              ),
-                              GestureDetector(
-                                onTap: () => _openNotificationSettings(context),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: context.colors.backgroundElevation,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Assets.icons.greenNotification.svg(),
-                                          const SizedBox(width: 8),
-                                          Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
-                                          Spacer(),
-                                          Assets.icons.setting.svg(),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              MealCardsGrid(meals: manager.meals, isLoading: state.isLoading),
+                              CaloryNotificationSettings(),
                             ],
                           ),
                         ),
@@ -136,15 +103,6 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
           ],
         ),
       ),
-    );
-  }
-
-  void _openNotificationSettings(BuildContext context) {
-    context.showAppBottomSheet(
-      maxChildSize: 0.5,
-      initialChildSize: 0.5,
-      minChildSize: 0.4,
-      child: NotificationSettingSheet(type: NotificationSettingType.mealReminder, reminders: List.empty()),
     );
   }
 }
