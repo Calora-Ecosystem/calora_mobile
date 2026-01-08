@@ -1,21 +1,20 @@
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/logger/local_logger.dart';
+import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
+import 'package:calora/presentation/auth/auth/management/auth_management.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:url_launcher/url_launcher.dart' show launchUrl, LaunchMode;
 
-import 'package:calora/presentation/auth/auth/management/auth_management.dart';
-
 @injectable
 class AuthManager extends Manager<AuthState, AuthEffect> {
-  AuthManager(this._repo) : super(const AuthState()) {
+  final AuthRepo _repo;
+  final AuthStore _authStore;
+  AuthManager(this._repo, this._authStore) : super(const AuthState()) {
     termsRecognizer.onTap = _openTermsOfUse;
   }
-
-  final AuthRepo _repo;
 
   final controller = TextEditingController();
   final termsRecognizer = TapGestureRecognizer();
@@ -28,51 +27,58 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   }
 
   Future<void> login() async {
-    final email = controller.text.trim();
-
-    // final localLogger = LocalLogger();
-    //
-    // localLogger.writeToFile("Email: $email\n"
-    //     "Email isEmpty: ${email.isEmpty}\n"
-    //     "Email isValid: ${_isValidEmail(email)}\n"
-    //     "Checked: ${state.checked}\n"
-    //     );
-
-    if (email.isEmpty) {
-      publish(AuthEffect.showError(Strings.enterEmailAddress));
-      return;
-    }
-    if (!_isValidEmail(email)) {
-      publish(AuthEffect.showError(Strings.emailAddressIsWrongFormat));
-      return;
-    }
     if (!state.checked) {
       publish(AuthEffect.showError(Strings.youMustAgreeToTheTerms));
       return;
     }
 
-    return _repo
-        .sendOtp(email)
-        .handle(
-          onStart: () {
-            // localLogger.writeToFile("OnStart\n");
-            emit(state.copyWith(loading: true));
-          },
-          onData: (verification) {
-            //  localLogger.writeToFile("OnDone: ${verification.toJson()}\n");
-
-            publish(AuthEffect.verify(verification));
-          },
-          onError: (error) {
-            //  localLogger.writeToFile("OnError: ${error.toString()}\n");
-            emit(state.copyWith(loading: false));
-          },
-          onDone: () => emit(state.copyWith(loading: false)),
-        );
+    if (state.isUzbekistan) {
+      final phone = controller.text.replaceAll(' ', '');
+      if (phone.length != 9) {
+        publish(AuthEffect.showError(Strings.enterValidNumber));
+        return;
+      }
+      final fullPhoneNumber = '+998$phone';
+      return _repo
+          .sendOtpToPhone(fullPhoneNumber)
+          .handle(
+            onStart: () => emit(state.copyWith(loading: true)),
+            onData: (verification) => publish(AuthEffect.verify(verification)),
+            onError: (error) => emit(state.copyWith(loading: false)),
+            onDone: () => emit(state.copyWith(loading: false)),
+          );
+    } else {
+      final email = controller.text.trim();
+      if (email.isEmpty) {
+        publish(AuthEffect.showError(Strings.enterEmailAddress));
+        return;
+      }
+      if (!_isValidEmail(email)) {
+        publish(AuthEffect.showError(Strings.emailAddressIsWrongFormat));
+        return;
+      }
+      return _repo
+          .sendOtp(email)
+          .handle(
+            onStart: () => emit(state.copyWith(loading: true)),
+            onData: (verification) => publish(AuthEffect.verify(verification)),
+            onError: (error) => emit(state.copyWith(loading: false)),
+            onDone: () => emit(state.copyWith(loading: false)),
+          );
+    }
   }
 
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  Future<void> setIsUzbekistan({bool? value}) async {
+    if (value == null) {
+      final bool response = await _authStore.isCountryUzbekistan.call();
+      emit(state.copyWith(isUzbekistan: response));
+      return;
+    }
+    emit(state.copyWith(isUzbekistan: value));
   }
 
   @override

@@ -5,8 +5,11 @@ part 'auth_management.freezed.dart';
 
 @freezed
 abstract class AuthState with _$AuthState {
-  const factory AuthState({@Default(false) bool loading, @Default(false) bool checked}) =
-      _AuthState;
+  const factory AuthState({
+    @Default(false) bool loading,
+    @Default(false) bool checked,
+    @Default(false) bool isUzbekistan,
+  }) = _AuthState;
 }
 
 @freezed

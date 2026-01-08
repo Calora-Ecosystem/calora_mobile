@@ -190,14 +190,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       default:
         return;
     }
-    emit(
-      state.copyWith(
-        period: newPeriod,
-        offset: 0,
-        from: from.toIso8601String(),
-        to: to.toIso8601String(),
-      ),
-    );
+    emit(state.copyWith(period: newPeriod, offset: 0, from: from.toIso8601String(), to: to.toIso8601String()));
     getSteps();
     getStats(1);
     getUserMetrics();
@@ -215,19 +208,19 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     DateTime to;
 
     switch (state.period) {
-      case 0: // Daily
+      case 0:
         final targetDay = now.add(Duration(days: newOffset));
         from = DateTime(targetDay.year, targetDay.month, targetDay.day);
         to = DateTime(targetDay.year, targetDay.month, targetDay.day, 23, 59, 59);
         break;
-      case 1: // Weekly
+      case 1:
         final startOfCurrentWeek = now.subtract(Duration(days: now.weekday - 1));
         final startOfTargetWeek = startOfCurrentWeek.add(Duration(days: 7 * newOffset));
         from = DateTime(startOfTargetWeek.year, startOfTargetWeek.month, startOfTargetWeek.day);
         final endOfTargetWeek = startOfTargetWeek.add(const Duration(days: 6));
         to = DateTime(endOfTargetWeek.year, endOfTargetWeek.month, endOfTargetWeek.day, 23, 59, 59);
         break;
-      case 2: // Monthly
+      case 2:
         final targetMonth = DateTime(now.year, now.month + newOffset, 1);
         from = DateTime(targetMonth.year, targetMonth.month, 1);
         final endOfMonth = DateTime(targetMonth.year, targetMonth.month + 1, 0);

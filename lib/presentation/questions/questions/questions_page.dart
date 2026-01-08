@@ -4,18 +4,16 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/navigation_button.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
+import 'package:calora/presentation/questions/questions/management/questions_management.dart';
+import 'package:calora/presentation/questions/questions/management/questions_manager.dart';
 import 'package:calora/widgets/questions/question_progress_widget.dart';
 import 'package:calora/widgets/questions/questions_body_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'package:calora/presentation/questions/questions/management/questions_management.dart';
-import 'package:calora/presentation/questions/questions/management/questions_manager.dart';
-
 @RoutePage()
 class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
-  final String email;
-  QuestionsPage(this.email, {super.key});
+  QuestionsPage({super.key});
 
   @override
   void listener(BuildContext context, QuestionsManager manager, QuestionsEffect effect) {

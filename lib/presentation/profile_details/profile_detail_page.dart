@@ -150,7 +150,7 @@ class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState
 
   void logOut(ProfileDetailManager manager, BuildContext context) {
     manager.logOut();
-    context.router.replaceAll([const AuthRoute()]);
+    context.router.replaceAll([AuthRoute()]);
   }
 
   Widget _buildRow(String label, String value, BuildContext context) {

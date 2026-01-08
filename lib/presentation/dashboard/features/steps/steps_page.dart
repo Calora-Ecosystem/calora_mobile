@@ -1,13 +1,13 @@
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
+import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/color_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pedometer_service.dart';
-import 'package:calora/common/widgets/capture_and_share/capture_and_share.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
@@ -24,14 +24,18 @@ import 'package:calora/widgets/track/fitness_track_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 @RoutePage()
 class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   StepsPage({super.key});
 
   late PedometerService _pedometerService;
-  GlobalKey globalKey = GlobalKey();
+  final ScreenshotController _screenshotController = ScreenshotController();
   int _previousTabIndex = 0;
+  final GlobalKey shareAnchorKey = GlobalKey();
 
   @override
   void init(context, manager) {
@@ -49,7 +53,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       onTodayStepCountUpdated: (todaySteps) {
         manager.updateTodaySteps(todaySteps);
       },
-      onError: (error) => log('StepsPageError: $error'),
+      onError: (error) => debugPrint('StepsPageError: $error'),
     );
     await _pedometerService.initializePedometer();
   }
@@ -68,6 +72,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     );
 
     return DefaultRefreshIndicator(
+      edgeOffset: context.topPadding + kToolbarHeight,
       onRefresh: () async {
         await manager.getNorms();
         await manager.getSteps();
@@ -126,22 +131,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                           const SizedBox(height: 16),
                           Expanded(
                             child: SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
+                              physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                               child: Column(
                                 children: [
-                                  FitnessTrackWidget(
-                                    primaryValues: state.primaryValues,
-                                    globalKey: globalKey,
-                                    goal: stepValue.toInt(),
-                                    metrics: state.metrics,
-                                    stepCount: state.displayStepCount,
-                                    canGoForward: state.canGoForward,
-                                    offset: state.offset,
-                                    onClickBackward: () => manager.changeOffset(-1),
-                                    onClickForward: () => manager.changeOffset(1),
-                                    onClickMoreVert: () => _showActionsSheet(context, manager),
-                                    onClickPause: () {},
-                                    onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+                                  Screenshot(
+                                    controller: _screenshotController,
+                                    child: FitnessTrackWidget(
+                                      key: shareAnchorKey,
+                                      primaryValues: state.primaryValues,
+                                      goal: stepValue.toInt(),
+                                      metrics: state.metrics,
+                                      stepCount: state.displayStepCount,
+                                      canGoForward: state.canGoForward,
+                                      offset: state.offset,
+                                      onClickBackward: () => manager.changeOffset(-1),
+                                      onClickForward: () => manager.changeOffset(1),
+                                      onClickMoreVert: () => _showActionsSheet(context, manager),
+                                      onClickPause: () {},
+                                      onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+                                    ),
                                   ),
                                   PodiumWidget(
                                     firstPosition: WinnerItemBuilder(
@@ -244,24 +252,38 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
               manager.state.period == 0 &&
                   DateTime(fromDate.year, fromDate.month, fromDate.day).toIso8601String() ==
                       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).toIso8601String()
-              ? () async {
+              ? () {
                   sheetContext.router.maybePop();
-                  await Future.delayed(const Duration(milliseconds: 100));
                   _showConfirmDialog(context, manager);
                 }
               : null,
           onTapShare: () {
             sheetContext.router.maybePop();
-            captureAndShare(globalKey);
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              final image = await _screenshotController.capture();
+              if (image == null) return;
+
+              final Rect origin = _getWidgetRect(shareAnchorKey);
+              final directory = await getTemporaryDirectory();
+              final imagePath = await File('${directory.path}/screenshot.png').create();
+              await imagePath.writeAsBytes(image);
+
+              await SharePlus.instance.share(
+                ShareParams(files: [XFile(imagePath.path)], sharePositionOrigin: origin),
+              );
+            });
           },
         );
       },
     );
   }
 
-  @override
-  void dispose() {
-    // _pedometerService.dispose();
-    super.dispose();
+  Rect _getWidgetRect(GlobalKey key) {
+    final renderBox = key.currentContext!.findRenderObject() as RenderBox;
+
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    return offset & size;
   }
 }

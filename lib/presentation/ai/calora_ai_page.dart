@@ -127,7 +127,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
       context: context,
       builder: (_) => ConfirmPage(
         onConfirm: () => manager.requestCameraPermission(),
-        onCancel: () {},
+        onCancel: () => context.router.maybePop(),
         confirmBackgroundColor: context.colors.accentSub,
         confirmTextColor: context.colors.white,
         cancelText: Strings.rejection,

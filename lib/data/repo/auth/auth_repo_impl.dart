@@ -45,9 +45,10 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken = await FirebaseMessaging.instance.getToken();
     }
     final response = await _api.signIn(
-      email: verification.email!,
+      email: verification.email,
       verificationCode: verification.verificationCode!,
       code: code,
+      phone: verification.phone,
       key: installationId,
       name: deviceName,
       fcmToken: fcmToken,
@@ -58,5 +59,10 @@ class AuthRepoImpl extends AuthRepo {
     await _store.token.set(token);
 
     return content['hasNewUser'] as bool;
+  }
+
+  @override
+  Future<Verification> sendOtpToPhone(String phone) async {
+    return await _api.sendOtpToPhone(phone);
   }
 }

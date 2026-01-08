@@ -16,8 +16,9 @@ class SplashPage extends Managed<SplashManager, SplashState, SplashEffect> {
     effect.when(
       language: () => context.router.replaceAll([const SelectLanguageRoute()]),
       onboarding: () => context.router.replaceAll([const OnboardingRoute()]),
-      auth: () => context.router.replaceAll([const AuthRoute()]),
+      auth: (isUzbekistan) => context.router.replaceAll([AuthRoute(isUzbekistan: isUzbekistan)]),
       dashboard: () => context.router.replaceAll([const DashboardRoute()]),
+      questionary: () => context.router.replaceAll([QuestionsRoute()]),
     );
   }
 

@@ -17,7 +17,6 @@ class FitnessTrackWidget extends StatefulWidget {
     super.key,
     required this.primaryValues,
     required this.stepCount,
-    required this.globalKey,
     required this.goal,
     required this.metrics,
     required this.onClickForward,
@@ -34,7 +33,6 @@ class FitnessTrackWidget extends StatefulWidget {
   final int stepCount;
   final List<double> primaryValues;
   final int goal;
-  final GlobalKey globalKey;
   final MetricsRequest metrics;
   final Function() onClickForward;
   final Function() onClickBackward;
@@ -119,7 +117,6 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                         borderRadius: const BorderRadius.all(Radius.circular(20)),
                       ),
                       child: RepaintBoundary(
-                        key: widget.globalKey,
                         child: Column(
                           children: [
                             Row(

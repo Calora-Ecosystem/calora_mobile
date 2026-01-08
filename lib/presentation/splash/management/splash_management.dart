@@ -11,6 +11,7 @@ abstract class SplashState with _$SplashState {
 sealed class SplashEffect with _$SplashEffect {
   const factory SplashEffect.dashboard() = _Dashboard;
   const factory SplashEffect.language() = _Language;
-  const factory SplashEffect.auth() = _Auth;
+  const factory SplashEffect.auth(bool isCountryUzbekistan) = _Auth;
   const factory SplashEffect.onboarding() = _Onboarding;
+  const factory SplashEffect.questionary() = _Questionary;
 }

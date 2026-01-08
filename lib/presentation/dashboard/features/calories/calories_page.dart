@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
@@ -43,6 +44,7 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   Widget builder(context, manager, state) {
     return Scaffold(
       body: DefaultRefreshIndicator(
+        edgeOffset: context.topPadding + kToolbarHeight,
         onRefresh: () async {
           manager.fetchCaloriesAndMeals(state.date ?? DateTime.now());
           manager.getSummary(state.date ?? DateTime.now());
