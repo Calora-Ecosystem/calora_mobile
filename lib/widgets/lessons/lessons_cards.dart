@@ -1,3 +1,5 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
@@ -10,7 +12,7 @@ class LessonsCards extends StatelessWidget {
   final Level level;
   final bool isLoading;
 
-  const LessonsCards({super.key, required this.level, required this.workouts, required this.isLoading});
+  const LessonsCards({super.key, required this.workouts, required this.isLoading, required this.level});
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +42,7 @@ class LessonsCards extends StatelessWidget {
               height: 70,
             ),
             child: GestureDetector(
-              onTap: () {
-                // context.router.push(TasksRoute());
-              },
+              onTap: () => context.router.push(TasksRoute(level: level, workout: workout)),
               child: LessonCard(
                 workout: workout,
               ),

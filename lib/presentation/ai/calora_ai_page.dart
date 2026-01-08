@@ -9,6 +9,7 @@ import 'package:calora/presentation/ai/management/calora_ai_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
@@ -41,16 +42,17 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  height: 100,
-                  width: 100,
+                  height: 96,
+                  width: 96,
                   child: Assets.images.ai.image(),
                 ),
                 const SizedBox(height: 4),
                 Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 4),
                 Container(
+                  height: 60,
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: context.colors.backgroundElevation,
                     borderRadius: BorderRadius.circular(12),
@@ -65,9 +67,12 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                Assets.images.thisIsLottie.image(),
-                const SizedBox(height: 16),
+                ClipRect(
+                  child: Align(
+                    heightFactor: 0.5,
+                    child: Lottie.asset('assets/lottie/face.json', fit: BoxFit.contain, repeat: true),
+                  ),
+                ),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Strings.takePictureOfYourFaceLikeThis.text(16, 20, 500).c(context.colors.textStrong),

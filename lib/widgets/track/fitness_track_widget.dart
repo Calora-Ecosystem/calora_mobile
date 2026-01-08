@@ -172,7 +172,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                   children: [
                                     Assets.icons.icStopwatch.svg(),
                                     const SizedBox(height: 4),
-                                    '0 S'.text(16, 20, 500).c(context.colors.textStrong),
+                                    widget.metrics.duration.toString().text(16, 20, 500).c(context.colors.textStrong),
                                     const SizedBox(height: 2),
                                     Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
                                   ],

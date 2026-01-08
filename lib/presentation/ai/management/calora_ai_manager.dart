@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:calora/presentation/ai/management/calora_ai_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -10,10 +8,21 @@ class CaloraAiManager extends Manager<CaloraAiState, CaloraAiEffect> {
   CaloraAiManager() : super(const CaloraAiState());
 
   void openConfirmPage() async {
-    final status = await Permission.camera.request();
+    final status = await Permission.camera.status;
     if (status.isGranted) {
       publish(const CaloraAiEffect.navigateToCamera());
-    } else {
+      return;
+    }
+    if (status.isDenied) {
+      final result = await Permission.camera.request();
+      if (result.isGranted) {
+        publish(const CaloraAiEffect.navigateToCamera());
+      } else {
+        publish(const CaloraAiEffect.showConfirmDialog());
+      }
+      return;
+    }
+    if (status.isPermanentlyDenied) {
       publish(const CaloraAiEffect.showConfirmDialog());
     }
   }

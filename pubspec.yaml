@@ -76,6 +76,7 @@ dependencies:
   video_player: any
   collection: any
   connectivity_plus: ^6.1.5
+  lottie: ^3.3.2
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +96,7 @@ flutter:
     - assets/localization/
     - assets/icons/
     - assets/images/
+    - assets/lottie/
   fonts:
     - family: Inter
       fonts:

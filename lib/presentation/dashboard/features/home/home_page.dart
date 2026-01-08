@@ -169,7 +169,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   loading: state.isMetricsLoading,
                                   currentSteps: state.currentSteps,
                                   targetSteps: state.targetSteps,
-                                  timeInSeconds: state.timeInSeconds,
+                                  timeInSeconds: state.metrics?.duration ?? 0,
                                   distanceInKm: state.metrics?.distance ?? 0,
                                   caloriesBurned: state.metrics?.kcal ?? 0,
                                 ),
