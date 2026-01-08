@@ -9,17 +9,34 @@ part 'steps_management.freezed.dart';
 @freezed
 abstract class StepsState with _$StepsState {
   const factory StepsState({
-    @Default([]) List<StepsWithMetricsRequest> steps,
-    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0)) MetricsRequest metrics,
+    @Default([]) List<StepsWithMetricsRequest> dailySteps,
+    @Default([]) List<StepsWithMetricsRequest> weeklySteps,
+    @Default([]) List<StepsWithMetricsRequest> monthlySteps,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0))
+    MetricsRequest dailyMetrics,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0))
+    MetricsRequest weeklyMetrics,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0))
+    MetricsRequest monthlyMetrics,
+    @Default([]) List<double> dailyPrimaryValues,
+    @Default([]) List<double> weeklyPrimaryValues,
+    @Default([]) List<double> monthlyPrimaryValues,
+    @Default(0) int dailyDisplayStepCount,
+    @Default(0) int weeklyDisplayStepCount,
+    @Default(0) int monthlyDisplayStepCount,
+    @Default('') String dailyFrom,
+    @Default('') String weeklyFrom,
+    @Default('') String monthlyFrom,
+    @Default('') String dailyTo,
+    @Default('') String weeklyTo,
+    @Default('') String monthlyTo,
     @Default([]) List<NormsRequest> norms,
-    @Default([]) List<double> primaryValues,
     @Default([]) List<UserStatRequest> userStates,
     @Default(0) int stepCount,
-    @Default(0) int displayStepCount,
     @Default(0) int period,
-    @Default(0) int offset,
-    @Default('') String from,
-    @Default('') String to,
+    @Default(0) int dailyOffset,
+    @Default(0) int weeklyOffset,
+    @Default(0) int monthlyOffset,
     @Default(false) bool isGettingSteps,
     @Default(false) bool isGettingStats,
     @Default(false) bool isGettingUserMetrics,
@@ -42,7 +59,9 @@ abstract class StepsState with _$StepsState {
     if (period == 0 && offset == 0) {
       return stepCount;
     }
-    return displayStepCount;
+    if (period == 0) return dailyDisplayStepCount;
+    if (period == 1) return weeklyDisplayStepCount;
+    return monthlyDisplayStepCount;
   }
 }
 
