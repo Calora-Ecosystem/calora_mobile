@@ -16,10 +16,12 @@ class WaterNotificationSettingsSheet extends StatefulWidget {
   const WaterNotificationSettingsSheet({super.key, required this.manager});
 
   @override
-  State<WaterNotificationSettingsSheet> createState() => _WaterNotificationSettingsSheetState();
+  State<WaterNotificationSettingsSheet> createState() =>
+      _WaterNotificationSettingsSheetState();
 }
 
-class _WaterNotificationSettingsSheetState extends State<WaterNotificationSettingsSheet> {
+class _WaterNotificationSettingsSheetState
+    extends State<WaterNotificationSettingsSheet> {
   late Map<ReminderTypesEnum, ReminderRequest> _originalReminders;
   bool _isSaved = false;
 
@@ -41,7 +43,10 @@ class _WaterNotificationSettingsSheetState extends State<WaterNotificationSettin
 
   @override
   Widget build(BuildContext context) {
-    return ManagerBuilder<NotificationSettingsState, NotificationSettingsEffect>(
+    return ManagerBuilder<
+      NotificationSettingsState,
+      NotificationSettingsEffect
+    >(
       manager: widget.manager,
       properties: (state) => [state.reminders, state.isSaving],
       builder: (context, state) {
@@ -77,7 +82,8 @@ class _WaterNotificationSettingsSheetState extends State<WaterNotificationSettin
                   _isSaved = true;
                   await widget.manager.saveSingleReminderChange(
                     type: ReminderTypesEnum.water,
-                    originalRequest: _originalReminders[ReminderTypesEnum.water],
+                    originalRequest:
+                        _originalReminders[ReminderTypesEnum.water],
                   );
                   if (context.mounted) context.router.maybePop();
                 },

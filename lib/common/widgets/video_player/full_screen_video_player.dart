@@ -118,14 +118,22 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(icon: Assets.icons.replay10.svg(), onPressed: _skipBackward),
+              IconButton(
+                icon: Assets.icons.replay10.svg(),
+                onPressed: _skipBackward,
+              ),
               const SizedBox(width: 50),
               IconButton(
-                icon: widget.controller.value.isPlaying ? Assets.icons.icPause.svg() : Assets.icons.start.svg(),
+                icon: widget.controller.value.isPlaying
+                    ? Assets.icons.icPause.svg()
+                    : Assets.icons.start.svg(),
                 onPressed: _togglePlayPause,
               ),
               const SizedBox(width: 50),
-              IconButton(icon: Assets.icons.forward10.svg(), onPressed: _skipForward),
+              IconButton(
+                icon: Assets.icons.forward10.svg(),
+                onPressed: _skipForward,
+              ),
             ],
           ),
           SafeArea(
@@ -135,7 +143,9 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(width: 8),
-                  _format(widget.controller.value.position).text(14, 16, 400).c(Colors.white),
+                  _format(
+                    widget.controller.value.position,
+                  ).text(14, 16, 400).c(Colors.white),
                   const SizedBox(width: 8),
                   Expanded(
                     child: VideoProgressIndicator(
@@ -149,7 +159,9 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _format(widget.controller.value.duration).text(14, 16, 400).c(Colors.white),
+                  _format(
+                    widget.controller.value.duration,
+                  ).text(14, 16, 400).c(Colors.white),
                   const SizedBox(width: 8),
                 ],
               ),

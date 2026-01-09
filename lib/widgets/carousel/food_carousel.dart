@@ -31,7 +31,14 @@ class FoodCarousel extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: Stack(
-                  children: [Image.asset(url, fit: BoxFit.cover, width: double.infinity, height: double.infinity)],
+                  children: [
+                    Image.asset(
+                      url,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ],
                 ),
               ),
             );

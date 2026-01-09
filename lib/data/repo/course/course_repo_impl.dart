@@ -1,6 +1,7 @@
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/data/api/course_api.dart';
-import 'package:calora/domain/model/course/course_request.dart' show CourseRequest;
+import 'package:calora/domain/model/course/course_request.dart'
+    show CourseRequest;
 import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/domain/repo/course/course_repo.dart';
@@ -15,10 +16,14 @@ class CourseRepoImpl implements CourseRepo {
   @override
   Future<List<CourseRequest>> getCourse() async {
     final profile = await profileStore.getProfile();
-    final response = await _courseApi.getCourse(profile.gender ?? Gender.Male.name);
+    final response = await _courseApi.getCourse(
+      profile.gender ?? Gender.Male.name,
+    );
     final data = response.data;
     final List<dynamic> content = data['content'] ?? [];
-    return content.map((item) => CourseRequest.fromJson(item as Map<String, dynamic>)).toList();
+    return content
+        .map((item) => CourseRequest.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -26,7 +31,9 @@ class CourseRepoImpl implements CourseRepo {
     final result = await _courseApi.getLessonsById(id);
     final data = result.data;
     final List<dynamic> content = data['content'] ?? [];
-    return content.map((item) => LessonRequest.fromJson(item as Map<String, dynamic>)).toList();
+    return content
+        .map((item) => LessonRequest.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -34,7 +41,9 @@ class CourseRepoImpl implements CourseRepo {
     final result = await _courseApi.getLessonById();
     final data = result.data;
     final List<dynamic> content = data['content'] ?? [];
-    return content.map((item) => WorkoutRequest.fromJson(item as Map<String, dynamic>)).toList();
+    return content
+        .map((item) => WorkoutRequest.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   @override

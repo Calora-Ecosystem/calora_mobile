@@ -43,12 +43,19 @@ class LanguagePage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: Container(width: 24, height: 3, color: context.colors.strokeSoft)),
+          Center(
+            child: Container(
+              width: 24,
+              height: 3,
+              color: context.colors.strokeSoft,
+            ),
+          ),
           const SizedBox(height: 13),
           Strings.applicationLanguage.text(20, 24, 700),
           const SizedBox(height: 16),
           ...languages.map((lang) {
-            final isSelected = currentLocale.languageCode == lang.locale.languageCode;
+            final isSelected =
+                currentLocale.languageCode == lang.locale.languageCode;
             return ListTile(
               leading: lang.flag,
               title: lang.name.text(16, 20, 400),
@@ -72,5 +79,10 @@ class Language {
   final Locale locale;
   final Widget flag;
 
-  Language({required this.code, required this.name, required this.locale, required this.flag});
+  Language({
+    required this.code,
+    required this.name,
+    required this.locale,
+    required this.flag,
+  });
 }

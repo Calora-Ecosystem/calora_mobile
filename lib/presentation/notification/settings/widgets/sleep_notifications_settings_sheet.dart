@@ -17,10 +17,12 @@ class SleepNotificationSettingsSheet extends StatefulWidget {
   const SleepNotificationSettingsSheet({super.key, required this.manager});
 
   @override
-  State<SleepNotificationSettingsSheet> createState() => _SleepNotificationSettingsSheetState();
+  State<SleepNotificationSettingsSheet> createState() =>
+      _SleepNotificationSettingsSheetState();
 }
 
-class _SleepNotificationSettingsSheetState extends State<SleepNotificationSettingsSheet> {
+class _SleepNotificationSettingsSheetState
+    extends State<SleepNotificationSettingsSheet> {
   late Map<ReminderTypesEnum, ReminderRequest> _originalReminders;
   bool _isSaved = false;
 
@@ -40,7 +42,10 @@ class _SleepNotificationSettingsSheetState extends State<SleepNotificationSettin
 
   @override
   Widget build(BuildContext context) {
-    return ManagerBuilder<NotificationSettingsState, NotificationSettingsEffect>(
+    return ManagerBuilder<
+      NotificationSettingsState,
+      NotificationSettingsEffect
+    >(
       manager: widget.manager,
       properties: (state) => [state.reminders, state.isSaving],
       builder: (context, state) {
@@ -76,7 +81,8 @@ class _SleepNotificationSettingsSheetState extends State<SleepNotificationSettin
                   _isSaved = true;
                   await widget.manager.saveSingleReminderChange(
                     type: ReminderTypesEnum.sleep,
-                    originalRequest: _originalReminders[ReminderTypesEnum.sleep],
+                    originalRequest:
+                        _originalReminders[ReminderTypesEnum.sleep],
                   );
                   if (context.mounted) context.router.maybePop();
                 },

@@ -23,10 +23,13 @@ class WinnerItemBuilder extends StatelessWidget {
           children: [
             AvatarWithFlagWidget(
               initials: userStat.getInitials(),
-              flagAsset: userStat.firstName == '-' ? null : Assets.icons.circleFlag.svg(),
+              flagAsset: userStat.firstName == '-'
+                  ? null
+                  : Assets.icons.circleFlag.svg(),
               loading: loading,
             ),
-            if (userStat.isWinner) Positioned(top: -10, right: -10, child: Assets.icons.crown.svg()),
+            if (userStat.isWinner)
+              Positioned(top: -10, right: -10, child: Assets.icons.crown.svg()),
           ],
         ),
         SizedBox(height: 8),
@@ -51,7 +54,9 @@ class WinnerItemBuilder extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(12)),
               color: context.colors.backgroundElevation6,
             ),
-            child: userStat.prettySteps.text(12, 16, 500).c(context.colors.neutral900Primary),
+            child: userStat.prettySteps
+                .text(12, 16, 500)
+                .c(context.colors.neutral900Primary),
           ),
         ),
       ],

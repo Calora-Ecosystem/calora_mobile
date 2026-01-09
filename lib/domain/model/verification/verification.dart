@@ -5,8 +5,13 @@ part 'verification.g.dart';
 
 @freezed
 abstract class Verification with _$Verification {
-  const factory Verification({String? verificationCode, DateTime? expireDate, String? email, String? phone}) =
-      _Verification;
+  const factory Verification({
+    String? verificationCode,
+    DateTime? expireDate,
+    String? email,
+    String? phone,
+  }) = _Verification;
 
-  factory Verification.fromJson(Map<String, dynamic> json) => _$VerificationFromJson(json);
+  factory Verification.fromJson(Map<String, dynamic> json) =>
+      _$VerificationFromJson(json);
 }

@@ -15,7 +15,8 @@ abstract class UserStatRequest with _$UserStatRequest {
     @Default(false) bool isWinner,
   }) = _UserStatRequest;
 
-  factory UserStatRequest.fromJson(Map<String, dynamic> json) => _$UserStatRequestFromJson(json);
+  factory UserStatRequest.fromJson(Map<String, dynamic> json) =>
+      _$UserStatRequestFromJson(json);
 }
 
 extension UserStatExtension on UserStatRequest {

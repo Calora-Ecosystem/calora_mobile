@@ -27,8 +27,12 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
   @override
   void listener(context, manager, effect) {
     effect.when(
-      verify: (verification) =>
-          context.router.push(VerifyRoute(verification: verification, isPhoneAuth: manager.state.isUzbekistan)),
+      verify: (verification) => context.router.push(
+        VerifyRoute(
+          verification: verification,
+          isPhoneAuth: manager.state.isUzbekistan,
+        ),
+      ),
       showError: (message) => CustomSnackBar.show(context, message),
     );
   }
@@ -60,7 +64,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       if (!state.isUzbekistan) ...[
                         TextField(
                           controller: manager.controller,
-                          decoration: InputDecoration(hintText: Strings.emailAddress),
+                          decoration: InputDecoration(
+                            hintText: Strings.emailAddress,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         SizedBox(
@@ -75,11 +81,23 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                         const SizedBox(height: 32),
                         Row(
                           children: [
-                            Expanded(child: Container(height: 1, color: context.colors.accentSub)),
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                color: context.colors.accentSub,
+                              ),
+                            ),
                             const SizedBox(width: 8),
-                            Strings.or.text(14, 18, 500).c(context.colors.textStrong),
+                            Strings.or
+                                .text(14, 18, 500)
+                                .c(context.colors.textStrong),
                             const SizedBox(width: 8),
-                            Expanded(child: Container(height: 1, color: context.colors.accentSub)),
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                color: context.colors.accentSub,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 32),
@@ -91,7 +109,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                             children: [
                               Assets.icons.apple.svg(),
                               const SizedBox(width: 8),
-                              Strings.continueWithApple.text(14, 18, 500).c(context.colors.textStrong),
+                              Strings.continueWithApple
+                                  .text(14, 18, 500)
+                                  .c(context.colors.textStrong),
                             ],
                           ),
                         ),
@@ -104,7 +124,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                             children: [
                               Assets.icons.google.svg(),
                               const SizedBox(width: 8),
-                              Strings.continueWithGoogle.text(14, 18, 500).c(context.colors.textStrong),
+                              Strings.continueWithGoogle
+                                  .text(14, 18, 500)
+                                  .c(context.colors.textStrong),
                             ],
                           ),
                         ),
@@ -148,7 +170,10 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       const SizedBox(height: 32),
                       Row(
                         children: [
-                          Checkbox(value: state.checked, onChanged: manager.setChecked),
+                          Checkbox(
+                            value: state.checked,
+                            onChanged: manager.setChecked,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: RichText(
@@ -163,7 +188,9 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                                   TextSpan(text: Strings.iReadAndAgree),
                                   TextSpan(
                                     text: ' ${Strings.termsOfUseLink} ',
-                                    style: TextStyle(color: context.colors.informationBase),
+                                    style: TextStyle(
+                                      color: context.colors.informationBase,
+                                    ),
                                     recognizer: manager.termsRecognizer,
                                   ),
                                   TextSpan(text: Strings.readAndAgreeEnd),

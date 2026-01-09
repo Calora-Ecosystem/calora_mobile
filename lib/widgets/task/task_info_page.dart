@@ -43,9 +43,12 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
                 width: double.infinity,
                 child: Assets.images.task.image(),
               ),
-            if (selectedIndex == 1) VideoPlayerPage(videoUrl: widget.taskInfo.videoUrl),
+            if (selectedIndex == 1)
+              VideoPlayerPage(videoUrl: widget.taskInfo.videoUrl),
             const SizedBox(height: 8),
-            widget.taskInfo.descriptionTitle.text(20, 24, 700).c(context.colors.textStrong),
+            widget.taskInfo.descriptionTitle
+                .text(20, 24, 700)
+                .c(context.colors.textStrong),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -64,7 +67,12 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: UniversalStepperWidget(type: StepperType.int, totalInt: 15)),
+                Expanded(
+                  child: UniversalStepperWidget(
+                    type: StepperType.int,
+                    totalInt: 15,
+                  ),
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: GestureDetector(
@@ -103,12 +111,22 @@ class DescriptionWidget extends StatelessWidget {
           'Planka mashqi — tanani to‘g‘ri holatda ushlab turishni talab qiladigan statik mashq. '
           'Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.',
         ),
-        const Text('• Bajarilish tartibi:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text(
+          '• Bajarilish tartibi:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         _bullet('a. Tizzadan turib, tirsaklarni yelkalar ostiga qo‘ying.'),
         _bullet('b. Oyoqlarni orqaga cho‘zib, tanani tekis chiziqda ushlang.'),
-        _bullet('c. Qorin mushaklarini tarang qilib, belni bukmasdan yoki ko‘tarmasdan ushlang.'),
-        _bullet('d. Belgilangan vaqt davomida (masalan, 30–60 soniya) shu holatda turing.'),
-        const Text('• Asosiy foydasi:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        _bullet(
+          'c. Qorin mushaklarini tarang qilib, belni bukmasdan yoki ko‘tarmasdan ushlang.',
+        ),
+        _bullet(
+          'd. Belgilangan vaqt davomida (masalan, 30–60 soniya) shu holatda turing.',
+        ),
+        const Text(
+          '• Asosiy foydasi:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         _bullet('Qorin mushaklarini kuchaytiradi'),
         _bullet('Bel va orqa qismini mustahkamlaydi'),
       ],
@@ -121,7 +139,10 @@ class DescriptionWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('• ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            '• ',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
         ],
       ),

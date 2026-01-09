@@ -9,47 +9,35 @@ import 'package:calora/common/widgets/display/display_type.dart';
 class DisplayImpl extends Display {
   void Function(DisplayMessage message)? _onDisplay;
 
-  void _display(DisplayType type, String description, [String? title, VoidCallback? onTap, Duration? duration]) =>
-      _onDisplay?.call(
-        DisplayMessage(
-          type,
-          description,
-          title,
-          onTap,
-          duration,
-        ),
-      );
+  void _display(
+    DisplayType type,
+    String description, [
+    String? title,
+    VoidCallback? onTap,
+    Duration? duration,
+  ]) => _onDisplay?.call(
+    DisplayMessage(type, description, title, onTap, duration),
+  );
 
   @override
-  void error(String description, [String? title]) => _display(
-        DisplayType.error,
-        description,
-        title,
-      );
+  void error(String description, [String? title]) =>
+      _display(DisplayType.error, description, title);
 
   @override
-  void warning(String description, [String? title]) => _display(
-        DisplayType.warning,
-        description,
-        title,
-      );
+  void warning(String description, [String? title]) =>
+      _display(DisplayType.warning, description, title);
 
   @override
-  void info({required String description, String? title, VoidCallback? onTap, Duration? duration}) =>
-      _display(
-        DisplayType.info,
-        description,
-        title,
-        onTap,
-        duration,
-      );
+  void info({
+    required String description,
+    String? title,
+    VoidCallback? onTap,
+    Duration? duration,
+  }) => _display(DisplayType.info, description, title, onTap, duration);
 
   @override
-  void success(String description, [String? title]) => _display(
-        DisplayType.success,
-        description,
-        title,
-      );
+  void success(String description, [String? title]) =>
+      _display(DisplayType.success, description, title);
 
   @override
   void setOnDisplayListener(void Function(DisplayMessage message) onDisplay) {

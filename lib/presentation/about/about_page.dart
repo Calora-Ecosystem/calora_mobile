@@ -23,7 +23,9 @@ class AboutPage extends StatelessWidget {
           const SizedBox(height: 8),
           Strings.welcomeToHealthyLife.text(14, 16, 400),
           const SizedBox(height: 16),
-          Strings.caloraAboutText.text(14, 16, 400).c(context.colors.textStrong),
+          Strings.caloraAboutText
+              .text(14, 16, 400)
+              .c(context.colors.textStrong),
           const SizedBox(height: 16),
           // Version row
           Container(
@@ -45,7 +47,9 @@ class AboutPage extends StatelessWidget {
                     }
                     final version = snapshot.data!.version;
                     final buildNumber = snapshot.data!.buildNumber;
-                    return '$version+$buildNumber'.text(14, 16, 400).c(context.colors.textStrong);
+                    return '$version+$buildNumber'
+                        .text(14, 16, 400)
+                        .c(context.colors.textStrong);
                   },
                 ),
               ],

@@ -7,7 +7,14 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class FoodCreatorWidget extends StatefulWidget {
-  final void Function(String name, int calories, double protein, double fat, double carbs) onSubmit;
+  final void Function(
+    String name,
+    int calories,
+    double protein,
+    double fat,
+    double carbs,
+  )
+  onSubmit;
 
   const FoodCreatorWidget({super.key, required this.onSubmit});
 
@@ -61,7 +68,10 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
               Assets.icons.icCreator.svg(),
             ],
           ),
-          CommonTextField(controller: _nameController, hint: Strings.nameOfTheDish),
+          CommonTextField(
+            controller: _nameController,
+            hint: Strings.nameOfTheDish,
+          ),
           CommonTextField(
             controller: _calorieController,
             hint: Strings.calorieContentKcal,

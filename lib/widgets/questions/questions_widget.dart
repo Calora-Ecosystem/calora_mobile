@@ -34,7 +34,11 @@ class QuestionWidget extends StatelessWidget {
                 child: questionText
                     .text(14, 18, 400)
                     .c(context.colors.textStrong)
-                    .copyWith(maxLines: 2, softWrap: true, overflow: TextOverflow.visible),
+                    .copyWith(
+                      maxLines: 2,
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
               ),
             ],
           ),

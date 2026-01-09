@@ -9,7 +9,12 @@ class AvatarWithFlagWidget extends StatelessWidget {
   final SvgPicture? flagAsset; // Changed to nullable
   final bool loading;
 
-  const AvatarWithFlagWidget({super.key, required this.initials, this.flagAsset, this.loading = false}); // Updated constructor
+  const AvatarWithFlagWidget({
+    super.key,
+    required this.initials,
+    this.flagAsset,
+    this.loading = false,
+  }); // Updated constructor
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,12 @@ class AvatarWithFlagWidget extends StatelessWidget {
       children: [
         ShimmerWrapper(
           loading: loading,
-          shimmerChild: ShimmerChild(height: 48, width: 48, radius: 100, border: _border(context)),
+          shimmerChild: ShimmerChild(
+            height: 48,
+            width: 48,
+            radius: 100,
+            border: _border(context),
+          ),
           child: Container(
             height: 48,
             width: 48,
@@ -28,7 +38,9 @@ class AvatarWithFlagWidget extends StatelessWidget {
               color: context.colors.accentWhite,
               shape: BoxShape.circle,
             ),
-            child: Center(child: initials.text(20, 24, 600).c(context.colors.accentSub)),
+            child: Center(
+              child: initials.text(20, 24, 600).c(context.colors.accentSub),
+            ),
           ),
         ),
         if (flagAsset != null) // Conditional rendering of the flag
@@ -45,5 +57,6 @@ class AvatarWithFlagWidget extends StatelessWidget {
     );
   }
 
-  BoxBorder _border(BuildContext context) => Border.all(color: context.colors.strokeSoft, width: 2);
+  BoxBorder _border(BuildContext context) =>
+      Border.all(color: context.colors.strokeSoft, width: 2);
 }

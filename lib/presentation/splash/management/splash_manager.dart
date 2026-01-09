@@ -13,7 +13,12 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
   final CommonStore _commonStore;
   final ProfileStore _profileStore;
   final SplashRepo _splashRepo;
-  SplashManager(this._authStore, this._commonStore, this._profileStore, this._splashRepo) : super(const SplashState()) {
+  SplashManager(
+    this._authStore,
+    this._commonStore,
+    this._profileStore,
+    this._splashRepo,
+  ) : super(const SplashState()) {
     checkAuth();
   }
 
@@ -31,7 +36,8 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
     final bool isOnboardingCompleted = results[2] as bool;
     final bool isQuestionaryFinished = results[3] as bool;
 
-    if (token?.refreshTokenExpireAt != null && token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
+    if (token?.refreshTokenExpireAt != null &&
+        token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
       await _authStore.token.clear();
       await _profileStore.clear();
       token = null;
@@ -55,5 +61,6 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
     }
   }
 
-  Future<bool> getCurrentCountry() async => await _splashRepo.getCurrentCountry();
+  Future<bool> getCurrentCountry() async =>
+      await _splashRepo.getCurrentCountry();
 }

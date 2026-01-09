@@ -31,7 +31,9 @@ abstract class StepsState with _$StepsState {
     @Default('') String weeklyTo,
     @Default('') String monthlyTo,
     @Default([]) List<NormsRequest> norms,
-    @Default([]) List<UserStatRequest> userStates,
+    @Default([]) List<UserStatRequest> dailyUserStates,
+    @Default([]) List<UserStatRequest> weeklyUserStates,
+    @Default([]) List<UserStatRequest> monthlyUserStates,
     @Default(0) int stepCount,
     @Default(0) int period,
     @Default(0) int dailyOffset,
@@ -49,19 +51,49 @@ abstract class StepsState with _$StepsState {
   const StepsState._();
 
   List<UserStatRequest> getUserStates() {
-    if (userStates.length <= 3) return [];
-    return userStates.sublist(3);
+    List<UserStatRequest> currentPeriodUserStates;
+    switch (period) {
+      case 0:
+        currentPeriodUserStates = dailyUserStates;
+        break;
+      case 1:
+        currentPeriodUserStates = weeklyUserStates;
+        break;
+      case 2:
+        currentPeriodUserStates = monthlyUserStates;
+        break;
+      default:
+        currentPeriodUserStates = [];
+        break;
+    }
+    if (currentPeriodUserStates.length <= 3) return [];
+    return currentPeriodUserStates.sublist(3);
   }
 
-  bool get canGoForward => offset < 0;
+  bool get canGoForward {
+    switch (period) {
+      case 0:
+        return dailyOffset < 0;
+      case 1:
+        return weeklyOffset < 0;
+      case 2:
+        return monthlyOffset < 0;
+      default:
+        return false;
+    }
+  }
 
   int get currentStepCount {
-    if (period == 0 && offset == 0) {
-      return stepCount;
+    switch (period) {
+      case 0:
+        return dailyOffset == 0 ? stepCount : dailyDisplayStepCount;
+      case 1:
+        return weeklyDisplayStepCount;
+      case 2:
+        return monthlyDisplayStepCount;
+      default:
+        return 0;
     }
-    if (period == 0) return dailyDisplayStepCount;
-    if (period == 1) return weeklyDisplayStepCount;
-    return monthlyDisplayStepCount;
   }
 }
 

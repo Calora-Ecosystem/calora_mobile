@@ -27,13 +27,19 @@ extension ModalSheetExtension on BuildContext {
               return Container(
                 decoration: BoxDecoration(
                   color: backgroundColor ?? context.colors.white,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 12),
-                    Container(height: 3, width: 40, color: context.colors.neutral200Stroke),
+                    Container(
+                      height: 3,
+                      width: 40,
+                      color: context.colors.neutral200Stroke,
+                    ),
                     const SizedBox(height: 12),
                     Expanded(
                       child: ListView(

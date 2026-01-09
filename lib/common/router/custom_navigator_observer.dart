@@ -18,7 +18,9 @@ class CustomNavigatorObserver extends AutoRouteObserver {
 
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
-    _logger.d('Route replaced: ${oldRoute?.settings.name} by ${newRoute?.settings.name}');
+    _logger.d(
+      'Route replaced: ${oldRoute?.settings.name} by ${newRoute?.settings.name}',
+    );
   }
 
   @override

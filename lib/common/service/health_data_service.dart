@@ -33,7 +33,6 @@ class HealthDataService {
     required this.onError,
   });
 
-
   // Check if health data is available on the device
   Future<void> _checkHealthDataAvailability() async {
     try {
@@ -213,11 +212,12 @@ class HealthDataService {
       }
 
       // Fetch health data from the past 24 hours
-      final List<HealthDataPoint> healthData = await _health.getHealthDataFromTypes(
-        startTime: yesterday,
-        endTime: now,
-        types: _healthDataTypes,
-      );
+      final List<HealthDataPoint> healthData = await _health
+          .getHealthDataFromTypes(
+            startTime: yesterday,
+            endTime: now,
+            types: _healthDataTypes,
+          );
 
       if (kDebugMode) {
         print('Fetched ${healthData.length} health data points');
@@ -262,11 +262,12 @@ class HealthDataService {
         final hourStart = yesterday.add(Duration(hours: i));
         final hourEnd = yesterday.add(Duration(hours: i + 1));
 
-        final List<HealthDataPoint> hourData = await _health.getHealthDataFromTypes(
-          startTime: hourStart,
-          endTime: hourEnd,
-          types: [HealthDataType.STEPS],
-        );
+        final List<HealthDataPoint> hourData = await _health
+            .getHealthDataFromTypes(
+              startTime: hourStart,
+              endTime: hourEnd,
+              types: [HealthDataType.STEPS],
+            );
 
         int hourSteps = 0;
         for (var point in hourData) {
@@ -299,11 +300,12 @@ class HealthDataService {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
 
-      final List<HealthDataPoint> todayData = await _health.getHealthDataFromTypes(
-        types: [HealthDataType.STEPS],
-        startTime: startOfDay,
-        endTime: now,
-      );
+      final List<HealthDataPoint> todayData = await _health
+          .getHealthDataFromTypes(
+            types: [HealthDataType.STEPS],
+            startTime: startOfDay,
+            endTime: now,
+          );
 
       int totalSteps = 0;
       for (var point in todayData) {

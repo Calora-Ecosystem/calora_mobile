@@ -18,7 +18,12 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   final Verification verification;
   final Future<void> Function()? onVerified;
 
-  const VerifyPage({super.key, required this.verification, this.onVerified, required this.isPhoneAuth});
+  const VerifyPage({
+    super.key,
+    required this.verification,
+    this.onVerified,
+    required this.isPhoneAuth,
+  });
 
   @override
   void init(context, manager) {
@@ -38,7 +43,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -62,7 +69,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       child: Button(
                         loading: state.loading,
                         onPressed: manager.verify,
-                        child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
+                        child: Strings.doContinue
+                            .text(16, 20, 500)
+                            .c(context.colors.textWhite),
                       ),
                     ),
                   ],

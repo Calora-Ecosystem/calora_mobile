@@ -5,8 +5,7 @@ enum ReminderSettingTypeEnum {
   water,
   sleep,
   dailyChallenge,
-  none
-  ;
+  none;
 
   bool get isNotification => this != ReminderSettingTypeEnum.none;
   bool get isNone => this == ReminderSettingTypeEnum.none;

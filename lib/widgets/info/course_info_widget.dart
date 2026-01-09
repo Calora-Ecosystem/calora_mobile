@@ -15,7 +15,9 @@ class CourseInfoWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Strings.briefInformation.text(16, 20, 500).c(context.colors.textStrong),
+          Strings.briefInformation
+              .text(16, 20, 500)
+              .c(context.colors.textStrong),
           SizedBox(height: 12),
           CourseDescriptions.weightLossOverview().text(14, 16, 400),
         ],

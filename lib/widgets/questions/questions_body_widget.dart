@@ -6,7 +6,8 @@ import 'package:calora/widgets/questions/custom_text_field.dart';
 import 'package:calora/widgets/questions/date_picker_widget.dart';
 import 'package:calora/widgets/questions/gender_widget.dart';
 import 'package:calora/widgets/questions/purposes_widget.dart';
-import 'package:calora/widgets/questions/questions_widget.dart' show QuestionWidget;
+import 'package:calora/widgets/questions/questions_widget.dart'
+    show QuestionWidget;
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -18,7 +19,11 @@ class QuestionsBodyWidget extends StatefulWidget {
 }
 
 class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
-  List<String> goals = [Strings.weightLoss, Strings.maintainingBody, Strings.muscleDevelopment];
+  List<String> goals = [
+    Strings.weightLoss,
+    Strings.maintainingBody,
+    Strings.muscleDevelopment,
+  ];
   List<String> activities = [
     Strings.minActivity,
     Strings.lowActivity,
@@ -46,7 +51,10 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         // 1 - Gender
         QuestionWidget(
           questionText: Strings.whatIsYourGender,
-          child: GenderWidget(onGenderSelected: (val) => manager.setAnswer(Questions(gender: val))),
+          child: GenderWidget(
+            onGenderSelected: (val) =>
+                manager.setAnswer(Questions(gender: val)),
+          ),
           icon: Assets.icons.gender.svg(),
         ),
 
@@ -54,7 +62,8 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         QuestionWidget(
           questionText: Strings.chooseYourGoals,
           child: PurposesWidget(
-            onPurposeSelected: (val) => manager.setAnswer(Questions(purposeIds: [val])),
+            onPurposeSelected: (val) =>
+                manager.setAnswer(Questions(purposeIds: [val])),
             goals: goals,
           ),
           icon: Assets.icons.goal.svg(),
@@ -63,7 +72,10 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         // 3 - BirthDate
         QuestionWidget(
           questionText: Strings.whenWhereYouBorn,
-          child: DatePickerWidget(onDateChanged: (val) => manager.setAnswer(Questions(birthDate: val))),
+          child: DatePickerWidget(
+            onDateChanged: (val) =>
+                manager.setAnswer(Questions(birthDate: val)),
+          ),
           icon: Assets.icons.calendar.svg(),
         ),
 
@@ -74,7 +86,8 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
             metrics: ' sm',
             hintText: '- sm',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: (val) => manager.setAnswer(Questions(height: double.tryParse(val))),
+            onChanged: (val) =>
+                manager.setAnswer(Questions(height: double.tryParse(val))),
           ),
           icon: Assets.icons.ruler.svg(),
         ),
@@ -86,7 +99,8 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
             metrics: ' kg',
             hintText: '- kg',
             keyboardType: TextInputType.number,
-            onChanged: (val) => manager.setAnswer(Questions(weight: double.tryParse(val))),
+            onChanged: (val) =>
+                manager.setAnswer(Questions(weight: double.tryParse(val))),
           ),
           icon: Assets.icons.weight.svg(),
         ),
@@ -98,7 +112,9 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
             hintText: '- kg',
             metrics: ' kg',
             keyboardType: TextInputType.number,
-            onChanged: (val) => manager.setAnswer(Questions(targetWeight: double.tryParse(val))),
+            onChanged: (val) => manager.setAnswer(
+              Questions(targetWeight: double.tryParse(val)),
+            ),
           ),
           icon: Assets.icons.weight.svg(),
         ),
@@ -107,7 +123,9 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         QuestionWidget(
           questionText: Strings.activePerDay,
           child: PurposesWidget(
-            onPurposeSelected: (val) => manager.setAnswer(Questions(activityHours: mapActivity(val).name)),
+            onPurposeSelected: (val) => manager.setAnswer(
+              Questions(activityHours: mapActivity(val).name),
+            ),
             goals: activities,
           ),
           icon: Assets.icons.activity.svg(),

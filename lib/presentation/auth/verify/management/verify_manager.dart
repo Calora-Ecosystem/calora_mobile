@@ -42,7 +42,8 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (hasNewUser) {
             if (hasNewUser) {
-              final identifier = _verification.email ?? _verification.phone ?? '';
+              final identifier =
+                  _verification.email ?? _verification.phone ?? '';
               publish(VerifyEffect.openQuestions(identifier));
             } else {
               publish(VerifyEffect.openDashboard());

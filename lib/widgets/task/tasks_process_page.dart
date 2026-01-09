@@ -30,7 +30,11 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
     final currentTask = manager.currentTask;
 
     if (currentTask == null || state.tasks.isEmpty) {
-      return Scaffold(body: Center(child: 'No tasks available'.text(16, 20, 400).c(Colors.black)));
+      return Scaffold(
+        body: Center(
+          child: 'No tasks available'.text(16, 20, 400).c(Colors.black),
+        ),
+      );
     }
 
     final currentIndex = state.currentTaskIndex;
@@ -41,7 +45,10 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
       (sum, task) => sum + (lessonInfo.calories / lessonInfo.tasks.length),
     );
 
-    final totalDuration = lessonInfo.tasks.fold<int>(0, (sum, task) => sum + task.duration);
+    final totalDuration = lessonInfo.tasks.fold<int>(
+      0,
+      (sum, task) => sum + task.duration,
+    );
 
     return Scaffold(
       backgroundColor: context.colors.white,
@@ -73,7 +80,9 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
               const SizedBox(height: 12),
               currentTask.title.text(20, 24, 700).c(context.colors.textStrong),
               const SizedBox(height: 12),
-              formatSeconds(currentTask.duration).text(32, 40, 700).c(context.colors.textStrong),
+              formatSeconds(
+                currentTask.duration,
+              ).text(32, 40, 700).c(context.colors.textStrong),
               const SizedBox(height: 16),
               ProgressButton(
                 key: ValueKey(currentIndex),
@@ -103,7 +112,9 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
                       icon: currentIndex > 0
                           ? Assets.icons.previewIcon.svg()
                           : Assets.icons.softPrevious.svg(),
-                      onPressed: currentIndex > 0 ? () => manager.previousTask() : () {},
+                      onPressed: currentIndex > 0
+                          ? () => manager.previousTask()
+                          : () {},
                       color: context.colors.backgroundElevation,
                       textColor: currentIndex > 0
                           ? context.colors.textStrong
@@ -118,7 +129,9 @@ class TasksProcessPage extends Managed<TasksManager, TasksState, TasksEffect> {
                           ? Assets.icons.nextIcon.svg()
                           : Assets.icons.softNext.svg(),
                       iconPosition: IconPosition.right,
-                      onPressed: currentIndex < totalTasks - 1 ? () => manager.nextTask() : () {},
+                      onPressed: currentIndex < totalTasks - 1
+                          ? () => manager.nextTask()
+                          : () {},
                       color: context.colors.backgroundElevation,
                       textColor: currentIndex < totalTasks - 1
                           ? context.colors.textStrong

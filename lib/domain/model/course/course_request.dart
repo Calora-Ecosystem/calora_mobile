@@ -17,5 +17,6 @@ abstract class CourseRequest with _$CourseRequest {
     int? price,
   }) = _CourseRequest;
 
-  factory CourseRequest.fromJson(Map<String, dynamic> json) => _$CourseRequestFromJson(json);
+  factory CourseRequest.fromJson(Map<String, dynamic> json) =>
+      _$CourseRequestFromJson(json);
 }

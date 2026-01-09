@@ -6,17 +6,31 @@ import 'package:flutter/material.dart';
 
 class LeaderboardSection extends StatelessWidget {
   const LeaderboardSection({
-    required this.userStatesWithPlaceholders,
+    super.key,
+    required this.allUserStatsForPeriod,
     required this.isGettingStats,
-    required this.userStates,
   });
 
-  final List<UserStatRequest> userStatesWithPlaceholders;
+  final List<UserStatRequest> allUserStatsForPeriod;
   final bool isGettingStats;
-  final List<UserStatRequest> userStates;
 
   @override
   Widget build(BuildContext context) {
+    final List<UserStatRequest> userStatesWithPlaceholders = List.generate(
+      3,
+      (index) => index < allUserStatsForPeriod.length
+          ? allUserStatsForPeriod[index]
+          : const UserStatRequest(
+              firstName: '-',
+              lastName: '',
+              stepCount: 0,
+              talks: 0,
+            ),
+    );
+
+    final List<UserStatRequest> leaderboardUsers =
+        allUserStatsForPeriod.length > 3 ? allUserStatsForPeriod.sublist(3) : [];
+
     return Column(
       children: [
         PodiumWidget(
@@ -34,7 +48,7 @@ class LeaderboardSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        LeaderboardWidget(users: userStates),
+        LeaderboardWidget(users: leaderboardUsers),
         const SizedBox(height: 24),
       ],
     );

@@ -16,7 +16,6 @@ class DailyFitnessTrackWidget extends StatefulWidget {
     required this.onClickMoreVert,
     required this.onClickEditStepGoal,
     this.selectedDate,
-    this.canGoForward = true,
     this.offset = 0,
     this.loading = false,
   });
@@ -30,7 +29,6 @@ class DailyFitnessTrackWidget extends StatefulWidget {
   final Function() onClickMoreVert;
   final Function() onClickEditStepGoal;
   final DateTime? selectedDate;
-  final bool canGoForward;
   final int offset;
   final bool loading;
 
@@ -44,11 +42,12 @@ class _DailyFitnessTrackWidgetState extends State<DailyFitnessTrackWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final bool canGoForwardForThisTab = widget.offset < 0; // Calculate here
     return BaseFitnessTrackWidget(
       period: 'daily',
       title: Strings.daily,
       offset: widget.offset,
-      canGoForward: widget.canGoForward,
+      canGoForward: canGoForwardForThisTab,
       onClickBackward: widget.onClickBackward,
       onClickForward: widget.onClickForward,
       onClickMoreVert: widget.onClickMoreVert,

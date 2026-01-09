@@ -2,7 +2,10 @@ import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:flutter/material.dart';
 
 extension MetricsController on TextEditingController {
-  void handleMetricsChange({required String metrics, required bool isUserEditing}) {
+  void handleMetricsChange({
+    required String metrics,
+    required bool isUserEditing,
+  }) {
     if (metrics.isEmpty || !isUserEditing) return;
 
     final currentValue = text;
@@ -34,9 +37,7 @@ extension WorkoutRequestMetrics on WorkoutRequest {
   int getMetricSum(String metricName) {
     try {
       return totalMetrics
-          .firstWhere(
-            (m) => m.metric.toLowerCase() == metricName.toLowerCase(),
-          )
+          .firstWhere((m) => m.metric.toLowerCase() == metricName.toLowerCase())
           .sum;
     } catch (_) {
       return 0;

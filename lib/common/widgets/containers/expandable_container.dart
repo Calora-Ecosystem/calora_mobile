@@ -30,7 +30,10 @@ class ExpandableContainer extends StatefulWidget {
     this.tilePadding = const EdgeInsets.symmetric(horizontal: 20),
     this.initiallyExpanded = false,
     this.onExpansionChanged,
-  }) : assert(info != null || children != null, 'Either value or children must be provided');
+  }) : assert(
+         info != null || children != null,
+         'Either value or children must be provided',
+       );
 
   @override
   State<ExpandableContainer> createState() => _ExpandableContainerState();
@@ -77,13 +80,22 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
             tilePadding: widget.tilePadding,
             enabled: !widget.useSwitch,
             initiallyExpanded: widget.initiallyExpanded,
-            childrenPadding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+            childrenPadding: const EdgeInsets.only(
+              left: 12,
+              right: 12,
+              bottom: 12,
+            ),
             visualDensity: VisualDensity.standard,
             backgroundColor: widget.backgroundColor ?? context.colors.white,
             minTileHeight: widget.minTileHeight,
-            collapsedBackgroundColor: widget.collapsedBackgroundColor ?? context.colors.white,
-            collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            collapsedBackgroundColor:
+                widget.collapsedBackgroundColor ?? context.colors.white,
+            collapsedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             trailing: widget.useSwitch
                 ? CustomSwitch(
                     initialValue: _isExpanded,
@@ -104,14 +116,25 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
                     child: Assets.icons.arrowDown.svg(
                       height: 20,
                       width: 20,
-                      colorFilter: ColorFilter.mode(context.colors.black, BlendMode.srcIn),
+                      colorFilter: ColorFilter.mode(
+                        context.colors.black,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
             title: AbsorbPointer(
               absorbing: widget.useSwitch,
-              child: widget.title.text(16, 20, 400).c(context.colors.textPrimary),
+              child: widget.title
+                  .text(16, 20, 400)
+                  .c(context.colors.textPrimary),
             ),
-            children: widget.children ?? [(widget.info ?? '').text(14, 16, 400).c(context.colors.textSub)],
+            children:
+                widget.children ??
+                [
+                  (widget.info ?? '')
+                      .text(14, 16, 400)
+                      .c(context.colors.textSub),
+                ],
           ),
         ),
       ),

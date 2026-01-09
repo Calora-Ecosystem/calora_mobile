@@ -7,12 +7,25 @@ class BottomBox extends StatelessWidget {
   final double radius;
   final Widget child;
   final Color? color;
-  const BottomBox({super.key, this.padding, this.radius = 0, required this.child, this.color});
+  const BottomBox({
+    super.key,
+    this.padding,
+    this.radius = 0,
+    required this.child,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: padding ?? EdgeInsets.only(top: 8, left: 16, right: 16, bottom: context.bottomPadding + 8),
+      padding:
+          padding ??
+          EdgeInsets.only(
+            top: 8,
+            left: 16,
+            right: 16,
+            bottom: context.bottomPadding + 8,
+          ),
       decoration: BoxDecoration(
         color: color ?? context.colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),

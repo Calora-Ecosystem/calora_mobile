@@ -82,8 +82,7 @@ final profileStore = GetIt.I<ProfileStore>();
 enum Gender {
   Male,
   Female,
-  Unknown
-  ;
+  Unknown;
 
   bool get isMale => this == Gender.Male;
   bool get isFemale => this == Gender.Female;

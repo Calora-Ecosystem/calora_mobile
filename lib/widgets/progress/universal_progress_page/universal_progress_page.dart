@@ -12,7 +12,13 @@ import 'package:calora/widgets/progress/universal_progress_page/management/unive
 import 'package:calora/widgets/progress/universal_progress_page/management/universal_progress_manager.dart';
 
 @RoutePage()
-class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalProgressState, UniversalProgressEffect> {
+class UniversalProgressPage
+    extends
+        Managed<
+          UniversalProgressManager,
+          UniversalProgressState,
+          UniversalProgressEffect
+        > {
   final String title;
   final String description;
   final VoidCallback? onComplete;
@@ -31,14 +37,15 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
   @override
   void init(BuildContext context, UniversalProgressManager manager) {
     super.init(context, manager);
-    manager.startProgressAnimation(
-      onComplete: onComplete,
-      apiCall: apiCall,
-    );
+    manager.startProgressAnimation(onComplete: onComplete, apiCall: apiCall);
   }
 
   @override
-  void listener(BuildContext context, UniversalProgressManager manager, UniversalProgressEffect effect) {
+  void listener(
+    BuildContext context,
+    UniversalProgressManager manager,
+    UniversalProgressEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.mapOrNull(
       completed: (_) {
@@ -57,7 +64,11 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
   }
 
   @override
-  Widget builder(BuildContext context, UniversalProgressManager manager, UniversalProgressState state) {
+  Widget builder(
+    BuildContext context,
+    UniversalProgressManager manager,
+    UniversalProgressState state,
+  ) {
     return Scaffold(
       backgroundColor: context.colors.white,
       appBar: CustomAppBar(
@@ -82,9 +93,10 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
                   children: [
                     Icon(Icons.error_outline, color: Colors.red.shade700),
                     Expanded(
-                      child: 'Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.'
-                          .text(16, 20, 500)
-                          .c(Colors.red.shade700),
+                      child:
+                          'Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.'
+                              .text(16, 20, 500)
+                              .c(Colors.red.shade700),
                     ),
                   ],
                 ),
@@ -101,7 +113,11 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Assets.icons.informationCircleBlue.svg(),
-                    Expanded(child: description.text(16, 20, 500).c(context.colors.brightBlue)),
+                    Expanded(
+                      child: description
+                          .text(16, 20, 500)
+                          .c(context.colors.brightBlue),
+                    ),
                   ],
                 ),
               ),
@@ -111,9 +127,13 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
               lineWidth: 18,
               percent: state.progress.clamp(0.0, 1.0),
               circularStrokeCap: CircularStrokeCap.round,
-              progressColor: state.hasError ? Colors.red : context.colors.accentSub,
+              progressColor: state.hasError
+                  ? Colors.red
+                  : context.colors.accentSub,
               backgroundColor: context.colors.backgroundElevation,
-              center: '${(state.progress * 100).round()}%'.text(32, 40, 700).c(context.colors.textStrong),
+              center: '${(state.progress * 100).round()}%'
+                  .text(32, 40, 700)
+                  .c(context.colors.textStrong),
             ),
             const SizedBox(height: 40),
             ...List.generate(steps.length, (index) {
@@ -131,7 +151,11 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
                   child: Row(
                     children: [
                       if (state.hasError)
-                        Icon(Icons.error_outline, size: 24, color: Colors.red.shade700)
+                        Icon(
+                          Icons.error_outline,
+                          size: 24,
+                          color: Colors.red.shade700,
+                        )
                       else if (isDone)
                         Assets.icons.done.svg(width: 24, height: 24)
                       else
@@ -140,7 +164,11 @@ class UniversalProgressPage extends Managed<UniversalProgressManager, UniversalP
                       Expanded(
                         child: steps[index]
                             .text(14, 18, 400)
-                            .c(isDone ? context.colors.textSub : context.colors.textStrong),
+                            .c(
+                              isDone
+                                  ? context.colors.textSub
+                                  : context.colors.textStrong,
+                            ),
                       ),
                     ],
                   ),

@@ -5,8 +5,10 @@ part 'profile_management.freezed.dart';
 
 @freezed
 abstract class ProfileState with _$ProfileState {
-  const factory ProfileState({ProfileRequest? profile, @Default(false) bool isLoading}) =
-      _ProfileState;
+  const factory ProfileState({
+    ProfileRequest? profile,
+    @Default(false) bool isLoading,
+  }) = _ProfileState;
 }
 
 @freezed

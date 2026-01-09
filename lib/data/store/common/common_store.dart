@@ -9,7 +9,8 @@ class CommonStore {
   final language = BaseStore<Language?>(
     'language',
     serialize: (value) => value == null ? null : jsonEncode(value.name),
-    deserialize: (value) => value == null ? null : Language.fromName(jsonDecode(value)),
+    deserialize: (value) =>
+        value == null ? null : Language.fromName(jsonDecode(value)),
   );
 
   final isLanguageSelected = BaseStore<bool>(

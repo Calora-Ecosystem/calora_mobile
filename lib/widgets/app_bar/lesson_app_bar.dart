@@ -43,8 +43,14 @@ class LessonAppBar extends StatelessWidget {
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                    decoration: BoxDecoration(color: context.colors.white, shape: BoxShape.circle),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colors.white,
+                      shape: BoxShape.circle,
+                    ),
                     child: Assets.icons.arrowLeft.svg(),
                   ),
                 ),
@@ -52,7 +58,10 @@ class LessonAppBar extends StatelessWidget {
                   GestureDetector(
                     onTap: () => _openSettings(context),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: context.colors.white,
                         shape: BoxShape.circle,
@@ -76,17 +85,25 @@ class LessonAppBar extends StatelessWidget {
                         children: [
                           RatingStars(level: level),
                           const SizedBox(width: 8),
-                          Strings.startEasy.text(12, 14, 500).c(context.colors.textSub),
+                          Strings.startEasy
+                              .text(12, 14, 500)
+                              .c(context.colors.textSub),
                         ],
                       ),
-                      title.text(24, 32, 700).c(context.colors.accentSub).copyWith(maxLines: 2),
+                      title
+                          .text(24, 32, 700)
+                          .c(context.colors.accentSub)
+                          .copyWith(maxLines: 2),
                     ],
                   ),
                 ),
                 if (showIndicator)
                   Padding(
                     padding: const EdgeInsets.only(left: 16),
-                    child: SizedBox(width: 128, child: CardIndicator(percent: percent)),
+                    child: SizedBox(
+                      width: 128,
+                      child: CardIndicator(percent: percent),
+                    ),
                   ),
               ],
             ),

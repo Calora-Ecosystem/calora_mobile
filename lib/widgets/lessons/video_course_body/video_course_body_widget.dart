@@ -8,7 +8,8 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/course/course_request.dart';
-import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonRequest;
+import 'package:calora/domain/model/lesson/lesson_request.dart'
+    show LessonRequest;
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/courses_app_bar.dart';
 import 'package:calora/widgets/info/course_info_widget.dart';
@@ -20,7 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCourseBodyState, VideoCourseBodyEffect> {
+class VideoCourseBodyWidgetPage
+    extends
+        Managed<
+          VideoCourseBodyManager,
+          VideoCourseBodyState,
+          VideoCourseBodyEffect
+        > {
   final CourseRequest course;
   final bool isPurchased;
 
@@ -37,7 +44,11 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
   }
 
   @override
-  void listener(BuildContext context, VideoCourseBodyManager manager, VideoCourseBodyEffect effect) {
+  void listener(
+    BuildContext context,
+    VideoCourseBodyManager manager,
+    VideoCourseBodyEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.when(
       openInfoSheet: (description) => _openInfoSheet(context, description),
@@ -46,12 +57,17 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
   }
 
   @override
-  Widget builder(BuildContext context, VideoCourseBodyManager manager, VideoCourseBodyState state) {
+  Widget builder(
+    BuildContext context,
+    VideoCourseBodyManager manager,
+    VideoCourseBodyState state,
+  ) {
     return Scaffold(
       body: Stack(
         children: [
           CoursesAppBar(
-            openInfoSheet: () => _openInfoSheet(context, course.description ?? ''),
+            openInfoSheet: () =>
+                _openInfoSheet(context, course.description ?? ''),
             imageUrl: course.subCoverImage ?? '',
           ),
           Column(
@@ -63,7 +79,9 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: context.colors.white,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,9 +95,18 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                           ],
                         ),
                         parameters: [
-                          ParameterItem(name: Strings.price, value: '${course.price} so‘m'),
-                          ParameterItem(name: Strings.numberOfLessons, value: '${state.lessons.length} ta'),
-                          ParameterItem(name: Strings.duration, value: _getTotalDuration(state.lessons)),
+                          ParameterItem(
+                            name: Strings.price,
+                            value: '${course.price} so‘m',
+                          ),
+                          ParameterItem(
+                            name: Strings.numberOfLessons,
+                            value: '${state.lessons.length} ta',
+                          ),
+                          ParameterItem(
+                            name: Strings.duration,
+                            value: _getTotalDuration(state.lessons),
+                          ),
                         ],
                         bottomLabel: Strings.videos,
                         bottomCount: state.lessons.length,
@@ -90,7 +117,11 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                           itemCount: state.isLoading ? 3 : state.lessons.length,
                           separatorBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Divider(color: context.colors.neutral200Stroke, thickness: 1, height: 1),
+                            child: Divider(
+                              color: context.colors.neutral200Stroke,
+                              thickness: 1,
+                              height: 1,
+                            ),
                           ),
                           itemBuilder: (context, index) {
                             final lesson = state.isLoading
@@ -107,17 +138,22 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                                   )
                                 : state.lessons[index];
                             return ShimmerWrapper(
-                              shimmerChild: ShimmerChild(height: 48, width: double.infinity),
+                              shimmerChild: ShimmerChild(
+                                height: 48,
+                                width: double.infinity,
+                              ),
                               loading: state.isLoading,
                               child: GestureDetector(
-                                onTap: () => manager.onVideoTapped(lesson, index),
+                                onTap: () =>
+                                    manager.onVideoTapped(lesson, index),
                                 child: Row(
                                   children: [
                                     Container(
                                       height: 48,
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: context.colors.backgroundElevation,
+                                        color:
+                                            context.colors.backgroundElevation,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: Assets.icons.videoIcon.svg(),
@@ -125,15 +161,29 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          lesson.title.text(16, 20, 500).c(context.colors.neutral900Primary),
+                                          lesson.title
+                                              .text(16, 20, 500)
+                                              .c(
+                                                context
+                                                    .colors
+                                                    .neutral900Primary,
+                                              ),
                                           const SizedBox(height: 8),
-                                          lesson.duration.text(14, 18, 500).c(context.colors.neutral600Secondary),
+                                          lesson.duration
+                                              .text(14, 18, 500)
+                                              .c(
+                                                context
+                                                    .colors
+                                                    .neutral600Secondary,
+                                              ),
                                         ],
                                       ),
                                     ),
-                                    if (!lesson.isFree && !state.isPurchased) Assets.icons.lock.svg(),
+                                    if (!lesson.isFree && !state.isPurchased)
+                                      Assets.icons.lock.svg(),
                                   ],
                                 ),
                               ),
@@ -159,7 +209,12 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
     );
   }
 
-  void _openVideo(BuildContext context, LessonRequest lesson, int index, VideoCourseBodyManager manager) {
+  void _openVideo(
+    BuildContext context,
+    LessonRequest lesson,
+    int index,
+    VideoCourseBodyManager manager,
+  ) {
     context.showAppBottomSheet(
       child: AboutVideoPage(
         onVideoCompleted: () {

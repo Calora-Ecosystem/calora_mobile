@@ -16,7 +16,9 @@ class DishesManager extends Manager<DishesState, DishesEffect> {
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (value) {
-            final filteredFoods = value.where((food) => food.categoryId == categoryId).toList();
+            final filteredFoods = value
+                .where((food) => food.categoryId == categoryId)
+                .toList();
             emit(state.copyWith(foods: filteredFoods, isLoading: false));
           },
           onDone: () => emit(state.copyWith(isLoading: false)),

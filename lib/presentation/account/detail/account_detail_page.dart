@@ -21,7 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
+class AccountDetailPage
+    extends
+        Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
   AccountDetailPage({super.key});
 
   @override
@@ -33,12 +35,19 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
   Widget builder(context, manager, state) {
     return Scaffold(
       backgroundColor: context.colors.white,
-      appBar: CustomAppBar(title: Strings.accountInformation, onBack: () => _back(context)),
+      appBar: CustomAppBar(
+        title: Strings.accountInformation,
+        onBack: () => _back(context),
+      ),
       body: _uiBuilder(state, context, manager),
     );
   }
 
-  Widget _uiBuilder(AccountDetailState state, BuildContext context, AccountDetailManager manager) {
+  Widget _uiBuilder(
+    AccountDetailState state,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     return Loadable(
       loading: state.loading,
       builder: (context) {
@@ -54,7 +63,8 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
             final detailsInfo = state.detailInfos![index];
             return DetailInfoItemBuilder(
               detailInfo: detailsInfo,
-              onClickItem: (data) => _openInputManagePage(data, context, manager),
+              onClickItem: (data) =>
+                  _openInputManagePage(data, context, manager),
             );
           },
         );
@@ -62,7 +72,11 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     );
   }
 
-  void _openInputManagePage(DetailInfo info, BuildContext context, AccountDetailManager manager) {
+  void _openInputManagePage(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     switch (info.type) {
       case DetailInfoType.activityLevel:
         _openSingleSelectionActivityLevel(info, context, manager);
@@ -82,7 +96,11 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     }
   }
 
-  void _openSingleSelectionActivityLevel(DetailInfo info, BuildContext context, AccountDetailManager manager) {
+  void _openSingleSelectionActivityLevel(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -95,7 +113,9 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
             return SingleSelectionPage(
               loading: accountState.updatingType == info.type,
               title: Strings.chooseActivityLevel,
-              initialSelectedValue: ActivityLevelEnum.fromApi(info.message).displayName,
+              initialSelectedValue: ActivityLevelEnum.fromApi(
+                info.message,
+              ).displayName,
               selection: Selection(type: SelectionType.activityLevel),
               onSave: (data) {
                 manager.updateProfileDetail(info, data.name);
@@ -109,7 +129,11 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     );
   }
 
-  void _openSingleSelectionGoal(DetailInfo info, BuildContext context, AccountDetailManager manager) {
+  void _openSingleSelectionGoal(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -122,7 +146,9 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
             return SingleSelectionPage(
               loading: accountState.updatingType == info.type,
               title: Strings.chooseGoal,
-              initialSelectedValue: PurposeEnum.fromApi(info.message).displayName,
+              initialSelectedValue: PurposeEnum.fromApi(
+                info.message,
+              ).displayName,
               selection: Selection(type: SelectionType.goal),
               onSave: (data) {
                 manager.updateProfileDetail(info, data.name);
@@ -135,7 +161,11 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     );
   }
 
-  void _openSingleSelectionGender(DetailInfo info, BuildContext context, AccountDetailManager manager) {
+  void _openSingleSelectionGender(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -167,7 +197,11 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     );
   }
 
-  void _openInputPage(DetailInfo info, BuildContext context, AccountDetailManager manager) {
+  void _openInputPage(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -186,9 +220,15 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
               onSave: (data) {
                 profileStore.updateProfile(
                   name: info.type == DetailInfoType.name ? data : null,
-                  weight: info.type == DetailInfoType.weight ? double.tryParse(data) : null,
-                  height: info.type == DetailInfoType.height ? double.tryParse(data) : null,
-                  targetWeight: info.type == DetailInfoType.targetWeight ? double.tryParse(data) : null,
+                  weight: info.type == DetailInfoType.weight
+                      ? double.tryParse(data)
+                      : null,
+                  height: info.type == DetailInfoType.height
+                      ? double.tryParse(data)
+                      : null,
+                  targetWeight: info.type == DetailInfoType.targetWeight
+                      ? double.tryParse(data)
+                      : null,
                 );
                 manager.updateProfileDetail(info, data);
                 _dismiss(context);
@@ -200,7 +240,11 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
     );
   }
 
-  void _openSelectCalendar(DetailInfo info, BuildContext context, AccountDetailManager manager) {
+  void _openSelectCalendar(
+    DetailInfo info,
+    BuildContext context,
+    AccountDetailManager manager,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

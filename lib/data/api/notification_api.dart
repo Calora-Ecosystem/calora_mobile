@@ -11,15 +11,21 @@ class NotificationApi {
 
   Future<List<ReminderRequest>> getReminders() async {
     final response = await _dio.get('/reminder');
-    final List<ReminderRequest> data = ReminderRequest.fromJsonList((response.data as Map<String, dynamic>)['content']);
+    final List<ReminderRequest> data = ReminderRequest.fromJsonList(
+      (response.data as Map<String, dynamic>)['content'],
+    );
     return data;
   }
 
   Future<ReminderRequest> updateReminder(ReminderRequest request) async {
     final requestPayload = request.toJson()..remove('id');
-    log('NotificationApi: Sending updateReminder request with payload: $requestPayload');
+    log(
+      'NotificationApi: Sending updateReminder request with payload: $requestPayload',
+    );
     final response = await _dio.post('/reminder', data: requestPayload);
-    log('NotificationApi: Received updateReminder response data: ${response.data}');
+    log(
+      'NotificationApi: Received updateReminder response data: ${response.data}',
+    );
     final Map<String, dynamic> contentData = response.data['content'];
     return ReminderRequest.fromJson(contentData);
   }

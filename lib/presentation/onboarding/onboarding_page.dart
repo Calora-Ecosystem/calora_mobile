@@ -33,7 +33,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -45,7 +47,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(child: PageIndicator(currentPage: _currentPage, pageCount: 4)),
+                      Expanded(
+                        child: PageIndicator(
+                          currentPage: _currentPage,
+                          pageCount: 4,
+                        ),
+                      ),
                       InkWell(
                         onTap: () {
                           _openAuthPage();
@@ -53,7 +60,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         },
                         child: Container(
                           padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
                           child: Assets.icons.icClose.svg(),
                         ),
                       ),
@@ -63,7 +73,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   Expanded(
                     child: PageView(
                       controller: _controller,
-                      onPageChanged: (index) => setState(() => _currentPage = index),
+                      onPageChanged: (index) =>
+                          setState(() => _currentPage = index),
                       children: [
                         _pageItem(
                           Onboarding(
@@ -123,5 +134,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _openAuthPage() => {context.router.replace(AuthRoute())};
-  void _saveOnboardingCompletedFlag() async => await getIt<CommonStore>().isOnboardingCompleted.set(true);
+  void _saveOnboardingCompletedFlag() async =>
+      await getIt<CommonStore>().isOnboardingCompleted.set(true);
 }

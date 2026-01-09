@@ -9,7 +9,8 @@ class AuthStore {
   final token = BaseStore<Token?>(
     'token',
     serialize: (value) => value == null ? null : jsonEncode(value.toJson()),
-    deserialize: (value) => value == null ? null : Token.fromJson(jsonDecode(value)),
+    deserialize: (value) =>
+        value == null ? null : Token.fromJson(jsonDecode(value)),
   );
 
   final isCountryUzbekistan = BaseStore<bool>(

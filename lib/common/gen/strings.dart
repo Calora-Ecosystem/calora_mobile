@@ -13,6 +13,15 @@ part 'strings.g.dart';
   version: 82,
   outDir: 'assets/localization',
   outName: 'translations.csv',
-  preservedKeywords: ['few', 'many', 'one', 'other', 'two', 'zero', 'male', 'female'],
+  preservedKeywords: [
+    'few',
+    'many',
+    'one',
+    'other',
+    'two',
+    'zero',
+    'male',
+    'female',
+  ],
 )
 class _Strings {}

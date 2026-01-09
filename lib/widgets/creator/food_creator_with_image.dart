@@ -36,24 +36,44 @@ class FoodCreatorWithImage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 16,
         children: [
-          Strings.theValueOfTheFoodDetermined.text(20, 24, 700).c(context.colors.textStrong),
+          Strings.theValueOfTheFoodDetermined
+              .text(20, 24, 700)
+              .c(context.colors.textStrong),
           CommonTextField(
             hint: Strings.nameOfTheDish,
             controller: TextEditingController(text: name),
           ),
-          Strings.nutritionalValueOfFood.text(16, 20, 500).c(context.colors.textStrong),
-          buildContainer(context: context, value: calories, metric: Strings.kcal),
+          Strings.nutritionalValueOfFood
+              .text(16, 20, 500)
+              .c(context.colors.textStrong),
+          buildContainer(
+            context: context,
+            value: calories,
+            metric: Strings.kcal,
+          ),
           Row(
             spacing: 12,
             children: [
               Expanded(
-                child: buildContainer(context: context, value: protein, metric: 'gr ${Strings.protein}'),
+                child: buildContainer(
+                  context: context,
+                  value: protein,
+                  metric: 'gr ${Strings.protein}',
+                ),
               ),
               Expanded(
-                child: buildContainer(context: context, value: oil, metric: 'gr ${Strings.oil}'),
+                child: buildContainer(
+                  context: context,
+                  value: oil,
+                  metric: 'gr ${Strings.oil}',
+                ),
               ),
               Expanded(
-                child: buildContainer(context: context, value: calories, metric: 'gr ${Strings.carbohydrate}'),
+                child: buildContainer(
+                  context: context,
+                  value: calories,
+                  metric: 'gr ${Strings.carbohydrate}',
+                ),
               ),
             ],
           ),
@@ -80,11 +100,18 @@ class FoodCreatorWithImage extends StatelessWidget {
     );
   }
 
-  Widget buildContainer({required BuildContext context, required double value, required String metric}) {
+  Widget buildContainer({
+    required BuildContext context,
+    required double value,
+    required String metric,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       width: double.infinity,
-      decoration: BoxDecoration(color: context.colors.blackWithOpacity, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: context.colors.blackWithOpacity,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: '${value.asFixedTruncated(1)}$metric'
           .text(14, 16, 400)
           .c(context.colors.textStrong)

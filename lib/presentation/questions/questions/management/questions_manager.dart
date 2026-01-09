@@ -84,7 +84,9 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
     getIt<ProfileStore>().setGender(profile.gender?.name ?? '');
 
     _repo
-        .sendTargetWeight(NormsRequest(metric: 'Weight', value: profile.targetWeight ?? 0))
+        .sendTargetWeight(
+          NormsRequest(metric: 'Weight', value: profile.targetWeight ?? 0),
+        )
         .handle(
           onStart: () {
             emit(state.copyWith(isLoading: true));
@@ -110,7 +112,9 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
             publish(const QuestionsEffect.withType(QuestionsEffectType.error));
           },
           onDone: () {
-            publish(const QuestionsEffect.withType(QuestionsEffectType.success));
+            publish(
+              const QuestionsEffect.withType(QuestionsEffectType.success),
+            );
           },
         );
   }

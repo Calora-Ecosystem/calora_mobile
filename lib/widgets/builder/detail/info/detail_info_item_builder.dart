@@ -21,18 +21,29 @@ class DetailInfoItemBuilder extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
       title: detailInfo.title.text(14, 16, 400).c(context.colors.textStrong),
       trailing: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.5),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.5,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
               child: detailInfo.resultMessage
                   .text(14, 16, 400)
-                  .c(detailInfo.isHaveMessage ? context.colors.textStrong : context.colors.textSub)
+                  .c(
+                    detailInfo.isHaveMessage
+                        ? context.colors.textStrong
+                        : context.colors.textSub,
+                  )
                   .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
             const SizedBox(width: 4),
-            Assets.icons.icForward.svg(colorFilter: ColorFilter.mode(context.colors.black, BlendMode.srcIn)),
+            Assets.icons.icForward.svg(
+              colorFilter: ColorFilter.mode(
+                context.colors.black,
+                BlendMode.srcIn,
+              ),
+            ),
           ],
         ),
       ),

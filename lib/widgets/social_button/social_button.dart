@@ -24,14 +24,20 @@ class SocialButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? context.colors.backgroundElevation : Colors.transparent,
+          color: isSelected
+              ? context.colors.backgroundElevation
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? context.colors.strokeSoft : context.colors.backgroundElevation,
+            color: isSelected
+                ? context.colors.strokeSoft
+                : context.colors.backgroundElevation,
           ),
         ),
         child: Row(
-          mainAxisAlignment: isSelected ? MainAxisAlignment.spaceBetween : MainAxisAlignment.center,
+          mainAxisAlignment: isSelected
+              ? MainAxisAlignment.spaceBetween
+              : MainAxisAlignment.center,
           children: [
             Row(
               children: [

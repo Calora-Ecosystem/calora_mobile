@@ -20,11 +20,14 @@ class NotificationExpandableItem extends StatefulWidget {
   });
 
   @override
-  State<NotificationExpandableItem> createState() => _NotificationExpandableItemState();
+  State<NotificationExpandableItem> createState() =>
+      _NotificationExpandableItemState();
 }
 
-class _NotificationExpandableItemState extends State<NotificationExpandableItem> {
-  String get currentTime => '${DateTime.now().hour.toString().padLeft(2, '0')}:00';
+class _NotificationExpandableItemState
+    extends State<NotificationExpandableItem> {
+  String get currentTime =>
+      '${DateTime.now().hour.toString().padLeft(2, '0')}:00';
 
   late String selectedTime;
   bool isEnabled = false;
@@ -75,7 +78,9 @@ class _NotificationExpandableItemState extends State<NotificationExpandableItem>
       children: [
         ExpandableContainer(
           margin: EdgeInsets.zero,
-          title: widget.isInterval ? Strings.everyNHour(hour: getHourFromTime(selectedTime)) : selectedTime,
+          title: widget.isInterval
+              ? Strings.everyNHour(hour: getHourFromTime(selectedTime))
+              : selectedTime,
           children: [
             TimePickerWidget(
               isInterval: widget.isInterval,
@@ -94,7 +99,8 @@ class _NotificationExpandableItemState extends State<NotificationExpandableItem>
   String getHourFromTime(String time) {
     final String hourPart = time.split(':').first;
     if (hourPart == '00') return '24';
-    if (hourPart.startsWith('0') && hourPart.length == 2) return hourPart.substring(1);
+    if (hourPart.startsWith('0') && hourPart.length == 2)
+      return hourPart.substring(1);
     return hourPart;
   }
 }

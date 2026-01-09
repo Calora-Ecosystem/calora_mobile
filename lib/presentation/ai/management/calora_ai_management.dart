@@ -12,4 +12,5 @@ abstract class CaloraAiEffect with _$CaloraAiEffect {
   const factory CaloraAiEffect.showConfirmDialog() = _ShowConfirmDialog;
 
   const factory CaloraAiEffect.navigateToCamera() = _NavigateToCamera;
+  const factory CaloraAiEffect.showPermissionDeniedMessage() = _ShowPermissionDeniedMessage;
 }

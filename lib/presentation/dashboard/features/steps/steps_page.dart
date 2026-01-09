@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -27,7 +28,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 @RoutePage()
-class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
+class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with WidgetsBindingObserver {
   StepsPage({super.key});
 
   late PedometerService _pedometerService;
@@ -43,21 +44,32 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   @override
   void init(context, manager) {
+    WidgetsBinding.instance.addObserver(this);
     manager.getNorms();
-    manager.start();
-
-    manager.fetchDataForPeriod(0, 0); // Daily
-    manager.fetchDataForPeriod(1, 0); // Weekly
-    manager.fetchDataForPeriod(2, 0); // Monthly
-
+    manager.startPeriodicDataSync();
+    manager.fetchDataForPeriod(0, 0);
+    manager.fetchDataForPeriod(1, 0);
+    manager.fetchDataForPeriod(2, 0);
     _initializePedometerService(manager);
+  }
+
+  @override
+  void onFocusGained(BuildContext context, StepsManager manager) {
+    super.onFocusGained(context, manager);
+    manager.startPeriodicDataSync();
+    log('gaining focus');
+  }
+
+  @override
+  void onFocusLost(BuildContext context, StepsManager manager) {
+    super.onFocusLost(context, manager);
+    manager.stopPeriodicDataSync();
+    log('loosing focus');
   }
 
   void _initializePedometerService(StepsManager manager) async {
     _pedometerService = PedometerService(
-      onTodayStepCountUpdated: (todaySteps) {
-        manager.updateTodaySteps(todaySteps);
-      },
+      onTodayStepCountUpdated: (todaySteps) => manager.updateTodaySteps(todaySteps),
       onError: (error) => debugPrint('StepsPageError: $error'),
     );
     await _pedometerService.initializePedometer();
@@ -71,72 +83,38 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
           orElse: () => NormsRequest(metric: 'Step', value: 0),
         )
         .value;
-
-    final List<UserStatRequest> userStatesWithPlaceholders = List.generate(
-      3,
-      (index) => index < state.userStates.length
-          ? state.userStates[index]
-          : const UserStatRequest(
-              firstName: '-',
-              lastName: '',
-              stepCount: 0,
-              talks: 0,
-            ),
-    );
-
     return Scaffold(
+      backgroundColor: context.colors.softGray,
       body: DefaultRefreshIndicator(
         notificationPredicate: (notification) => notification.depth == 1,
         edgeOffset: context.topPadding + kToolbarHeight,
-        onRefresh: () async {
-          await manager.fetchDataForPeriod(
-            state.period,
-            state.offset,
-            refresh: true,
-          );
-        },
+        onRefresh: () async => await manager.fetchDataForPeriod(state.period, manager.currentOffset, refresh: true),
         child: DefaultTabController(
           length: 3,
           child: Builder(
             builder: (context) {
               final tabController = DefaultTabController.of(context);
               tabController.addListener(() {
-                if (!tabController.indexIsChanging &&
-                    tabController.index != _previousTabIndex) {
+                if (!tabController.indexIsChanging && tabController.index != _previousTabIndex) {
                   _previousTabIndex = tabController.index;
                   manager.changePeriod(tabController.index);
                 }
               });
               return Stack(
                 children: [
-                  Positioned.fill(
-                    child: Image.asset(
-                      Assets.icons.background.path,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
+                  Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
                   SafeArea(
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(
-                            top: 42,
-                            left: 20,
-                            right: 20,
-                          ),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Strings.steps.text(32, 36, 700),
-                          ),
+                          padding: const EdgeInsets.only(top: 42, left: 20, right: 20),
+                          child: Align(alignment: Alignment.centerLeft, child: Strings.steps.text(32, 36, 700)),
                         ),
                         const SizedBox(height: 12),
                         Container(
                           height: 40,
                           margin: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
                           child: TabBar(
                             indicatorPadding: const EdgeInsets.all(2),
                             indicatorSize: TabBarIndicatorSize.tab,
@@ -146,8 +124,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             labelColor: context.colors.neutralPrimary,
-                            unselectedLabelColor:
-                                context.colors.neutral600Secondary,
+                            unselectedLabelColor: context.colors.neutral600Secondary,
                             tabs: [
                               Tab(child: Strings.daily.text(14, 18, 500)),
                               Tab(child: Strings.weekly.text(14, 18, 500)),
@@ -165,51 +142,33 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                         goal: stepValue.toInt(),
                                         metrics: state.dailyMetrics,
                                         stepCount: state.dailyDisplayStepCount,
-                                        canGoForward: state.canGoForward,
-                                        offset: state.offset,
-                                        onClickBackward: () =>
-                                            manager.changeOffset(-1),
-                                        onClickForward: () =>
-                                            manager.changeOffset(1),
-                                        onClickMoreVert: () =>
-                                            _showActionsSheet(context, manager),
+                                        offset: state.dailyOffset,
+                                        onClickBackward: () => manager.changeOffset(-1),
+                                        onClickForward: () => manager.changeOffset(1),
+                                        onClickMoreVert: () => _showActionsSheet(context, manager),
                                         onClickPause: () {},
-                                        onClickEditStepGoal: () =>
-                                            _showEditStepGoalSheet(
-                                              context,
-                                              manager,
-                                            ),
+                                        onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
                                       ),
                                       WeeklyFitnessTrackWidget(
                                         key: weeklyShareAnchorKey,
-                                        primaryValues:
-                                            state.weeklyPrimaryValues,
+                                        primaryValues: state.weeklyPrimaryValues,
                                         goal: stepValue.toInt(),
                                         metrics: state.weeklyMetrics,
-                                        canGoForward: state.canGoForward,
-                                        offset: state.offset,
-                                        onClickBackward: () =>
-                                            manager.changeOffset(-1),
-                                        onClickForward: () =>
-                                            manager.changeOffset(1),
-                                        onClickMoreVert: () =>
-                                            _showActionsSheet(context, manager),
+                                        offset: state.weeklyOffset,
+                                        onClickBackward: () => manager.changeOffset(-1),
+                                        onClickForward: () => manager.changeOffset(1),
+                                        onClickMoreVert: () => _showActionsSheet(context, manager),
                                         onClickPause: () {},
                                       ),
                                       MonthlyFitnessTrackWidget(
                                         key: monthlyShareAnchorKey,
-                                        primaryValues:
-                                            state.monthlyPrimaryValues,
+                                        primaryValues: state.monthlyPrimaryValues,
                                         goal: stepValue.toInt(),
                                         metrics: state.monthlyMetrics,
-                                        canGoForward: state.canGoForward,
-                                        offset: state.offset,
-                                        onClickBackward: () =>
-                                            manager.changeOffset(-1),
-                                        onClickForward: () =>
-                                            manager.changeOffset(1),
-                                        onClickMoreVert: () =>
-                                            _showActionsSheet(context, manager),
+                                        offset: state.monthlyOffset,
+                                        onClickBackward: () => manager.changeOffset(-1),
+                                        onClickForward: () => manager.changeOffset(1),
+                                        onClickMoreVert: () => _showActionsSheet(context, manager),
                                         onClickPause: () {},
                                       ),
                                     ]
@@ -217,13 +176,15 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                                     .entries
                                     .map(
                                       (entry) => _buildTabContent(
-                                        screenshotController:
-                                            _screenshotControllers[entry.key],
+                                        screenshotController: _screenshotControllers[entry.key],
                                         fitnessTrackWidget: entry.value,
-                                        userStatesWithPlaceholders:
-                                            userStatesWithPlaceholders,
+                                        allUserStatsForPeriod: switch (entry.key) {
+                                          0 => state.dailyUserStates,
+                                          1 => state.weeklyUserStates,
+                                          2 => state.monthlyUserStates,
+                                          _ => [],
+                                        },
                                         isGettingStats: state.isGettingStats,
-                                        userStates: state.getUserStates(),
                                       ),
                                     )
                                     .toList(),
@@ -241,6 +202,12 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     );
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   void _showConfirmDialog(BuildContext context, StepsManager manager) {
     showDialog(
       context: context,
@@ -250,15 +217,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         builder: (context, state) {
           return ConfirmPage(
             loading: state.isDeletingUserDailyData,
-            onCancel: () {
-              if (!state.isDeletingUserDailyData) {
-                manager.deleteUserDailyData().then((_) {
-                  if (dialogContext.mounted) {
-                    dialogContext.router.maybePop();
-                  }
-                });
-              }
-            },
+            onCancel: () {},
             onConfirm: () {
               if (!state.isDeletingUserDailyData) {
                 dialogContext.router.maybePop();
@@ -275,10 +234,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   void _showEditStepGoalSheet(BuildContext context, StepsManager manager) {
     final stepValue = manager.state.norms
-        .firstWhere(
-          (norm) => norm.metric == 'Step',
-          orElse: () => NormsRequest(metric: 'Step', value: 0),
-        )
+        .firstWhere((norm) => norm.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
         .value;
     showModalBottomSheet(
       context: context,
@@ -286,11 +242,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       backgroundColor: Colors.transparent,
       builder: (_) => EditStepGoalPage(
         initialValue: stepValue.toInt(),
-        onSave: (value) {
-          manager.updateNorm(
-            NormsRequest(metric: 'Step', value: value.toDouble()),
-          );
-        },
+        onSave: (value) => manager.updateNorm(NormsRequest(metric: 'Step', value: value.toDouble())),
       ),
     );
   }
@@ -298,9 +250,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   void _showActionsSheet(BuildContext context, StepsManager manager) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (sheetContext) {
         String from;
         switch (manager.state.period) {
@@ -320,28 +270,19 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         return ActionsPage(
           onTapDelete:
               manager.state.period == 0 &&
-                  DateTime(
-                        fromDate.year,
-                        fromDate.month,
-                        fromDate.day,
-                      ).toIso8601String() ==
-                      DateTime(
-                        DateTime.now().year,
-                        DateTime.now().month,
-                        DateTime.now().day,
-                      ).toIso8601String()
+                  DateTime(fromDate.year, fromDate.month, fromDate.day).toIso8601String() ==
+                      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).toIso8601String()
               ? () {
                   sheetContext.router.maybePop();
                   _showConfirmDialog(context, manager);
                 }
               : null,
+
           onTapShare: () {
             sheetContext.router.maybePop();
             WidgetsBinding.instance.addPostFrameCallback((_) async {
-              final image = await _screenshotControllers[manager.state.period]
-                  .capture();
+              final image = await _screenshotControllers[manager.state.period].capture();
               if (image == null) return;
-
               GlobalKey shareAnchorKey;
               switch (manager.state.period) {
                 case 0:
@@ -359,17 +300,9 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
               final Rect origin = _getWidgetRect(shareAnchorKey);
               final directory = await getTemporaryDirectory();
-              final imagePath = await File(
-                '${directory.path}/screenshot.png',
-              ).create();
+              final imagePath = await File('${directory.path}/screenshot.png').create();
               await imagePath.writeAsBytes(image);
-
-              await SharePlus.instance.share(
-                ShareParams(
-                  files: [XFile(imagePath.path)],
-                  sharePositionOrigin: origin,
-                ),
-              );
+              await SharePlus.instance.share(ShareParams(files: [XFile(imagePath.path)], sharePositionOrigin: origin));
             });
           },
         );
@@ -378,37 +311,28 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   }
 
   Rect _getWidgetRect(GlobalKey key) {
-    final renderBox = key.currentContext!.findRenderObject() as RenderBox;
-
+    final context = key.currentContext;
+    if (context == null) return Offset.zero & Size.zero;
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return Offset.zero & Size.zero;
     final offset = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
-
     return offset & size;
   }
 
   Widget _buildTabContent({
     required Widget fitnessTrackWidget,
     required ScreenshotController screenshotController,
-    required List<UserStatRequest> userStatesWithPlaceholders,
+    required List<UserStatRequest> allUserStatsForPeriod,
     required bool isGettingStats,
-    required List<UserStatRequest> userStates,
   }) {
     return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: ClampingScrollPhysics(),
-      ),
+      physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          Screenshot(
-            controller: screenshotController,
-            child: fitnessTrackWidget,
-          ),
-          LeaderboardSection(
-            userStatesWithPlaceholders: userStatesWithPlaceholders,
-            isGettingStats: isGettingStats,
-            userStates: userStates,
-          ),
+          Screenshot(controller: screenshotController, child: fitnessTrackWidget),
+          LeaderboardSection(allUserStatsForPeriod: allUserStatsForPeriod, isGettingStats: isGettingStats),
         ],
       ),
     );

@@ -7,7 +7,9 @@ import 'package:calora/presentation/app/connectivity/widgets/connectivity_lost_s
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-class ConnectivityOverlay extends Managed<ConnectivityManager, ConnectivityState, ConnectivityEffect> {
+class ConnectivityOverlay
+    extends
+        Managed<ConnectivityManager, ConnectivityState, ConnectivityEffect> {
   final Widget child;
   ConnectivityOverlay({super.key, required this.child});
 
@@ -16,7 +18,11 @@ class ConnectivityOverlay extends Managed<ConnectivityManager, ConnectivityState
   final ValueNotifier<bool> _shouldShowSheet = ValueNotifier<bool>(false);
 
   @override
-  void listener(BuildContext context, ConnectivityManager manager, ConnectivityEffect effect) {
+  void listener(
+    BuildContext context,
+    ConnectivityManager manager,
+    ConnectivityEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.when(showOverlay: _showOverlay, removeOverlay: _hideOverlay);
   }
@@ -26,8 +32,12 @@ class ConnectivityOverlay extends Managed<ConnectivityManager, ConnectivityState
     // Restore overlay state after hot reload or app resume if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Only restore if we're disconnected and overlay isn't already shown
-      if (!state.isConnected && _overlayEntry == null && !_shouldShowSheet.value) {
-        log('[ConnectivityOverlay] Restoring overlay (disconnected state detected)');
+      if (!state.isConnected &&
+          _overlayEntry == null &&
+          !_shouldShowSheet.value) {
+        log(
+          '[ConnectivityOverlay] Restoring overlay (disconnected state detected)',
+        );
         _showOverlay();
       }
     });
@@ -116,7 +126,8 @@ class _AnimatedBottomSheet extends StatefulWidget {
   State<_AnimatedBottomSheet> createState() => _AnimatedBottomSheetState();
 }
 
-class _AnimatedBottomSheetState extends State<_AnimatedBottomSheet> with SingleTickerProviderStateMixin {
+class _AnimatedBottomSheetState extends State<_AnimatedBottomSheet>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
@@ -125,7 +136,10 @@ class _AnimatedBottomSheetState extends State<_AnimatedBottomSheet> with SingleT
   void initState() {
     super.initState();
 
-    _controller = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
 
     _slideAnimation = CurvedAnimation(
       parent: _controller,

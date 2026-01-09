@@ -4,8 +4,7 @@ enum MenuTypeEnum {
   breakfast,
   lunch,
   dinner,
-  snack
-  ;
+  snack;
 
   bool get isBreakfast => this == MenuTypeEnum.breakfast;
   bool get isLunch => this == MenuTypeEnum.lunch;

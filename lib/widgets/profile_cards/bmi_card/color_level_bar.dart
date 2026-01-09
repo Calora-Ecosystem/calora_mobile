@@ -23,18 +23,26 @@ class ColorIndicatorBar extends StatelessWidget {
         Column(
           children: [
             Align(
-              alignment: Alignment((_calculateIndicatorPosition(bmi) * 2) - 1, 0),
+              alignment: Alignment(
+                (_calculateIndicatorPosition(bmi) * 2) - 1,
+                0,
+              ),
               child: Padding(
                 padding: const EdgeInsets.only(),
                 child: CustomPaint(
-                  painter: TrianglePainter(color: context.colors.iconSub, pointingUp: false),
+                  painter: TrianglePainter(
+                    color: context.colors.iconSub,
+                    pointingUp: false,
+                  ),
                   child: SizedBox(width: 14, height: 7),
                 ),
               ),
             ),
             Container(
               height: 20,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Row(
                 children: colors.map((color) {
                   return Expanded(
@@ -42,8 +50,12 @@ class ColorIndicatorBar extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: color,
                         borderRadius: BorderRadius.horizontal(
-                          left: color == colors.first ? Radius.circular(20) : Radius.zero,
-                          right: color == colors.last ? Radius.circular(20) : Radius.zero,
+                          left: color == colors.first
+                              ? Radius.circular(20)
+                              : Radius.zero,
+                          right: color == colors.last
+                              ? Radius.circular(20)
+                              : Radius.zero,
                         ),
                       ),
                     ),

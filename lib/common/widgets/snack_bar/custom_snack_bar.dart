@@ -7,7 +7,8 @@ class CustomSnackBar {
   static void show(BuildContext context, String message) {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
-      builder: (context) => _CustomSnackBarWidget(message: message, onDismiss: () {}),
+      builder: (context) =>
+          _CustomSnackBarWidget(message: message, onDismiss: () {}),
     );
 
     overlay.insert(overlayEntry);
@@ -26,14 +27,18 @@ class _CustomSnackBarWidget extends StatefulWidget {
   State<_CustomSnackBarWidget> createState() => _CustomSnackBarWidgetState();
 }
 
-class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget> with SingleTickerProviderStateMixin {
+class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
 
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
@@ -71,14 +76,24 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget> with Singl
             decoration: BoxDecoration(
               color: context.colors.black,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Assets.icons.errorIcon.svg(),
                 const SizedBox(width: 8),
-                Expanded(child: widget.message.text(14, 18, 400).c(context.colors.textWhite)),
+                Expanded(
+                  child: widget.message
+                      .text(14, 18, 400)
+                      .c(context.colors.textWhite),
+                ),
               ],
             ),
           ),

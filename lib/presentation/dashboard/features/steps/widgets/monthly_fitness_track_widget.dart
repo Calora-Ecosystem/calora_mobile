@@ -15,7 +15,6 @@ class MonthlyFitnessTrackWidget extends StatefulWidget {
     required this.onClickPause,
     required this.onClickMoreVert,
     this.selectedDate,
-    this.canGoForward = true,
     this.offset = 0,
     this.loading = false,
   });
@@ -28,7 +27,6 @@ class MonthlyFitnessTrackWidget extends StatefulWidget {
   final Function() onClickPause;
   final Function() onClickMoreVert;
   final DateTime? selectedDate;
-  final bool canGoForward;
   final int offset;
   final bool loading;
 
@@ -42,11 +40,12 @@ class _MonthlyFitnessTrackWidgetState extends State<MonthlyFitnessTrackWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final bool canGoForwardForThisTab = widget.offset < 0;
     return BaseFitnessTrackWidget(
       period: 'monthly',
       title: Strings.monthly,
       offset: widget.offset,
-      canGoForward: widget.canGoForward,
+      canGoForward: canGoForwardForThisTab,
       onClickBackward: widget.onClickBackward,
       onClickForward: widget.onClickForward,
       onClickMoreVert: widget.onClickMoreVert,

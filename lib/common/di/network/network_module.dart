@@ -62,5 +62,6 @@ abstract class NetworkModule {
   );
 
   @lazySingleton
-  PrettyDioLogger get logger => PrettyDioLogger(requestHeader: true, requestBody: true, maxWidth: 100);
+  PrettyDioLogger get logger =>
+      PrettyDioLogger(requestHeader: true, requestBody: true, maxWidth: 100);
 }

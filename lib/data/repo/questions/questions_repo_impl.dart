@@ -16,7 +16,9 @@ class QuestionsRepoImpl extends QuestionsRepo {
   @override
   Future<void> sendAnswers(QuestionsRequest answers) async {
     final response = await _api.sendAnswers(answers);
-    if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
       await _commonStore.isQuestionaryFinished.set(true);
     }
   }

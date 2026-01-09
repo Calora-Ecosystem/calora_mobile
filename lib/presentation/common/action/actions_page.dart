@@ -20,13 +20,18 @@ class ActionsPage extends StatelessWidget {
           Container(
             width: 24,
             height: 4,
-            decoration: BoxDecoration(color: context.colors.strokeSub, borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(
+              color: context.colors.strokeSub,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
           const SizedBox(height: 12),
 
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Strings.actions.text(20, 24, 700).c(context.colors.textStrong),
+            title: Strings.actions
+                .text(20, 24, 700)
+                .c(context.colors.textStrong),
             dense: true,
           ),
           // if (onTapDelete != null)
@@ -39,7 +44,9 @@ class ActionsPage extends StatelessWidget {
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: Assets.icons.share.svg(),
-            title: Strings.share.text(14, 18, 400).c(context.colors.textPrimary),
+            title: Strings.share
+                .text(14, 18, 400)
+                .c(context.colors.textPrimary),
             onTap: onTapShare,
           ),
           const SizedBox(height: 8),

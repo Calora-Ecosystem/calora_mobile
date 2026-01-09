@@ -19,11 +19,18 @@ class TasksCards extends StatelessWidget {
     return Column(
       children: [
         TaskParametersWidget(
-          title: '${workout.id}-kun mashqlari bilan tanishing'.text(20, 24, 600),
+          title: '${workout.id}-kun mashqlari bilan tanishing'.text(
+            20,
+            24,
+            600,
+          ),
           parameters: [
             ParameterItem(name: Strings.degree, value: 'Yengil'),
             ParameterItem(name: 'Kkal', value: '${workout.totalMetrics}'),
-            ParameterItem(name: Strings.duration, value: '${lessonInfo.duration}'),
+            ParameterItem(
+              name: Strings.duration,
+              value: '${lessonInfo.duration}',
+            ),
           ],
           bottomLabel: Strings.exercises,
           bottomCount: lessonInfo.tasks.length,
@@ -36,9 +43,7 @@ class TasksCards extends StatelessWidget {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () => _showTask(context, lessonInfo.tasks[index]),
-                child: LessonCard(
-                  workout: workout,
-                ),
+                child: LessonCard(workout: workout),
               );
             },
             separatorBuilder: (BuildContext context, int index) {

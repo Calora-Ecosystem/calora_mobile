@@ -22,5 +22,6 @@ abstract class ProfileRequest with _$ProfileRequest {
     @JsonKey(name: 'photo') String? photo,
   }) = _ProfileRequest;
 
-  factory ProfileRequest.fromJson(Map<String, dynamic> json) => _$ProfileRequestFromJson(json);
+  factory ProfileRequest.fromJson(Map<String, dynamic> json) =>
+      _$ProfileRequestFromJson(json);
 }

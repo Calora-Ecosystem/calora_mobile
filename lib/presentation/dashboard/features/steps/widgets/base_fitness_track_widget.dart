@@ -60,37 +60,42 @@ class BaseFitnessTrackWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  InkWell(
-                    onTap: onClickBackward,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: Assets.icons.icBackward.svg(),
+                  SizedBox(
+                    width: 40,
+                    child: InkWell(
+                      onTap: onClickBackward,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: Assets.icons.icBackward.svg(),
+                      ),
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _getDateLabel(
-                        period,
-                      ).text(14, 16, 400).c(context.colors.textWhite),
-                    ],
-                  ),
+                  _getDateLabel(
+                    period,
+                  ).text(14, 16, 400).c(context.colors.textWhite),
                   canGoForward
-                      ? InkWell(
-                          onTap: onClickForward,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 16),
-                            child: Assets.icons.icForward.svg(),
+                      ? SizedBox(
+                          width: 40,
+                          child: InkWell(
+                            onTap: onClickForward,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 16),
+                              child: Assets.icons.icForward.svg(),
+                            ),
                           ),
                         )
-                      : const SizedBox(width: 48, height: 24),
+                      : const SizedBox(width: 40, height: 24),
                 ],
               ),
               const SizedBox(height: 6),
               ShimmerWrapper(
                 loading: manager.state.isGettingSteps,
-                shimmerChild: const ShimmerChild(
-                  height: 400,
+                shimmerChild: ShimmerChild(
+                  height: period == 'daily'
+                      ? 358
+                      : period == 'weekly'
+                      ? 370
+                      : 430,
                   width: double.maxFinite,
                   radius: 20,
                 ),
@@ -107,9 +112,7 @@ class BaseFitnessTrackWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             if (title != null)
-                              title!
-                                  .text(14, 18, 600)
-                                  .c(context.colors.neutralPrimary)
+                              title!.text(14, 18, 600).c(context.colors.neutralPrimary)
                             else
                               const SizedBox.shrink(),
                             InkWell(
@@ -135,13 +138,9 @@ class BaseFitnessTrackWidget extends StatelessWidget {
                               children: [
                                 Assets.icons.icStopwatch.svg(),
                                 const SizedBox(height: 4),
-                                '0 S'
-                                    .text(16, 20, 500)
-                                    .c(context.colors.textStrong),
+                                '0 S'.text(16, 20, 500).c(context.colors.textStrong),
                                 const SizedBox(height: 2),
-                                Strings.onTime
-                                    .text(14, 20, 400)
-                                    .c(context.colors.textSub),
+                                Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
                               ],
                             ),
                             Column(
@@ -149,14 +148,9 @@ class BaseFitnessTrackWidget extends StatelessWidget {
                               children: [
                                 Assets.icons.icDistance.svg(),
                                 const SizedBox(height: 4),
-                                (metrics.distance)
-                                    .asFixedTruncated(2)
-                                    .text(16, 20, 500)
-                                    .c(context.colors.textStrong),
+                                (metrics.distance).asFixedTruncated(2).text(16, 20, 500).c(context.colors.textStrong),
                                 const SizedBox(height: 2),
-                                Strings.distanceInKm
-                                    .text(14, 20, 400)
-                                    .c(context.colors.textSub),
+                                Strings.distanceInKm.text(14, 20, 400).c(context.colors.textSub),
                               ],
                             ),
                             Column(
@@ -164,13 +158,9 @@ class BaseFitnessTrackWidget extends StatelessWidget {
                               children: [
                                 Assets.icons.icCalorie.svg(),
                                 const SizedBox(height: 4),
-                                '${metrics.kcal}'
-                                    .text(16, 20, 500)
-                                    .c(context.colors.textStrong),
+                                '${metrics.kcal}'.text(16, 20, 500).c(context.colors.textStrong),
                                 const SizedBox(height: 2),
-                                Strings.calorie
-                                    .text(14, 20, 400)
-                                    .c(context.colors.textSub),
+                                Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
                               ],
                             ),
                           ],

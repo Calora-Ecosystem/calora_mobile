@@ -8,8 +8,7 @@ enum PurposeEnum {
   WeightLoss,
   SaveCurrent,
   MuscleDevelopment,
-  Unknown
-  ;
+  Unknown;
 
   bool get isWeightLoss => this == PurposeEnum.WeightLoss;
   bool get isSaveCurrent => this == PurposeEnum.SaveCurrent;
@@ -45,7 +44,8 @@ enum PurposeEnum {
   static PurposeEnum fromDisplayName(String value) {
     if (value == Strings.weightLoss) return PurposeEnum.WeightLoss;
     if (value == Strings.maintainingBody) return PurposeEnum.SaveCurrent;
-    if (value == Strings.muscleDevelopment) return PurposeEnum.MuscleDevelopment;
+    if (value == Strings.muscleDevelopment)
+      return PurposeEnum.MuscleDevelopment;
     return PurposeEnum.Unknown;
   }
 
@@ -79,5 +79,6 @@ abstract class QuestionsRequest with _$QuestionsRequest {
     String? language,
   }) = _QuestionsRequest;
 
-  factory QuestionsRequest.fromJson(Map<String, dynamic> json) => _$QuestionsRequestFromJson(json);
+  factory QuestionsRequest.fromJson(Map<String, dynamic> json) =>
+      _$QuestionsRequestFromJson(json);
 }

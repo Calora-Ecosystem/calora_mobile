@@ -47,14 +47,20 @@ class _SingleInputPageState extends State<SingleInputPage> {
 
     // Add listener to handle metrics automatically
     controller.addListener(
-      () => controller.handleMetricsChange(metrics: widget.metrics, isUserEditing: isUserEditing),
+      () => controller.handleMetricsChange(
+        metrics: widget.metrics,
+        isUserEditing: isUserEditing,
+      ),
     );
   }
 
   @override
   void dispose() {
     controller.removeListener(
-      () => controller.handleMetricsChange(metrics: widget.metrics, isUserEditing: isUserEditing),
+      () => controller.handleMetricsChange(
+        metrics: widget.metrics,
+        isUserEditing: isUserEditing,
+      ),
     );
     controller.dispose();
     super.dispose();
@@ -65,12 +71,21 @@ class _SingleInputPageState extends State<SingleInputPage> {
     return Container(
       margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: Container(height: 2, width: 24, color: context.colors.strokeSub)),
+          Center(
+            child: Container(
+              height: 2,
+              width: 24,
+              color: context.colors.strokeSub,
+            ),
+          ),
           const SizedBox(height: 8),
           widget.title.text(20, 24, 700).c(context.colors.textStrong),
           const SizedBox(height: 12),
@@ -83,9 +98,12 @@ class _SingleInputPageState extends State<SingleInputPage> {
               isUserEditing = true;
 
               // Move cursor to before metrics if user taps on the field
-              if (widget.metrics.isNotEmpty && controller.text.endsWith(widget.metrics)) {
+              if (widget.metrics.isNotEmpty &&
+                  controller.text.endsWith(widget.metrics)) {
                 final position = controller.text.length - widget.metrics.length;
-                controller.selection = TextSelection.collapsed(offset: position);
+                controller.selection = TextSelection.collapsed(
+                  offset: position,
+                );
               }
             },
             onEditingComplete: () {
@@ -108,9 +126,11 @@ class _SingleInputPageState extends State<SingleInputPage> {
             onPressed: () {
               // Remove metrics before saving if they exist
               String textToSave = controller.text;
-              if (widget.metrics.isNotEmpty && textToSave.endsWith(widget.metrics)) {
-                textToSave =
-                    textToSave.substring(0, textToSave.length - widget.metrics.length).trim();
+              if (widget.metrics.isNotEmpty &&
+                  textToSave.endsWith(widget.metrics)) {
+                textToSave = textToSave
+                    .substring(0, textToSave.length - widget.metrics.length)
+                    .trim();
               }
               widget.onSave(textToSave);
             },

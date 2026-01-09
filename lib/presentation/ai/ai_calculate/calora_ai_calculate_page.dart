@@ -14,7 +14,13 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:screenshot/screenshot.dart';
 
 @RoutePage()
-class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCalculateState, CaloraAiCalculateEffect> {
+class CaloraAiCalculatePage
+    extends
+        Managed<
+          CaloraAiCalculateManager,
+          CaloraAiCalculateState,
+          CaloraAiCalculateEffect
+        > {
   final String imagePath;
 
   CaloraAiCalculatePage({super.key, required this.imagePath});
@@ -28,21 +34,28 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
   }
 
   @override
-  void listener(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateEffect effect) {
-    effect.when(
-      error: (message) {},
-      analysisComplete: () {},
-    );
+  void listener(
+    BuildContext context,
+    CaloraAiCalculateManager manager,
+    CaloraAiCalculateEffect effect,
+  ) {
+    effect.when(error: (message) {}, analysisComplete: () {});
   }
 
   @override
-  Widget builder(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateState state) {
+  Widget builder(
+    BuildContext context,
+    CaloraAiCalculateManager manager,
+    CaloraAiCalculateState state,
+  ) {
     return Screenshot(
       controller: screenshotController,
       child: Scaffold(
         backgroundColor: context.colors.white,
         appBar: CustomAppBar(
-          title: Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
+          title: Strings.caloraAi
+              .text(16, 20, 500)
+              .c(context.colors.textStrong),
           onBack: () => _onBack(context),
         ),
         body: Container(
@@ -55,7 +68,9 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
           child: AnimatedCrossFade(
             firstChild: _buildAnalyzingView(context, manager, state),
             secondChild: _buildCompletedView(context, manager, state),
-            crossFadeState: !state.isCompleted ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            crossFadeState: !state.isCompleted
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
             duration: const Duration(milliseconds: 300),
           ),
         ),
@@ -68,7 +83,9 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
                     child: Button(
                       text: Strings.share,
                       loading: state.isSharing,
-                      onPressed: state.isSharing ? null : () => manager.shareResults(screenshotController),
+                      onPressed: state.isSharing
+                          ? null
+                          : () => manager.shareResults(screenshotController),
                     ),
                   ),
                 ),
@@ -78,7 +95,11 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
     );
   }
 
-  Widget _buildCompletedView(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateState state) {
+  Widget _buildCompletedView(
+    BuildContext context,
+    CaloraAiCalculateManager manager,
+    CaloraAiCalculateState state,
+  ) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -91,13 +112,19 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
             center: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                '${state.finalScore}'.text(32, 40, 700).c(_getScoreColor(context, state.finalScore)),
-                '/100'.text(14, 18, 400).c(_getScoreColor(context, state.finalScore)),
+                '${state.finalScore}'
+                    .text(32, 40, 700)
+                    .c(_getScoreColor(context, state.finalScore)),
+                '/100'
+                    .text(14, 18, 400)
+                    .c(_getScoreColor(context, state.finalScore)),
               ],
             ),
           ),
           const SizedBox(height: 12),
-          Strings.yourPhysicalHealthLevel.text(14, 18, 400).c(context.colors.textSub),
+          Strings.yourPhysicalHealthLevel
+              .text(14, 18, 400)
+              .c(context.colors.textSub),
           const SizedBox(height: 16),
           ListView.separated(
             shrinkWrap: true,
@@ -110,7 +137,12 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
                 context,
                 icon: item.iconPath,
                 text: item.description,
-                trailing: _buildTag(context, '${item.percentage}%', context.colors.accentSub, context.colors.paleGreen),
+                trailing: _buildTag(
+                  context,
+                  '${item.percentage}%',
+                  context.colors.accentSub,
+                  context.colors.paleGreen,
+                ),
               );
             },
           ),
@@ -119,7 +151,11 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
     );
   }
 
-  Widget _buildAnalyzingView(BuildContext context, CaloraAiCalculateManager manager, CaloraAiCalculateState state) {
+  Widget _buildAnalyzingView(
+    BuildContext context,
+    CaloraAiCalculateManager manager,
+    CaloraAiCalculateState state,
+  ) {
     if (state.errorMessage != null) {
       return Center(
         child: Column(
@@ -159,7 +195,9 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
           context,
           percent: state.progressPercent,
           color: context.colors.accentSub,
-          center: '${(state.progressPercent * 100).round()}%'.text(32, 40, 700).c(context.colors.textStrong),
+          center: '${(state.progressPercent * 100).round()}%'
+              .text(32, 40, 700)
+              .c(context.colors.textStrong),
         ),
         ...[
           [Strings.yourFacialFeaturesAreBeingAnalyzed, 0.3],
@@ -171,10 +209,14 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
           final done = state.progressPercent >= threshold;
           return _infoItem(
             context,
-            icon: done ? Assets.icons.done.svg() : const CupertinoActivityIndicator(radius: 12),
+            icon: done
+                ? Assets.icons.done.svg()
+                : const CupertinoActivityIndicator(radius: 12),
             text: text,
             bgColor: context.colors.commonBackground,
-            textColor: done ? context.colors.textSub : context.colors.textStrong,
+            textColor: done
+                ? context.colors.textSub
+                : context.colors.textStrong,
           );
         }),
       ],
@@ -199,7 +241,11 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
         spacing: 8,
         children: [
           icon,
-          Expanded(child: text.text(14, 16, 400).c(textColor ?? context.colors.textSub)),
+          Expanded(
+            child: text
+                .text(14, 16, 400)
+                .c(textColor ?? context.colors.textSub),
+          ),
           if (trailing != null) trailing,
         ],
       ),
@@ -234,10 +280,18 @@ class CaloraAiCalculatePage extends Managed<CaloraAiCalculateManager, CaloraAiCa
     );
   }
 
-  Widget _buildTag(BuildContext context, String text, Color textColor, Color bgColor) {
+  Widget _buildTag(
+    BuildContext context,
+    String text,
+    Color textColor,
+    Color bgColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: text.text(12, 14, 500).c(textColor),
     );
   }

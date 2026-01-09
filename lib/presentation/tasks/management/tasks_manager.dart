@@ -31,7 +31,9 @@ class TasksManager extends Manager<TasksState, TasksEffect> {
     final updatedTasks = List<TaskInfo>.from(state.tasks);
     final currentTask = updatedTasks[state.currentTaskIndex];
 
-    updatedTasks[state.currentTaskIndex] = currentTask.copyWith(isCompleted: true);
+    updatedTasks[state.currentTaskIndex] = currentTask.copyWith(
+      isCompleted: true,
+    );
 
     emit(state.copyWith(tasks: updatedTasks));
   }

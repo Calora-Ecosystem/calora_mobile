@@ -33,7 +33,12 @@ Widget buildReminderItem({
       if (isOn) {
         manager.updateReminder(
           typeEnum,
-          ReminderRequest(id: reminder?.id, time: newTime, type: settingType.toApi, menu: menuEnum?.toApi),
+          ReminderRequest(
+            id: reminder?.id,
+            time: newTime,
+            type: settingType.toApi,
+            menu: menuEnum?.toApi,
+          ),
         );
       } else {
         manager.removeReminder(typeEnum);

@@ -27,17 +27,48 @@ class SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      {'icon': Assets.icons.userList.svg(), 'title': Strings.accountInformation, 'onTap': onAccountTap},
-      {'icon': Assets.icons.norms.svg(), 'title': Strings.norms, 'onTap': onNormsTap},
-      {'icon': Assets.icons.languageSquare.svg(), 'title': Strings.applicationLanguage, 'onTap': onLanguageTap},
-      {'icon': Assets.icons.notification.svg(), 'title': Strings.settingUpNotification, 'onTap': onNotificationsTap},
-      {'icon': Assets.icons.addTeam.svg(), 'title': Strings.makeAnOffer, 'onTap': onInviteTap},
-      {'icon': Assets.icons.informationCircle.svg(), 'title': Strings.aboutCalora, 'onTap': onAboutTap},
-      {'icon': Assets.icons.messageQuestion.svg(), 'title': Strings.help, 'onTap': onHelpTap},
+      {
+        'icon': Assets.icons.userList.svg(),
+        'title': Strings.accountInformation,
+        'onTap': onAccountTap,
+      },
+      {
+        'icon': Assets.icons.norms.svg(),
+        'title': Strings.norms,
+        'onTap': onNormsTap,
+      },
+      {
+        'icon': Assets.icons.languageSquare.svg(),
+        'title': Strings.applicationLanguage,
+        'onTap': onLanguageTap,
+      },
+      {
+        'icon': Assets.icons.notification.svg(),
+        'title': Strings.settingUpNotification,
+        'onTap': onNotificationsTap,
+      },
+      {
+        'icon': Assets.icons.addTeam.svg(),
+        'title': Strings.makeAnOffer,
+        'onTap': onInviteTap,
+      },
+      {
+        'icon': Assets.icons.informationCircle.svg(),
+        'title': Strings.aboutCalora,
+        'onTap': onAboutTap,
+      },
+      {
+        'icon': Assets.icons.messageQuestion.svg(),
+        'title': Strings.help,
+        'onTap': onHelpTap,
+      },
     ];
 
     return Container(
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: ListView.builder(
         physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -53,7 +84,10 @@ class SettingsCard extends StatelessWidget {
               padding: const EdgeInsets.all(4),
               child: item['icon'] as Widget,
             ),
-            title: item['title'].toString().text(14, 16, 400).c(context.colors.textStrong),
+            title: item['title']
+                .toString()
+                .text(14, 16, 400)
+                .c(context.colors.textStrong),
             trailing: Assets.icons.arrowRight.svg(),
             onTap: item['onTap'] as VoidCallback,
           );

@@ -17,7 +17,8 @@ abstract class ConnectivityState with _$ConnectivityState {
     required DateTime lastCheckedAt,
   }) = _ConnectivityState;
 
-  factory ConnectivityState.initial() => ConnectivityState(lastCheckedAt: DateTime.now());
+  factory ConnectivityState.initial() =>
+      ConnectivityState(lastCheckedAt: DateTime.now());
 }
 
 @freezed

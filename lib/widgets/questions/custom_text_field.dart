@@ -30,14 +30,20 @@ class _CustomTextFieldState extends State<CustomTextField> {
     _controller = TextEditingController();
 
     _controller.addListener(
-      () => _controller.handleMetricsChange(metrics: widget.metrics, isUserEditing: isUserEditing),
+      () => _controller.handleMetricsChange(
+        metrics: widget.metrics,
+        isUserEditing: isUserEditing,
+      ),
     );
   }
 
   @override
   void dispose() {
     _controller.removeListener(
-      () => _controller.handleMetricsChange(metrics: widget.metrics, isUserEditing: isUserEditing),
+      () => _controller.handleMetricsChange(
+        metrics: widget.metrics,
+        isUserEditing: isUserEditing,
+      ),
     );
     _controller.dispose();
     super.dispose();
@@ -52,7 +58,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       textAlign: TextAlign.center,
       onTap: () {
         isUserEditing = true;
-        if (widget.metrics.isNotEmpty && _controller.text.endsWith(widget.metrics)) {
+        if (widget.metrics.isNotEmpty &&
+            _controller.text.endsWith(widget.metrics)) {
           final pos = _controller.text.length - widget.metrics.length;
           _controller.selection = TextSelection.collapsed(offset: pos);
         }
@@ -63,7 +70,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
       onChanged: (value) {
         String textToSend = value;
         if (widget.metrics.isNotEmpty && textToSend.endsWith(widget.metrics)) {
-          textToSend = textToSend.substring(0, textToSend.length - widget.metrics.length).trim();
+          textToSend = textToSend
+              .substring(0, textToSend.length - widget.metrics.length)
+              .trim();
         }
         widget.onChanged(textToSend);
       },
@@ -81,9 +90,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 12,
+        ),
       ),
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 0.8),
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 0.8,
+      ),
       cursorColor: colors.textStrong,
     );
   }

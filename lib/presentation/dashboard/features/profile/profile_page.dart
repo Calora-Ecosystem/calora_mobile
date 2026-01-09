@@ -4,6 +4,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/about/about_page.dart' show AboutPage;
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_manager.dart';
 import 'package:calora/presentation/help/help_page.dart';
 import 'package:calora/presentation/language/bottom_sheet/language_bottom_sheet.dart';
@@ -13,8 +14,6 @@ import 'package:calora/widgets/profile_cards/settings_card.dart' show SettingsCa
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:share_plus/share_plus.dart';
-
-import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 
 @RoutePage()
 class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
@@ -41,7 +40,10 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       surname: state.profile?.name ?? '',
                       name: state.profile?.name ?? '',
                       email: state.profile?.email ?? '',
-                      onEdit: () => _openProfileDetailPage(context, state.profile?.userId.toString() ?? ''),
+                      onEdit: () => _openProfileDetailPage(
+                        context,
+                        state.profile?.userId.toString() ?? '',
+                      ),
                     ),
                     const SizedBox(height: 16),
                     BmiCard(
@@ -85,7 +87,10 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
     );
   }
 
-  void _openAccountDetailPage(BuildContext context, ProfileManager manager) async {
+  void _openAccountDetailPage(
+    BuildContext context,
+    ProfileManager manager,
+  ) async {
     await context.router.push(AccountDetailRoute());
     manager.getProfile();
   }
@@ -103,7 +108,12 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
   }
 
   void _showHelpBottomSheet(BuildContext context) {
-    context.showAppBottomSheet(minChildSize: 0.2, initialChildSize: 0.3, maxChildSize: 0.3, child: const HelpPage());
+    context.showAppBottomSheet(
+      minChildSize: 0.2,
+      initialChildSize: 0.3,
+      maxChildSize: 0.3,
+      child: const HelpPage(),
+    );
   }
 
   void _showLanguageBottomSheet(BuildContext context) {
@@ -111,7 +121,9 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => const LanguagePage(),
     );
   }
@@ -121,7 +133,9 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => const AboutPage(),
     );
   }

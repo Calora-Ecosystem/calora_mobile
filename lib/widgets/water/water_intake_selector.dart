@@ -33,14 +33,17 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
 
   bool get _isToday {
     final now = DateTime.now();
-    return now.year == widget.date.year && now.month == widget.date.month && now.day == widget.date.day;
+    return now.year == widget.date.year &&
+        now.month == widget.date.month &&
+        now.day == widget.date.day;
   }
 
   @override
   void initState() {
     super.initState();
 
-    final minBottles = ((widget.targetLiters / 1000) / widget.bottleCapacity).ceil();
+    final minBottles = ((widget.targetLiters / 1000) / widget.bottleCapacity)
+        .ceil();
     displayCount = minBottles < 10 ? 10 : minBottles + 2;
 
     selectedCount = (widget.currentIntake / widget.bottleCapacity).floor();
@@ -50,7 +53,8 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
   void didUpdateWidget(covariant WaterIntakeSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.date != widget.date || oldWidget.currentIntake != widget.currentIntake) {
+    if (oldWidget.date != widget.date ||
+        oldWidget.currentIntake != widget.currentIntake) {
       selectedCount = (widget.currentIntake / widget.bottleCapacity).floor();
     }
   }
@@ -72,14 +76,12 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final targetBottles = ((widget.targetLiters / 1000) / widget.bottleCapacity).ceil();
+    final targetBottles = ((widget.targetLiters / 1000) / widget.bottleCapacity)
+        .ceil();
     final itemCount = _isToday ? displayCount : selectedCount;
     return ShimmerWrapper(
       loading: widget.loading,
-      shimmerChild: ShimmerChild(
-        height: 184,
-        radius: 20,
-      ),
+      shimmerChild: ShimmerChild(height: 184, radius: 20),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
@@ -93,7 +95,9 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Strings.yourWaterIntake.text(20, 24, 600).c(context.colors.textStrong),
+                Strings.yourWaterIntake
+                    .text(20, 24, 600)
+                    .c(context.colors.textStrong),
                 Expanded(
                   child: '${widget.targetLiters / 1000} L'
                       .text(20, 24, 600)
@@ -106,7 +110,9 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
                 ),
               ],
             ),
-            '${widget.currentIntake} L'.text(20, 24, 600).c(context.colors.textStrong),
+            '${widget.currentIntake} L'
+                .text(20, 24, 600)
+                .c(context.colors.textStrong),
 
             /// 🟦 Bottle’lar
             Wrap(
@@ -118,7 +124,8 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
                 final isAfterNext = _isToday && index > selectedCount;
 
                 final isTargetBottle = index == targetBottles - 1;
-                final shouldShowDone = _isToday && isTargetBottle && _isTargetReached();
+                final shouldShowDone =
+                    _isToday && isTargetBottle && _isTargetReached();
 
                 return GestureDetector(
                   onTap: !_isToday
@@ -165,11 +172,7 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
             Assets.icons.softBotl.svg(),
 
           if (showPlusButton)
-            Positioned(
-              top: -3,
-              right: -3,
-              child: Assets.icons.badge.svg(),
-            ),
+            Positioned(top: -3, right: -3, child: Assets.icons.badge.svg()),
 
           if (showDone)
             Positioned(

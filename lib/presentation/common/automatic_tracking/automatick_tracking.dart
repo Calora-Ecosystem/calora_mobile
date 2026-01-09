@@ -25,7 +25,9 @@ void showAutomaticTrackingSheet(
           children: [
             title.text(24, 32, 700),
             const SizedBox(height: 8),
-            'Avtomatik kuzatuvchi'.text(14, 16, 400).c(context.colors.textPrimary),
+            'Avtomatik kuzatuvchi'
+                .text(14, 16, 400)
+                .c(context.colors.textPrimary),
             const SizedBox(height: 16),
 
             const Text(
@@ -46,17 +48,27 @@ void showAutomaticTrackingSheet(
 
             const SizedBox(height: 12),
             const Text('Qanday ulanadi (2 daqiqa)'),
-            const Text('1. Calora -> Profil -> Ulanishlar (Integrations) -> Garmin ni tanlang.'),
+            const Text(
+              '1. Calora -> Profil -> Ulanishlar (Integrations) -> Garmin ni tanlang.',
+            ),
             const Text('2. “Garminni ulash” tugmasini bosing.'),
-            const Text('3. Garmin Connect oynasida login qiling (yoki tasdiqlang).'),
+            const Text(
+              '3. Garmin Connect oynasida login qiling (yoki tasdiqlang).',
+            ),
             const Text("4. Calora so'rayotgan ruxsatlarni ko'rib chiqing."),
-            const Text("5. Calora oynasiga qayting: “Ulandi” holatini ko'rasiz."),
+            const Text(
+              "5. Calora oynasiga qayting: “Ulandi” holatini ko'rasiz.",
+            ),
             const SizedBox(height: 16),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildIconButton(Assets.images.caloraLogo.image(), 'Calora', context),
+                _buildIconButton(
+                  Assets.images.caloraLogo.image(),
+                  'Calora',
+                  context,
+                ),
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(

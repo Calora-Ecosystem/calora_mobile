@@ -36,7 +36,11 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
                 dateOrder: DatePickerDateOrder.dmy,
                 initialDateTime:
                     _selectedDate ??
-                    DateTime(DateTime.now().year - 5, DateTime.now().month, DateTime.now().day),
+                    DateTime(
+                      DateTime.now().year - 5,
+                      DateTime.now().month,
+                      DateTime.now().day,
+                    ),
                 onDateTimeChanged: (val) {
                   setState(() {
                     _selectedDate = val;
@@ -77,7 +81,9 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
   }
 
   Widget _buildDatePart(String label, String? value) {
-    final displayValue = (value == null || value.isEmpty) ? label : value.padLeft(2, '0');
+    final displayValue = (value == null || value.isEmpty)
+        ? label
+        : value.padLeft(2, '0');
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),

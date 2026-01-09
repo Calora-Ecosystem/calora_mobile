@@ -5,11 +5,15 @@ part 'dishes_management.freezed.dart';
 
 @freezed
 abstract class DishesState with _$DishesState {
-  const factory DishesState({@Default([]) List<FoodModel> foods, @Default(false) bool isLoading, FoodModel? food}) =
-      _DishesState;
+  const factory DishesState({
+    @Default([]) List<FoodModel> foods,
+    @Default(false) bool isLoading,
+    FoodModel? food,
+  }) = _DishesState;
 }
 
 @freezed
 abstract class DishesEffect with _$DishesEffect {
-  const factory DishesEffect.openInfoSheet(FoodModel food, bool isFavourite) = _DishesEffect;
+  const factory DishesEffect.openInfoSheet(FoodModel food, bool isFavourite) =
+      _DishesEffect;
 }

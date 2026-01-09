@@ -9,7 +9,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect> {
+class ConnectivityManager
+    extends Manager<ConnectivityState, ConnectivityEffect> {
   final Connectivity _connectivity;
   late final StreamSubscription<List<ConnectivityResult>> _subscription;
   late final HttpClient _httpClient;
@@ -30,7 +31,9 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
       ..connectionTimeout = const Duration(seconds: 5)
       ..idleTimeout = const Duration(seconds: 10);
 
-    _subscription = _connectivity.onConnectivityChanged.listen(_onConnectivityChanged);
+    _subscription = _connectivity.onConnectivityChanged.listen(
+      _onConnectivityChanged,
+    );
 
     _hasShownOverlay = false;
 
@@ -62,10 +65,14 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
       final hasInterface = _hasNetworkInterface(results);
       log('[_checkConnection] hasInterface=$hasInterface, results=$results');
 
-      final hasInternet = hasInterface ? await _hasInternetConnectivity(currentRequest) : false;
+      final hasInternet = hasInterface
+          ? await _hasInternetConnectivity(currentRequest)
+          : false;
 
       if (currentRequest != _requestId) {
-        log('[_checkConnection] Request #$currentRequest outdated after internet check');
+        log(
+          '[_checkConnection] Request #$currentRequest outdated after internet check',
+        );
         return;
       }
 
@@ -77,7 +84,11 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
         _handleConnectionFailure(results, hasInterface: hasInterface);
       }
     } catch (e, stackTrace) {
-      log('[_checkConnection] Unexpected error', error: e, stackTrace: stackTrace);
+      log(
+        '[_checkConnection] Unexpected error',
+        error: e,
+        stackTrace: stackTrace,
+      );
       if (currentRequest == _requestId) {
         _handleConnectionFailure([], hasInterface: false);
       }
@@ -125,7 +136,10 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
     });
   }
 
-  void _handleConnectionFailure(List<ConnectivityResult> results, {required bool hasInterface}) {
+  void _handleConnectionFailure(
+    List<ConnectivityResult> results, {
+    required bool hasInterface,
+  }) {
     _consecutiveFailures++;
     log(
       '[_handleConnectionFailure] Failure #$_consecutiveFailures, hasInterface=$hasInterface, _hasShownOverlay=$_hasShownOverlay',
@@ -151,7 +165,9 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
       _hasShownOverlay = true;
       publish(const ConnectivityEffect.showOverlay());
     } else if (_consecutiveFailures == 1 && !_hasShownOverlay) {
-      log('[_handleConnectionFailure] Showing overlay (first check, no connection)');
+      log(
+        '[_handleConnectionFailure] Showing overlay (first check, no connection)',
+      );
       _hasShownOverlay = true;
       publish(const ConnectivityEffect.showOverlay());
     } else {
@@ -165,7 +181,9 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
 
   void _scheduleRetry() {
     if (_consecutiveFailures >= _maxRetries) {
-      log('[_scheduleRetry] Max retries ($_maxRetries) reached, stopping automatic retries');
+      log(
+        '[_scheduleRetry] Max retries ($_maxRetries) reached, stopping automatic retries',
+      );
       return;
     }
 
@@ -173,9 +191,13 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
 
     final exponent = (_consecutiveFailures - 1).clamp(0, 5);
     final delayMs = _baseRetryDelay.inMilliseconds * (1 << exponent);
-    final delay = Duration(milliseconds: delayMs.clamp(0, _maxRetryDelay.inMilliseconds));
+    final delay = Duration(
+      milliseconds: delayMs.clamp(0, _maxRetryDelay.inMilliseconds),
+    );
 
-    log('[_scheduleRetry] Scheduling retry #$_consecutiveFailures in ${delay.inSeconds}s');
+    log(
+      '[_scheduleRetry] Scheduling retry #$_consecutiveFailures in ${delay.inSeconds}s',
+    );
     _retryTimer = Timer(delay, _checkConnection);
   }
 
@@ -186,7 +208,9 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
     ];
 
     try {
-      final firstSuccess = await Future.any(checks).timeout(const Duration(seconds: 6));
+      final firstSuccess = await Future.any(
+        checks,
+      ).timeout(const Duration(seconds: 6));
 
       if (requestId != _requestId) {
         log('[_hasInternetConnectivity] Request #$requestId outdated');
@@ -212,7 +236,9 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
       await res.drain();
 
       final isSuccess = res.statusCode >= 200 && res.statusCode < 300;
-      log('[_headRequest] Check to $uri: ${isSuccess ? "SUCCESS" : "FAILED"} (${res.statusCode})');
+      log(
+        '[_headRequest] Check to $uri: ${isSuccess ? "SUCCESS" : "FAILED"} (${res.statusCode})',
+      );
       return isSuccess;
     } catch (e) {
       log('[_headRequest] Check to $uri failed', error: e);
@@ -221,10 +247,13 @@ class ConnectivityManager extends Manager<ConnectivityState, ConnectivityEffect>
   }
 
   bool _hasNetworkInterface(List<ConnectivityResult> results) {
-    return results.isNotEmpty && results.any((r) => r != ConnectivityResult.none);
+    return results.isNotEmpty &&
+        results.any((r) => r != ConnectivityResult.none);
   }
 
-  ConnectionQuality _determineConnectionQuality(List<ConnectivityResult> results) {
+  ConnectionQuality _determineConnectionQuality(
+    List<ConnectivityResult> results,
+  ) {
     if (results.contains(ConnectivityResult.ethernet)) {
       return ConnectionQuality.excellent;
     }

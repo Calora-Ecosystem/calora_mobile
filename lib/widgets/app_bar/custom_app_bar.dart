@@ -52,7 +52,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   )
                 : null),
         title: titleWidget,
-        actions: trailing != null ? [Padding(padding: const EdgeInsets.only(right: 16), child: trailing!)] : null,
+        actions: trailing != null
+            ? [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: trailing!,
+                ),
+              ]
+            : null,
       ),
     );
   }

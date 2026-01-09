@@ -9,8 +9,7 @@ enum ReminderTypesEnum {
   water,
   sleep,
   dailyChallenge,
-  none
-  ;
+  none;
 
   bool get isBreakfast => this == ReminderTypesEnum.breakfast;
   bool get isLunch => this == ReminderTypesEnum.lunch;
@@ -21,7 +20,10 @@ enum ReminderTypesEnum {
   bool get isDailyChallenge => this == ReminderTypesEnum.dailyChallenge;
   bool get isNone => this == ReminderTypesEnum.none;
 
-  static ReminderTypesEnum fromReminderSettings({required MenuTypeEnum menu, required ReminderSettingTypeEnum type}) {
+  static ReminderTypesEnum fromReminderSettings({
+    required MenuTypeEnum menu,
+    required ReminderSettingTypeEnum type,
+  }) {
     switch (type) {
       case ReminderSettingTypeEnum.food:
         switch (menu) {

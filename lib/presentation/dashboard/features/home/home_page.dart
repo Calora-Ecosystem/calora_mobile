@@ -60,7 +60,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         return Scaffold(
           body: Stack(
             children: [
-              Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+              Positioned.fill(
+                child: Assets.icons.background.image(fit: BoxFit.fill),
+              ),
               Positioned.fill(
                 child: Column(
                   children: [
@@ -94,17 +96,22 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                             manager.getDailyStep();
                           },
                           child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: const ClampingScrollPhysics(),
+                            ),
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
                               spacing: 16,
                               children: [
                                 DailyPlanWidget(
-                                  onDateTap: () => openCalendar(context, manager),
+                                  onDateTap: () =>
+                                      openCalendar(context, manager),
                                   loading: state.isLoading,
                                   onBackward: () {
                                     manager.updateDay(
-                                      (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
+                                      (state.day ?? DateTime.now()).subtract(
+                                        const Duration(days: 1),
+                                      ),
                                     );
                                     manager.getSummary();
                                     manager.getWater();
@@ -112,56 +119,82 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                     manager.getDailyStep();
                                   },
                                   onForward: () {
-                                    manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
+                                    manager.updateDay(
+                                      (state.day ?? DateTime.now()).add(
+                                        const Duration(days: 1),
+                                      ),
+                                    );
                                     manager.getSummary();
                                     manager.getWater();
                                     manager.getMetrics();
                                     manager.getDailyStep();
                                   },
                                   date: state.day ?? DateTime.now(),
-                                  calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
-                                  water: '${state.targetLiters} ${Strings.liter}',
+                                  calories:
+                                      '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
+                                  water:
+                                      '${state.targetLiters} ${Strings.liter}',
                                   steps: state.targetSteps.toString(),
                                 ),
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       gradient: RadialGradient(
                                         radius: 1.5,
                                         center: Alignment(0.7, 0),
-                                        colors: const [Color(0xFFECFFEF), Color(0xFF58AE8A)],
+                                        colors: const [
+                                          Color(0xFFECFFEF),
+                                          Color(0xFF58AE8A),
+                                        ],
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             spacing: 8,
                                             children: [
-                                              Strings.caloraAi.text(24, 30, 700).c(context.colors.white),
-                                              Strings.tryItForFree.text(16, 20, 500).c(context.colors.white),
+                                              Strings.caloraAi
+                                                  .text(24, 30, 700)
+                                                  .c(context.colors.white),
+                                              Strings.tryItForFree
+                                                  .text(16, 20, 500)
+                                                  .c(context.colors.white),
                                             ],
                                           ),
                                         ),
-                                        SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
+                                        SizedBox(
+                                          height: 100,
+                                          width: 100,
+                                          child: Assets.images.ai.image(),
+                                        ),
                                       ],
                                     ),
                                   ),
                                 ),
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
-                                  normCalories: (state.summary?.kcalNorm.value ?? 0).asFixedTruncated(0).toString(),
+                                  normCalories:
+                                      (state.summary?.kcalNorm.value ?? 0)
+                                          .asFixedTruncated(0)
+                                          .toString(),
                                   nutrients: state.nutrients,
                                   progressPercent:
-                                      (state.summary?.sum.Kcal ?? 0) / (state.summary?.kcalNorm.value ?? 0),
+                                      (state.summary?.sum.Kcal ?? 0) /
+                                      (state.summary?.kcalNorm.value ?? 0),
                                   remainedCalories:
-                                      ((state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0))
+                                      ((state.summary?.kcalNorm.value ?? 0) -
+                                              (state.summary?.sum.Kcal ?? 0))
                                           .asFixedTruncated(0),
                                   loading: state.isSummaryLoading,
                                 ),

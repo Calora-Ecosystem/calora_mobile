@@ -40,18 +40,28 @@ class Button extends StatelessWidget {
 
     switch (type) {
       case ButtonType.primary:
-        backgroundColor = enabled ? context.colors.accentSub : context.colors.accentSoft;
-        foregroundColor = textColor ?? (enabled ? context.colors.white : context.colors.textSub);
+        backgroundColor = enabled
+            ? context.colors.accentSub
+            : context.colors.accentSoft;
+        foregroundColor =
+            textColor ??
+            (enabled ? context.colors.white : context.colors.textSub);
         borderSide = BorderSide.none;
         break;
       case ButtonType.secondary:
-        backgroundColor = enabled ? context.colors.backgroundElevation : context.colors.strokeSoft;
-        foregroundColor = textColor ?? (enabled ? context.colors.textPrimary : context.colors.textSub);
+        backgroundColor = enabled
+            ? context.colors.backgroundElevation
+            : context.colors.strokeSoft;
+        foregroundColor =
+            textColor ??
+            (enabled ? context.colors.textPrimary : context.colors.textSub);
         borderSide = BorderSide.none;
         break;
       case ButtonType.container:
         backgroundColor = enabled ? Colors.white : context.colors.softGray;
-        foregroundColor = textColor ?? (enabled ? context.colors.textPrimary : context.colors.textSub);
+        foregroundColor =
+            textColor ??
+            (enabled ? context.colors.textPrimary : context.colors.textSub);
         borderSide = BorderSide.none;
         break;
     }

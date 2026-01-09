@@ -40,13 +40,22 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
   }
 
   @override
-  void listener(BuildContext context, MealsManager manager, MealsEffect effect) {
+  void listener(
+    BuildContext context,
+    MealsManager manager,
+    MealsEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.mapOrNull(
       openAddMealPage: (value) {
         context
             .pushRoute<bool>(
-              AddMealsRoute(type: type, meals: manager.state.meals, dateTime: dateTime, categoryId: categoryId),
+              AddMealsRoute(
+                type: type,
+                meals: manager.state.meals,
+                dateTime: dateTime,
+                categoryId: categoryId,
+              ),
             )
             .then((result) {
               if (result == true && context.mounted) {
@@ -92,14 +101,18 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            type.title.text(20, 24, 600).c(context.colors.textStrong),
+                            type.title
+                                .text(20, 24, 600)
+                                .c(context.colors.textStrong),
                             Row(
                               spacing: 4,
                               children: [
                                 '${state.meal?.mass.asFixedTruncated(0)}'
                                     .text(20, 24, 600)
                                     .c(context.colors.textStrong),
-                                'gr'.text(20, 24, 600).c(context.colors.textSub),
+                                'gr'
+                                    .text(20, 24, 600)
+                                    .c(context.colors.textSub),
                               ],
                             ),
                           ],
@@ -124,7 +137,10 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                               animation: true,
                               barRadius: Radius.circular(4),
                               padding: EdgeInsets.zero,
-                              percent: calculatePercent(state.meal?.value, state.meal?.max),
+                              percent: calculatePercent(
+                                state.meal?.value,
+                                state.meal?.max,
+                              ),
                               backgroundColor: context.colors.white,
                               progressColor: context.colors.accentSub,
                             ),
@@ -133,9 +149,21 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                         Row(
                           spacing: 8,
                           children: [
-                            mealInfoCard(context, title: Strings.oils, value: state.meal?.oils ?? 0),
-                            mealInfoCard(context, title: Strings.proteins, value: state.meal?.proteins ?? 0),
-                            mealInfoCard(context, title: Strings.carbohydrates, value: state.meal?.carbohydrates ?? 0),
+                            mealInfoCard(
+                              context,
+                              title: Strings.oils,
+                              value: state.meal?.oils ?? 0,
+                            ),
+                            mealInfoCard(
+                              context,
+                              title: Strings.proteins,
+                              value: state.meal?.proteins ?? 0,
+                            ),
+                            mealInfoCard(
+                              context,
+                              title: Strings.carbohydrates,
+                              value: state.meal?.carbohydrates ?? 0,
+                            ),
                           ],
                         ),
                       ],
@@ -195,7 +223,10 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                               '${item.calories.asFixedTruncated(1)} ${Strings.kcal}'
                                   .text(16, 20, 500)
                                   .c(context.colors.textStrong),
-                              DateFormat('HH:mm').format(item.date).text(14, 16, 400).c(context.colors.textSub),
+                              DateFormat('HH:mm')
+                                  .format(item.date)
+                                  .text(14, 16, 400)
+                                  .c(context.colors.textSub),
                             ],
                           ),
                           const SizedBox(height: 4),
@@ -231,7 +262,10 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
       bottomNavigationBar: _isToday(dateTime)
           ? Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Button(onPressed: () => manager.openAddMealPage(), text: Strings.add),
+              child: Button(
+                onPressed: () => manager.openAddMealPage(),
+                text: Strings.add,
+              ),
             )
           : null,
     );
@@ -245,14 +279,24 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
-    return now.year == date.year && now.month == date.month && now.day == date.day;
+    return now.year == date.year &&
+        now.month == date.month &&
+        now.day == date.day;
   }
 
-  Widget mealInfoCard(BuildContext context, {required String title, required double value, String unit = 'gr'}) {
+  Widget mealInfoCard(
+    BuildContext context, {
+    required String title,
+    required double value,
+    String unit = 'gr',
+  }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: context.colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -262,7 +306,11 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
               spacing: 4,
               children: [
                 Expanded(
-                  child: value.asFixedTruncated(1).text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
+                  child: value
+                      .asFixedTruncated(1)
+                      .text(20, 24, 600)
+                      .c(context.colors.textStrong)
+                      .auto(minSize: 16),
                 ),
                 unit.text(20, 24, 600).c(context.colors.textSub),
               ],

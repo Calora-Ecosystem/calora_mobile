@@ -32,7 +32,9 @@ class DateFormatter {
       final DateTime localDateTime = dateTime == null
           ? DateTime.now().toLocal()
           : dateTime.toLocal();
-      final String formattedDate = DateFormat('yyyy-MM-dd').format(localDateTime);
+      final String formattedDate = DateFormat(
+        'yyyy-MM-dd',
+      ).format(localDateTime);
       return formattedDate;
     } catch (e) {
       return '${dateTime}';

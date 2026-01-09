@@ -17,15 +17,20 @@ abstract class MealData with _$MealData {
     required double carbohydrates,
   }) = _MealData;
 
-  factory MealData.fromJson(Map<String, dynamic> json) => _$MealDataFromJson(json);
+  factory MealData.fromJson(Map<String, dynamic> json) =>
+      _$MealDataFromJson(json);
 }
 
 @freezed
 abstract class DailyCalories with _$DailyCalories {
-  const factory DailyCalories({required double plan, required double consumed, required double leftover}) =
-      _DailyCalories;
+  const factory DailyCalories({
+    required double plan,
+    required double consumed,
+    required double leftover,
+  }) = _DailyCalories;
 
-  factory DailyCalories.fromJson(Map<String, dynamic> json) => _$DailyCaloriesFromJson(json);
+  factory DailyCalories.fromJson(Map<String, dynamic> json) =>
+      _$DailyCaloriesFromJson(json);
 }
 
 class SummaryResult {

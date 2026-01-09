@@ -30,7 +30,9 @@ class LessonCard extends StatelessWidget {
               (workout.title).text(16, 20, 500).c(context.colors.textStrong),
               const SizedBox(height: 8),
               if (workout.isDone)
-                Strings.youCanRelaxTuday.text(14, 18, 500).c(context.colors.textSub)
+                Strings.youCanRelaxTuday
+                    .text(14, 18, 500)
+                    .c(context.colors.textSub)
               else
                 ('${workout.totalDurationInMin} ${Strings.minute} • ${workout.kcal} ${Strings.kcal}')
                     .text(14, 18, 500)
@@ -53,7 +55,10 @@ class LessonCard extends StatelessWidget {
                   .c(context.colors.textSub),
             ],
           ),
-          if (workout.hasRest) Assets.icons.dayOffIcon.svg() else if (workout.isDone) Assets.icons.twoDone.svg(),
+          if (workout.hasRest)
+            Assets.icons.dayOffIcon.svg()
+          else if (workout.isDone)
+            Assets.icons.twoDone.svg(),
           // else
           //   Assets.icons.lock.svg(),
 

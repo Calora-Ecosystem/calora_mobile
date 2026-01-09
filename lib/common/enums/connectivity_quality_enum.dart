@@ -4,12 +4,12 @@ enum ConnectionQuality {
   average,
   poor,
   none,
-  fair
-  ;
+  fair;
 
   bool get isGood => this == ConnectionQuality.good;
 
-  bool get isBad => this == ConnectionQuality.none || this == ConnectionQuality.poor;
+  bool get isBad =>
+      this == ConnectionQuality.none || this == ConnectionQuality.poor;
 
   bool get isFair => this == ConnectionQuality.fair;
 

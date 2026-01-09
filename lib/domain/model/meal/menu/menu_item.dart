@@ -20,5 +20,6 @@ abstract class MenuItem with _$MenuItem {
     required double weight,
   }) = _MenuItem;
 
-  factory MenuItem.fromJson(Map<String, dynamic> json) => _$MenuItemFromJson(json);
+  factory MenuItem.fromJson(Map<String, dynamic> json) =>
+      _$MenuItemFromJson(json);
 }

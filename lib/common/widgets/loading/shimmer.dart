@@ -59,7 +59,9 @@ class ShimmerWrapper extends StatelessWidget {
               height: height,
               width: width,
               margin: margin,
-              borderRadius: BorderRadius.circular(radius ?? (height / 2).clamp(0, 100)),
+              borderRadius: BorderRadius.circular(
+                radius ?? (height / 2).clamp(0, 100),
+              ),
               border: border,
               color: baseColor,
             ),

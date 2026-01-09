@@ -30,10 +30,7 @@ class DailyFeedRateWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerWrapper(
       loading: loading,
-      shimmerChild: const ShimmerChild(
-        height: 272,
-        radius: 20,
-      ),
+      shimmerChild: const ShimmerChild(height: 272, radius: 20),
       child: Container(
         height: 272,
         width: double.infinity,
@@ -62,7 +59,9 @@ class DailyFeedRateWidget extends StatelessWidget {
                       lineWidth: 10,
                       percent: safePercent(progressPercent),
                       circularStrokeCap: CircularStrokeCap.round,
-                      progressColor: safePercent(progressPercent) >= 1 ? context.colors.red : context.colors.accentSub,
+                      progressColor: safePercent(progressPercent) >= 1
+                          ? context.colors.red
+                          : context.colors.accentSub,
                       backgroundColor: context.colors.backgroundElevation,
                       center: '${(safePercent(progressPercent) * 100).round()}%'
                           .text(16, 20, 500)
@@ -99,7 +98,10 @@ class DailyFeedRateWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 4,
                         children: [
-                          nutrient.value.asFixedTruncated(1).toString().text(16, 20, 500),
+                          nutrient.value
+                              .asFixedTruncated(1)
+                              .toString()
+                              .text(16, 20, 500),
                           'gr'.text(12, 14, 400),
                         ],
                       ),
@@ -131,7 +133,10 @@ class DailyFeedRateWidget extends StatelessWidget {
                   color: context.colors.accentSub,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Strings.addFood.text(16, 20, 500).c(context.colors.white).copyWith(textAlign: TextAlign.center),
+                child: Strings.addFood
+                    .text(16, 20, 500)
+                    .c(context.colors.white)
+                    .copyWith(textAlign: TextAlign.center),
               ),
             ),
           ],
@@ -167,20 +172,14 @@ class _SideCalories extends StatelessWidget {
         children: [
           title
               .text(14, 16, 400)
-              .copyWith(
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(
                 child: value
                     .text(16, 20, 500)
-                    .copyWith(
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
               const SizedBox(width: 4),
               Strings.kcal.text(12, 14, 400),

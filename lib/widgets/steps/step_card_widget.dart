@@ -49,21 +49,24 @@ class StepCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerWrapper(
       loading: loading,
-      shimmerChild: ShimmerChild(
-        height: 204,
-        radius: 20,
-      ),
+      shimmerChild: ShimmerChild(height: 204, radius: 20),
       child: Container(
         height: 204,
         padding: EdgeInsets.all(16),
         width: double.infinity,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: context.colors.white),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: context.colors.white,
+        ),
         child: Column(
           spacing: 16,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Strings.yourStep.text(20, 24, 600), '$currentSteps'.text(24, 30, 700)],
+              children: [
+                Strings.yourStep.text(20, 24, 600),
+                '$currentSteps'.text(24, 30, 700),
+              ],
             ),
             Column(
               spacing: 4,
@@ -80,7 +83,10 @@ class StepCardWidget extends StatelessWidget {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: ['0'.text(14, 16, 400), '$targetSteps'.text(14, 16, 400)],
+                  children: [
+                    '0'.text(14, 16, 400),
+                    '$targetSteps'.text(14, 16, 400),
+                  ],
                 ),
               ],
             ),
@@ -92,7 +98,9 @@ class StepCardWidget extends StatelessWidget {
                   children: [
                     Assets.icons.icStopwatch.svg(),
                     const SizedBox(height: 4),
-                    formattedTime.text(16, 20, 500).c(context.colors.textStrong),
+                    formattedTime
+                        .text(16, 20, 500)
+                        .c(context.colors.textStrong),
                     const SizedBox(height: 2),
                     Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
                   ],
@@ -102,9 +110,14 @@ class StepCardWidget extends StatelessWidget {
                   children: [
                     Assets.icons.icDistance.svg(),
                     const SizedBox(height: 4),
-                    distanceInKm.asFixedTruncated(2).text(16, 20, 500).c(context.colors.textStrong),
+                    distanceInKm
+                        .asFixedTruncated(2)
+                        .text(16, 20, 500)
+                        .c(context.colors.textStrong),
                     const SizedBox(height: 2),
-                    Strings.distanceInKm.text(14, 20, 400).c(context.colors.textSub),
+                    Strings.distanceInKm
+                        .text(14, 20, 400)
+                        .c(context.colors.textSub),
                   ],
                 ),
                 Column(
@@ -112,7 +125,9 @@ class StepCardWidget extends StatelessWidget {
                   children: [
                     Assets.icons.icCalorie.svg(),
                     const SizedBox(height: 4),
-                    '$caloriesBurned'.text(16, 20, 500).c(context.colors.textStrong),
+                    '$caloriesBurned'
+                        .text(16, 20, 500)
+                        .c(context.colors.textStrong),
                     const SizedBox(height: 2),
                     Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
                   ],

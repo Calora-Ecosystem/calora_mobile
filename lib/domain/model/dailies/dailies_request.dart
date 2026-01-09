@@ -12,5 +12,6 @@ abstract class DailiesRequest with _$DailiesRequest {
     required String date,
   }) = _DailiesRequest;
 
-  factory DailiesRequest.fromJson(Map<String, dynamic> json) => _$DailiesRequestFromJson(json);
+  factory DailiesRequest.fromJson(Map<String, dynamic> json) =>
+      _$DailiesRequestFromJson(json);
 }

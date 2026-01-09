@@ -15,7 +15,11 @@ abstract class VideoCourseBodyState with _$VideoCourseBodyState {
 
 @freezed
 abstract class VideoCourseBodyEffect with _$VideoCourseBodyEffect {
-  const factory VideoCourseBodyEffect.openInfoSheet(String description) = _OpenInfoSheet;
+  const factory VideoCourseBodyEffect.openInfoSheet(String description) =
+      _OpenInfoSheet;
 
-  const factory VideoCourseBodyEffect.openVideo(LessonRequest lesson, int index) = _OpenVideo;
+  const factory VideoCourseBodyEffect.openVideo(
+    LessonRequest lesson,
+    int index,
+  ) = _OpenVideo;
 }

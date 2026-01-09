@@ -18,9 +18,15 @@ class LeavePage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(width: double.infinity),
-          SizedBox(height: 100, width: 100, child: Assets.images.exitImage.image()),
+          SizedBox(
+            height: 100,
+            width: 100,
+            child: Assets.images.exitImage.image(),
+          ),
           const SizedBox(height: 12),
-          Strings.willYouFinishTheExercises.text(20, 24, 700).c(context.colors.textStrong),
+          Strings.willYouFinishTheExercises
+              .text(20, 24, 700)
+              .c(context.colors.textStrong),
           const SizedBox(height: 16),
           Strings.youMadeAGoodStart
               .text(16, 20, 400)

@@ -18,7 +18,10 @@ enum MetricType {
   const MetricType(this.value);
 
   static MetricType? fromString(String value) {
-    return MetricType.values.firstWhere((e) => e.value == value, orElse: () => MetricType.protein);
+    return MetricType.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => MetricType.protein,
+    );
   }
 }
 
@@ -41,12 +44,7 @@ extension ScannerFoodMapper on ScannerFood {
   }) {
     return FoodRequest(
       categoryId: categoryId,
-      name: FoodName(
-        uz: name,
-        ru: name,
-        eng: name,
-        cyrl: name,
-      ),
+      name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
       coverUrl: coverUrl,
       metrics: metrics,
       userId: userId,
@@ -58,23 +56,20 @@ extension ScannerFoodMapper on ScannerFood {
     required DateTime date,
     required int foodId,
   }) {
-    return MenuInfo(
-      menu: menu,
-      date: date,
-      foodId: foodId,
-      weightInGr: weight,
-    );
+    return MenuInfo(menu: menu, date: date, foodId: foodId, weightInGr: weight);
   }
 }
 
 extension FoodModelMetrics on FoodModel {
   double get cal => MetricsHelper.getMetricValue(metrics, MetricType.kcal);
 
-  double get proteins => MetricsHelper.getMetricValue(metrics, MetricType.protein);
+  double get proteins =>
+      MetricsHelper.getMetricValue(metrics, MetricType.protein);
 
   double get fats => MetricsHelper.getMetricValue(metrics, MetricType.fat);
 
-  double get carbohydrates => MetricsHelper.getMetricValue(metrics, MetricType.carb);
+  double get carbohydrates =>
+      MetricsHelper.getMetricValue(metrics, MetricType.carb);
 
   double get water => MetricsHelper.getMetricValue(metrics, MetricType.water);
 
@@ -85,7 +80,8 @@ extension FoodModelMetrics on FoodModel {
 
 // MenuItem extension
 extension MenuItemMetrics on MenuItem {
-  double getMetricValue(MetricType type) => MetricsHelper.getMetricValue(metrics, type);
+  double getMetricValue(MetricType type) =>
+      MetricsHelper.getMetricValue(metrics, type);
 
   double get proteins => getMetricValue(MetricType.protein);
 

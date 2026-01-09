@@ -12,7 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateEffect> {
+class CalculatePage
+    extends Managed<CalculateManager, CalculateState, CalculateEffect> {
   const CalculatePage({super.key});
 
   @override
@@ -21,16 +22,29 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
   }
 
   @override
-  listener(BuildContext context, CalculateManager manager, CalculateEffect effect) {
-    effect.when(error: (String message) {}, navigateNext: () => goToNextPage(context));
+  listener(
+    BuildContext context,
+    CalculateManager manager,
+    CalculateEffect effect,
+  ) {
+    effect.when(
+      error: (String message) {},
+      navigateNext: () => goToNextPage(context),
+    );
   }
 
   @override
-  Widget builder(BuildContext context, CalculateManager manager, CalculateState state) {
+  Widget builder(
+    BuildContext context,
+    CalculateManager manager,
+    CalculateState state,
+  ) {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
@@ -40,16 +54,22 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(16)),
+                    decoration: BoxDecoration(
+                      color: context.colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Strings.yourProgramIsReady.text(16, 20, 500).c(context.colors.textStrong),
+                        Strings.yourProgramIsReady
+                            .text(16, 20, 500)
+                            .c(context.colors.textStrong),
                         SizedBox(height: 20),
                         _buildIconTextRow(
                           context,
                           icon: Assets.icons.vegetarianFood.svg(),
-                          count: '${state.dailyGoals[0].toDouble().asFixedTruncated(0)} ${Strings.kcal}',
+                          count:
+                              '${state.dailyGoals[0].toDouble().asFixedTruncated(0)} ${Strings.kcal}',
                           title: Strings.mealPlan,
                           subtitle: Strings.dailyGoal,
                         ),
@@ -76,14 +96,19 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                             color: context.colors.backgroundElevation,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Strings.beforeStartingAnyDiet.text(12, 14, 400).c(context.colors.textStrong),
+                          child: Strings.beforeStartingAnyDiet
+                              .text(12, 14, 400)
+                              .c(context.colors.textStrong),
                         ),
                       ],
                     ),
                   ),
                   SizedBox(
                     width: double.infinity,
-                    child: Button(onPressed: () => goToNextPage(context), text: Strings.start),
+                    child: Button(
+                      onPressed: () => goToNextPage(context),
+                      text: Strings.start,
+                    ),
                   ),
                 ],
               ),
@@ -105,7 +130,10 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(shape: BoxShape.circle, color: context.colors.accentDisabled),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: context.colors.accentDisabled,
+          ),
           child: icon,
         ),
         const SizedBox(width: 8),

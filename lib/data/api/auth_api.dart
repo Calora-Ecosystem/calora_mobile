@@ -33,6 +33,9 @@ class AuthApi {
       'code': code,
       'deviceInfo': {'key': key, 'name': name, 'fcmToken': fcmToken},
     };
-    return _dio.post('/auth/sign-in/${email == null ? 'phone' : 'email'}', data: data);
+    return _dio.post(
+      '/auth/sign-in/${email == null ? 'phone' : 'email'}',
+      data: data,
+    );
   }
 }

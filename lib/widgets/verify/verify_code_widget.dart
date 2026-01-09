@@ -73,7 +73,9 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
                 },
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Strings.resend.text(14, 20, 500).c(context.colors.accentSub),
+                  child: Strings.resend
+                      .text(14, 20, 500)
+                      .c(context.colors.accentSub),
                 ),
               )
             : Row(

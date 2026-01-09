@@ -14,7 +14,8 @@ class DisplayWidget extends StatefulWidget {
   State<DisplayWidget> createState() => _DisplayWidgetState();
 }
 
-class _DisplayWidgetState extends State<DisplayWidget> with SingleTickerProviderStateMixin {
+class _DisplayWidgetState extends State<DisplayWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
   @override
@@ -43,9 +44,16 @@ class _DisplayWidgetState extends State<DisplayWidget> with SingleTickerProvider
         widget.child,
         if (message != null)
           SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(
-              CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-            ),
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0, -1),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: _animationController,
+                    curve: Curves.easeInOut,
+                  ),
+                ),
             child: AnimatedContainer(
               curve: Curves.easeInOut,
               duration: const Duration(seconds: 1),
