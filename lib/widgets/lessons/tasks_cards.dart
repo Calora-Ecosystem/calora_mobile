@@ -28,7 +28,7 @@ class TasksCards extends StatelessWidget {
     return Column(
       children: [
         TaskParametersWidget(
-          title: '${workout.title} mashqlari bilan tanishing'.text(20, 24, 600),
+          title: '${workout.title} mashqlari bilan tanishing '.text(20, 24, 600),
           parameters: [
             ParameterItem(name: Strings.degree, value: 'Yengil'),
             ParameterItem(name: Strings.kcal, value: '${workout.totalMetrics.sumOf('Kcal')}'),
