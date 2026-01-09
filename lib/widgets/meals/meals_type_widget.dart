@@ -22,6 +22,7 @@ class MealTypeGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
+      cacheExtent: 700,
       padding: const EdgeInsets.only(top: 16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -103,6 +104,7 @@ class FavouriteFoodGrid extends StatelessWidget {
       );
     }
     return GridView.builder(
+      cacheExtent: 700,
       padding: const EdgeInsets.only(top: 16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,

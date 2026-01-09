@@ -1,4 +1,5 @@
 import 'package:calora/common/extensions/metrics_extension.dart';
+import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -30,9 +31,7 @@ class LessonCard extends StatelessWidget {
               (workout.title).text(16, 20, 500).c(context.colors.textStrong),
               const SizedBox(height: 8),
               if (workout.isDone)
-                Strings.youCanRelaxTuday
-                    .text(14, 18, 500)
-                    .c(context.colors.textSub)
+                Strings.youCanRelaxTuday.text(14, 18, 500).c(context.colors.textSub)
               else
                 ('${workout.totalDurationInMin} ${Strings.minute} • ${workout.kcal} ${Strings.kcal}')
                     .text(14, 18, 500)
@@ -40,25 +39,23 @@ class LessonCard extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          Row(
-            children: [
-              CircularPercentIndicator(
-                radius: 10,
-                lineWidth: 2,
-                percent: workout.doneItems / workout.totalItems,
-                backgroundColor: context.colors.accentWhite,
-                progressColor: context.colors.accentSub,
-              ),
-              const SizedBox(width: 8),
-              ('${(workout.doneItems / workout.totalItems * 100).toInt()}%')
-                  .text(14, 18, 500)
-                  .c(context.colors.textSub),
-            ],
-          ),
-          if (workout.hasRest)
-            Assets.icons.dayOffIcon.svg()
-          else if (workout.isDone)
-            Assets.icons.twoDone.svg(),
+          if (!workout.hasRest)
+            Row(
+              children: [
+                CircularPercentIndicator(
+                  radius: 10,
+                  lineWidth: 2,
+                  percent: workout.doneItems / workout.totalItems,
+                  backgroundColor: context.colors.accentWhite,
+                  progressColor: context.colors.accentSub,
+                ),
+                const SizedBox(width: 8),
+                '${(workout.doneItems / workout.totalItems * 100).asFixedTruncated(0)}%'
+                    .text(14, 18, 500)
+                    .c(context.colors.textSub),
+              ],
+            ),
+          if (workout.hasRest) Assets.icons.dayOffIcon.svg() else if (workout.isDone) Assets.icons.twoDone.svg(),
           // else
           //   Assets.icons.lock.svg(),
 
@@ -75,29 +72,6 @@ class LessonCard extends StatelessWidget {
           //   )
         ],
       ),
-
-      // TaskData(:final taskInfo) => Row(
-      //   children: [
-      //     Container(
-      //       color: context.colors.white,
-      //       height: 56,
-      //       width: 56,
-      //       child: Assets.images.task.image(width: 32, height: 32),
-      //     ),
-      //     const SizedBox(width: 12),
-      //     Expanded(
-      //       child: Column(
-      //         crossAxisAlignment: CrossAxisAlignment.start,
-      //         children: [
-      //           taskInfo.title.text(16, 20, 500).c(context.colors.textStrong),
-      //           const SizedBox(height: 8),
-      //           (taskInfo.count).text(14, 18, 500).c(context.colors.textSub),
-      //         ],
-      //       ),
-      //     ),
-      //     if (taskInfo.isCompleted) Assets.icons.twoDone.svg() else Assets.icons.time.svg(),
-      //   ],
-      // ),
     );
   }
 }

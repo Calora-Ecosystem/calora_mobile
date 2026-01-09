@@ -10,12 +10,7 @@ class LessonsCards extends StatelessWidget {
   final Level level;
   final bool isLoading;
 
-  const LessonsCards({
-    super.key,
-    required this.level,
-    required this.workouts,
-    required this.isLoading,
-  });
+  const LessonsCards({super.key, required this.level, required this.workouts, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +40,10 @@ class LessonsCards extends StatelessWidget {
               height: 70,
             ),
             child: GestureDetector(
-              onTap: () {
-                // context.router.push(TasksRoute());
-              },
-              child: LessonCard(workout: workout),
+              onTap: () => context.router.push(TasksRoute(level: level, workout: workout)),
+              child: LessonCard(
+                workout: workout,
+              ),
             ),
           );
         },

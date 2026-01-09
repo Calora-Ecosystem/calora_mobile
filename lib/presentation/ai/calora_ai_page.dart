@@ -27,7 +27,11 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
   @override
   Widget builder(BuildContext context, CaloraAiManager manager, CaloraAiState state) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: context.colors.white, elevation: 0, scrolledUnderElevation: 0),
+      appBar: AppBar(
+        backgroundColor: context.colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
       backgroundColor: context.colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -36,7 +40,11 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
+                SizedBox(
+                  height: 96,
+                  width: 96,
+                  child: Assets.images.ai.image(),
+                ),
                 const SizedBox(height: 4),
                 Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 4),
@@ -51,13 +59,18 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                     children: [
                       Assets.icons.informationCircleBlue.svg(),
                       const SizedBox(width: 8),
-                      Expanded(child: Strings.takeAPicture.text(14, 18, 400).c(context.colors.brightBlue)),
+                      Expanded(
+                        child: Strings.takeAPicture.text(14, 18, 400).c(context.colors.brightBlue),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                Assets.images.thisIsLottie.image(),
-                const SizedBox(height: 16),
+                ClipRect(
+                  child: Align(
+                    heightFactor: 0.5,
+                    child: Lottie.asset('assets/lottie/face.json', fit: BoxFit.contain, repeat: true),
+                  ),
+                ),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Strings.takePictureOfYourFaceLikeThis.text(16, 20, 500).c(context.colors.textStrong),

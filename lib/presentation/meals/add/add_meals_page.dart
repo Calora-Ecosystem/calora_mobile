@@ -30,8 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class AddMealsPage
-    extends Managed<AddMealsManager, AddMealsState, AddMealsEffect> {
+class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffect> {
   final bool shouldOpenCreator;
   final MealType type;
   final List<MealData> meals;
@@ -76,24 +75,13 @@ class AddMealsPage
   }
 
   @override
-  void listener(
-    BuildContext context,
-    AddMealsManager manager,
-    AddMealsEffect effect,
-  ) {
+  void listener(BuildContext context, AddMealsManager manager, AddMealsEffect effect) {
     super.listener(context, manager, effect);
     effect.mapOrNull(
       openDishesPage: (e) => context.pushRoute(
-        DishesRoute(
-          data: e.meal,
-          type: type,
-          categoryId: categoryId,
-          meals: meals,
-          dateTime: dateTime,
-        ),
+        DishesRoute(data: e.meal, type: type, categoryId: categoryId, meals: meals, dateTime: dateTime),
       ),
-      openAboutPage: (e) =>
-          openAboutDishPage(context, e.food, manager, e.isFavourite),
+      openAboutPage: (e) => openAboutDishPage(context, e.food, manager, e.isFavourite),
     );
   }
 
@@ -105,11 +93,7 @@ class AddMealsPage
   }
 
   @override
-  Widget builder(
-    BuildContext context,
-    AddMealsManager manager,
-    AddMealsState state,
-  ) {
+  Widget builder(BuildContext context, AddMealsManager manager, AddMealsState state) {
     return Scaffold(
       backgroundColor: context.colors.white,
       appBar: CustomAppBar(
@@ -122,35 +106,9 @@ class AddMealsPage
           child: Column(
             spacing: 12,
             children: [
-              TextField(
+              CommonTextField(
+                hint: Strings.searchForFoodOrProduct,
                 controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: Strings.searchForFoodOrProduct,
-                  hintStyle: TextStyle(
-                    color: context.colors.textSub,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    height: 0.8,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: context.colors.strokeSoft,
-                      width: 1.5,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: context.colors.blue,
-                      width: 1.5,
-                    ),
-                  ),
-                ),
               ),
               if (!state.isSearchMode) ...[
                 Row(
@@ -183,61 +141,48 @@ class AddMealsPage
                 ),
                 ToggleButtonsWidget(
                   onChanged: (value) => manager.onToggleChanged(value),
-                  titles: [
-                    Strings.allDishes,
-                    Strings.lastEaten,
-                    Strings.thoseICreated,
-                    Strings.favoriteFoods,
-                  ],
+                  titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
                 ),
-                Expanded(
-                  child: Builder(
-                    builder: (_) {
-                      if (state.selectedToggleIndex == 3) {
-                        return FavouriteFoodGrid(
-                          isLoading: state.isFavourite,
-                          foods: state.favouriteFoods,
-                          onFoodSelected: (food) =>
-                              manager.openAboutPage(food, food.isFavourite),
-                        );
-                      }
-                      if (state.selectedToggleIndex == 1) {
-                        return FavouriteFoodGrid(
-                          isLoading: state.isLatest,
-                          foods: state.latestFoods,
-                          onFoodSelected: (food) =>
-                              manager.openAboutPage(food, food.isFavourite),
-                        );
-                      }
-                      if (state.selectedToggleIndex == 2) {
-                        return FavouriteFoodGrid(
-                          isLoading: state.isUserFoods,
-                          foods: state.userFoods,
-                          onFoodSelected: (food) =>
-                              manager.openAboutPage(food, food.isFavourite),
-                        );
-                      }
-                      return MealTypeGrid(
-                        isLoading: state.isMealCategory,
-                        mealTypes: state.mealCategories,
-                        onMealTypeSelected: (meal) =>
-                            manager.openDishesPage(meal),
-                      );
-                    },
-                  ),
+                Flexible(
+                  child: state.selectedToggleIndex == 3
+                      ? RepaintBoundary(
+                          child: FavouriteFoodGrid(
+                            isLoading: state.isFavourite,
+                            foods: state.favouriteFoods,
+                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                          ),
+                        )
+                      : state.selectedToggleIndex == 1
+                      ? RepaintBoundary(
+                          child: FavouriteFoodGrid(
+                            isLoading: state.isLatest,
+                            foods: state.latestFoods,
+                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                          ),
+                        )
+                      : state.selectedToggleIndex == 2
+                      ? RepaintBoundary(
+                          child: FavouriteFoodGrid(
+                            isLoading: state.isUserFoods,
+                            foods: state.userFoods,
+                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                          ),
+                        )
+                      : RepaintBoundary(
+                          child: MealTypeGrid(
+                            isLoading: state.isMealCategory,
+                            mealTypes: state.mealCategories,
+                            onMealTypeSelected: (meal) => manager.openDishesPage(meal),
+                          ),
+                        ),
                 ),
               ],
               if (state.isSearchMode)
                 Expanded(
-                  child: Builder(
-                    builder: (_) {
-                      return FavouriteFoodGrid(
-                        isLoading: state.isSearch,
-                        foods: state.searchFoods,
-                        onFoodSelected: (food) =>
-                            manager.openAboutPage(food, food.isFavourite),
-                      );
-                    },
+                  child: FavouriteFoodGrid(
+                    isLoading: state.isSearch,
+                    foods: state.searchFoods,
+                    onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
                   ),
                 ),
             ],
@@ -247,14 +192,8 @@ class AddMealsPage
     );
   }
 
-  void openAboutDishPage(
-    BuildContext context,
-    FoodModel food,
-    AddMealsManager manager,
-    bool isFavourite,
-  ) {
+  void openAboutDishPage(BuildContext context, FoodModel food, AddMealsManager manager, bool isFavourite) {
     context.showAppBottomSheet(
-      initialChildSize: 0.75,
       child: DishInfoPage(
         isFavourite: isFavourite,
         foodItem: food,
@@ -264,12 +203,7 @@ class AddMealsPage
         onSave: (value) async {
           manager.addFavourite(food.id ?? 0);
           final success = await manager.saveMenuItem(
-            MenuInfo(
-              menu: type.name,
-              date: DateTime.now(),
-              foodId: food.id ?? 0,
-              weightInGr: value.toInt(),
-            ),
+            MenuInfo(menu: type.name, date: DateTime.now(), foodId: food.id ?? 0, weightInGr: value.toInt()),
           );
           if (context.mounted) context.router.pop();
 
@@ -300,16 +234,8 @@ class AddMealsPage
               name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
               coverUrl: abstractImageUrl,
               metrics: [
-                Metric(
-                  userId: 0,
-                  metric: MetricType.kcal.name,
-                  value: calories,
-                ),
-                Metric(
-                  userId: 0,
-                  metric: MetricType.protein.name,
-                  value: protein,
-                ),
+                Metric(userId: 0, metric: MetricType.kcal.name, value: calories),
+                Metric(userId: 0, metric: MetricType.protein.name, value: protein),
                 Metric(userId: 0, metric: MetricType.fat.name, value: fat),
                 Metric(userId: 0, metric: MetricType.carb.name, value: carbs),
               ],
@@ -320,12 +246,7 @@ class AddMealsPage
           bool success = false;
           if (addedFoodId != null) {
             success = await manager.saveMenuItem(
-              MenuInfo(
-                menu: type.name,
-                date: DateTime.now(),
-                foodId: addedFoodId,
-                weightInGr: 400,
-              ),
+              MenuInfo(menu: type.name, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
             );
           }
           if (context.mounted) context.router.pop();
@@ -334,28 +255,17 @@ class AddMealsPage
           }
         },
       ),
-      initialChildSize: 0.45,
-      minChildSize: 0.2,
-      maxChildSize: 0.5,
     );
   }
 
-  void openCreatorWithImage(
-    BuildContext context,
-    AddMealsManager manager,
-    ScannerFood food,
-  ) {
+  void openCreatorWithImage(BuildContext context, AddMealsManager manager, ScannerFood food) {
     final metrics = food.metrics;
     context.showAppBottomSheet(
       child: FoodCreatorWithImage(
         isLoading: manager.state.isLoading,
         name: food.name,
         addButton: () async {
-          final success = await manager.addFoodAndMenuWithImage(
-            food,
-            categoryId,
-            type.name,
-          );
+          final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
           if (context.mounted) context.router.pop();
           if (success) {
             _showInfoDialog(context);
@@ -366,34 +276,20 @@ class AddMealsPage
         carbohydrates: MetricsHelper.getMetricValue(metrics, MetricType.carb),
         calories: MetricsHelper.getMetricValue(metrics, MetricType.kcal),
       ),
-      initialChildSize: 0.55,
-      minChildSize: 0.2,
-      maxChildSize: 0.7,
     );
   }
 
-  void openCreatorWithSpeech(
-    BuildContext context,
-    AddMealsManager manager,
-    List<ScannerFood> foods,
-  ) {
+  void openCreatorWithSpeech(BuildContext context, AddMealsManager manager, List<ScannerFood> foods) {
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
         isLoading: manager.state.isLoading,
         meals: foods
-            .map(
-              (e) =>
-                  '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}',
-            )
+            .map((e) => '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
             .toList(),
         onAdd: () async {
           bool allSucceeded = true;
           for (final food in foods) {
-            final success = await manager.addFoodAndMenuWithImage(
-              food,
-              categoryId,
-              type.name,
-            );
+            final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
             if (!success) {
               allSucceeded = false;
             }
@@ -406,16 +302,10 @@ class AddMealsPage
           }
         },
       ),
-      initialChildSize: 0.55,
-      minChildSize: 0.2,
-      maxChildSize: 0.6,
     );
   }
 
-  Future<void> openCameraPage(
-    BuildContext context,
-    AddMealsManager manager,
-  ) async {
+  Future<void> openCameraPage(BuildContext context, AddMealsManager manager) async {
     final imagePath = await context.pushRoute<String>(
       UniversalCameraRoute(
         title: Strings.scanning,
@@ -430,8 +320,7 @@ class AddMealsPage
     await context.pushRoute<bool>(
       UniversalProgressRoute(
         title: Strings.caloraAi,
-        description: Strings
-            .theDataInTheImageIsBeingProcessedWeWillAnnounceTheResultsSoon,
+        description: Strings.theDataInTheImageIsBeingProcessedWeWillAnnounceTheResultsSoon,
         steps: [
           Strings.theCompositionOfTheFoodIsBeingDetermined,
           Strings.theAmountOfFoodIsMeasured,
@@ -457,9 +346,6 @@ class AddMealsPage
 
   void openSpeechPage(BuildContext context, AddMealsManager manager) {
     context.showAppBottomSheet(
-      initialChildSize: 0.5,
-      minChildSize: 0.2,
-      maxChildSize: 0.5,
       child: ModernVoiceRecorder(
         onFinished: (value) async {
           await context.pushRoute(
@@ -519,10 +405,7 @@ class AddMealsPage
           ),
           child: Column(
             spacing: 8,
-            children: [
-              if (icon != null) icon,
-              text.text(14, 16, 600).c(textColor ?? context.colors.textWhite),
-            ],
+            children: [if (icon != null) icon, text.text(14, 16, 600).c(textColor ?? context.colors.textWhite)],
           ),
         ),
       ),
@@ -549,7 +432,10 @@ class AddMealsPage
           actions: [
             Center(
               child: Button(
-                onPressed: () => dialogContext.pop(),
+                onPressed: () {
+                  dialogContext.pop();
+                  context.pop(true);
+                },
                 text: Strings.close,
                 textColor: context.colors.textStrong,
                 type: ButtonType.secondary,

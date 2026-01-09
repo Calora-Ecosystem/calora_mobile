@@ -26,19 +26,16 @@ class HomeRepoImpl implements HomeRepo {
 
   @override
   Future<DailiesRequest> getDailiesWater(DateTime date) async {
-    return await _homeApi.getDailies(date, 'Water') ??
-        DailiesRequest(metric: 'Water', value: 0, date: '');
+    return await _homeApi.getDailies(date, 'Water') ?? DailiesRequest(metric: 'Water', value: 0, date: '');
   }
 
   @override
   Future<DailiesRequest> getDailiesSteps(DateTime date) async {
-    return await _homeApi.getDailies(date, 'Step') ??
-        DailiesRequest(metric: 'Step', value: 0, date: 'date');
+    return await _homeApi.getDailies(date, 'Step') ?? DailiesRequest(metric: 'Step', value: 0, date: 'date');
   }
 
   @override
   Future<MetricsRequest> getMetrics(DateTime date) async {
-    return await _homeApi.getUserMetrics(date) ??
-        MetricsRequest(foots: 0, distance: 0, kcal: 0);
+    return await _homeApi.getUserMetrics(date) ?? MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0);
   }
 }

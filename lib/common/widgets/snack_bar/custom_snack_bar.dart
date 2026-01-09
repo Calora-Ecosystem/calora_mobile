@@ -47,7 +47,6 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget>
 
     _controller.forward();
 
-    // Avtomatik yopish
     Future.delayed(const Duration(milliseconds: 1200), () {
       if (mounted) {
         _controller.reverse();

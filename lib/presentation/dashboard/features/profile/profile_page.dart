@@ -40,10 +40,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       surname: state.profile?.name ?? '',
                       name: state.profile?.name ?? '',
                       email: state.profile?.email ?? '',
-                      onEdit: () => _openProfileDetailPage(
-                        context,
-                        state.profile?.userId.toString() ?? '',
-                      ),
+                      onEdit: () => _openProfileDetailPage(context, state.profile?.userId.toString() ?? ''),
                     ),
                     const SizedBox(height: 16),
                     BmiCard(
@@ -63,17 +60,12 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       onInviteTap: () {
                         SharePlus.instance.share(
                           ShareParams(
-                            text:
-                                'Men Calora ilovasidan foydalanayapman 😊.\nSiz ham sog‘lom hayot uchun yuklab oling!',
+                            text: 'Men Calora ilovasidan foydalanayapman.\nSiz ham sog‘lom hayot uchun yuklab oling!',
                           ),
                         );
                       },
-                      onAboutTap: () {
-                        _showAboutBottomSheet(context);
-                      },
-                      onHelpTap: () {
-                        _showHelpBottomSheet(context);
-                      },
+                      onAboutTap: () => _showAboutBottomSheet(context),
+                      onHelpTap: () => _showHelpBottomSheet(context),
                     ),
                     SizedBox(height: 16),
                     Assets.images.yandexBanner.image(),
@@ -87,10 +79,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
     );
   }
 
-  void _openAccountDetailPage(
-    BuildContext context,
-    ProfileManager manager,
-  ) async {
+  void _openAccountDetailPage(BuildContext context, ProfileManager manager) async {
     await context.router.push(AccountDetailRoute());
     manager.getProfile();
   }
@@ -108,12 +97,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
   }
 
   void _showHelpBottomSheet(BuildContext context) {
-    context.showAppBottomSheet(
-      minChildSize: 0.2,
-      initialChildSize: 0.3,
-      maxChildSize: 0.3,
-      child: const HelpPage(),
-    );
+    context.showAppBottomSheet(child: const HelpPage());
   }
 
   void _showLanguageBottomSheet(BuildContext context) {
@@ -121,9 +105,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => const LanguagePage(),
     );
   }
@@ -133,9 +115,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => const AboutPage(),
     );
   }

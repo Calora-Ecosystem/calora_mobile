@@ -123,7 +123,6 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
     bool isFavourite,
   ) {
     context.showAppBottomSheet(
-      initialChildSize: 0.75,
       child: DishInfoPage(
         isFavourite: isFavourite,
         foodItem: food,
@@ -170,7 +169,11 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
           actions: [
             Center(
               child: Button(
-                onPressed: () => dialogContext.pop(),
+                onPressed: () {
+                  dialogContext.pop();
+                  context.router.pop();
+                  context.router.pop(true);
+                },
                 text: Strings.close,
                 textColor: context.colors.textStrong,
                 type: ButtonType.secondary,

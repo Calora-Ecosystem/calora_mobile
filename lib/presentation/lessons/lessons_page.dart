@@ -1,4 +1,5 @@
 import 'package:auto_route/annotations.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
@@ -34,6 +35,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
   @override
   void init(BuildContext context, LessonsManager manager) {
     manager.getWorkout();
+    manager.loadActivityLevel();
     super.init(context, manager);
   }
 
@@ -62,7 +64,13 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
               LessonAppBar(
                 title: Strings.changeWithin30Days,
                 level: _mapIntToLevel(state.levelIndex),
-                onLevelChanged: (value) => manager.setLevel(value),
+                onLevelChanged: (value) async {
+                  manager.setLevel(value);
+                  final newLevelText = levelTextFromIndex(value);
+                  await profileStore.updateActivityLevel(newLevelText);
+                  final profile = await profileStore.getProfile();
+                  await manager.refreshActivityLevel(value);
+                },
               ),
               Expanded(
                 child: Container(
@@ -77,9 +85,9 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                     children: [
                       Assets.images.yandexBanner.image(),
                       LessonsCards(
+                        level: _mapIntToLevel(state.levelIndex),
                         isLoading: state.isLoading,
                         workouts: state.workouts,
-                        level: _mapIntToLevel(state.levelIndex),
                       ),
                     ],
                   ),
@@ -90,5 +98,33 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
         ],
       ),
     );
+  }
+
+  int levelIndexFromText(String text) {
+    const levels = [
+      'Minimal',
+      'Less',
+      'Medium',
+      'High',
+      'Maximal',
+    ];
+
+    return levels.indexOf(text);
+  }
+
+  String levelTextFromIndex(int index) {
+    const levels = [
+      'Minimal',
+      'Less',
+      'Medium',
+      'High',
+      'Maximal',
+    ];
+
+    if (index < 0 || index >= levels.length) {
+      return '';
+    }
+
+    return levels[index];
   }
 }

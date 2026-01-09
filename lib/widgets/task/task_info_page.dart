@@ -3,15 +3,17 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/toggle_buttons.dart';
 import 'package:calora/common/widgets/button/universal_stepper_widget.dart';
-import 'package:calora/common/widgets/video_player/video_player_page.dart';
-import 'package:calora/domain/model/lesson/lesson_info.dart';
+import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart' hide StepperType;
 
 class TaskInfoPage extends StatefulWidget {
-  final TaskInfo taskInfo;
+  final ExercisesRequest exercises;
 
-  const TaskInfoPage({super.key, required this.taskInfo});
+  const TaskInfoPage({
+    super.key,
+    required this.exercises,
+  });
 
   @override
   State<TaskInfoPage> createState() => _TaskInfoPageState();
@@ -26,16 +28,20 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          spacing: 8,
+          crossAxisAlignment: .start,
           children: [
-            ToggleButtonsWidget(
-              onChanged: (value) {
-                setState(() {
-                  selectedIndex = value;
-                });
-              },
-              titles: [Strings.animation, Strings.videoExercises],
+            Align(
+              child: ToggleButtonsWidget(
+                onChanged: (value) {
+                  setState(() {
+                    selectedIndex = value;
+                  });
+                },
+                titles: [Strings.animation, Strings.videoExercises],
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             if (selectedIndex == 0)
               Container(
                 height: 200,
@@ -43,36 +49,24 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
                 width: double.infinity,
                 child: Assets.images.task.image(),
               ),
-            if (selectedIndex == 1)
-              VideoPlayerPage(videoUrl: widget.taskInfo.videoUrl),
-            const SizedBox(height: 8),
-            widget.taskInfo.descriptionTitle
-                .text(20, 24, 700)
-                .c(context.colors.textStrong),
-            const SizedBox(height: 8),
+            // if (selectedIndex == 1) VideoPlayerPage(videoUrl: widget.exercises.assets),
+            widget.exercises.title.text(20, 24, 700).c(context.colors.textStrong),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Strings.duration.text(16, 20, 500),
                 UniversalStepperWidget(
                   type: StepperType.duration,
-                  initialDuration: Duration(seconds: widget.taskInfo.duration),
+                  initialDuration: parseDuration(widget.exercises.duration),
                   stepDuration: const Duration(seconds: 5),
                   onChanged: (value) {},
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            DescriptionWidget(),
-            const SizedBox(height: 8),
+            widget.exercises.description.text(14, 18, 400).c(context.colors.neutral600Secondary),
             Row(
               children: [
-                Expanded(
-                  child: UniversalStepperWidget(
-                    type: StepperType.int,
-                    totalInt: 15,
-                  ),
-                ),
+                Expanded(child: UniversalStepperWidget(type: StepperType.int, totalInt: 15)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: GestureDetector(
@@ -97,55 +91,14 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
       ),
     );
   }
-}
 
-class DescriptionWidget extends StatelessWidget {
-  const DescriptionWidget({super.key});
+  Duration parseDuration(String time) {
+    final parts = time.split(':').map(int.parse).toList();
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Planka mashqi — tanani to‘g‘ri holatda ushlab turishni talab qiladigan statik mashq. '
-          'Bu mashq qorin muskullarini, bel, orqa va yelka mushaklarini mustahkamlaydi.',
-        ),
-        const Text(
-          '• Bajarilish tartibi:',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        _bullet('a. Tizzadan turib, tirsaklarni yelkalar ostiga qo‘ying.'),
-        _bullet('b. Oyoqlarni orqaga cho‘zib, tanani tekis chiziqda ushlang.'),
-        _bullet(
-          'c. Qorin mushaklarini tarang qilib, belni bukmasdan yoki ko‘tarmasdan ushlang.',
-        ),
-        _bullet(
-          'd. Belgilangan vaqt davomida (masalan, 30–60 soniya) shu holatda turing.',
-        ),
-        const Text(
-          '• Asosiy foydasi:',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        _bullet('Qorin mushaklarini kuchaytiradi'),
-        _bullet('Bel va orqa qismini mustahkamlaydi'),
-      ],
-    );
-  }
-
-  static Widget _bullet(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '• ',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
-        ],
-      ),
+    return Duration(
+      hours: parts[0],
+      minutes: parts[1],
+      seconds: parts[2],
     );
   }
 }

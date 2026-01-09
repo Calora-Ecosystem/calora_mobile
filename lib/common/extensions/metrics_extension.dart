@@ -58,3 +58,12 @@ extension WorkoutRequestMetrics on WorkoutRequest {
 
   int get weight => getMetricSum('Weight');
 }
+
+extension TotalMetricListX on List<TotalMetric> {
+  int sumOf(String metric) {
+    return firstWhere(
+      (e) => e.metric == metric,
+      orElse: () => const TotalMetric(metric: '', sum: 0),
+    ).sum;
+  }
+}

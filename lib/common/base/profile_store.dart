@@ -43,6 +43,12 @@ class ProfileStore extends BaseStore<ProfileRequest> {
     await set(updated);
   }
 
+  Future<void> updateActivityLevel(String level) async {
+    final current = await call();
+    final updated = current.copyWith(activityLevel: level);
+    await set(updated);
+  }
+
   Future<void> delete() async => await clear();
 
   Future<void> updateProfile({
@@ -85,7 +91,9 @@ enum Gender {
   Unknown;
 
   bool get isMale => this == Gender.Male;
+
   bool get isFemale => this == Gender.Female;
+
   bool get isUnknown => this == Gender.Unknown;
 
   String get displayName {

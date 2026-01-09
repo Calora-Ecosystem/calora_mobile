@@ -9,8 +9,8 @@ abstract class MetricsRequest with _$MetricsRequest {
     required int foots,
     required double distance,
     required int kcal,
+    required int duration,
   }) = _MetricsRequest;
 
-  factory MetricsRequest.fromJson(Map<String, dynamic> json) =>
-      _$MetricsRequestFromJson(json);
+  factory MetricsRequest.fromJson(Map<String, dynamic> json) => _$MetricsRequestFromJson(json);
 }
