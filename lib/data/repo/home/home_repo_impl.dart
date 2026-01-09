@@ -36,6 +36,6 @@ class HomeRepoImpl implements HomeRepo {
 
   @override
   Future<MetricsRequest> getMetrics(DateTime date) async {
-    return await _homeApi.getUserMetrics(date) ?? MetricsRequest(foots: 0, distance: 0, kcal: 0);
+    return await _homeApi.getUserMetrics(date) ?? MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0);
   }
 }

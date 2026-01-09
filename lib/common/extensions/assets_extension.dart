@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/course/course_request.dart';
+import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
@@ -48,4 +49,8 @@ extension LessonAssetsExtension on LessonRequest {
   String? get videoUrl => _getAssetUrl('Video');
 
   String? get coverImageUrl => _getAssetUrl('CoverImage');
+}
+
+extension ExerciseAssetX on ExerciseAsset {
+  String get onlyUrl => url;
 }

@@ -60,10 +60,7 @@ class _PurposesWidgetState extends State<PurposesWidget> {
           color: context.colors.commonBackground,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: label
-            .text(14, 16, 400)
-            .c(context.colors.textStrong)
-            .copyWith(textAlign: TextAlign.center),
+        child: label.text(14, 16, 400).c(context.colors.textStrong).copyWith(textAlign: TextAlign.center),
       ),
     );
   }

@@ -8,6 +8,7 @@ part 'lessons_management.freezed.dart';
 abstract class LessonsState with _$LessonsState {
   const factory LessonsState({
     @Default(0) int levelIndex,
+    @Default('') String level,
     @Default(false) bool isLoading,
     @Default([]) List<LessonInfo> lessons,
     @Default([]) List<WorkoutRequest> workouts,

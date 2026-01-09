@@ -144,7 +144,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onData: (success) {
             if (success) {
               emit(
-                state.copyWith(metrics: MetricsRequest(foots: 0, distance: 0, kcal: 0), isDeletingUserDailyData: false),
+                state.copyWith(
+                  metrics: MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0),
+                  isDeletingUserDailyData: false,
+                ),
               );
             } else {
               emit(state.copyWith(isDeletingUserDailyData: false));

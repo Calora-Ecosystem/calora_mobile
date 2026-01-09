@@ -40,24 +40,13 @@ class _CommonTextFieldState extends State<CommonTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onTapOutside: (_) => FocusManager.instance.primaryFocus!.unfocus(),
       controller: widget.controller,
       focusNode: _focusNode,
       onChanged: widget.onChanged,
       obscureText: widget.obscureText,
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,
-      onTap: () {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted && _focusNode.hasFocus) {
-            Scrollable.ensureVisible(
-              context,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              alignment: 0.2,
-            );
-          }
-        });
-      },
       decoration: InputDecoration(
         hintText: widget.hint,
         hintStyle: TextStyle(color: context.colors.textSub, fontSize: 16, fontWeight: FontWeight.w400, height: 0.8),
