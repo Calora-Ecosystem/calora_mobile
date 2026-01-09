@@ -63,8 +63,7 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
         // For intervals, 00:00 means 24 hours. Map current hour 0 to 23 (for 24:00)
         // Or map current hour 1 to 0 (for 01:00) etc.
         final currentHour = DateTime.now().hour;
-        if (currentHour == 0)
-          return 23; // 00:00 maps to 24:00 (index 23 in _times)
+        if (currentHour == 0) return 23; // 00:00 maps to 24:00 (index 23 in _times)
         return (currentHour - 1).clamp(
           0,
           23,
@@ -78,8 +77,7 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
     }
 
     if (widget.isInterval && cleaned == '00:00') {
-      cleaned =
-          '24:00'; // If initialTime is 00:00 for interval, treat it as 24:00
+      cleaned = '24:00'; // If initialTime is 00:00 for interval, treat it as 24:00
     }
 
     final index = _times.indexOf(cleaned);
@@ -116,14 +114,10 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
             .map(
               (value) => widget.isInterval
                   ? Center(
-                      child: value
-                          .text(24, 30, 400)
-                          .c(context.colors.defaultText),
+                      child: value.text(24, 30, 400).c(context.colors.defaultText),
                     )
                   : Center(
-                      child: value
-                          .text(35, 44, 400)
-                          .c(context.colors.defaultText),
+                      child: value.text(35, 44, 400).c(context.colors.defaultText),
                     ),
             )
             .toList(),
