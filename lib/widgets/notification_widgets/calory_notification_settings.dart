@@ -11,7 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 class CaloryNotificationSettings
-    extends Managed<NotificationSettingsManager, NotificationSettingsState, NotificationSettingsEffect> {
+    extends
+        Managed<
+          NotificationSettingsManager,
+          NotificationSettingsState,
+          NotificationSettingsEffect
+        > {
   const CaloryNotificationSettings({super.key});
 
   @override
@@ -25,7 +30,10 @@ class CaloryNotificationSettings
           builder: (_) => DefaultBottomSheet(
             padding: EdgeInsets.zero,
             title: ReminderSettingTypeEnum.food.displayName,
-            child: FoodNotificationSettingsSheet(manager: manager, loading: state.loading),
+            child: FoodNotificationSettingsSheet(
+              manager: manager,
+              loading: state.loading,
+            ),
           ),
         );
       },
@@ -42,13 +50,17 @@ class CaloryNotificationSettings
               children: [
                 Assets.icons.greenNotification.svg(),
                 const SizedBox(width: 8),
-                Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
+                Strings.notification
+                    .text(20, 24, 600)
+                    .c(context.colors.textStrong),
                 Spacer(),
                 Assets.icons.setting.svg(),
               ],
             ),
             const SizedBox(height: 4),
-            Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
+            Strings.toRemindYouOfMealTimes
+                .text(14, 16, 400)
+                .c(context.colors.textSub),
           ],
         ),
       ),

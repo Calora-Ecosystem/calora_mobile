@@ -34,7 +34,10 @@ class StepsApi {
     if (to != null) {
       queryParams['to'] = to.toIso8601String();
     }
-    final response = await _dio.get('users/dailies', queryParameters: queryParams);
+    final response = await _dio.get(
+      'users/dailies',
+      queryParameters: queryParams,
+    );
 
     final data = response.data;
 
@@ -53,7 +56,10 @@ class StepsApi {
     final currentEmail = profile.email?.toLowerCase() ?? '';
     final response = await _dio.get(
       '/users/steps/stat',
-      queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String()},
+      queryParameters: {
+        'from': fromUtc.toIso8601String(),
+        'to': toUtc.toIso8601String(),
+      },
     );
     final data = response.data;
     final content = data['content'] as List<dynamic>;
@@ -71,10 +77,16 @@ class StepsApi {
     }).toList();
   }
 
-  Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {
+  Future<MetricsRequest> getUserMetrics({
+    required String from,
+    required String to,
+  }) async {
     final int? userId = await profileStore.getUserId();
     final query = {'from': from, 'to': to, 'userId': userId};
-    final response = await _dio.get('users/steps/metrics', queryParameters: query);
+    final response = await _dio.get(
+      'users/steps/metrics',
+      queryParameters: query,
+    );
     return MetricsRequest.fromJson(response.data['content']);
   }
 
@@ -92,20 +104,34 @@ class StepsApi {
     await _dio.delete('/users/norms/$metric');
   }
 
-  Future<void> sendDailyData({required String metric, required int value}) async {
-    final body = {'metric': metric, 'value': value, 'date': DateTime.now().toUtc().toIso8601String()};
+  Future<void> sendDailyData({
+    required String metric,
+    required int value,
+  }) async {
+    final body = {
+      'metric': metric,
+      'value': value,
+      'date': DateTime.now().toUtc().toIso8601String(),
+    };
     await _dio.post('/users/dailies', data: body);
   }
 
-  Future<void> sendStepDataDateRange({List<StepsWithMetricsRequest> steps = const []}) async {
+  Future<void> sendStepDataDateRange({
+    List<StepsWithMetricsRequest> steps = const [],
+  }) async {
     final payload = steps.map((element) => element.toJson()).toList();
     await _dio.post('/users/dailies/batch', data: payload);
   }
 
   Future<bool> deleteUserDailyData({required String date}) async {
     try {
-      final response = await _dio.delete('/users/dailies/reset', queryParameters: {'date': date});
-      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
+      final response = await _dio.delete(
+        '/users/dailies/reset',
+        queryParameters: {'date': date},
+      );
+      return response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300;
     } on DioException {
       return false;
     }

@@ -11,18 +11,32 @@ class ChartWidget extends StatelessWidget {
   final List<double> primaryValues;
   final double? target;
 
-  const ChartWidget({super.key, required this.type, required this.primaryValues, this.target});
+  const ChartWidget({
+    super.key,
+    required this.type,
+    required this.primaryValues,
+    this.target,
+  });
 
   @override
   Widget build(BuildContext context) {
     final int itemCount = type == ChartType.weekly ? 7 : 30;
 
-    final values = List<double>.generate(itemCount, (i) => i < primaryValues.length ? primaryValues[i] : 0);
+    final values = List<double>.generate(
+      itemCount,
+      (i) => i < primaryValues.length ? primaryValues[i] : 0,
+    );
 
-    final average = values.isNotEmpty ? values.reduce((a, b) => a + b) / values.length : 0;
+    final average = values.isNotEmpty
+        ? values.reduce((a, b) => a + b) / values.length
+        : 0;
     final total = values.isNotEmpty ? values.reduce((a, b) => a + b) : 0;
 
-    final maxValue = [...values, if (target != null) target!, average].reduce((a, b) => a > b ? a : b);
+    final maxValue = [
+      ...values,
+      if (target != null) target!,
+      average,
+    ].reduce((a, b) => a > b ? a : b);
 
     final maxY = maxValue == 0 ? 10 : maxValue * 1.1;
 
@@ -41,26 +55,32 @@ class ChartWidget extends StatelessWidget {
           height: type == ChartType.monthly ? 220 : 160,
           child: BarChart(
             BarChartData(
-              alignment: type == ChartType.monthly ? BarChartAlignment.spaceBetween : BarChartAlignment.spaceAround,
+              alignment: type == ChartType.monthly
+                  ? BarChartAlignment.spaceBetween
+                  : BarChartAlignment.spaceAround,
               maxY: maxY.toDouble(),
               borderData: FlBorderData(show: false),
               gridData: FlGridData(
-                getDrawingVerticalLine: (value) => FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
-                getDrawingHorizontalLine: (value) => FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
+                getDrawingVerticalLine: (value) =>
+                    FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
+                getDrawingHorizontalLine: (value) =>
+                    FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
               ),
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 35,
-                    getTitlesWidget: (value, meta) =>
-                        _formatNumber(value).text(10, 16, 400).c(context.colors.neutralPrimary),
+                    getTitlesWidget: (value, meta) => _formatNumber(
+                      value,
+                    ).text(10, 16, 400).c(context.colors.neutralPrimary),
                   ),
                 ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    getTitlesWidget: (value, meta) => _buildBottomTitle(context, value.toInt()),
+                    getTitlesWidget: (value, meta) =>
+                        _buildBottomTitle(context, value.toInt()),
                   ),
                 ),
                 rightTitles: AxisTitles(sideTitles: SideTitles()),
@@ -73,14 +93,23 @@ class ChartWidget extends StatelessWidget {
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
                       rod.toY.toStringAsFixed(0),
-                      TextStyle(color: context.colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      TextStyle(
+                        color: context.colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     );
                   },
                 ),
               ),
               extraLinesData: ExtraLinesData(
                 horizontalLines: [
-                  if (target != null) HorizontalLine(y: target!, color: context.colors.iconSoft, strokeWidth: 1),
+                  if (target != null)
+                    HorizontalLine(
+                      y: target!,
+                      color: context.colors.iconSoft,
+                      strokeWidth: 1,
+                    ),
                 ],
               ),
               barGroups: values.asMap().entries.map((entry) {
@@ -122,7 +151,10 @@ class ChartWidget extends StatelessWidget {
     if (type == ChartType.monthly) {
       final day = index + 1;
       if ([7, 14, 21, 28].contains(day)) {
-        return day.toString().text(14, 16, 400).c(context.colors.neutralPrimary);
+        return day
+            .toString()
+            .text(14, 16, 400)
+            .c(context.colors.neutralPrimary);
       }
       return const SizedBox();
     } else {

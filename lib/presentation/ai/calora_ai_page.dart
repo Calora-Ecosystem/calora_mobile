@@ -50,7 +50,6 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                 Strings.caloraAi.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 4),
                 Container(
-                  height: 60,
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -132,7 +131,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
       context: context,
       builder: (_) => ConfirmPage(
         onConfirm: () => manager.requestCameraPermission(),
-        onCancel: () {},
+        onCancel: () => context.router.maybePop(),
         confirmBackgroundColor: context.colors.accentSub,
         confirmTextColor: context.colors.white,
         cancelText: Strings.rejection,

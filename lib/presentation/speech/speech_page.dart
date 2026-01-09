@@ -48,7 +48,8 @@ class _ModernVoiceRecorderState extends State<ModernVoiceRecorder> {
   Future<void> _startRecording() async {
     if (await _recorder.hasPermission()) {
       final dir = await getTemporaryDirectory();
-      _filePath = '${dir.path}/rec_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      _filePath =
+          '${dir.path}/rec_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
       await _recorder.start(const RecordConfig(), path: _filePath!);
       _seconds = 0;
@@ -96,19 +97,25 @@ class _ModernVoiceRecorderState extends State<ModernVoiceRecorder> {
           SizedBox(height: 30),
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: context.colors.backgroundElevation, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: context.colors.backgroundElevation,
+              shape: BoxShape.circle,
+            ),
             child: !_isRecording
                 ? Assets.icons.icMicro.svg()
                 : Column(
                     children: [
                       Assets.icons.icWriteSpeech.svg(),
                       SizedBox(height: 8),
-                      _formatTime(_seconds).text(20, 24, 600).c(context.colors.textStrong),
+                      _formatTime(
+                        _seconds,
+                      ).text(20, 24, 600).c(context.colors.textStrong),
                     ],
                   ),
           ),
           const SizedBox(height: 30),
-          Strings.tellMeWhatYouAteSaySomethingLikeCoffee300GramsOfWhiteBread3Eggs
+          Strings
+              .tellMeWhatYouAteSaySomethingLikeCoffee300GramsOfWhiteBread3Eggs
               .text(14, 16, 400)
               .c(context.colors.textStrong)
               .copyWith(textAlign: TextAlign.center),

@@ -3,7 +3,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestionsEffect> {
+class CourseQuestionsManager
+    extends Manager<CourseQuestionsState, CourseQuestionsEffect> {
   CourseQuestionsManager() : super(const CourseQuestionsState());
 
   void next() {

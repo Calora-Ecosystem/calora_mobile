@@ -9,7 +9,11 @@ class CoursesAppBar extends StatelessWidget {
   final String imageUrl;
   final void Function() openInfoSheet;
 
-  const CoursesAppBar({super.key, required this.openInfoSheet, required this.imageUrl});
+  const CoursesAppBar({
+    super.key,
+    required this.openInfoSheet,
+    required this.imageUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +27,14 @@ class CoursesAppBar extends StatelessWidget {
                 width: double.infinity,
                 height: 220,
                 child: ClipRect(
-                  child: CustomCachedNetworkImage.banner(
-                    imageUrl: imageUrl,
-                  ),
+                  child: CustomCachedNetworkImage.banner(imageUrl: imageUrl),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -37,7 +42,10 @@ class CoursesAppBar extends StatelessWidget {
                       onTap: () => Navigator.pop(context),
                       child: Container(
                         padding: const EdgeInsets.all(9),
-                        decoration: BoxDecoration(color: context.colors.white, shape: BoxShape.circle),
+                        decoration: BoxDecoration(
+                          color: context.colors.white,
+                          shape: BoxShape.circle,
+                        ),
                         child: Assets.icons.arrowLeft.svg(),
                       ),
                     ),
@@ -45,7 +53,10 @@ class CoursesAppBar extends StatelessWidget {
                       onTap: openInfoSheet,
                       child: Container(
                         padding: const EdgeInsets.all(9),
-                        decoration: BoxDecoration(color: context.colors.white, shape: BoxShape.circle),
+                        decoration: BoxDecoration(
+                          color: context.colors.white,
+                          shape: BoxShape.circle,
+                        ),
                         child: Assets.icons.informationCircle.svg(),
                       ),
                     ),

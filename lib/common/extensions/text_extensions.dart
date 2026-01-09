@@ -64,8 +64,12 @@ extension TextStyleExtensions on TextStyle {
     TextOverflow? overflow,
   }) => TextStyle(
     inherit: inherit ?? this.inherit,
-    color: this.foreground == null && foreground == null ? color ?? this.color : null,
-    backgroundColor: this.background == null && background == null ? backgroundColor ?? this.backgroundColor : null,
+    color: this.foreground == null && foreground == null
+        ? color ?? this.color
+        : null,
+    backgroundColor: this.background == null && background == null
+        ? backgroundColor ?? this.backgroundColor
+        : null,
     fontSize: fontSize ?? this.fontSize,
     fontWeight: fontWeight ?? this.fontWeight,
     fontStyle: fontStyle ?? this.fontStyle,
@@ -117,5 +121,6 @@ extension TextExtensions on Text {
     selectionColor: selectionColor ?? this.selectionColor,
   );
 
-  Text c(Color color) => copyWith(style: (style ?? const TextStyle()).copyWith(color: color));
+  Text c(Color color) =>
+      copyWith(style: (style ?? const TextStyle()).copyWith(color: color));
 }

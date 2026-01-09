@@ -8,7 +8,11 @@ class NotificationSettingItemBuilder extends StatelessWidget {
 
   final Function() onClickItem;
 
-  const NotificationSettingItemBuilder({super.key, required this.notificationName, required this.onClickItem});
+  const NotificationSettingItemBuilder({
+    super.key,
+    required this.notificationName,
+    required this.onClickItem,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +23,12 @@ class NotificationSettingItemBuilder extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(width: 4),
-          Assets.icons.icForward.svg(colorFilter: ColorFilter.mode(context.colors.black, BlendMode.srcIn)),
+          Assets.icons.icForward.svg(
+            colorFilter: ColorFilter.mode(
+              context.colors.black,
+              BlendMode.srcIn,
+            ),
+          ),
         ],
       ),
       onTap: onClickItem,

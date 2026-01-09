@@ -30,7 +30,10 @@ class TokenInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     try {
       final language = await _commonStore.language();
       options.headers['Accept-Language'] = language?.code ?? 'UZ';
@@ -132,8 +135,12 @@ class TokenInterceptor extends Interceptor {
         return false;
       }
 
-      final refreshTokenPreview = refreshToken.length >= 10 ? refreshToken.substring(0, 10) : refreshToken;
-      final accessTokenPreview = oldAccessToken.length >= 20 ? oldAccessToken.substring(0, 20) : oldAccessToken;
+      final refreshTokenPreview = refreshToken.length >= 10
+          ? refreshToken.substring(0, 10)
+          : refreshToken;
+      final accessTokenPreview = oldAccessToken.length >= 20
+          ? oldAccessToken.substring(0, 20)
+          : oldAccessToken;
 
       _log.d('Refresh token: $refreshTokenPreview...');
       _log.d('Old access token: $accessTokenPreview...');
@@ -148,7 +155,10 @@ class TokenInterceptor extends Interceptor {
         _refreshTokenEndpoint,
         queryParameters: {'rToken': refreshToken},
         options: Options(
-          headers: {'Accept-Language': languageCode, 'Authorization': 'Bearer $oldAccessToken'},
+          headers: {
+            'Accept-Language': languageCode,
+            'Authorization': 'Bearer $oldAccessToken',
+          },
           validateStatus: (status) => status != null,
         ),
       );
@@ -163,7 +173,9 @@ class TokenInterceptor extends Interceptor {
           _log.e('⚠️ Refresh token is invalid or expired - CLEARING TOKENS');
           await _clearTokens();
         } else if (response.statusCode! >= 500) {
-          _log.e('⚠️ Server error during refresh - KEEPING TOKENS (retry later)');
+          _log.e(
+            '⚠️ Server error during refresh - KEEPING TOKENS (retry later)',
+          );
         } else {
           _log.e('⚠️ Client error during refresh - CLEARING TOKENS');
           await _clearTokens();
@@ -224,8 +236,12 @@ class TokenInterceptor extends Interceptor {
 
       await _storage.token.set(newTokens);
 
-      final newAccessPreview = newAccessToken.length >= 20 ? newAccessToken.substring(0, 20) : newAccessToken;
-      final newRefreshPreview = newRefreshToken.length >= 10 ? newRefreshToken.substring(0, 10) : newRefreshToken;
+      final newAccessPreview = newAccessToken.length >= 20
+          ? newAccessToken.substring(0, 20)
+          : newAccessToken;
+      final newRefreshPreview = newRefreshToken.length >= 10
+          ? newRefreshToken.substring(0, 10)
+          : newRefreshToken;
 
       _log.i('✅ Token refresh successful!');
       _log.d('New access token: $newAccessPreview...');

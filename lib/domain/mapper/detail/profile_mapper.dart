@@ -6,9 +6,21 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 extension ProfileRequestToDetailInfos on ProfileRequest {
   List<DetailInfo> toDetailInfoList() {
     return [
-      DetailInfo(title: Strings.name, message: name ?? '', type: DetailInfoType.name),
-      DetailInfo(title: Strings.birthday, message: birthDay ?? '', type: DetailInfoType.birthDay),
-      DetailInfo(title: Strings.goal, message: goal ?? '', type: DetailInfoType.goal),
+      DetailInfo(
+        title: Strings.name,
+        message: name ?? '',
+        type: DetailInfoType.name,
+      ),
+      DetailInfo(
+        title: Strings.birthday,
+        message: birthDay ?? '',
+        type: DetailInfoType.birthDay,
+      ),
+      DetailInfo(
+        title: Strings.goal,
+        message: goal ?? '',
+        type: DetailInfoType.goal,
+      ),
       DetailInfo(
         title: Strings.activityLevel,
         message: activityLevel?.toString() ?? '',
@@ -17,7 +29,11 @@ extension ProfileRequestToDetailInfos on ProfileRequest {
 
       // DetailInfo(title: Strings.emailAddress, message: email ?? "", type: DetailInfoType.email),
       // DetailInfo(title: 'Bmi', message: bmi?.toString() ?? "", type: DetailInfoType.bmi),
-      DetailInfo(title: Strings.gender, message: gender ?? '', type: DetailInfoType.gender),
+      DetailInfo(
+        title: Strings.gender,
+        message: gender ?? '',
+        type: DetailInfoType.gender,
+      ),
       DetailInfo(
         title: Strings.height,
         message: height?.toString() ?? '',

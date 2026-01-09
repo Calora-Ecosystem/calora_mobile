@@ -7,8 +7,12 @@ class ToggleButtonsWidget extends StatefulWidget {
   final List<String> titles;
   final int initialIndex;
 
-  const ToggleButtonsWidget({super.key, required this.onChanged, required this.titles, this.initialIndex = 0})
-    : assert(titles.length > 0, 'At least one button is required');
+  const ToggleButtonsWidget({
+    super.key,
+    required this.onChanged,
+    required this.titles,
+    this.initialIndex = 0,
+  }) : assert(titles.length > 0, 'At least one button is required');
 
   @override
   State<ToggleButtonsWidget> createState() => _ToggleButtonsWidgetState();
@@ -36,7 +40,9 @@ class _ToggleButtonsWidgetState extends State<ToggleButtonsWidget> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
-          color: isActive ? context.colors.accentSub : context.colors.backgroundElevation,
+          color: isActive
+              ? context.colors.accentSub
+              : context.colors.backgroundElevation,
           borderRadius: BorderRadius.circular(8),
         ),
         child: title
@@ -57,7 +63,10 @@ class _ToggleButtonsWidgetState extends State<ToggleButtonsWidget> {
             return const SizedBox(width: 8);
           }
           final buttonIndex = index ~/ 2;
-          return _buildButton(title: widget.titles[buttonIndex], index: buttonIndex);
+          return _buildButton(
+            title: widget.titles[buttonIndex],
+            index: buttonIndex,
+          );
         }),
       ),
     );

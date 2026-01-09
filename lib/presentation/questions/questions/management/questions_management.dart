@@ -16,7 +16,8 @@ abstract class QuestionsState with _$QuestionsState {
 
 @freezed
 sealed class QuestionsEffect with _$QuestionsEffect {
-  const factory QuestionsEffect.withType(QuestionsEffectType type) = _QuestionsEffect;
+  const factory QuestionsEffect.withType(QuestionsEffectType type) =
+      _QuestionsEffect;
 }
 
 enum QuestionsEffectType { success, error, empty }

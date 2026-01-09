@@ -61,11 +61,14 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   void _onSearchChanged(AddMealsManager manager) {
     final text = _searchController.text.trim();
     _debounce?.cancel();
+
     if (text.isEmpty) {
       manager.onSearchChanged('');
       return;
     }
+
     if (text.length >= 3) {
+      // 200ms debounce
       _debounce = Timer(const Duration(milliseconds: 200), () {
         manager.onSearchChanged(text);
       });
@@ -94,13 +97,11 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   Widget builder(BuildContext context, AddMealsManager manager, AddMealsState state) {
     return Scaffold(
       backgroundColor: context.colors.white,
-      resizeToAvoidBottomInset: true,
       appBar: CustomAppBar(
         title: Strings.add,
         onBack: () => context.router.pop(true),
       ),
       body: SafeArea(
-        bottom: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(

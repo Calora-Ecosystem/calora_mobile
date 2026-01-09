@@ -20,9 +20,7 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String initials = name.isNotEmpty
-        ? name.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase()
-        : '';
+    final String initials = name.isNotEmpty ? name.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase() : '';
     final String initialsSurname = surname.isNotEmpty
         ? surname.trim().split(' ').map((e) => e[0]).take(2).join().toUpperCase()
         : '';
@@ -30,10 +28,7 @@ class ProfileCard extends StatelessWidget {
     return Container(
       height: 80,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
       child: Row(
         children: [
           Container(
@@ -51,10 +46,7 @@ class ProfileCard extends StatelessWidget {
               children: [
                 name.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 8),
-                email
-                    .text(14, 16, 400)
-                    .c(context.colors.textSub)
-                    .copyWith(overflow: TextOverflow.ellipsis),
+                email.text(14, 16, 400).c(context.colors.textSub).copyWith(overflow: TextOverflow.ellipsis),
               ],
             ),
           ),

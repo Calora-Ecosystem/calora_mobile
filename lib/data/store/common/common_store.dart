@@ -9,7 +9,8 @@ class CommonStore {
   final language = BaseStore<Language?>(
     'language',
     serialize: (value) => value == null ? null : jsonEncode(value.name),
-    deserialize: (value) => value == null ? null : Language.fromName(jsonDecode(value)),
+    deserialize: (value) =>
+        value == null ? null : Language.fromName(jsonDecode(value)),
   );
 
   final isLanguageSelected = BaseStore<bool>(
@@ -19,6 +20,12 @@ class CommonStore {
   );
   final isOnboardingCompleted = BaseStore<bool>(
     'isOnboardingCompleted',
+    serialize: (value) => value.toString(),
+    deserialize: (value) => value == 'true',
+  );
+
+  final isQuestionaryFinished = BaseStore<bool>(
+    'isQuestionaryFinished',
     serialize: (value) => value.toString(),
     deserialize: (value) => value == 'true',
   );

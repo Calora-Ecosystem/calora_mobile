@@ -18,15 +18,15 @@ abstract class WorkoutRequest with _$WorkoutRequest {
     required int order,
   }) = _WorkoutRequest;
 
-  factory WorkoutRequest.fromJson(Map<String, dynamic> json) => _$WorkoutRequestFromJson(json);
+  factory WorkoutRequest.fromJson(Map<String, dynamic> json) =>
+      _$WorkoutRequestFromJson(json);
 }
 
 @freezed
 abstract class TotalMetric with _$TotalMetric {
-  const factory TotalMetric({
-    required String metric,
-    required int sum,
-  }) = _TotalMetric;
+  const factory TotalMetric({required String metric, required int sum}) =
+      _TotalMetric;
 
-  factory TotalMetric.fromJson(Map<String, dynamic> json) => _$TotalMetricFromJson(json);
+  factory TotalMetric.fromJson(Map<String, dynamic> json) =>
+      _$TotalMetricFromJson(json);
 }

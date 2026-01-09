@@ -21,7 +21,10 @@ class InboxPage extends Managed<InboxManager, InboxState, InboxEffect> {
         title: Strings.notification,
         trailing: Padding(
           padding: const EdgeInsets.only(right: 12),
-          child: GestureDetector(onTap: () {}, child: Assets.icons.messageDone.svg()),
+          child: GestureDetector(
+            onTap: () {},
+            child: Assets.icons.messageDone.svg(),
+          ),
         ),
       ),
     );

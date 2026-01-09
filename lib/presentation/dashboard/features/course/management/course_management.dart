@@ -16,6 +16,8 @@ abstract class CourseState with _$CourseState {
 
 @freezed
 abstract class CourseEffect with _$CourseEffect {
-  const factory CourseEffect.navigateToLessons({required CourseRequest course, required List<LessonRequest> lessons}) =
-      _NavigateToLessons;
+  const factory CourseEffect.navigateToLessons({
+    required CourseRequest course,
+    required List<LessonRequest> lessons,
+  }) = _NavigateToLessons;
 }

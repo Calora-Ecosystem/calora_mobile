@@ -6,7 +6,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @Injectable()
-class UniversalProgressManager extends Manager<UniversalProgressState, UniversalProgressEffect> {
+class UniversalProgressManager
+    extends Manager<UniversalProgressState, UniversalProgressEffect> {
   Timer? _timer;
   bool _apiCompleted = false;
 

@@ -21,7 +21,8 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
   void getWorkout() {
     _courseRepo.getWorkout().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
+      onData: (workouts) =>
+          emit(state.copyWith(workouts: workouts, isLoading: false)),
       onError: (error) => emit(state.copyWith(isLoading: false)),
     );
   }

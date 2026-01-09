@@ -16,7 +16,13 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
   final int taskCount;
   final double calories;
   final int duration;
-  const FinishTaskPage(this.day, this.taskCount, this.calories, this.duration, {super.key});
+  const FinishTaskPage(
+    this.day,
+    this.taskCount,
+    this.calories,
+    this.duration, {
+    super.key,
+  });
 
   @override
   Widget builder(BuildContext context, TasksManager manager, TasksState state) {
@@ -28,7 +34,9 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
             top: 0,
             left: 0,
             right: 0,
-            child: Assets.images.femaleFinishBackground.image(fit: BoxFit.cover),
+            child: Assets.images.femaleFinishBackground.image(
+              fit: BoxFit.cover,
+            ),
           ),
           Positioned(
             left: 0,
@@ -43,28 +51,47 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
               ),
               child: Column(
                 children: [
-                  SizedBox(height: 200, width: 200, child: Assets.images.finishIcon.image()),
+                  SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Assets.images.finishIcon.image(),
+                  ),
                   SizedBox(height: 16),
-                  Strings.congratulations.text(32, 40, 700).c(context.colors.textStrong),
+                  Strings.congratulations
+                      .text(32, 40, 700)
+                      .c(context.colors.textStrong),
                   SizedBox(height: 16),
-                  '$day-kun bajarildi'.text(24, 32, 700).c(context.colors.accentSub),
+                  '$day-kun bajarildi'
+                      .text(24, 32, 700)
+                      .c(context.colors.accentSub),
                   SizedBox(height: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Strings.yourTrainingIsOver.text(16, 20, 500).c(context.colors.textSub),
+                      Strings.yourTrainingIsOver
+                          .text(16, 20, 500)
+                          .c(context.colors.textSub),
                       Row(
                         children: [
                           Expanded(
-                            child: _buildTaskParametrs(Strings.exercises, '$taskCount ta', context),
+                            child: _buildTaskParametrs(
+                              Strings.exercises,
+                              '$taskCount ta',
+                              context,
+                            ),
                           ),
                           Expanded(
                             child: Container(
                               margin: EdgeInsets.only(right: 12),
-                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              padding: EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 12,
+                              ),
                               decoration: BoxDecoration(
                                 border: Border.symmetric(
-                                  vertical: BorderSide(color: context.colors.neutral200Stroke),
+                                  vertical: BorderSide(
+                                    color: context.colors.neutral200Stroke,
+                                  ),
                                 ),
                               ),
                               child: _buildTaskParametrs(
@@ -84,7 +111,9 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
                         ],
                       ),
                       SizedBox(height: 16),
-                      Strings.howAreYouFeeling.text(16, 20, 500).c(context.colors.textSub),
+                      Strings.howAreYouFeeling
+                          .text(16, 20, 500)
+                          .c(context.colors.textSub),
                       SizedBox(height: 8),
                       MoodSelector(),
                     ],
@@ -98,7 +127,11 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
     );
   }
 
-  Widget _buildTaskParametrs(String parameterName, String parameterValue, BuildContext context) {
+  Widget _buildTaskParametrs(
+    String parameterName,
+    String parameterValue,
+    BuildContext context,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -49,8 +49,16 @@ class _CommonTextFieldState extends State<CommonTextField> {
       inputFormatters: widget.inputFormatters,
       decoration: InputDecoration(
         hintText: widget.hint,
-        hintStyle: TextStyle(color: context.colors.textSub, fontSize: 16, fontWeight: FontWeight.w400, height: 0.8),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        hintStyle: TextStyle(
+          color: context.colors.textSub,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          height: 0.8,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         prefixIcon: widget.prefix,
         suffixIcon: widget.suffix,
         enabledBorder: OutlineInputBorder(

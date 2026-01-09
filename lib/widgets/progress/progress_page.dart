@@ -11,12 +11,18 @@ import 'package:management/management.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 @RoutePage()
-class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEffect> {
+class ProgressPage
+    extends Managed<CalculateManager, CalculateState, CalculateEffect> {
   final bool fetchGoals;
   final int mode;
   final PageRouteInfo? nextRoute;
 
-  const ProgressPage({super.key, this.mode = 1, this.nextRoute, this.fetchGoals = false});
+  const ProgressPage({
+    super.key,
+    this.mode = 1,
+    this.nextRoute,
+    this.fetchGoals = false,
+  });
 
   @override
   void init(BuildContext context, CalculateManager manager) {
@@ -34,10 +40,16 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
   }
 
   @override
-  void listener(BuildContext context, CalculateManager manager, CalculateEffect effect) {
+  void listener(
+    BuildContext context,
+    CalculateManager manager,
+    CalculateEffect effect,
+  ) {
     effect.when(
       error: (message) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       },
       navigateNext: () {
         if (nextRoute != null) {
@@ -49,17 +61,29 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
     );
   }
 
-  Widget _analyzingItem(BuildContext context, String text, double threshold, double currentProgress) {
+  Widget _analyzingItem(
+    BuildContext context,
+    String text,
+    double threshold,
+    double currentProgress,
+  ) {
     final bool done = currentProgress >= threshold;
-    final Color textColor = done ? context.colors.textSub : context.colors.textStrong;
+    final Color textColor = done
+        ? context.colors.textSub
+        : context.colors.textStrong;
 
     return Container(
       padding: const EdgeInsets.all(8),
       width: double.infinity,
-      decoration: BoxDecoration(color: context.colors.commonBackground, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+        color: context.colors.commonBackground,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Row(
         children: [
-          done ? Assets.icons.done.svg() : const CupertinoActivityIndicator(radius: 12),
+          done
+              ? Assets.icons.done.svg()
+              : const CupertinoActivityIndicator(radius: 12),
           const SizedBox(width: 8),
           Expanded(child: text.text(14, 16, 400).c(textColor)),
         ],
@@ -68,11 +92,17 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
   }
 
   @override
-  Widget builder(BuildContext context, CalculateManager manager, CalculateState state) {
+  Widget builder(
+    BuildContext context,
+    CalculateManager manager,
+    CalculateState state,
+  ) {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -82,7 +112,13 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
                   padding: const EdgeInsets.all(16),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    boxShadow: [BoxShadow(color: Colors.black.withAlpha(2), blurRadius: 8, offset: const Offset(0, 4))],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                     color: context.colors.accentWhite,
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -111,11 +147,26 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _analyzingItem(context, Strings.analyzingActivityLevel, 0.3, state.progressPercent),
+                      _analyzingItem(
+                        context,
+                        Strings.analyzingActivityLevel,
+                        0.3,
+                        state.progressPercent,
+                      ),
                       const SizedBox(height: 16),
-                      _analyzingItem(context, Strings.smartReminderPlan, 0.5, state.progressPercent),
+                      _analyzingItem(
+                        context,
+                        Strings.smartReminderPlan,
+                        0.5,
+                        state.progressPercent,
+                      ),
                       const SizedBox(height: 16),
-                      _analyzingItem(context, Strings.analyzingActivityLevel, 0.8, state.progressPercent),
+                      _analyzingItem(
+                        context,
+                        Strings.analyzingActivityLevel,
+                        0.8,
+                        state.progressPercent,
+                      ),
                     ],
                   ),
                 ),
@@ -123,7 +174,10 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
                   GestureDetector(
                     onTap: () => manager.goToNextPage(),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 40,
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       width: double.infinity,
                       decoration: BoxDecoration(

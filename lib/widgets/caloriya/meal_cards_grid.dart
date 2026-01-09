@@ -32,7 +32,13 @@ class MealCardsGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final meal = !isLoading
             ? meals[index]
-            : MealInfo(title: 'title', value: 'value', max: '100', image: SizedBox(), onTap: null);
+            : MealInfo(
+                title: 'title',
+                value: 'value',
+                max: '100',
+                image: SizedBox(),
+                onTap: null,
+              );
         return ShimmerWrapper(
           loading: isLoading,
           type: ShimmerType.backgroundElevation,
@@ -82,14 +88,20 @@ class MealCardsGrid extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: title.text(14, 16, 400).c(context.colors.textSub).auto(maxLines: 1, minSize: 12),
+                      child: title
+                          .text(14, 16, 400)
+                          .c(context.colors.textSub)
+                          .auto(maxLines: 1, minSize: 12),
                     ),
                     Assets.icons.icPlusCircle.svg(),
                     const SizedBox(width: 8),
                   ],
                 ),
                 const Spacer(),
-                '$value ${Strings.kcal}'.text(16, 20, 500).c(Colors.black).auto(minSize: 12),
+                '$value ${Strings.kcal}'
+                    .text(16, 20, 500)
+                    .c(Colors.black)
+                    .auto(minSize: 12),
                 const SizedBox(height: 4),
                 '$max ${Strings.fromKcal}'.text(14, 16, 600).c(Colors.grey),
               ],

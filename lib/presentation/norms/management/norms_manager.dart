@@ -16,7 +16,8 @@ class NormsManager extends Manager<NormsState, NormsEffect> {
   void getDailyNorms() {
     _repo.getDailyNorms().handle(
       onStart: () => emit(state.copyWith(loading: true)),
-      onData: (data) => emit(state.copyWith(dailyNormsList: data, loading: false)),
+      onData: (data) =>
+          emit(state.copyWith(dailyNormsList: data, loading: false)),
       onDone: () => emit(state.copyWith(loading: false)),
     );
   }
@@ -30,13 +31,17 @@ class NormsManager extends Manager<NormsState, NormsEffect> {
     }).toList();
 
     final metricName = _getMetricName(info.type);
-    final request = NormsRequest(metric: metricName, value: double.parse(lastResult));
+    final request = NormsRequest(
+      metric: metricName,
+      value: double.parse(lastResult),
+    );
 
     _repo
         .updateSingleNorm(request)
         .handle(
           onStart: () => emit(state.copyWith(loading: true)),
-          onData: (data) => emit(state.copyWith(dailyNormsList: resultData, loading: false)),
+          onData: (data) =>
+              emit(state.copyWith(dailyNormsList: resultData, loading: false)),
           onDone: () => emit(state.copyWith(loading: false)),
         );
   }

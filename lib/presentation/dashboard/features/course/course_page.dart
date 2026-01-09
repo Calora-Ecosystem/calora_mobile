@@ -38,12 +38,20 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
   }
 
   @override
-  void listener(BuildContext context, CourseManager manager, CourseEffect effect) {
+  void listener(
+    BuildContext context,
+    CourseManager manager,
+    CourseEffect effect,
+  ) {
     super.listener(context, manager, effect);
   }
 
   @override
-  Widget builder(BuildContext context, CourseManager manager, CourseState state) {
+  Widget builder(
+    BuildContext context,
+    CourseManager manager,
+    CourseState state,
+  ) {
     final itemCount = state.isLoading ? 3 : state.courses.length;
 
     return Scaffold(
@@ -65,27 +73,31 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                   builder: (_, isScrolled, __) {
                     return SliverAppBar(
                       pinned: true,
-                      backgroundColor: isScrolled ? context.colors.white : context.colors.transparent,
+                      backgroundColor: isScrolled
+                          ? context.colors.white
+                          : context.colors.transparent,
                       elevation: isScrolled ? 4 : 0,
                       scrolledUnderElevation: 4,
                       shadowColor: context.colors.black.withValues(alpha: 0.2),
                       surfaceTintColor: context.colors.white,
                       centerTitle: true,
-                      title: Strings.allCourses.text(17, 22, 600).c(context.colors.textStrong),
+                      title: Strings.allCourses
+                          .text(17, 22, 600)
+                          .c(context.colors.textStrong),
                     );
                   },
                 ),
 
-                const SliverPadding(
-                  padding: EdgeInsets.only(top: 16),
-                ),
+                const SliverPadding(padding: EdgeInsets.only(top: 16)),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   sliver: SliverList.separated(
                     itemCount: itemCount,
                     separatorBuilder: (_, __) => const SizedBox(height: 20),
                     itemBuilder: (context, index) {
-                      final course = state.isLoading ? CourseRequest() : state.courses[index];
+                      final course = state.isLoading
+                          ? CourseRequest()
+                          : state.courses[index];
                       return ShimmerWrapper(
                         loading: state.isLoading,
                         type: ShimmerType.backgroundElevation,
@@ -100,16 +112,16 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                           onTap: () {
                             course.type == 'Workout'
                                 ? context.router.push(LessonsRoute())
-                                : context.router.push(VideoCourseBodyWidgetRoute(course: course));
+                                : context.router.push(
+                                    VideoCourseBodyWidgetRoute(course: course),
+                                  );
                           },
                         ),
                       );
                     },
                   ),
                 ),
-                const SliverPadding(
-                  padding: EdgeInsets.only(bottom: 24),
-                ),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
               ],
             ),
           ),

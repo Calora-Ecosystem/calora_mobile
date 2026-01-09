@@ -29,7 +29,9 @@ class RatingStars extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {
         final isFilled = index < filledStars;
-        return isFilled ? Assets.icons.fullStar.svg() : Assets.icons.lightStar.svg();
+        return isFilled
+            ? Assets.icons.fullStar.svg()
+            : Assets.icons.lightStar.svg();
       }),
     );
   }

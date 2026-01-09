@@ -46,16 +46,25 @@ class _FoodStepperState extends State<FoodStepper> {
           onTap: _decrement,
           child: Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: context.colors.backgroundElevation, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: context.colors.backgroundElevation,
+              shape: BoxShape.circle,
+            ),
             child: const Icon(Icons.remove, color: Colors.black87, size: 24),
           ),
         ),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 24.0), child: value.toString().text(32, 40, 700)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: value.toString().text(32, 40, 700),
+        ),
         GestureDetector(
           onTap: _increment,
           child: Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: context.colors.backgroundElevation, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: context.colors.backgroundElevation,
+              shape: BoxShape.circle,
+            ),
             child: const Icon(Icons.add, color: Colors.black87, size: 24),
           ),
         ),

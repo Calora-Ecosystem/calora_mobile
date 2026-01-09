@@ -15,6 +15,8 @@ abstract class BaseResponse<T> with _$BaseResponse<T> {
     dynamic modelStateError,
   }) = _BaseResponse;
 
-  factory BaseResponse.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
-      _$BaseResponseFromJson(json, fromJsonT);
+  factory BaseResponse.fromJson(
+    Map<String, dynamic> json,
+    T Function(Object?) fromJsonT,
+  ) => _$BaseResponseFromJson(json, fromJsonT);
 }

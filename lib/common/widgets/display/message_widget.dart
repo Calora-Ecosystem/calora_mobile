@@ -4,7 +4,11 @@ import 'package:calora/common/widgets/display/display_type.dart';
 import 'package:flutter/material.dart';
 
 class MessageWidget extends StatelessWidget {
-  const MessageWidget({super.key, required this.message, required this.onClosed});
+  const MessageWidget({
+    super.key,
+    required this.message,
+    required this.onClosed,
+  });
 
   final DisplayMessage message;
   final VoidCallback onClosed;
@@ -30,7 +34,12 @@ class MessageWidget extends StatelessWidget {
                     height: 62,
                     margin: const EdgeInsets.symmetric(horizontal: 24),
                     decoration: BoxDecoration(
-                      boxShadow: [BoxShadow(color: message.type.shadow(context), blurRadius: 50)],
+                      boxShadow: [
+                        BoxShadow(
+                          color: message.type.shadow(context),
+                          blurRadius: 50,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -42,15 +51,24 @@ class MessageWidget extends StatelessWidget {
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(12),
-                    title: (message.title ?? message.description).text(16, 16, 500),
-                    subtitle: message.title == null ? null : message.description.text(14, 14, 500),
+                    title: (message.title ?? message.description).text(
+                      16,
+                      16,
+                      500,
+                    ),
+                    subtitle: message.title == null
+                        ? null
+                        : message.description.text(14, 14, 500),
                     leading: Container(
                       height: 42,
                       width: 42,
                       decoration: BoxDecoration(shape: BoxShape.circle),
                       child: Center(child: message.type.icon(context)),
                     ),
-                    trailing: IconButton(onPressed: onClosed, icon: Icon(Icons.close)),
+                    trailing: IconButton(
+                      onPressed: onClosed,
+                      icon: Icon(Icons.close),
+                    ),
                   ),
                 ),
               ],

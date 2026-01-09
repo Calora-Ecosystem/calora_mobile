@@ -4,9 +4,16 @@ import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 
 abstract class StepRepo {
-  Future<List<StepsWithMetricsRequest>> getSteps(int period, {int offset = 0, bool isSortDate = true});
+  Future<List<StepsWithMetricsRequest>> getSteps(
+    int period, {
+    int offset = 0,
+    bool isSortDate = true,
+  });
 
-  Future<MetricsRequest> getUserMetrics({required String from, required String to});
+  Future<MetricsRequest> getUserMetrics({
+    required String from,
+    required String to,
+  });
 
   Future<List<UserStatRequest>> getStats(int period, {int offset = 0});
 
@@ -18,7 +25,9 @@ abstract class StepRepo {
 
   Future<void> sendDailyData({required String metric, required int value});
 
-  Future<void> sendStepDataDateRange({required List<StepsWithMetricsRequest> steps});
+  Future<void> sendStepDataDateRange({
+    required List<StepsWithMetricsRequest> steps,
+  });
 
   Future<bool> deleteUserDailyData({required String date});
 }

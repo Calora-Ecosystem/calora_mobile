@@ -29,7 +29,12 @@ class DefaultBottomSheet extends StatelessWidget {
     return Container(
       height: height,
       width: double.infinity,
-      padding: padding ?? EdgeInsets.all(20).copyWith(top: 0, bottom: MediaQuery.viewPaddingOf(context).bottom + 14),
+      padding:
+          padding ??
+          EdgeInsets.all(20).copyWith(
+            top: 0,
+            bottom: MediaQuery.viewPaddingOf(context).bottom + 14,
+          ),
       decoration: BoxDecoration(
         color: color ?? context.colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
@@ -44,14 +49,19 @@ class DefaultBottomSheet extends StatelessWidget {
               child: Container(
                 width: 24,
                 height: 3,
-                decoration: BoxDecoration(color: context.colors.strokeSub, borderRadius: BorderRadius.circular(100)),
+                decoration: BoxDecoration(
+                  color: context.colors.strokeSub,
+                  borderRadius: BorderRadius.circular(100),
+                ),
               ),
             ),
             const SizedBox(height: 12),
           ],
           if (title != null) ...[
             Padding(
-              padding: padding == EdgeInsets.zero ? titlePadding : EdgeInsets.zero,
+              padding: padding == EdgeInsets.zero
+                  ? titlePadding
+                  : EdgeInsets.zero,
               child: title
                   .text(16, 20, 600)
                   .c(context.colors.textPrimary)

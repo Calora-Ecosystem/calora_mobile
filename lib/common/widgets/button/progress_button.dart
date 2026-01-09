@@ -8,13 +8,18 @@ class ProgressButton extends StatefulWidget {
   final Duration duration;
   final VoidCallback onFinished;
 
-  const ProgressButton({super.key, required this.duration, required this.onFinished});
+  const ProgressButton({
+    super.key,
+    required this.duration,
+    required this.onFinished,
+  });
 
   @override
   State<ProgressButton> createState() => _ProgressButtonState();
 }
 
-class _ProgressButtonState extends State<ProgressButton> with SingleTickerProviderStateMixin {
+class _ProgressButtonState extends State<ProgressButton>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override

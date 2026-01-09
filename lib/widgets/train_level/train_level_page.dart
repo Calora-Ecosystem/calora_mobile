@@ -41,7 +41,9 @@ class _TrainLevelPageState extends State<TrainLevelPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            Strings.chooseYourWorkoutLevel.text(20, 24, 700).c(context.colors.textStrong),
+            Strings.chooseYourWorkoutLevel
+                .text(20, 24, 700)
+                .c(context.colors.textStrong),
             const SizedBox(height: 16),
             PurposesWidget(
               goals: degrees,

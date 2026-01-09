@@ -14,5 +14,6 @@ abstract class DailyNormsInfo with _$DailyNormsInfo {
     required double steps,
   }) = _DailyNormsInfo;
 
-  factory DailyNormsInfo.fromJson(Map<String, dynamic> json) => _$DailyNormsInfoFromJson(json);
+  factory DailyNormsInfo.fromJson(Map<String, dynamic> json) =>
+      _$DailyNormsInfoFromJson(json);
 }

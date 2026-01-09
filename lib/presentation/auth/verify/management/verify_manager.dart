@@ -1,9 +1,8 @@
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
+import 'package:calora/presentation/auth/verify/management/verify_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
-
-import 'package:calora/presentation/auth/verify/management/verify_management.dart';
 
 @injectable
 class VerifyManager extends Manager<VerifyState, VerifyEffect> {
@@ -43,7 +42,9 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (hasNewUser) {
             if (hasNewUser) {
-              publish(VerifyEffect.openQuestions(_verification.email!));
+              final identifier =
+                  _verification.email ?? _verification.phone ?? '';
+              publish(VerifyEffect.openQuestions(identifier));
             } else {
               publish(VerifyEffect.openDashboard());
             }

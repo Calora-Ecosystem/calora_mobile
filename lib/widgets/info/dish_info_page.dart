@@ -57,7 +57,10 @@ class _DishInfoPageState extends State<DishInfoPage> {
             SizedBox(height: 4),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: CustomCachedNetworkImage.banner(imageUrl: widget.foodItem.coverUrl, height: 160),
+              child: CustomCachedNetworkImage.banner(
+                imageUrl: widget.foodItem.coverUrl,
+                height: 160,
+              ),
             ),
             SizedBox(height: 8),
             Padding(
@@ -69,7 +72,9 @@ class _DishInfoPageState extends State<DishInfoPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      widget.foodItem.name.text(24, 32, 700).c(context.colors.textStrong),
+                      widget.foodItem.name
+                          .text(24, 32, 700)
+                          .c(context.colors.textStrong),
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -77,11 +82,15 @@ class _DishInfoPageState extends State<DishInfoPage> {
                           });
                           widget.onFavouriteChanged(isFavourite);
                         },
-                        child: isFavourite ? Assets.icons.icRedFavourite.svg() : Assets.icons.icFavourite.svg(),
+                        child: isFavourite
+                            ? Assets.icons.icRedFavourite.svg()
+                            : Assets.icons.icFavourite.svg(),
                       ),
                     ],
                   ),
-                  '400 grammdagi ozuqaviyligi'.text(16, 20, 400).c(context.colors.textSub),
+                  '400 grammdagi ozuqaviyligi'
+                      .text(16, 20, 400)
+                      .c(context.colors.textSub),
                   Row(
                     children: [
                       buildNutritionItem(
@@ -91,19 +100,28 @@ class _DishInfoPageState extends State<DishInfoPage> {
                         label: Strings.calories,
                       ),
                       buildNutritionItem(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         borderColor: context.colors.strokeSoft,
                         value: widget.foodItem.proteins,
                         label: Strings.proteins,
                       ),
                       buildNutritionItem(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         borderColor: context.colors.strokeSoft,
                         value: widget.foodItem.carbohydrates,
                         label: Strings.carbohydrates,
                       ),
                       buildNutritionItem(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         borderColor: context.colors.strokeSoft,
                         value: widget.foodItem.fats,
                         label: Strings.oils,
@@ -112,12 +130,18 @@ class _DishInfoPageState extends State<DishInfoPage> {
                   ),
                   GestureDetector(
                     onTap: () {},
-                    child: Strings.moreDetails.text(14, 16, 600).c(context.colors.accentSub),
+                    child: Strings.moreDetails
+                        .text(14, 16, 600)
+                        .c(context.colors.accentSub),
                   ),
-                  Strings.addASpecificAmount.text(14, 16, 600).c(context.colors.textStrong),
+                  Strings.addASpecificAmount
+                      .text(14, 16, 600)
+                      .c(context.colors.textStrong),
                   CommonTextField(
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                    ],
                     hint: Strings.enterTheAmountOfFoodGr,
                     controller: _amountController,
                   ),
@@ -161,7 +185,10 @@ class _DishInfoPageState extends State<DishInfoPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             '${value.asFixedTruncated(0)} gr'.toString().text(16, 20, 500),
-            label.text(14, 18, 400).c(context.colors.textSub).copyWith(maxLines: 1),
+            label
+                .text(14, 18, 400)
+                .c(context.colors.textSub)
+                .copyWith(maxLines: 1),
           ],
         ),
       ),

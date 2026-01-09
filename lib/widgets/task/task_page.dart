@@ -39,7 +39,9 @@ class TaskPage extends StatelessWidget {
                 child: Assets.images.task.image(),
               ),
               const SizedBox(height: 20),
-              taskInfo.descriptionTitle.text(20, 24, 700).c(context.colors.textStrong),
+              taskInfo.descriptionTitle
+                  .text(20, 24, 700)
+                  .c(context.colors.textStrong),
               SizedBox(height: 16),
               Container(
                 padding: EdgeInsets.all(20),
@@ -50,11 +52,17 @@ class TaskPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildButton(context: context, icon: Assets.icons.pause.svg(), onTap: () {}),
+                    _buildButton(
+                      context: context,
+                      icon: Assets.icons.pause.svg(),
+                      onTap: () {},
+                    ),
                     Column(
                       children: [
                         '00:${taskInfo.duration}'.text(32, 40, 700),
-                        Strings.getReady.text(16, 20, 500).c(context.colors.accentSub),
+                        Strings.getReady
+                            .text(16, 20, 500)
+                            .c(context.colors.accentSub),
                       ],
                     ),
                     _buildButton(

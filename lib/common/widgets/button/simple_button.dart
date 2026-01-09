@@ -34,7 +34,10 @@ class SimpleButton extends StatelessWidget {
       child: Container(
         width: double.infinity,
         padding: padding,
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(borderRadius)),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
         child: Row(
           mainAxisAlignment: alignment,
           children: [
@@ -44,7 +47,10 @@ class SimpleButton extends StatelessWidget {
             ],
             if (text != null)
               Flexible(
-                child: text!.text(16, 20, 500).c(textColor).copyWith(textAlign: TextAlign.center),
+                child: text!
+                    .text(16, 20, 500)
+                    .c(textColor)
+                    .copyWith(textAlign: TextAlign.center),
               ),
             if (icon != null && iconPosition == IconPosition.right) ...[
               if (text != null) const SizedBox(width: 8),

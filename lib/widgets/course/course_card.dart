@@ -18,7 +18,10 @@ class CourseCard extends StatelessWidget {
       child: Container(
         height: 160,
         padding: const EdgeInsets.fromLTRB(16, 16, 0, 0),
-        decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: context.colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -35,7 +38,10 @@ class CourseCard extends StatelessWidget {
                         course.description
                             .text(16, 20, 500)
                             .c(context.colors.textSub)
-                            .copyWith(maxLines: 3, overflow: TextOverflow.ellipsis),
+                            .copyWith(
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                       ],
                     ),
                   ),

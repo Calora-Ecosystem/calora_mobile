@@ -41,7 +41,11 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
   }
 
   @override
-  void listener(BuildContext context, DishesManager manager, DishesEffect effect) {
+  void listener(
+    BuildContext context,
+    DishesManager manager,
+    DishesEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.mapOrNull(
       openInfoSheet: (value) {
@@ -51,7 +55,11 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
   }
 
   @override
-  Widget builder(BuildContext context, DishesManager manager, DishesState state) {
+  Widget builder(
+    BuildContext context,
+    DishesManager manager,
+    DishesState state,
+  ) {
     return Scaffold(
       backgroundColor: context.colors.white,
       appBar: CustomAppBar(title: data.name),
@@ -94,7 +102,9 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: dish.name.text(14, 16, 600).c(context.colors.textStrong),
+                      child: dish.name
+                          .text(14, 16, 600)
+                          .c(context.colors.textStrong),
                     ),
                   ],
                 ),
@@ -106,7 +116,12 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
     );
   }
 
-  void openAboutDishPage(BuildContext context, FoodModel food, DishesManager manager, bool isFavourite) {
+  void openAboutDishPage(
+    BuildContext context,
+    FoodModel food,
+    DishesManager manager,
+    bool isFavourite,
+  ) {
     context.showAppBottomSheet(
       child: DishInfoPage(
         isFavourite: isFavourite,

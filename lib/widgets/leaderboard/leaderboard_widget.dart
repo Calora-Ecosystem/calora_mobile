@@ -14,7 +14,10 @@ class LeaderboardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: context.colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: ListView.builder(
         shrinkWrap: true,
         padding: EdgeInsets.zero,
@@ -26,7 +29,10 @@ class LeaderboardWidget extends StatelessWidget {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 24),
-                leading: (index + 4).toString().text(16, 20, 500).c(context.colors.neutralPrimary),
+                leading: (index + 4)
+                    .toString()
+                    .text(16, 20, 500)
+                    .c(context.colors.neutralPrimary),
                 title: Row(
                   children: [
                     AvatarWithFlagWidget(
@@ -38,15 +44,23 @@ class LeaderboardWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         user.isMe
-                            ? Strings.you.text(16, 20, 500).c(context.colors.neutralPrimary)
-                            : user.firstName.text(16, 20, 500).c(context.colors.neutralPrimary),
+                            ? Strings.you
+                                  .text(16, 20, 500)
+                                  .c(context.colors.neutralPrimary)
+                            : user.firstName
+                                  .text(16, 20, 500)
+                                  .c(context.colors.neutralPrimary),
                         const SizedBox(height: 8),
-                        ('${user.prettyTalks} talks').text(12, 16, 500).c(context.colors.textSub),
+                        ('${user.prettyTalks} talks')
+                            .text(12, 16, 500)
+                            .c(context.colors.textSub),
                       ],
                     ),
                   ],
                 ),
-                trailing: user.prettySteps.text(12, 16, 500).c(context.colors.neutralPrimary),
+                trailing: user.prettySteps
+                    .text(12, 16, 500)
+                    .c(context.colors.neutralPrimary),
               ),
             ],
           );

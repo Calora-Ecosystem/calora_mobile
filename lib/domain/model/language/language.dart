@@ -7,11 +7,16 @@ enum Language {
   RU;
 
   static Language fromName(String name) {
-    return Language.values.firstWhere((element) => element.name == name, orElse: () => Language.UZ);
+    return Language.values.firstWhere(
+      (element) => element.name == name,
+      orElse: () => Language.UZ,
+    );
   }
 
   static Language from(BuildContext context) {
-    return Language.values.firstWhere((element) => element.locale.languageCode == context.locale.languageCode);
+    return Language.values.firstWhere(
+      (element) => element.locale.languageCode == context.locale.languageCode,
+    );
   }
 
   String get name {

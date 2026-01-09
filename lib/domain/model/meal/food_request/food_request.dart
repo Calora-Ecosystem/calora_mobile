@@ -15,13 +15,19 @@ abstract class FoodRequest with _$FoodRequest {
     required int userId,
   }) = _FoodRequest;
 
-  factory FoodRequest.fromJson(Map<String, dynamic> json) => _$FoodRequestFromJson(json);
+  factory FoodRequest.fromJson(Map<String, dynamic> json) =>
+      _$FoodRequestFromJson(json);
 }
 
 @freezed
 abstract class FoodName with _$FoodName {
-  const factory FoodName({required String uz, required String ru, required String eng, required String cyrl}) =
-      _FoodName;
+  const factory FoodName({
+    required String uz,
+    required String ru,
+    required String eng,
+    required String cyrl,
+  }) = _FoodName;
 
-  factory FoodName.fromJson(Map<String, dynamic> json) => _$FoodNameFromJson(json);
+  factory FoodName.fromJson(Map<String, dynamic> json) =>
+      _$FoodNameFromJson(json);
 }

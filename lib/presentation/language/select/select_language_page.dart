@@ -14,7 +14,13 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class SelectLanguagePage extends Managed<SelectLanguageManager, SelectLanguageState, SelectLanguageEffect> {
+class SelectLanguagePage
+    extends
+        Managed<
+          SelectLanguageManager,
+          SelectLanguageState,
+          SelectLanguageEffect
+        > {
   const SelectLanguagePage({super.key});
 
   @override
@@ -30,7 +36,9 @@ class SelectLanguagePage extends Managed<SelectLanguageManager, SelectLanguageSt
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -56,7 +64,9 @@ class SelectLanguagePage extends Managed<SelectLanguageManager, SelectLanguageSt
                       width: double.infinity,
                       child: Button(
                         onPressed: () => _openOnboarding(context),
-                        child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
+                        child: Strings.doContinue
+                            .text(16, 20, 500)
+                            .c(context.colors.textWhite),
                       ),
                     ),
                   ],

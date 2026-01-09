@@ -12,7 +12,12 @@ class MealTypeGrid extends StatelessWidget {
   final Function(MealTypeData meal) onMealTypeSelected;
   final bool isLoading;
 
-  const MealTypeGrid({super.key, required this.mealTypes, required this.onMealTypeSelected, required this.isLoading});
+  const MealTypeGrid({
+    super.key,
+    required this.mealTypes,
+    required this.onMealTypeSelected,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +31,18 @@ class MealTypeGrid extends StatelessWidget {
       ),
       itemCount: isLoading ? 4 : mealTypes.length,
       itemBuilder: (context, index) {
-        final mealType = isLoading ? MealTypeData(name: '', imageUrl: '', id: 1) : mealTypes[index];
+        final mealType = isLoading
+            ? MealTypeData(name: '', imageUrl: '', id: 1)
+            : mealTypes[index];
         return ShimmerWrapper(
           loading: isLoading,
           type: ShimmerType.backgroundElevation,
           shimmerChild: ShimmerChild(height: 152),
-          child: _buildMealTypeCard(context: context, mealType: mealType, onTap: () => onMealTypeSelected(mealType)),
+          child: _buildMealTypeCard(
+            context: context,
+            mealType: mealType,
+            onTap: () => onMealTypeSelected(mealType),
+          ),
         );
       },
     );
@@ -60,7 +71,9 @@ class MealTypeGrid extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: mealType.name.text(14, 16, 600).c(context.colors.textStrong),
+              child: mealType.name
+                  .text(14, 16, 600)
+                  .c(context.colors.textStrong),
             ),
           ],
         ),
@@ -74,12 +87,21 @@ class FavouriteFoodGrid extends StatelessWidget {
   final bool isLoading;
   final Function(FoodModel) onFoodSelected;
 
-  const FavouriteFoodGrid({super.key, required this.foods, required this.onFoodSelected, required this.isLoading});
+  const FavouriteFoodGrid({
+    super.key,
+    required this.foods,
+    required this.onFoodSelected,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (foods.isEmpty) {
-      return Center(child: Strings.mealsAreNotAvailable.text(14, 18, 500).c(context.colors.textSub));
+      return Center(
+        child: Strings.mealsAreNotAvailable
+            .text(14, 18, 500)
+            .c(context.colors.textSub),
+      );
     }
     return GridView.builder(
       cacheExtent: 700,
@@ -91,7 +113,15 @@ class FavouriteFoodGrid extends StatelessWidget {
       ),
       itemCount: isLoading ? 4 : foods.length,
       itemBuilder: (context, index) {
-        final food = isLoading ? FoodModel(name: '', coverUrl: '', id: 1, categoryId: 1, metrics: []) : foods[index];
+        final food = isLoading
+            ? FoodModel(
+                name: '',
+                coverUrl: '',
+                id: 1,
+                categoryId: 1,
+                metrics: [],
+              )
+            : foods[index];
         return ShimmerWrapper(
           loading: isLoading,
           type: ShimmerType.backgroundElevation,
@@ -119,9 +149,7 @@ class FavouriteFoodGrid extends StatelessWidget {
                     child: food.name
                         .text(14, 16, 600)
                         .c(context.colors.textStrong)
-                        .copyWith(
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        .copyWith(overflow: TextOverflow.ellipsis),
                   ),
                 ],
               ),

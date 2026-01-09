@@ -49,22 +49,30 @@ class ConnectivityLostSheet extends StatelessWidget {
                         children: [
                           LayoutBuilder(
                             builder: (context, constraints) {
-                              final double width = constraints.maxWidth.clamp(100, 180);
+                              final double width = constraints.maxWidth.clamp(
+                                100,
+                                180,
+                              );
                               return Assets.icons.offlineTRex.svg(width: width);
                             },
                           ),
                           const SizedBox(height: 32),
-                          (state.hasInterface ? Strings.limitedInternetTitle : Strings.noInternetTitle)
+                          (state.hasInterface
+                                  ? Strings.limitedInternetTitle
+                                  : Strings.noInternetTitle)
                               .text(22, 24, 600)
                               .c(context.colors.textPrimary)
                               .copyWith(textAlign: TextAlign.center),
                           const SizedBox(height: 8),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 40),
-                            child: (state.hasInterface ? Strings.limitedInternetSubtitle : Strings.noInternetSubtitle)
-                                .text(16, 20, 500)
-                                .c(context.colors.textSub)
-                                .copyWith(textAlign: TextAlign.center),
+                            child:
+                                (state.hasInterface
+                                        ? Strings.limitedInternetSubtitle
+                                        : Strings.noInternetSubtitle)
+                                    .text(16, 20, 500)
+                                    .c(context.colors.textSub)
+                                    .copyWith(textAlign: TextAlign.center),
                           ),
                         ],
                       ),

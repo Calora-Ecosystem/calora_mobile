@@ -4,21 +4,24 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/navigation_button.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
+import 'package:calora/presentation/questions/questions/management/questions_management.dart';
+import 'package:calora/presentation/questions/questions/management/questions_manager.dart';
 import 'package:calora/widgets/questions/question_progress_widget.dart';
 import 'package:calora/widgets/questions/questions_body_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'package:calora/presentation/questions/questions/management/questions_management.dart';
-import 'package:calora/presentation/questions/questions/management/questions_manager.dart';
-
 @RoutePage()
-class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
-  final String email;
-  QuestionsPage(this.email, {super.key});
+class QuestionsPage
+    extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
+  QuestionsPage({super.key});
 
   @override
-  void listener(BuildContext context, QuestionsManager manager, QuestionsEffect effect) {
+  void listener(
+    BuildContext context,
+    QuestionsManager manager,
+    QuestionsEffect effect,
+  ) {
     effect.mapOrNull(
       withType: (e) {
         switch (e.type) {
@@ -36,7 +39,11 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
   }
 
   @override
-  Widget builder(BuildContext context, QuestionsManager manager, QuestionsState state) {
+  Widget builder(
+    BuildContext context,
+    QuestionsManager manager,
+    QuestionsState state,
+  ) {
     final profile = state.answers;
 
     final currentAnswer = switch (state.currentIndex) {
@@ -55,7 +62,9 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Column(
               children: [
@@ -72,7 +81,9 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                         ),
                         const SizedBox(height: 16),
                         QuestionsBodyWidget(),
-                        SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                        SizedBox(
+                          height: MediaQuery.of(context).viewInsets.bottom,
+                        ),
                       ],
                     ),
                   ),
@@ -81,7 +92,9 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                   padding: EdgeInsets.only(
                     left: 20,
                     right: 20,
-                    bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? 10 : 30,
+                    bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                        ? 10
+                        : 30,
                     top: 10,
                   ),
                   child: NavigationButtons(
@@ -104,7 +117,11 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
 
   void pushProgressPage(BuildContext context) {
     context.router.push(
-      ProgressRoute(mode: 2, fetchGoals: true, nextRoute: const CalculateRoute()),
+      ProgressRoute(
+        mode: 2,
+        fetchGoals: true,
+        nextRoute: const CalculateRoute(),
+      ),
     );
   }
 

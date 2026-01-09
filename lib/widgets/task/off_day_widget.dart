@@ -23,7 +23,9 @@ class OffDayWidget extends StatelessWidget {
             child: Assets.icons.dayOffIcon.svg(),
           ),
           SizedBox(height: 8),
-          Strings.youCanRelaxTuday.text(20, 24, 600).c(context.colors.neutral900Primary),
+          Strings.youCanRelaxTuday
+              .text(20, 24, 600)
+              .c(context.colors.neutral900Primary),
           SizedBox(height: 8),
           Strings.yourBodyAndMusclessNeedToRest
               .text(16, 20, 400)

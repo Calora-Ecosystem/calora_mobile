@@ -12,7 +12,8 @@ abstract class ReminderRequest with _$ReminderRequest {
     String? menu,
   }) = _ReminderRequest;
 
-  factory ReminderRequest.fromJson(Map<String, dynamic> json) => _$ReminderRequestFromJson(json);
+  factory ReminderRequest.fromJson(Map<String, dynamic> json) =>
+      _$ReminderRequestFromJson(json);
 
   static List<ReminderRequest> fromJsonList(List<dynamic> json) =>
       json.map((e) => ReminderRequest.fromJson(e)).toList();

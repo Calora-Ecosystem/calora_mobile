@@ -71,7 +71,9 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
     );
 
     // Check if video is 2 seconds away from completion
-    if (!_hasCalledOnComplete && videoDuration != Duration.zero && videoDuration.inSeconds > 0) {
+    if (!_hasCalledOnComplete &&
+        videoDuration != Duration.zero &&
+        videoDuration.inSeconds > 0) {
       final remainingSeconds = (videoDuration - currentPosition).inSeconds;
 
       if (remainingSeconds <= 2 && remainingSeconds >= 0) {
@@ -90,11 +92,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
 
         publish(const VideoEffect.videoCompleted());
 
-        emit(
-          state.copyWith(
-            isCompleted: true,
-          ),
-        );
+        emit(state.copyWith(isCompleted: true));
       }
     }
   }
@@ -125,7 +123,9 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
   void _startHideControlsTimer() {
     _cancelHideControlsTimer();
     _controlsTimer = Timer(const Duration(seconds: 5), () {
-      if (state.isControlsVisible && _controller != null && _controller!.value.isPlaying) {
+      if (state.isControlsVisible &&
+          _controller != null &&
+          _controller!.value.isPlaying) {
         emit(state.copyWith(isControlsVisible: false));
       }
     });
@@ -172,12 +172,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
     await _controller?.dispose();
     _controller = null;
     _hasCalledOnComplete = false;
-    emit(
-      const VideoState(
-        aspectRatio: 1.0,
-        isControlsVisible: true,
-      ),
-    );
+    emit(const VideoState(aspectRatio: 1.0, isControlsVisible: true));
     await super.close();
   }
 }

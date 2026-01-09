@@ -18,7 +18,8 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
 
-  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo) : super(HomeState());
+  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo)
+    : super(HomeState());
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
     onStart: () => emit(state.copyWith(isLoading: true)),
@@ -31,7 +32,11 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   );
 
   Future<void> requestPedometerPermissions() async {
-    await [Permission.activityRecognition, Permission.sensors, Permission.locationWhenInUse].request();
+    await [
+      Permission.activityRecognition,
+      Permission.sensors,
+      Permission.locationWhenInUse,
+    ].request();
   }
 
   void updateDay(DateTime day) {
@@ -62,7 +67,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         .handle(
           onStart: () => emit(state.copyWith(isMetricsLoading: true)),
           onData: (data) {
-            emit(state.copyWith(currentSteps: data.value.toInt(), isMetricsLoading: false));
+            emit(
+              state.copyWith(
+                currentSteps: data.value.toInt(),
+                isMetricsLoading: false,
+              ),
+            );
           },
           onError: (error) => emit(state.copyWith(isMetricsLoading: false)),
         );
@@ -74,7 +84,9 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         .handle(
           onStart: () => emit(state.copyWith(isWaterLoading: true)),
           onData: (data) {
-            emit(state.copyWith(waterIntake: data.value, isWaterLoading: false));
+            emit(
+              state.copyWith(waterIntake: data.value, isWaterLoading: false),
+            );
           },
           onError: (error) => emit(state.copyWith(isWaterLoading: false)),
         );
@@ -110,22 +122,40 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       onStart: () => emit(state.copyWith(isLoading: true)),
       onData: (data) {
         final stepValue = data
-            .firstWhere((e) => e.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Step',
+              orElse: () => NormsRequest(metric: 'Step', value: 0),
+            )
             .value;
         final waterValue = data
-            .firstWhere((e) => e.metric == 'Water', orElse: () => NormsRequest(metric: 'Water', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Water',
+              orElse: () => NormsRequest(metric: 'Water', value: 0),
+            )
             .value;
         final kcalValue = data
-            .firstWhere((e) => e.metric == 'Kcal', orElse: () => NormsRequest(metric: 'Kcal', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Kcal',
+              orElse: () => NormsRequest(metric: 'Kcal', value: 0),
+            )
             .value;
         final proteinValue = data
-            .firstWhere((e) => e.metric == 'Protein', orElse: () => NormsRequest(metric: 'Protein', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Protein',
+              orElse: () => NormsRequest(metric: 'Protein', value: 0),
+            )
             .value;
         final fatValue = data
-            .firstWhere((e) => e.metric == 'Fat', orElse: () => NormsRequest(metric: 'Fat', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Fat',
+              orElse: () => NormsRequest(metric: 'Fat', value: 0),
+            )
             .value;
         final carbsValue = data
-            .firstWhere((e) => e.metric == 'Carb', orElse: () => NormsRequest(metric: 'Carb', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Carb',
+              orElse: () => NormsRequest(metric: 'Carb', value: 0),
+            )
             .value;
 
         emit(
@@ -168,17 +198,23 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
           NutrientInfo(
             name: Strings.proteins,
             value: summary.sum.Protein,
-            percent: proteinNorm > 0 ? (summary.sum.Protein / proteinNorm).clamp(0.0, 1.0) : 0,
+            percent: proteinNorm > 0
+                ? (summary.sum.Protein / proteinNorm).clamp(0.0, 1.0)
+                : 0,
           ),
           NutrientInfo(
             name: Strings.oils,
             value: summary.sum.Fat,
-            percent: fatNorm > 0 ? (summary.sum.Fat / fatNorm).clamp(0.0, 1.0) : 0,
+            percent: fatNorm > 0
+                ? (summary.sum.Fat / fatNorm).clamp(0.0, 1.0)
+                : 0,
           ),
           NutrientInfo(
             name: Strings.carbohydrates,
             value: summary.sum.Carb,
-            percent: carbNorm > 0 ? (summary.sum.Carb / carbNorm).clamp(0.0, 1.0) : 0,
+            percent: carbNorm > 0
+                ? (summary.sum.Carb / carbNorm).clamp(0.0, 1.0)
+                : 0,
           ),
         ],
       ),

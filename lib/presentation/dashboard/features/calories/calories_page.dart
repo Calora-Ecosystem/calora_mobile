@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
@@ -14,7 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
+class CaloriesPage
+    extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
   const CaloriesPage({super.key});
 
   @override
@@ -24,18 +26,23 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   }
 
   @override
-  void listener(BuildContext context, CaloriesManager manager, CaloriesEffect effect) {
+  void listener(
+    BuildContext context,
+    CaloriesManager manager,
+    CaloriesEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.when(
-      openMealPage: (type, meals, date) =>
-          context.pushRoute<bool>(MealsRoute(type: type, dateTime: date, categoryId: 1)).then(
-            (value) {
-              if (value == true) {
-                manager.fetchCaloriesAndMeals(date);
-                manager.getSummary(date);
-              }
-            },
-          ),
+      openMealPage: (type, meals, date) => context
+          .pushRoute<bool>(
+            MealsRoute(type: type, dateTime: date, categoryId: 1),
+          )
+          .then((value) {
+            if (value == true) {
+              manager.fetchCaloriesAndMeals(date);
+              manager.getSummary(date);
+            }
+          }),
     );
   }
 
@@ -43,19 +50,25 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   Widget builder(context, manager, state) {
     return Scaffold(
       body: DefaultRefreshIndicator(
+        edgeOffset: context.topPadding + kToolbarHeight,
         onRefresh: () async {
           manager.fetchCaloriesAndMeals(state.date ?? DateTime.now());
           manager.getSummary(state.date ?? DateTime.now());
         },
         child: Stack(
           children: [
-            Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+            Positioned.fill(
+              child: Assets.icons.background.image(fit: BoxFit.fill),
+            ),
             Container(
-              color: state.isScrolled ? context.colors.softGray : Colors.transparent,
+              color: state.isScrolled
+                  ? context.colors.softGray
+                  : Colors.transparent,
               child: SafeArea(
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (notification) {
-                    if (notification.metrics.axis == Axis.horizontal) return false;
+                    if (notification.metrics.axis == Axis.horizontal)
+                      return false;
                     if (notification is ScrollUpdateNotification) {
                       manager.setScrolled(notification.metrics.pixels > 0);
                     }
@@ -78,8 +91,13 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                          decoration: BoxDecoration(color: context.colors.white),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.colors.white,
+                          ),
                           child: Column(
                             spacing: 8,
                             children: [
@@ -89,7 +107,10 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                 leftover: state.leftover.asFixedTruncated(0),
                                 loading: state.isLoading,
                               ),
-                              MealCardsGrid(meals: manager.meals, isLoading: state.isLoading),
+                              MealCardsGrid(
+                                meals: manager.meals,
+                                isLoading: state.isLoading,
+                              ),
                               CaloryNotificationSettings(),
                             ],
                           ),

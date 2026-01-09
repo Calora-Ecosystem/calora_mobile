@@ -65,8 +65,10 @@ class LoggingInterceptor extends Interceptor {
 
   Future<void> _writeToFile(String message) async {
     final timestamp = DateTime.now().toIso8601String();
-    await logFile.writeAsString('Time: $timestamp\n$message\n',
-        mode: FileMode.append);
+    await logFile.writeAsString(
+      'Time: $timestamp\n$message\n',
+      mode: FileMode.append,
+    );
   }
 
   String _convertToJson(dynamic data) {
@@ -88,7 +90,8 @@ class LoggingInterceptor extends Interceptor {
           field.key.toLowerCase().contains('image') ||
           value.length > 500) {
         buffer.writeln(
-            '  ${field.key}: <base64 hidden, length: ${value.length}>');
+          '  ${field.key}: <base64 hidden, length: ${value.length}>',
+        );
       } else {
         buffer.writeln('  ${field.key}: $value');
       }
@@ -107,7 +110,9 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     String dataDescription;
     if (options.data is FormData) {
       dataDescription = _formDataToReadable(options.data as FormData);

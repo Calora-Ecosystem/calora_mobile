@@ -9,7 +9,10 @@ const String abstractImageUrl = 'images/abstract.png';
 
 extension CourseRequestX on CourseRequest {
   String? _getAssetUrl(String type) {
-    final asset = assets?.firstWhere((a) => a['type'] == type, orElse: () => {});
+    final asset = assets?.firstWhere(
+      (a) => a['type'] == type,
+      orElse: () => {},
+    );
 
     final url = asset?['url'];
     if (url == null || url.isEmpty) return null;
@@ -23,11 +26,13 @@ extension CourseRequestX on CourseRequest {
 }
 
 extension MealTypeDataX on MealTypeData {
-  String get fullImageUrl => imageUrl.startsWith('http') ? imageUrl : '$baseUrl$imageUrl';
+  String get fullImageUrl =>
+      imageUrl.startsWith('http') ? imageUrl : '$baseUrl$imageUrl';
 }
 
 extension FoodModelX on FoodModel {
-  String get fullImageUrl => coverUrl.startsWith('http') ? coverUrl : '$baseUrl$coverUrl';
+  String get fullImageUrl =>
+      coverUrl.startsWith('http') ? coverUrl : '$baseUrl$coverUrl';
 }
 
 extension ImageUrlExtension on String {

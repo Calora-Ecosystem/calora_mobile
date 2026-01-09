@@ -29,15 +29,19 @@ abstract class AddMealsState with _$AddMealsState {
 
 @freezed
 class AddMealsEffect with _$AddMealsEffect {
-  const factory AddMealsEffect.openDishesPage(MealTypeData meal) = OpenDishesPage;
+  const factory AddMealsEffect.openDishesPage(MealTypeData meal) =
+      OpenDishesPage;
 
   const factory AddMealsEffect.openCreatorWithImage() = OpenCreatorWithImage;
 
   const factory AddMealsEffect.openCreatorWithSpeech() = OpenCreatorWithSpeech;
 
-  const factory AddMealsEffect.openAboutPage(FoodModel food, bool isFavourite) = OpenAboutPage;
+  const factory AddMealsEffect.openAboutPage(FoodModel food, bool isFavourite) =
+      OpenAboutPage;
 
-  const factory AddMealsEffect.showSuccessDialog(String message) = ShowSuccessDialog;
+  const factory AddMealsEffect.showSuccessDialog(String message) =
+      ShowSuccessDialog;
 
-  const factory AddMealsEffect.showErrorDialog(String message) = ShowErrorDialog;
+  const factory AddMealsEffect.showErrorDialog(String message) =
+      ShowErrorDialog;
 }

@@ -15,7 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
+class ProfileDetailPage
+    extends
+        Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
   final String userId;
   const ProfileDetailPage({required this.userId, super.key});
 
@@ -73,7 +75,9 @@ class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState
                 const SizedBox(height: 16),
                 Image.asset('assets/images/yandex-banner.png'),
                 const SizedBox(height: 8),
-                Strings.automaticTracking.text(16, 20, 500).c(context.colors.textStrong),
+                Strings.automaticTracking
+                    .text(16, 20, 500)
+                    .c(context.colors.textStrong),
                 const SizedBox(height: 8),
                 SvgButtonsRow(
                   isAppleHealthSelected: state.isAppleHealthSelected,
@@ -135,7 +139,9 @@ class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState
                       children: [
                         Assets.icons.logout.svg(),
                         const SizedBox(width: 8),
-                        Strings.logOut.text(14, 16, 600).c(context.colors.errorBase),
+                        Strings.logOut
+                            .text(14, 16, 600)
+                            .c(context.colors.errorBase),
                       ],
                     ),
                   ),
@@ -150,7 +156,7 @@ class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState
 
   void logOut(ProfileDetailManager manager, BuildContext context) {
     manager.logOut();
-    context.router.replaceAll([const AuthRoute()]);
+    context.router.replaceAll([AuthRoute()]);
   }
 
   Widget _buildRow(String label, String value, BuildContext context) {

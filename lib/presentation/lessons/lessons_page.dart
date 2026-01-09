@@ -40,7 +40,11 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
   }
 
   @override
-  Widget builder(BuildContext context, LessonsManager manager, LessonsState state) {
+  Widget builder(
+    BuildContext context,
+    LessonsManager manager,
+    LessonsState state,
+  ) {
     return Scaffold(
       backgroundColor: context.colors.accentDisabled,
       body: Stack(
@@ -73,7 +77,9 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: context.colors.white,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
                   ),
                   child: Column(
                     children: [

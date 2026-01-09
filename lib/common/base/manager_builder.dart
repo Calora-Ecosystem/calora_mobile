@@ -19,10 +19,12 @@ class ManagerBuilder<STATE, EFFECT> extends StatefulWidget {
   });
 
   @override
-  State<ManagerBuilder<STATE, EFFECT>> createState() => _ManagerBuilderState<STATE, EFFECT>();
+  State<ManagerBuilder<STATE, EFFECT>> createState() =>
+      _ManagerBuilderState<STATE, EFFECT>();
 }
 
-class _ManagerBuilderState<STATE, EFFECT> extends State<ManagerBuilder<STATE, EFFECT>> {
+class _ManagerBuilderState<STATE, EFFECT>
+    extends State<ManagerBuilder<STATE, EFFECT>> {
   late STATE _currentState;
   late StreamSubscription<STATE> _subscription;
   List<dynamic>? _lastProps;

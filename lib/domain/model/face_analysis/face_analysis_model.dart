@@ -14,5 +14,6 @@ sealed class FaceAnalysisModel with _$FaceAnalysisModel {
     int? sleep,
   }) = _FaceAnalysisModel;
 
-  factory FaceAnalysisModel.fromJson(Map<String, dynamic> json) => _$FaceAnalysisModelFromJson(json);
+  factory FaceAnalysisModel.fromJson(Map<String, dynamic> json) =>
+      _$FaceAnalysisModelFromJson(json);
 }

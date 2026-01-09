@@ -57,7 +57,9 @@ class TaskParametersWidget extends StatelessWidget {
                     bottomLabel!.text(16, 20, 500),
                     if (bottomCount != null) ...[
                       const SizedBox(width: 4),
-                      '(${bottomCount.toString()})'.text(16, 20, 500).c(colors.neutral600Secondary),
+                      '(${bottomCount.toString()})'
+                          .text(16, 20, 500)
+                          .c(colors.neutral600Secondary),
                     ],
                   ],
                 ),

@@ -35,10 +35,7 @@ class HomeApi {
 
     final response = await _dio.get(
       'users/steps/metrics',
-      queryParameters: {
-        'from': formattedDate,
-        'to': formattedDate,
-      },
+      queryParameters: {'from': formattedDate, 'to': formattedDate},
     );
 
     final data = response.data['content'];

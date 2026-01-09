@@ -52,13 +52,22 @@ class ConfirmPage extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: iconBackgroundColor ?? colors.warningLighter, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: iconBackgroundColor ?? colors.warningLighter,
+                shape: BoxShape.circle,
+              ),
               child: Assets.icons.warning.svg(
-                colorFilter: ColorFilter.mode(iconColor ?? colors.warningBase, BlendMode.srcIn),
+                colorFilter: ColorFilter.mode(
+                  iconColor ?? colors.warningBase,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
             const SizedBox(height: 8),
-            title.text(16, 20, 400).c(titleColor ?? colors.textStrong).copyWith(textAlign: TextAlign.center),
+            title
+                .text(16, 20, 400)
+                .c(titleColor ?? colors.textStrong)
+                .copyWith(textAlign: TextAlign.center),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -66,7 +75,10 @@ class ConfirmPage extends StatelessWidget {
                   child: GestureDetector(
                     onTap: onCancel,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: cancelBackgroundColor ?? colors.errorLighter,
                         borderRadius: BorderRadius.circular(8),
@@ -85,9 +97,14 @@ class ConfirmPage extends StatelessWidget {
                   child: GestureDetector(
                     onTap: onConfirm,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: confirmBackgroundColor ?? colors.backgroundElevation,
+                        color:
+                            confirmBackgroundColor ??
+                            colors.backgroundElevation,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: confirmText

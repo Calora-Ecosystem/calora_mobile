@@ -19,7 +19,8 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
   void getDailyGoals() async {
     await questionsRepo.getDailyGoals().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (goals) => emit(state.copyWith(dailyGoals: goals, isLoading: false)),
+      onData: (goals) =>
+          emit(state.copyWith(dailyGoals: goals, isLoading: false)),
       onError: (error) {
         emit(state.copyWith(isLoading: false));
         publish(CalculateEffect.error(error.toString()));
@@ -33,17 +34,20 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
     final totalTicks = _animationDurationSeconds * _ticksPerSecond;
     int currentTick = 0;
 
-    _animationTimer = Timer.periodic(Duration(milliseconds: 1000 ~/ _ticksPerSecond), (timer) {
-      currentTick++;
-      final progress = (currentTick / totalTicks).clamp(0.0, 1.0);
+    _animationTimer = Timer.periodic(
+      Duration(milliseconds: 1000 ~/ _ticksPerSecond),
+      (timer) {
+        currentTick++;
+        final progress = (currentTick / totalTicks).clamp(0.0, 1.0);
 
-      emit(state.copyWith(progressPercent: progress));
+        emit(state.copyWith(progressPercent: progress));
 
-      if (progress >= 1.0) {
-        timer.cancel();
-        onComplete?.call();
-      }
-    });
+        if (progress >= 1.0) {
+          timer.cancel();
+          onComplete?.call();
+        }
+      },
+    );
   }
 
   void goToNextPage() {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:calora/data/api/auth_api.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
+import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/token/token.dart';
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
@@ -14,8 +15,9 @@ import 'package:injectable/injectable.dart';
 class AuthRepoImpl extends AuthRepo {
   final AuthApi _api;
   final AuthStore _store;
+  final CommonStore _commonStore;
 
-  AuthRepoImpl(this._api, this._store);
+  AuthRepoImpl(this._api, this._store, this._commonStore);
 
   @override
   Future<Verification> sendOtp(String email) async {
@@ -45,9 +47,10 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken = await FirebaseMessaging.instance.getToken();
     }
     final response = await _api.signIn(
-      email: verification.email!,
+      email: verification.email,
       verificationCode: verification.verificationCode!,
       code: code,
+      phone: verification.phone,
       key: installationId,
       name: deviceName,
       fcmToken: fcmToken,
@@ -56,7 +59,13 @@ class AuthRepoImpl extends AuthRepo {
     final Map<String, dynamic> content = (response.data as Map<String, dynamic>)['content'];
     final token = Token.fromJson(content);
     await _store.token.set(token);
+    final bool hasNewUser = content['hasNewUser'] as bool;
+    await _commonStore.isQuestionaryFinished.set(!hasNewUser);
+    return hasNewUser;
+  }
 
-    return content['hasNewUser'] as bool;
+  @override
+  Future<Verification> sendOtpToPhone(String phone) async {
+    return await _api.sendOtpToPhone(phone);
   }
 }

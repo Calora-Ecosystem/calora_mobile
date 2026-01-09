@@ -9,31 +9,22 @@ class CaloraAiManager extends Manager<CaloraAiState, CaloraAiEffect> {
 
   void openConfirmPage() async {
     final status = await Permission.camera.status;
+
     if (status.isGranted) {
       publish(const CaloraAiEffect.navigateToCamera());
       return;
     }
-    if (status.isDenied) {
-      final result = await Permission.camera.request();
-      if (result.isGranted) {
-        publish(const CaloraAiEffect.navigateToCamera());
-      } else {
-        publish(const CaloraAiEffect.showConfirmDialog());
-      }
-      return;
-    }
-    if (status.isPermanentlyDenied) {
-      publish(const CaloraAiEffect.showConfirmDialog());
+
+    final result = await Permission.camera.request();
+
+    if (result.isGranted) {
+      publish(const CaloraAiEffect.navigateToCamera());
+    } else {
+      publish(const CaloraAiEffect.showPermissionDeniedMessage());
     }
   }
 
   Future<void> requestCameraPermission() async {
-    final status = await Permission.camera.status;
-
-    if (status.isGranted) {
-      publish(const CaloraAiEffect.navigateToCamera());
-    } else {
-      openAppSettings();
-    }
+    await openAppSettings();
   }
 }

@@ -5,10 +5,12 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class SingleSelectionManager extends Manager<SingleSelectionState, SingleSelectionEffect> {
+class SingleSelectionManager
+    extends Manager<SingleSelectionState, SingleSelectionEffect> {
   final SelectionRepo _selectionRepo;
 
-  SingleSelectionManager(this._selectionRepo) : super(const SingleSelectionState());
+  SingleSelectionManager(this._selectionRepo)
+    : super(const SingleSelectionState());
   Selection _currentSelection = Selection();
 
   String? _initialSelectedValue;
@@ -18,14 +20,19 @@ class SingleSelectionManager extends Manager<SingleSelectionState, SingleSelecti
     _initialSelectedValue = initialSelectedValue;
   }
 
-
   void getSelections() async {
     await _selectionRepo
         .getSelections(_currentSelection)
         .handle(
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (data) {
-            final updatedData = data.map((item) => item.copyWith(isChecked: item.name == _initialSelectedValue)).toList();
+            final updatedData = data
+                .map(
+                  (item) => item.copyWith(
+                    isChecked: item.name == _initialSelectedValue,
+                  ),
+                )
+                .toList();
             emit(state.copyWith(selections: updatedData));
           },
           onDone: () => emit(state.copyWith(loading: false)),
