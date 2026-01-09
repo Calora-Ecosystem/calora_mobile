@@ -263,7 +263,7 @@ from_kcal,from kcal,kkaldan,из ккал
 to_remind_you_of_meal_times,To remind you of meal times,Ovqat vaqtlarini eslatish uchun,Чтобы напомнить вам о времени приема пищи
 add_food,Add food,Ovqatni qo’shish,Добавить еду
 meals_are_not_available,Meals are not available.,Ovqatlar mavjud emas,Питание не предоставляется.
-add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь вы можете указать свои последние приемы пищи.
+add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь укажите ваши последние приемы пищи.
 search_for_food_or_product,Search for food or product,Ovqat yoki maxsulotni qidirish,Поиск продуктов питания или товаров
 creation,Creation,Yaratish,Творение
 scanning,Scanning,Skanerlash,Сканирование
@@ -292,7 +292,7 @@ the_information_in_your_voicemail_is_being_analyzed,The information in your voic
 daily_meal_plan,Daily meal plan,Kunlik ozuqa rejasi,Ежедневный план питания
 add,Add,Qo'shish,Добавлять
 more_details,More details,Batafsill,Более подробная информация
-add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённое количество
+add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённую сумму
 enter_the_amount_of_food_gr,"Enter the amount of food, gr.","Ovqat miqdorini kiriting, gr","Введите количество еды, гр."
 make_your_own_food,Make your own food,O‘zingizni ovqatingizni yarating,Готовьте еду сами
 name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
@@ -320,7 +320,7 @@ notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj
 should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
 yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
 please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
-your_data_has_been_saved,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+your_data_has_been_saved,Your data has been successfully saved.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
 no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
 liter,liter,litr,литр
@@ -331,7 +331,7 @@ number_of_lessons,Number of lessons,Darslar soni,Количество уроко
 price,Price,Narxi,Цена
 snack,snack,gazak,перекус
 try_again,Try again,Qayta urunish,Попробуйте еще раз
-snack_time_reminder,snack time reminder,gazak vaqtini eslatish,напоминание о времени перекуса
+snack_time_reminder,snack time reminder,gazak vaqtini eslatish,напоминание о перекусе
 minute,minute,minut,минута
 yourDataHasBeenSuccessfullySaved,You data has been saved successfully,Ma'lumotlaringiz muaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 limited_internet_title,Internet is unavailable.,Internet mavjud emas,Интернет недоступен

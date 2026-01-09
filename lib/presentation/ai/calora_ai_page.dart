@@ -9,6 +9,7 @@ import 'package:calora/presentation/ai/management/calora_ai_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
@@ -50,7 +51,7 @@ class CaloraAiPage extends Managed<CaloraAiManager, CaloraAiState, CaloraAiEffec
                 const SizedBox(height: 4),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: context.colors.backgroundElevation,
                     borderRadius: BorderRadius.circular(12),

@@ -1,3 +1,5 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';

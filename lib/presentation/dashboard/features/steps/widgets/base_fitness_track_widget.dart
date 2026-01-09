@@ -138,7 +138,7 @@ class BaseFitnessTrackWidget extends StatelessWidget {
                               children: [
                                 Assets.icons.icStopwatch.svg(),
                                 const SizedBox(height: 4),
-                                '0 S'.text(16, 20, 500).c(context.colors.textStrong),
+                                '${metrics.duration}'.text(16, 20, 500).c(context.colors.textStrong),
                                 const SizedBox(height: 2),
                                 Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
                               ],
