@@ -11,6 +11,7 @@ class DefaultBottomSheet extends StatelessWidget {
   final bool showHandle;
   final double? height;
   final String? title;
+  final Widget? titleWidget;
 
   const DefaultBottomSheet({
     super.key,
@@ -22,6 +23,7 @@ class DefaultBottomSheet extends StatelessWidget {
     this.showHandle = true,
     this.title,
     this.titlePadding = const EdgeInsets.symmetric(horizontal: 20),
+    this.titleWidget,
   });
 
   @override
@@ -57,17 +59,17 @@ class DefaultBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-          if (title != null) ...[
+          if (title != null || titleWidget != null) ...[
             Padding(
-              padding: padding == EdgeInsets.zero
-                  ? titlePadding
-                  : EdgeInsets.zero,
-              child: title
-                  .text(16, 20, 600)
-                  .c(context.colors.textPrimary)
-                  .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+              padding: padding == EdgeInsets.zero ? titlePadding : EdgeInsets.zero,
+              child:
+                  titleWidget ??
+                  title
+                      .text(16, 20, 600)
+                      .c(context.colors.textPrimary)
+                      .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-            const SizedBox(height: 16),
+            if (titleWidget == null) const SizedBox(height: 16),
           ],
           Flexible(child: child),
         ],

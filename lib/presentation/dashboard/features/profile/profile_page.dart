@@ -8,6 +8,7 @@ import 'package:calora/presentation/dashboard/features/profile/management/profil
 import 'package:calora/presentation/dashboard/features/profile/management/profile_manager.dart';
 import 'package:calora/presentation/help/help_page.dart';
 import 'package:calora/presentation/language/bottom_sheet/language_bottom_sheet.dart';
+import 'package:calora/widgets/premium/premium_entry_card.dart';
 import 'package:calora/widgets/profile_cards/bmi_card/bmi_card.dart';
 import 'package:calora/widgets/profile_cards/profile_card.dart';
 import 'package:calora/widgets/profile_cards/settings_card.dart' show SettingsCard;
@@ -54,21 +55,18 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       onAccountTap: () => _openAccountDetailPage(context, manager),
                       onNormsTap: () => _openNormsPage(context),
                       onLanguageTap: () => _showLanguageBottomSheet(context),
-                      onNotificationsTap: () {
-                        _openNotificationSettingsPage(context);
-                      },
-                      onInviteTap: () {
-                        SharePlus.instance.share(
-                          ShareParams(
-                            text: 'Men Calora ilovasidan foydalanayapman.\nSiz ham sog‘lom hayot uchun yuklab oling!',
-                          ),
-                        );
-                      },
+                      onNotificationsTap: () => _openNotificationSettingsPage(context),
+                      onInviteTap: () => SharePlus.instance.share(
+                        ShareParams(
+                          text: 'Men Calora ilovasidan foydalanayapman.\nSiz ham sog‘lom hayot uchun yuklab oling!',
+                        ),
+                      ),
                       onAboutTap: () => _showAboutBottomSheet(context),
                       onHelpTap: () => _showHelpBottomSheet(context),
                     ),
                     SizedBox(height: 16),
-                    Assets.images.yandexBanner.image(),
+                    // Assets.images.yandexBanner.image(),
+                    PremiumEntryCard(),
                   ],
                 ),
               ),

@@ -29,7 +29,7 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           spacing: 8,
-          crossAxisAlignment: .start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Align(
               child: ToggleButtonsWidget(

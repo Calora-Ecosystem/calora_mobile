@@ -10,7 +10,9 @@ class CommonTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final bool obscureText;
   final Widget? prefix;
+  final Widget? suffixIcon;
   final Widget? suffix;
+  final EdgeInsets? contentPadding;
 
   const CommonTextField({
     super.key,
@@ -21,7 +23,9 @@ class CommonTextField extends StatefulWidget {
     this.inputFormatters,
     this.obscureText = false,
     this.prefix,
+    this.suffixIcon,
     this.suffix,
+    this.contentPadding,
   });
 
   @override
@@ -54,13 +58,12 @@ class _CommonTextFieldState extends State<CommonTextField> {
           fontSize: 16,
           fontWeight: FontWeight.w400,
           height: 0.8,
+          leadingDistribution: TextLeadingDistribution.even,
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        contentPadding: widget.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16),
+        suffix: widget.suffix,
         prefixIcon: widget.prefix,
-        suffixIcon: widget.suffix,
+        suffixIcon: widget.suffixIcon,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: context.colors.strokeSoft, width: 1.5),
