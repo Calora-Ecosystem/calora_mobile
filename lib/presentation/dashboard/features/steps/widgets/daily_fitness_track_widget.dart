@@ -33,16 +33,14 @@ class DailyFitnessTrackWidget extends StatefulWidget {
   final bool loading;
 
   @override
-  State<DailyFitnessTrackWidget> createState() =>
-      _DailyFitnessTrackWidgetState();
+  State<DailyFitnessTrackWidget> createState() => _DailyFitnessTrackWidgetState();
 }
 
-class _DailyFitnessTrackWidgetState extends State<DailyFitnessTrackWidget>
-    with AutomaticKeepAliveClientMixin {
+class _DailyFitnessTrackWidgetState extends State<DailyFitnessTrackWidget> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final bool canGoForwardForThisTab = widget.offset < 0; // Calculate here
+    final bool canGoForwardForThisTab = widget.offset < 0;
     return BaseFitnessTrackWidget(
       period: 'daily',
       title: Strings.daily,
@@ -52,6 +50,7 @@ class _DailyFitnessTrackWidgetState extends State<DailyFitnessTrackWidget>
       onClickForward: widget.onClickForward,
       onClickMoreVert: widget.onClickMoreVert,
       metrics: widget.metrics,
+      loading: widget.loading,
       body: StepsIndicatorWidget(
         current: widget.stepCount.toDouble(),
         goal: widget.goal,

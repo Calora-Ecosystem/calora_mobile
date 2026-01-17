@@ -43,6 +43,9 @@ abstract class StepsState with _$StepsState {
     @Default(false) bool isGettingNorms,
     @Default(false) bool isDeletingNorm,
     @Default(false) bool isDeletingUserDailyData,
+    @Default(false) bool isDailyLoading,
+    @Default(false) bool isWeeklyLoading,
+    @Default(false) bool isMonthlyLoading,
   }) = _StepsState;
 
   const StepsState._();

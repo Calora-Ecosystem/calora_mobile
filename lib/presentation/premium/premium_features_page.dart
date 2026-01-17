@@ -59,7 +59,7 @@ class PremiumFeaturesPage extends StatelessWidget {
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                     ),
-                    builder: (_) => const PremiumSheet(),
+                    builder: (_) => PremiumSheet(),
                   );
                 },
               ),

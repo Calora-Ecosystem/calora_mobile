@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
@@ -6,6 +7,7 @@ import 'package:calora/domain/model/token/token.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 @lazySingleton
 class TokenInterceptor extends Interceptor {
@@ -37,9 +39,9 @@ class TokenInterceptor extends Interceptor {
     try {
       final language = await _commonStore.language();
       options.headers['Accept-Language'] = language?.code ?? 'UZ';
-
       final tokens = await _storage.token();
       final accessToken = tokens?.accessToken;
+      await _commonStore.isUserPremium.set(isUserPremium(accessToken ?? ''));
 
       if (accessToken != null && accessToken.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $accessToken';
@@ -135,12 +137,8 @@ class TokenInterceptor extends Interceptor {
         return false;
       }
 
-      final refreshTokenPreview = refreshToken.length >= 10
-          ? refreshToken.substring(0, 10)
-          : refreshToken;
-      final accessTokenPreview = oldAccessToken.length >= 20
-          ? oldAccessToken.substring(0, 20)
-          : oldAccessToken;
+      final refreshTokenPreview = refreshToken.length >= 10 ? refreshToken.substring(0, 10) : refreshToken;
+      final accessTokenPreview = oldAccessToken.length >= 20 ? oldAccessToken.substring(0, 20) : oldAccessToken;
 
       _log.d('Refresh token: $refreshTokenPreview...');
       _log.d('Old access token: $accessTokenPreview...');
@@ -236,12 +234,8 @@ class TokenInterceptor extends Interceptor {
 
       await _storage.token.set(newTokens);
 
-      final newAccessPreview = newAccessToken.length >= 20
-          ? newAccessToken.substring(0, 20)
-          : newAccessToken;
-      final newRefreshPreview = newRefreshToken.length >= 10
-          ? newRefreshToken.substring(0, 10)
-          : newRefreshToken;
+      final newAccessPreview = newAccessToken.length >= 20 ? newAccessToken.substring(0, 20) : newAccessToken;
+      final newRefreshPreview = newRefreshToken.length >= 10 ? newRefreshToken.substring(0, 10) : newRefreshToken;
 
       _log.i('✅ Token refresh successful!');
       _log.d('New access token: $newAccessPreview...');
@@ -336,5 +330,12 @@ class TokenInterceptor extends Interceptor {
   Future<void> _clearTokens() async {
     _log.w('🗑️ Clearing all tokens');
     await _storage.token.set(null);
+  }
+
+  bool isUserPremium(String token) {
+    if (JwtDecoder.isExpired(token)) return false;
+    final Map<String, dynamic> payload = JwtDecoder.decode(token);
+    final plan = (payload['plan'] as String?)?.toLowerCase() ?? 'free';
+    return plan == 'premium';
   }
 }

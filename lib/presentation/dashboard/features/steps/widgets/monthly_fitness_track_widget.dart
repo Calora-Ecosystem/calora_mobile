@@ -50,6 +50,7 @@ class _MonthlyFitnessTrackWidgetState extends State<MonthlyFitnessTrackWidget>
       onClickForward: widget.onClickForward,
       onClickMoreVert: widget.onClickMoreVert,
       metrics: widget.metrics,
+      loading: widget.loading,
       body: ChartWidget(
         type: ChartType.monthly,
         primaryValues: widget.primaryValues,

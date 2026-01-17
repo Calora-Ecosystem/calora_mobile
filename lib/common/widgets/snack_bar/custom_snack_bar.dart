@@ -1,14 +1,27 @@
+import 'package:calora/common/extensions/color_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
+enum SnackBarType { error, success }
+
 class CustomSnackBar {
   static void show(BuildContext context, String message) {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
-      builder: (context) =>
-          _CustomSnackBarWidget(message: message, onDismiss: () {}),
+      builder: (context) => _CustomSnackBarWidget(message: message, type: SnackBarType.error, onDismiss: () {}),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(milliseconds: 1500), overlayEntry.remove);
+  }
+
+  static void showSuccess(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => _CustomSnackBarWidget(message: message, type: SnackBarType.success, onDismiss: () {}),
     );
 
     overlay.insert(overlayEntry);
@@ -20,25 +33,22 @@ class CustomSnackBar {
 class _CustomSnackBarWidget extends StatefulWidget {
   final String message;
   final VoidCallback onDismiss;
+  final SnackBarType type;
 
-  const _CustomSnackBarWidget({required this.message, required this.onDismiss});
+  const _CustomSnackBarWidget({required this.message, required this.onDismiss, required this.type});
 
   @override
   State<_CustomSnackBarWidget> createState() => _CustomSnackBarWidgetState();
 }
 
-class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget>
-    with SingleTickerProviderStateMixin {
+class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+    _controller = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
 
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
@@ -46,11 +56,8 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
-
     Future.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) {
-        _controller.reverse();
-      }
+      if (mounted) _controller.reverse();
     });
   }
 
@@ -73,11 +80,11 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget>
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             decoration: BoxDecoration(
-              color: context.colors.black,
+              color: widget.type == SnackBarType.error ? context.colors.black : context.colors.green,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withOpacityLevel(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -86,13 +93,9 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Assets.icons.errorIcon.svg(),
+                widget.type == SnackBarType.error ? Assets.icons.errorIcon.svg() : Assets.icons.checkmarkCircle.svg(),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: widget.message
-                      .text(14, 18, 400)
-                      .c(context.colors.textWhite),
-                ),
+                Expanded(child: widget.message.text(14, 18, 400).c(context.colors.textWhite)),
               ],
             ),
           ),

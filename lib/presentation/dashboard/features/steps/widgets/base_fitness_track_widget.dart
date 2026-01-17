@@ -70,9 +70,7 @@ class BaseFitnessTrackWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  _getDateLabel(
-                    period,
-                  ).text(14, 16, 400).c(context.colors.textWhite),
+                  _getDateLabel(period).text(14, 16, 400).c(context.colors.textWhite),
                   canGoForward
                       ? SizedBox(
                           width: 40,
@@ -89,7 +87,7 @@ class BaseFitnessTrackWidget extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               ShimmerWrapper(
-                loading: manager.state.isGettingSteps,
+                loading: loading,
                 shimmerChild: ShimmerChild(
                   height: period == 'daily'
                       ? 358

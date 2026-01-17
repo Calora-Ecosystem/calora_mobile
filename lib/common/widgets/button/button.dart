@@ -18,10 +18,14 @@ class Button extends StatelessWidget {
     this.height = 48,
     this.radius = 12,
     this.padding = EdgeInsets.zero,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   final String? text;
   final Color? textColor;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
   final Widget? child;
   final Function()? onPressed;
   final bool enabled;
@@ -34,32 +38,33 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor;
-    final Color foregroundColor;
+    Color effectiveBackgroundColor;
+    Color effectiveForegroundColor;
     final BorderSide? borderSide;
 
     switch (type) {
       case ButtonType.primary:
-        backgroundColor = enabled
-            ? context.colors.accentSub
-            : context.colors.accentSoft;
-        foregroundColor =
+        effectiveBackgroundColor = this.backgroundColor ??
+            (enabled ? context.colors.accentSub : context.colors.accentSoft);
+        effectiveForegroundColor = this.foregroundColor ??
             textColor ??
             (enabled ? context.colors.white : context.colors.textSub);
         borderSide = BorderSide.none;
         break;
       case ButtonType.secondary:
-        backgroundColor = enabled
-            ? context.colors.backgroundElevation
-            : context.colors.strokeSoft;
-        foregroundColor =
+        effectiveBackgroundColor = this.backgroundColor ??
+            (enabled
+                ? context.colors.backgroundElevation
+                : context.colors.strokeSoft);
+        effectiveForegroundColor = this.foregroundColor ??
             textColor ??
             (enabled ? context.colors.textPrimary : context.colors.textSub);
         borderSide = BorderSide.none;
         break;
       case ButtonType.container:
-        backgroundColor = enabled ? Colors.white : context.colors.softGray;
-        foregroundColor =
+        effectiveBackgroundColor =
+            this.backgroundColor ?? (enabled ? Colors.white : context.colors.softGray);
+        effectiveForegroundColor = this.foregroundColor ??
             textColor ??
             (enabled ? context.colors.textPrimary : context.colors.textSub);
         borderSide = BorderSide.none;
@@ -76,9 +81,9 @@ class Button extends StatelessWidget {
         child: FilledButton(
           onPressed: null,
           style: ButtonStyle(
-            backgroundColor: WidgetStatePropertyAll(backgroundColor),
+            backgroundColor: WidgetStatePropertyAll(effectiveBackgroundColor),
             padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-            foregroundColor: WidgetStatePropertyAll(foregroundColor),
+            foregroundColor: WidgetStatePropertyAll(effectiveForegroundColor),
             shape: WidgetStatePropertyAll(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(radius),
@@ -87,11 +92,11 @@ class Button extends StatelessWidget {
             ),
           ),
           child: loading
-              ? CupertinoActivityIndicator(color: foregroundColor)
+              ? CupertinoActivityIndicator(color: effectiveForegroundColor)
               : child ??
                     text
                         .text(16, 24, 400)
-                        .c(foregroundColor)
+                        .c(effectiveForegroundColor)
                         .copyWith(
                           style: const TextStyle(
                             leadingDistribution: TextLeadingDistribution.even,

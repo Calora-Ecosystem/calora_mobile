@@ -1,26 +1,65 @@
+import 'dart:ui';
+
 import 'package:calora/common/extensions/color_extension.dart';
 import 'package:calora/common/extensions/number_extension/number_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/app_lifecycle_observer_service.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/containers/bottom_box.dart';
+import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/sheets/default_bottom_sheet.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
+import 'package:calora/widgets/premium/promo_code_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> {
-  const PremiumSheet({super.key});
+  PremiumSheet({super.key});
+
+  late final AppLifecycleObserverServer _lifecycleObserver;
+
+  @override
+  void init(BuildContext context, PremiumManager manager) {
+    super.init(context, manager);
+    _lifecycleObserver = AppLifecycleObserverServer(
+      onResumed: () => manager.getMyOrders(),
+    );
+    WidgetsBinding.instance.addObserver(_lifecycleObserver);
+  }
+
+  @override
+  void listener(BuildContext context, PremiumManager manager, PremiumEffect effect) {
+    super.listener(context, manager, effect);
+    effect.when(
+      openPaymentUrlFailure: (error) => CustomSnackBar.show(context, error),
+      deleteSubscriptionFailure: (error) => CustomSnackBar.show(context, error),
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(_lifecycleObserver);
+    super.dispose();
+  }
 
   Widget builder(context, manager, state) {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: DefaultBottomSheet(
-        titleWidget: Strings.chooseRightPackage.text(20, 24, 600).c(context.colors.textPrimary),
+        titleWidget: ShimmerWrapper(
+          loading: state.isGettingOrders,
+          type: ShimmerType.backgroundElevation,
+          shimmerChild: ShimmerChild(height: 24, radius: 6, width: 150),
+          child: (state.isPaymentPending ? Strings.purchaseIsPending : Strings.chooseRightPackage)
+              .text(20, 24, 600)
+              .c(context.colors.textPrimary),
+        ),
         padding: EdgeInsets.zero,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -33,97 +72,139 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...List.generate(
-                      state.plans.length,
-                      (index) {
-                        final plan = state.plans[index];
-                        return _planCard(
-                          context: context,
-                          plan: plan,
-                          isSelected: state.selectedPlanIndex == index,
-                          onTap: () => manager.selectPlan(index),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    SizedBox(
-                      height: 48,
-                      child: Stack(
-                        children: [
-                          CommonTextField(
-                            hint: Strings.promokod,
-                            contentPadding: const EdgeInsets.only(left: 16, right: 100),
+                    Stack(
+                      children: [
+                        Column(
+                          children: List.generate(
+                            state.plans.length,
+                            (index) {
+                              if (state.isGettingOrders) {
+                                return ShimmerWrapper(
+                                  loading: true,
+                                  type: ShimmerType.backgroundElevation,
+                                  shimmerChild: ShimmerChild(
+                                    margin: const EdgeInsets.only(top: 16),
+                                    height: 56,
+                                    radius: 16,
+                                    width: double.infinity,
+                                  ),
+                                  child: const SizedBox.shrink(),
+                                );
+                              }
+                              final plan = state.plans[index];
+                              return _planCard(
+                                context: context,
+                                plan: plan,
+                                isSelected: state.selectedPlan == plan,
+                                onTap: () => manager.selectPlan(plan),
+                              );
+                            },
                           ),
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                height: 32,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: context.colors.accentSub,
+                        ),
+
+                        if (state.isPaymentPending)
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                                  child: Assets.icons.pendingClock.svg(),
                                 ),
-                                child: Strings.apply.text(12, 14, 400).c(context.colors.white),
                               ),
                             ),
                           ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+                    // PromoCodeWidget(),
+                    const SizedBox(height: 16),
+                    if (state.isPaymentPending && state.selectedPaymentMethod != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Strings.chosenPaymentType.text(20, 24, 600).c(context.colors.textPrimary),
+                          const SizedBox(height: 8),
+                          _buildPaymentMethodCard(
+                            context,
+                            manager,
+                            state.selectedPaymentMethod!,
+                            true,
+                            state.isGettingOrders,
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Strings.choosePaymentMethod.text(20, 24, 600).c(context.colors.textPrimary),
+                          const SizedBox(height: 8),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisExtent: 60,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                            ),
+                            itemCount: state.paymentMethods.length,
+                            itemBuilder: (context, index) {
+                              if (state.isGettingOrders) {
+                                return ShimmerWrapper(
+                                  loading: true,
+                                  type: ShimmerType.backgroundElevation,
+                                  shimmerChild: ShimmerChild(height: 60, radius: 12),
+                                  child: const SizedBox.shrink(),
+                                );
+                              }
+                              final method = state.paymentMethods[index];
+                              final isSelected = state.selectedPaymentMethod == method;
+                              return _buildPaymentMethodCard(
+                                context,
+                                manager,
+                                method,
+                                isSelected,
+                                state.isGettingOrders,
+                              );
+                            },
+                          ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Strings.choosePaymentMethod.text(20, 24, 600).c(context.colors.textPrimary),
-                    const SizedBox(height: 8),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisExtent: 60,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                      ),
-                      itemCount: state.paymentMethods.length,
-                      itemBuilder: (context, index) {
-                        final method = state.paymentMethods[index];
-                        final isSelected = state.selectedPaymentMethodIndex == index;
-                        return GestureDetector(
-                          onTap: () => manager.selectPaymentMethod(index),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: isSelected
-                                  ? context.colors.accentSub.withOpacityLevel(0.2)
-                                  : const Color(0x0F000000),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                method.icon.svg(),
-                                if (method.displayName != null) ...[
-                                  const SizedBox(width: 8),
-                                  method.displayName!.text(14, 18, 500).c(context.colors.textStrong),
-                                ],
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 60),
             BottomBox(
-              child: Button(
-                height: 40,
-                text: Strings.purchase,
-                onPressed: () {},
-              ),
+              child: state.isPaymentPending
+                  ? Column(
+                      children: [
+                        Button(
+                          height: 40,
+                          text: Strings.continuePurchase,
+                          loading: state.isGettingPaymentLink,
+                          onPressed: () => manager.getPaymentLink(),
+                        ),
+                        const SizedBox(height: 12),
+                        Button(
+                          height: 40,
+                          text: Strings.cancel,
+                          loading: state.isDeletingOrder,
+                          backgroundColor: context.colors.errorBase,
+                          onPressed: () => manager.deleteOrder(),
+                        ),
+                      ],
+                    )
+                  : Button(
+                      height: 40,
+                      text: Strings.purchase,
+                      loading: state.isOrderingSubscription,
+                      onPressed: () => manager.orderSubscription(),
+                    ),
             ),
           ],
         ),
@@ -133,7 +214,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
 
   Widget _planCard({
     required BuildContext context,
-    required Plan plan,
+    required PlanModel plan,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
@@ -155,7 +236,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   color: isSelected ? context.colors.white : context.colors.backgroundElevation,
-                  border: isSelected ? Border.all(color: context.colors.accentSub) : null,
+                  border: Border.all(color: isSelected ? context.colors.accentSub : context.colors.backgroundElevation),
                 ),
                 child: Row(
                   children: [
@@ -166,7 +247,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                       decoration: BoxDecoration(
                         color: isSelected ? context.colors.accentSub : context.colors.backgroundElevation,
                         borderRadius: BorderRadius.circular(100),
-                        border: Border.all(color: isSelected ? context.colors.iconSoft : Colors.transparent),
+                        border: Border.all(color: isSelected ? context.colors.accentSub : context.colors.iconSoft),
                       ),
                       child: isSelected
                           ? Container(
@@ -182,22 +263,21 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         '${plan.price.formatPrice()} UZS'.text(14, 18, 500).c(context.colors.textPrimary),
-                        if (plan.actualPrice != plan.price)
-                          '${plan.actualPrice.formatPrice()} UZS'
-                              .text(12, 14, 500)
-                              .c(context.colors.textSub)
-                              .copyWith(
-                                textHeightBehavior: const TextHeightBehavior(
-                                  applyHeightToFirstAscent: false,
-                                  applyHeightToLastDescent: false,
-                                ),
-                                style: TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  height: 14 / 12,
-                                ),
-                              ),
+                        if (plan.actualPrice != null && plan.actualPrice != plan.price)
+                          Text(
+                            '${plan.actualPrice!.formatPrice()} UZS',
+                            style: TextStyle(
+                              color: context.colors.textSub,
+                              decoration: TextDecoration.lineThrough,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              height: 14 / 12,
+                            ),
+                            textHeightBehavior: const TextHeightBehavior(
+                              applyHeightToFirstAscent: false,
+                              applyHeightToLastDescent: false,
+                            ),
+                          ),
                       ],
                     ),
                   ],
@@ -224,6 +304,46 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                   ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodCard(
+    BuildContext context,
+    PremiumManager manager,
+    PaymentMethod method,
+    bool isSelected,
+    bool isLoading,
+  ) {
+    if (isLoading) {
+      return ShimmerWrapper(
+        loading: true,
+        type: ShimmerType.backgroundElevation,
+        shimmerChild: ShimmerChild(height: 60, radius: 12),
+        child: const SizedBox.shrink(),
+      );
+    }
+    return GestureDetector(
+      onTap: () => manager.selectPaymentMethod(method),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? context.colors.white : const Color(0x0F000000),
+          border: Border.all(
+            color: isSelected ? context.colors.accentSub : context.colors.backgroundElevation,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            method.icon.svg(),
+            if (method.displayName != null) ...[
+              const SizedBox(width: 8),
+              method.displayName!.text(14, 18, 500).c(context.colors.textStrong),
+            ],
           ],
         ),
       ),
