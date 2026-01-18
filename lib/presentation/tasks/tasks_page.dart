@@ -3,6 +3,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/simple_button.dart';
+import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -44,34 +45,40 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
               ),
             ),
           ),
-          Column(
-            children: [
-              LessonAppBar(
-                percent: workout.doneItems / workout.totalItems,
-                title: workout.title,
-                level: level,
-                showIndicator: false,
-                showSettings: false,
-                onLevelChanged: (value) {},
-              ),
-              const SizedBox(height: 50),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: context.colors.white,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                  ),
-                  child: workout.hasRest
-                      ? const OffDayWidget()
-                      : TasksCards(
-                          loading: state.isLoading,
-                          exercises: state.exercises,
-                          workout: workout,
-                        ),
+          DefaultRefreshIndicator(
+            onRefresh: () async => manager.getExercises(workout.id),
+            child: Column(
+              children: [
+                LessonAppBar(
+                  percent: workout.doneItems / workout.totalItems,
+                  title: workout.title,
+                  level: level,
+                  showSettings: false,
+                  onLevelChanged: (value) {},
                 ),
-              ),
-            ],
+                const SizedBox(height: 50),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: context.colors.white,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    child: workout.hasRest
+                        ? const OffDayWidget()
+                        : SingleChildScrollView(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            child: TasksCards(
+                              level: level,
+                              loading: state.isLoading,
+                              exercises: state.exercises,
+                              workout: workout,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -82,7 +89,7 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: SimpleButton(
                   text: Strings.start,
-                  onPressed: () => context.router.push(TasksProcessRoute()),
+                  onPressed: () => context.router.push(TasksProcessRoute(exercises: state.exercises, workout: workout)),
                   color: context.colors.accentSub,
                   textColor: context.colors.textWhite,
                 ),

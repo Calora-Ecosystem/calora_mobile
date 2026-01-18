@@ -175,20 +175,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   void updateNutrientsPercent(SummaryRequest summary) {
     final proteinNorm = state.norms
         .firstWhere(
-          (e) => e.metric == "Protein",
-          orElse: () => NormsRequest(metric: "Protein", value: 1),
+          (e) => e.metric == 'Protein',
+          orElse: () => NormsRequest(metric: 'Protein', value: 1),
         )
         .value;
     final fatNorm = state.norms
         .firstWhere(
-          (e) => e.metric == "Fat",
-          orElse: () => NormsRequest(metric: "Fat", value: 1),
+          (e) => e.metric == 'Fat',
+          orElse: () => NormsRequest(metric: 'Fat', value: 1),
         )
         .value;
     final carbNorm = state.norms
         .firstWhere(
-          (e) => e.metric == "Carb",
-          orElse: () => NormsRequest(metric: "Carb", value: 1),
+          (e) => e.metric == 'Carb',
+          orElse: () => NormsRequest(metric: 'Carb', value: 1),
         )
         .value;
 

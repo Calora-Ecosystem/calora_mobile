@@ -3,7 +3,7 @@ import 'package:calora/domain/repo/course/course_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'video_course_body_management.dart';
+import 'package:calora/widgets/lessons/video_course_body/management/video_course_body_management.dart';
 
 @injectable
 class VideoCourseBodyManager
