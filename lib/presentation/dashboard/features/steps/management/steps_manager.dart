@@ -132,8 +132,8 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         toDate = DateTime(endOfTargetWeek.year, endOfTargetWeek.month, endOfTargetWeek.day, 23, 59, 59);
         break;
       case 2:
-        final targetMonth = DateTime(now.year, now.month + offset, 1);
-        fromDate = DateTime(targetMonth.year, targetMonth.month, 1);
+        final targetMonth = DateTime(now.year, now.month + offset);
+        fromDate = DateTime(targetMonth.year, targetMonth.month);
         final endOfMonth = DateTime(targetMonth.year, targetMonth.month + 1, 0);
         toDate = DateTime(endOfMonth.year, endOfMonth.month, endOfMonth.day, 23, 59, 59);
         break;
@@ -255,8 +255,8 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         break;
       case 2:
         targetOffset = state.monthlyOffset;
-        final targetMonth = DateTime(now.year, now.month + targetOffset, 1);
-        fromDate = DateTime(targetMonth.year, targetMonth.month, 1);
+        final targetMonth = DateTime(now.year, now.month + targetOffset);
+        fromDate = DateTime(targetMonth.year, targetMonth.month);
         final endOfMonth = DateTime(targetMonth.year, targetMonth.month + 1, 0);
         toDate = DateTime(endOfMonth.year, endOfMonth.month, endOfMonth.day, 23, 59, 59);
         emit(
@@ -324,8 +324,8 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         if (change > 0 && newOffset > 0) return;
         if (newOffset == currentOffset) return;
 
-        final targetMonth = DateTime(now.year, now.month + newOffset, 1);
-        fromDate = DateTime(targetMonth.year, targetMonth.month, 1);
+        final targetMonth = DateTime(now.year, now.month + newOffset);
+        fromDate = DateTime(targetMonth.year, targetMonth.month);
         final endOfMonth = DateTime(targetMonth.year, targetMonth.month + 1, 0);
         toDate = DateTime(endOfMonth.year, endOfMonth.month, endOfMonth.day, 23, 59, 59);
 

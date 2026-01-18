@@ -91,7 +91,7 @@ class MealCardsGrid extends StatelessWidget {
                       child: title
                           .text(14, 16, 400)
                           .c(context.colors.textSub)
-                          .auto(maxLines: 1, minSize: 12),
+                          .auto(minSize: 12),
                     ),
                     Assets.icons.icPlusCircle.svg(),
                     const SizedBox(width: 8),

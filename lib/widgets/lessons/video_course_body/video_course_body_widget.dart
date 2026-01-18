@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/annotations.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
@@ -8,8 +6,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/course/course_request.dart';
-import 'package:calora/domain/model/lesson/lesson_request.dart'
-    show LessonRequest;
+import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonRequest;
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/courses_app_bar.dart';
 import 'package:calora/widgets/info/course_info_widget.dart';
@@ -21,13 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class VideoCourseBodyWidgetPage
-    extends
-        Managed<
-          VideoCourseBodyManager,
-          VideoCourseBodyState,
-          VideoCourseBodyEffect
-        > {
+class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCourseBodyState, VideoCourseBodyEffect> {
   final CourseRequest course;
   final bool isPurchased;
 
@@ -66,8 +57,7 @@ class VideoCourseBodyWidgetPage
       body: Stack(
         children: [
           CoursesAppBar(
-            openInfoSheet: () =>
-                _openInfoSheet(context, course.description ?? ''),
+            openInfoSheet: () => _openInfoSheet(context, course.description ?? ''),
             imageUrl: course.subCoverImage ?? '',
           ),
           Column(
@@ -144,16 +134,14 @@ class VideoCourseBodyWidgetPage
                               ),
                               loading: state.isLoading,
                               child: GestureDetector(
-                                onTap: () =>
-                                    manager.onVideoTapped(lesson, index),
+                                onTap: () => manager.onVideoTapped(lesson, index),
                                 child: Row(
                                   children: [
                                     Container(
                                       height: 48,
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color:
-                                            context.colors.backgroundElevation,
+                                        color: context.colors.backgroundElevation,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: Assets.icons.videoIcon.svg(),
@@ -161,29 +149,23 @@ class VideoCourseBodyWidgetPage
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           lesson.title
                                               .text(16, 20, 500)
                                               .c(
-                                                context
-                                                    .colors
-                                                    .neutral900Primary,
+                                                context.colors.neutral900Primary,
                                               ),
                                           const SizedBox(height: 8),
                                           lesson.duration
                                               .text(14, 18, 500)
                                               .c(
-                                                context
-                                                    .colors
-                                                    .neutral600Secondary,
+                                                context.colors.neutral600Secondary,
                                               ),
                                         ],
                                       ),
                                     ),
-                                    if (!lesson.isFree && !state.isPurchased)
-                                      Assets.icons.lock.svg(),
+                                    if (!lesson.isFree && !state.isPurchased) Assets.icons.lock.svg(),
                                   ],
                                 ),
                               ),
@@ -218,7 +200,6 @@ class VideoCourseBodyWidgetPage
     context.showAppBottomSheet(
       child: AboutVideoPage(
         onVideoCompleted: () {
-          log('message');
           manager.videoCompleted(lesson.id);
         },
         lesson: lesson,

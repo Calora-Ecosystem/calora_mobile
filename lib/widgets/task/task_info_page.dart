@@ -1,8 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/widgets/button/toggle_buttons.dart';
 import 'package:calora/common/widgets/button/universal_stepper_widget.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart' hide StepperType;
@@ -31,24 +30,22 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
           spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Align(
-              child: ToggleButtonsWidget(
-                onChanged: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
-                titles: [Strings.animation, Strings.videoExercises],
-              ),
+            // Align(
+            //   child: ToggleButtonsWidget(
+            //     onChanged: (value) {
+            //       setState(() {
+            //         selectedIndex = value;
+            //       });
+            //     },
+            //     titles: [Strings.animation, Strings.videoExercises],
+            //   ),
+            // ),
+            // const SizedBox(height: 12),
+            // if (selectedIndex == 0)
+            CustomCachedNetworkImage.banner(
+              imageUrl: '',
+              width: double.infinity,
             ),
-            const SizedBox(height: 12),
-            if (selectedIndex == 0)
-              Container(
-                height: 200,
-                color: context.colors.backgroundElevation,
-                width: double.infinity,
-                child: Assets.images.task.image(),
-              ),
             // if (selectedIndex == 1) VideoPlayerPage(videoUrl: widget.exercises.assets),
             widget.exercises.title.text(20, 24, 700).c(context.colors.textStrong),
             Row(

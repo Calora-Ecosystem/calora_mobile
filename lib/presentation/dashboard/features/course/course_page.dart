@@ -3,6 +3,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -53,7 +54,6 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
     CourseState state,
   ) {
     final itemCount = state.isLoading ? 3 : state.courses.length;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -62,67 +62,65 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
           ),
           SafeArea(
             top: false,
-            child: CustomScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: ClampingScrollPhysics(),
-              ),
-              slivers: [
-                ValueListenableBuilder<bool>(
-                  valueListenable: _isScrolled,
-                  builder: (_, isScrolled, __) {
-                    return SliverAppBar(
-                      pinned: true,
-                      backgroundColor: isScrolled
-                          ? context.colors.white
-                          : context.colors.transparent,
-                      elevation: isScrolled ? 4 : 0,
-                      scrolledUnderElevation: 4,
-                      shadowColor: context.colors.black.withValues(alpha: 0.2),
-                      surfaceTintColor: context.colors.white,
-                      centerTitle: true,
-                      title: Strings.allCourses
-                          .text(17, 22, 600)
-                          .c(context.colors.textStrong),
-                    );
-                  },
+            child: DefaultRefreshIndicator(
+              onRefresh: () async {
+                manager.getCourses();
+              },
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
                 ),
-
-                const SliverPadding(padding: EdgeInsets.only(top: 16)),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverList.separated(
-                    itemCount: itemCount,
-                    separatorBuilder: (_, __) => const SizedBox(height: 20),
-                    itemBuilder: (context, index) {
-                      final course = state.isLoading
-                          ? CourseRequest()
-                          : state.courses[index];
-                      return ShimmerWrapper(
-                        loading: state.isLoading,
-                        type: ShimmerType.backgroundElevation,
-                        radius: 12,
-                        shimmerChild: const ShimmerChild(
-                          height: 160,
-                          width: double.infinity,
-                          radius: 16,
-                        ),
-                        child: CourseCard(
-                          course: course,
-                          onTap: () {
-                            course.type == 'Workout'
-                                ? context.router.push(LessonsRoute())
-                                : context.router.push(
-                                    VideoCourseBodyWidgetRoute(course: course),
-                                  );
-                          },
-                        ),
+                slivers: [
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _isScrolled,
+                    builder: (_, isScrolled, __) {
+                      return SliverAppBar(
+                        pinned: true,
+                        backgroundColor: isScrolled ? context.colors.white : context.colors.transparent,
+                        elevation: isScrolled ? 4 : 0,
+                        scrolledUnderElevation: 4,
+                        shadowColor: context.colors.black.withValues(alpha: 0.2),
+                        surfaceTintColor: context.colors.white,
+                        centerTitle: true,
+                        title: Strings.allCourses.text(17, 22, 600).c(context.colors.textStrong),
                       );
                     },
                   ),
-                ),
-                const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
-              ],
+                  const SliverPadding(padding: EdgeInsets.only(top: 16)),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverList.separated(
+                      itemCount: itemCount,
+                      separatorBuilder: (_, __) => const SizedBox(height: 20),
+                      itemBuilder: (context, index) {
+                        final course = state.isLoading ? CourseRequest() : state.courses[index];
+                        return ShimmerWrapper(
+                          loading: state.isLoading,
+                          type: ShimmerType.backgroundElevation,
+                          radius: 12,
+                          shimmerChild: const ShimmerChild(
+                            height: 160,
+                            width: double.infinity,
+                            radius: 16,
+                          ),
+                          child: CourseCard(
+                            course: course,
+                            onTap: () {
+                              course.type == 'Workout'
+                                  ? context.router.push(LessonsRoute(courseId: course.id ?? 0))
+                                  : context.router.push(
+                                      VideoCourseBodyWidgetRoute(course: course),
+                                    );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+                ],
+              ),
             ),
           ),
         ],

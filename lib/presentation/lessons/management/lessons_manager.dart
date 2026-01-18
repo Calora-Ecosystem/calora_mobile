@@ -18,13 +18,14 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
     emit(state.copyWith(levelIndex: index));
   }
 
-  void getWorkout() {
-    _courseRepo.getWorkout().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (workouts) =>
-          emit(state.copyWith(workouts: workouts, isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
-    );
+  void getWorkout(int id) {
+    _courseRepo
+        .getWorkout(id, _levelTextFromIndex(state.levelIndex))
+        .handle(
+          onStart: () => emit(state.copyWith(isLoading: true)),
+          onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
+          onError: (error) => emit(state.copyWith(isLoading: false)),
+        );
   }
 
   Future<void> loadActivityLevel() async {
