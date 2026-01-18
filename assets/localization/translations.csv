@@ -366,3 +366,10 @@ purchase,Purchase,Sotib olish,Покупка
 apply,Apply,Qo‘llash,Применить
 best_offer,Best offer,Eng yaxshi taklif,Лучшее предложение
 excess,Excess,Ortiqcha,Избыток
+monthly_premium,Monthly Premium,Oylik Premium,Ежемесячная премия
+n_moth_premium,{month} months Premium,{month} oylik Premium,{month} месяца Премиум
+annual_premium,Annual Premium,Yillik Premium,Годовая премия
+purchase_is_pending,Purchase is pending,Xarid amalga oshirilishi kutilmoqda,Ожидается совершение покупки
+chosen_payment_type,Choosen payment type,Tanlangan to’lov turi,Выбранный тип оплаты
+continue_purchase,Continue purchase,Sotib olishni davom ettirish,Продолжить покупки
+could_not_launch_payment_url,Could not launch payment URL,To'lov URL manzilini ishga tushirib bo'lmadi,Не удалось запустить платежный URL.

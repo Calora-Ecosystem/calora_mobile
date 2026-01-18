@@ -99,7 +99,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                       ),
                       child: Column(
                         children: [
-                          Assets.images.yandexBanner.image(),
+                          PremiumEntryCard(),
                           LessonsCards(
                             level: _mapIntToLevel(state.levelIndex),
                             isLoading: state.isLoading,
