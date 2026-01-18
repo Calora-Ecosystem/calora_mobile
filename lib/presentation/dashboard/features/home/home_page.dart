@@ -104,8 +104,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                               spacing: 16,
                               children: [
                                 DailyPlanWidget(
-                                  onDateTap: () =>
-                                      openCalendar(context, manager),
+                                  onDateTap: () => openCalendar(context, manager),
                                   loading: state.isLoading,
                                   onBackward: () {
                                     manager.updateDay(
@@ -130,10 +129,8 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                     manager.getDailyStep();
                                   },
                                   date: state.day ?? DateTime.now(),
-                                  calories:
-                                      '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
-                                  water:
-                                      '${state.targetLiters} ${Strings.liter}',
+                                  calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
+                                  water: '${state.targetLiters} ${Strings.liter}',
                                   steps: state.targetSteps.toString(),
                                 ),
                                 GestureDetector(
@@ -155,21 +152,15 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             spacing: 8,
                                             children: [
-                                              Strings.caloraAi
-                                                  .text(24, 30, 700)
-                                                  .c(context.colors.white),
-                                              Strings.tryItForFree
-                                                  .text(16, 20, 500)
-                                                  .c(context.colors.white),
+                                              Strings.caloraAi.text(24, 30, 700).c(context.colors.white),
+                                              Strings.tryItForFree.text(16, 20, 500).c(context.colors.white),
                                             ],
                                           ),
                                         ),
@@ -184,18 +175,12 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 ),
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
-                                  normCalories:
-                                      (state.summary?.kcalNorm.value ?? 0)
-                                          .asFixedTruncated(0)
-                                          .toString(),
+                                  normCalories: (state.summary?.kcalNorm.value ?? 0).asFixedTruncated(0).toString(),
                                   nutrients: state.nutrients,
                                   progressPercent:
-                                      (state.summary?.sum.Kcal ?? 0) /
-                                      (state.summary?.kcalNorm.value ?? 0),
+                                      (state.summary?.sum.Kcal ?? 0) / (state.summary?.kcalNorm.value ?? 0),
                                   remainedCalories:
-                                      ((state.summary?.kcalNorm.value ?? 0) -
-                                              (state.summary?.sum.Kcal ?? 0))
-                                          .asFixedTruncated(0),
+                                      (state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0),
                                   loading: state.isSummaryLoading,
                                 ),
                                 StepCardWidget(

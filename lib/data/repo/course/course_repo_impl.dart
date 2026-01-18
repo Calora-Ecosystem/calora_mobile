@@ -34,8 +34,8 @@ class CourseRepoImpl implements CourseRepo {
   }
 
   @override
-  Future<List<WorkoutRequest>> getWorkout() async {
-    final result = await _courseApi.getLessonById();
+  Future<List<WorkoutRequest>> getWorkout(int courseId, String level) async {
+    final result = await _courseApi.getLessonById(courseId, level);
     final data = result.data;
     final List<dynamic> content = data['content'] ?? [];
     return content.map((item) => WorkoutRequest.fromJson(item as Map<String, dynamic>)).toList();
@@ -57,5 +57,10 @@ class CourseRepoImpl implements CourseRepo {
   @override
   Future<void> refreshActivityLevel(QuestionsRequest answer) async {
     await _questionsApi.sendAnswers(answer);
+  }
+
+  @override
+  Future<void> finishedExercises(int id) async {
+    await _courseApi.finishedExercises(id);
   }
 }

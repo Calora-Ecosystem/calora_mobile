@@ -17,8 +17,8 @@ class CourseApi {
     return _dio.get('/lessons', queryParameters: {'courseId': id});
   }
 
-  Future<Response> getLessonById() async {
-    return _dio.get('/workouts');
+  Future<Response> getLessonById(int courseId, String level) async {
+    return _dio.get('/workouts', queryParameters: {'courseId': courseId, 'level': level});
   }
 
   Future<void> updateVideoCourseFinished(int id) async {
@@ -27,5 +27,9 @@ class CourseApi {
 
   Future<Response> getExercisesByWorkoutId(int id) async {
     return _dio.get('/exercises', queryParameters: {'workoutId': id});
+  }
+
+  Future<void> finishedExercises(int id) async {
+    await _dio.put('/exercises/finish/${id}');
   }
 }

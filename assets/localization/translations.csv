@@ -339,3 +339,30 @@ limited_internet_subtitle,"You’re connected to a network, but can’t reach th
 no_internet_title,You’re Offline,Siz oflaynsiz,Вы офлайн
 no_internet_subtitle,Turn on Wi-Fi or mobile data to reconnect.,Qayta ulanish uchun Wi-Fi yoki mobil maʼlumotlarni yoqing.,"Включите Wi-Fi или мобильные данные, чтобы подключиться снова."
 enter_valid_number,Please enter a valid phone number,"Iltimos, to'g'ri telefon raqamini kiriting","Пожалуйста, введите действительный номер телефона."
+minimal,Minimal,Boshlang‘ich,Начальный
+less,Less,Yengil,Лёгкий
+medium,Medium,O‘rtacha,Средний
+high,High,Qiyin,Сложный
+maximal,Maximal,Juda qiyin,Очень сложный
+calora_premium,Calora Premium,Calora Premium,Калора Премиум
+price_per_month,For {price} soums per month,Xar oy {price} so‘m evaziga,За {цена} сумов в месяц
+ai_health_analysis_title,AI-powered health level analysis,AI orqali sog‘lomlik darajasini aniqlash,Определение уровня здоровья с помощью ИИ
+ai_health_analysis_subtitle,Discover optimal health indicators for your body,Tanangiz uchun optimal sog‘lomlik ko‘rsatkichlarini bilib oling,Узнайте оптимальные показатели здоровья для вашего организма
+ai_food_photo_analysis_title,AI food analysis from photos,AI orqali suratdagi taomlarni tahlil qilish,Анализ блюд по фото с помощью ИИ
+ai_food_photo_analysis_subtitle,Quickly identify calories and ingredients from images,Rasmdan kaloriyalarni va tarkibini tezda aniqlash,Быстрое определение калорий и состава по изображению
+voice_food_input_title,Add food using voice,Ovoz orqali taom qo‘shish,Добавление еды голосом
+voice_food_input_subtitle,Log meals by voice without manual typing,Taomlaringizni qo‘lda yozmasdan ovoz bilan kiriting,Вводите блюда голосом без ручного набора
+men_30_day_workout_title,30-day weight loss workouts for men,Erkaklar uchun 30 kunlik ozish mashqlari,30-дневные тренировки для похудения для мужчин
+men_30_day_workout_subtitle,Lose weight with expert-recommended workouts,Mutaxassislar tavsiya qilgan mashqlar orqali ozishga yordam,Помощь в снижении веса с тренировками от специалистов
+women_30_day_workout_title,30-day weight loss workouts for women,Ayollar uchun 30 kunlik ozish mashqlari,30-дневные тренировки для похудения для женщин
+women_30_day_workout_subtitle,Lose weight with expert-recommended workouts,Mutaxassislar tavsiya qilgan mashqlar orqali ozishga yordam,Помощь в снижении веса с тренировками от специалистов
+ad_free_experience_title,Ad-free experience,Reklamasiz foydalanish,Использование без рекламы
+ad_free_experience_subtitle,Enjoy all features without ads,Barcha funksiyalardan reklamasiz qulay foydalaning,Пользуйтесь всеми функциями без рекламы
+payment,Payment,To’lov qilish,Оплата
+choose_right_package,Choose the right package!,Mos paketni tanlang !,Выберите подходящий пакет!
+promokod,Promo code,Promokod,Promokod
+choose_payment_method,Choose a payment type!,To'lov turini tanlang !,Выберите способ оплаты!
+purchase,Purchase,Sotib olish,Покупка
+apply,Apply,Qo‘llash,Применить
+best_offer,Best offer,Eng yaxshi taklif,Лучшее предложение
+excess,Excess,Ortiqcha,Избыток

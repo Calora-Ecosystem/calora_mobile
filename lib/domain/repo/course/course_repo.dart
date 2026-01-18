@@ -9,11 +9,13 @@ abstract class CourseRepo {
 
   Future<List<LessonRequest>> getLessonsById(int id);
 
-  Future<List<WorkoutRequest>> getWorkout();
+  Future<List<WorkoutRequest>> getWorkout(int courseId, String level);
 
   Future<void> updateVideoCourseFinished(int id);
 
   Future<List<ExercisesRequest>> getExercisesByWorkoutId(int id);
 
   Future<void> refreshActivityLevel(QuestionsRequest answer);
+
+  Future<void> finishedExercises(int id);
 }

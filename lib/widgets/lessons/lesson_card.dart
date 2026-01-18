@@ -30,7 +30,7 @@ class LessonCard extends StatelessWidget {
             children: [
               (workout.title).text(16, 20, 500).c(context.colors.textStrong),
               const SizedBox(height: 8),
-              if (workout.isDone)
+              if (workout.hasRest)
                 Strings.youCanRelaxTuday.text(14, 18, 500).c(context.colors.textSub)
               else
                 ('${workout.totalDurationInMin} ${Strings.minute} • ${workout.kcal} ${Strings.kcal}')

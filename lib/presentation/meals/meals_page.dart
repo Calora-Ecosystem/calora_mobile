@@ -15,10 +15,10 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
-import '../../common/gen/strings.dart';
-import '../../common/widgets/button/button.dart';
-import 'management/meals_management.dart';
-import 'management/meals_manager.dart' show MealsManager;
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/presentation/meals/management/meals_management.dart';
+import 'package:calora/presentation/meals/management/meals_manager.dart' show MealsManager;
 
 @RoutePage()
 class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {

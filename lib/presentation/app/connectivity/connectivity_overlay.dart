@@ -213,7 +213,6 @@ class _AnimatedBottomSheetState extends State<_AnimatedBottomSheet>
                         BoxShadow(
                           color: Colors.black.withOpacityLevel(0.2),
                           blurRadius: 10,
-                          spreadRadius: 0,
                           offset: const Offset(0, -2),
                         ),
                       ],

@@ -16,43 +16,42 @@ class LessonsCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.separated(
-        physics: const BouncingScrollPhysics(),
-        itemCount: workouts.isEmpty ? 3 : workouts.length,
-        itemBuilder: (context, index) {
-          final WorkoutRequest workout = workouts.isEmpty
-              ? WorkoutRequest(
-                  id: 1,
-                  courseId: 1,
-                  title: 'title',
-                  hasRest: true,
-                  totalItems: 1,
-                  doneItems: 1,
-                  isDone: true,
-                  totalDurationInMin: 12,
-                  totalMetrics: [],
-                  order: 2,
-                )
-              : workouts[index];
-          return ShimmerWrapper(
-            loading: isLoading,
-            shimmerChild: ShimmerChild(
-              color: context.colors.backgroundElevation,
-              height: 70,
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const BouncingScrollPhysics(),
+      itemCount: workouts.isEmpty ? 0 : workouts.length,
+      itemBuilder: (context, index) {
+        final WorkoutRequest workout = workouts.isEmpty
+            ? WorkoutRequest(
+                id: 1,
+                courseId: 1,
+                title: 'title',
+                hasRest: true,
+                totalItems: 1,
+                doneItems: 1,
+                isDone: true,
+                totalDurationInMin: 12,
+                totalMetrics: [],
+                order: 2,
+              )
+            : workouts[index];
+        return ShimmerWrapper(
+          loading: isLoading,
+          shimmerChild: ShimmerChild(
+            color: context.colors.backgroundElevation,
+            height: 70,
+          ),
+          child: GestureDetector(
+            onTap: () => context.router.push(TasksRoute(level: level, workout: workout)),
+            child: LessonCard(
+              workout: workout,
             ),
-            child: GestureDetector(
-              onTap: () => context.router.push(TasksRoute(level: level, workout: workout)),
-              child: LessonCard(
-                workout: workout,
-              ),
-            ),
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          return SizedBox(height: 16);
-        },
-      ),
+          ),
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return SizedBox(height: 16);
+      },
     );
   }
 }
