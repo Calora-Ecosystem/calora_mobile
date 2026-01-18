@@ -17,7 +17,9 @@ import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
+import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/auth/auth/management/auth_manager.dart';
 import 'package:calora/presentation/meals/add/management/add_meals_management.dart';
 import 'package:calora/presentation/meals/add/management/add_meals_manager.dart';
 import 'package:calora/presentation/speech/speech_page.dart';
@@ -105,23 +107,24 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
-            spacing: 12,
             children: [
               CommonTextField(
                 hint: Strings.searchForFoodOrProduct,
                 controller: _searchController,
               ),
+              if (context.read<AppManager>().state.isUserPremium) const SizedBox(height: 12),
               if (!state.isSearchMode) ...[
                 Row(
-                  spacing: 8,
                   children: [
                     buildActionCard(
                       onTap: () => openCreatePage(context, manager),
                       context: context,
-                      icon: Assets.icons.icPlusCircle.svg(),
                       text: Strings.creation,
+                      isPremiumFeature: false,
                       textColor: context.colors.textStrong,
+                      icon: Assets.icons.icPlusCircle.svg(),
                     ),
+                    const SizedBox(width: 8),
                     buildActionCard(
                       onTap: () => openCameraPage(context, manager),
                       context: context,
@@ -140,10 +143,12 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
                 ToggleButtonsWidget(
                   onChanged: (value) => manager.onToggleChanged(value),
                   titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
                 ),
+                const SizedBox(height: 12),
                 Flexible(
                   child: state.selectedToggleIndex == 3
                       ? RepaintBoundary(
@@ -178,7 +183,8 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                         ),
                 ),
               ],
-              if (state.isSearchMode)
+              if (state.isSearchMode) ...[
+                const SizedBox(height: 12),
                 Expanded(
                   child: FavouriteFoodGrid(
                     isLoading: state.isSearch,
@@ -186,6 +192,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                     onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
                   ),
                 ),
+              ],
             ],
           ),
         ),
@@ -386,29 +393,50 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     Color? textColor,
     VoidCallback? onTap,
     bool useGradient = false,
+    bool isPremiumFeature = true,
   }) {
+    final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: useGradient ? null : context.colors.backgroundElevation,
-            gradient: useGradient
-                ? RadialGradient(
-                    center: const Alignment(1.2, 0.5),
-                    radius: 1.3,
-                    colors: [context.colors.honeydew, context.colors.mintGreen],
-                    stops: const [0.0, 1.0],
-                  )
-                : null,
+      child: Stack(
+        children: [
+          const SizedBox(height: 84),
+          Positioned(
+            left: 0,
+            right: isPremiumFeature ? 10 : 0,
+            bottom: 0,
+            child: GestureDetector(
+              onTap: isUserPremium || !isPremiumFeature
+                  ? onTap
+                  : () => context.router.push(const PremiumFeaturesRoute()),
+              child: Container(
+                height: 72,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: useGradient ? null : context.colors.backgroundElevation,
+                  gradient: useGradient
+                      ? RadialGradient(
+                          center: const Alignment(1.2, 0.5),
+                          radius: 1.3,
+                          colors: [context.colors.honeydew, context.colors.mintGreen],
+                          stops: const [0.0, 1.0],
+                        )
+                      : null,
+                ),
+                child: Column(
+                  spacing: 8,
+                  children: [if (icon != null) icon, text.text(14, 16, 600).c(textColor ?? context.colors.textWhite)],
+                ),
+              ),
+            ),
           ),
-          child: Column(
-            spacing: 8,
-            children: [if (icon != null) icon, text.text(14, 16, 600).c(textColor ?? context.colors.textWhite)],
-          ),
-        ),
+          if (isPremiumFeature && !isUserPremium)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Assets.images.premiumFire.image(height: 42),
+            ),
+        ],
       ),
     );
   }

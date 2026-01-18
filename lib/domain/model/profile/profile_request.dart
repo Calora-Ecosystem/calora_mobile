@@ -11,7 +11,6 @@ abstract class ProfileRequest with _$ProfileRequest {
     @JsonKey(name: 'birthDate') String? birthDay,
     @JsonKey(name: 'purpose') String? goal,
     @JsonKey(name: 'activityLevel') dynamic activityLevel,
-
     @JsonKey(name: 'email') String? email,
     @JsonKey(name: 'bmi') double? bmi,
     @JsonKey(name: 'gender') String? gender,
@@ -22,6 +21,5 @@ abstract class ProfileRequest with _$ProfileRequest {
     @JsonKey(name: 'photo') String? photo,
   }) = _ProfileRequest;
 
-  factory ProfileRequest.fromJson(Map<String, dynamic> json) =>
-      _$ProfileRequestFromJson(json);
+  factory ProfileRequest.fromJson(Map<String, dynamic> json) => _$ProfileRequestFromJson(json);
 }

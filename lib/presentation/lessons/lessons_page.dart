@@ -9,6 +9,7 @@ import 'package:calora/presentation/lessons/management/lessons_management.dart';
 import 'package:calora/presentation/lessons/management/lessons_manager.dart';
 import 'package:calora/widgets/app_bar/lesson_app_bar.dart';
 import 'package:calora/widgets/lessons/lessons_cards.dart' show LessonsCards;
+import 'package:calora/widgets/premium/premium_entry_card.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -98,7 +99,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                       ),
                       child: Column(
                         children: [
-                          Assets.images.yandexBanner.image(),
+                          PremiumEntryCard(),
                           LessonsCards(
                             level: _mapIntToLevel(state.levelIndex),
                             isLoading: state.isLoading,

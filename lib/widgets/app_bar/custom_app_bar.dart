@@ -8,6 +8,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final Widget? trailing;
   final bool showBackButton;
+  final Color? backgroundColor;
 
   const CustomAppBar({
     super.key,
@@ -16,6 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.trailing,
     this.showBackButton = true,
+    this.backgroundColor,
   });
 
   @override
@@ -38,7 +40,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         border: Border(bottom: BorderSide(color: context.colors.strokeSoft)),
       ),
       child: AppBar(
-        backgroundColor: context.colors.white,
+        backgroundColor: backgroundColor ?? context.colors.white,
         elevation: 0,
         centerTitle: true,
         surfaceTintColor: Colors.transparent,

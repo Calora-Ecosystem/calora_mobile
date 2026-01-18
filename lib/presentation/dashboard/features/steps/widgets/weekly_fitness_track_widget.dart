@@ -50,6 +50,7 @@ class _WeeklyFitnessTrackWidgetState extends State<WeeklyFitnessTrackWidget>
       onClickForward: widget.onClickForward,
       onClickMoreVert: widget.onClickMoreVert,
       metrics: widget.metrics,
+      loading: widget.loading,
       body: ChartWidget(
         type: ChartType.weekly,
         primaryValues: widget.primaryValues,

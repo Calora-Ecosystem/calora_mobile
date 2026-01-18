@@ -5,7 +5,10 @@ part 'app_management.freezed.dart';
 
 @freezed
 abstract class AppState with _$AppState {
-  const factory AppState({Language? language}) = _AppState;
+  const factory AppState({
+    Language? language,
+    @Default(false) isUserPremium,
+  }) = _AppState;
 }
 
 @freezed

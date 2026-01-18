@@ -12,8 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class DashboardPage
-    extends Managed<DashboardManager, DashboardState, DashboardEffect> {
+class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardEffect> {
   const DashboardPage({super.key});
 
   @override
@@ -22,13 +21,7 @@ class DashboardPage
   @override
   Widget builder(context, manager, state) {
     return AutoTabsScaffold(
-      routes: [
-        HomeRoute(),
-        CaloriesRoute(),
-        CourseRoute(),
-        StepsRoute(),
-        ProfileRoute(),
-      ],
+      routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
       bottomNavigationBuilder: (context, tabRouter) {
         final tabsRouter = AutoTabsRouter.of(context);
         return ClipRRect(
@@ -65,9 +58,7 @@ class DashboardPage
                     _buildBottomNavigationBarItem(
                       icon: Assets.icons.icHome.svg(
                         colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 0
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
+                          tabsRouter.activeIndex == 0 ? context.colors.accentSub : context.colors.textSub,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -76,9 +67,7 @@ class DashboardPage
                     _buildBottomNavigationBarItem(
                       icon: Assets.icons.icCalories.svg(
                         colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 1
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
+                          tabsRouter.activeIndex == 1 ? context.colors.accentSub : context.colors.textSub,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -87,9 +76,7 @@ class DashboardPage
                     _buildBottomNavigationBarItem(
                       icon: Assets.icons.icVideoPlayer.svg(
                         colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 2
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
+                          tabsRouter.activeIndex == 2 ? context.colors.accentSub : context.colors.textSub,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -98,9 +85,7 @@ class DashboardPage
                     _buildBottomNavigationBarItem(
                       icon: Assets.icons.icFootwear.svg(
                         colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 3
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
+                          tabsRouter.activeIndex == 3 ? context.colors.accentSub : context.colors.textSub,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -109,9 +94,7 @@ class DashboardPage
                     _buildBottomNavigationBarItem(
                       icon: Assets.icons.icPersonNeutral.svg(
                         colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 4
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
+                          tabsRouter.activeIndex == 4 ? context.colors.accentSub : context.colors.textSub,
                           BlendMode.srcIn,
                         ),
                       ),
