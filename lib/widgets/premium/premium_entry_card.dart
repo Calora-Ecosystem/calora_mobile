@@ -47,9 +47,7 @@ class PremiumEntryCard extends StatelessWidget {
                             .text(24, 30, 700)
                             .c(context.colors.white)
                             .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Strings.pricePerMonth(
-                              price: 49000.formatPrice(),
-                            )
+                        Strings.pricePerMonth(price: 49000.formatPrice())
                             .text(16, 20, 500)
                             .c(context.colors.white)
                             .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
