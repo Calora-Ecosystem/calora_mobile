@@ -34,33 +34,43 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
   }
 
   void onExerciseFinished() {
-    final newCompletedExercises = List<ExercisesRequest>.from(state.completedExercises)..add(currentExercise!);
-    emit(state.copyWith(
-      completedTaskCount: state.completedTaskCount + 1,
-      completedExercises: newCompletedExercises,
-    ));
-    next();
+    final ex = currentExercise;
+    if (ex == null) return;
+
+    unawaited(finishExercises(ex.id));
+
+    final newCompletedExercises = List<ExercisesRequest>.from(state.completedExercises)..add(ex);
+
+    emit(
+      state.copyWith(
+        completedTaskCount: state.completedTaskCount + 1,
+        completedExercises: newCompletedExercises,
+      ),
+    );
+
+    _goNextIndex();
   }
 
   void next() {
     _timer?.cancel();
-    final currentExId = currentExercise?.id;
-    if (currentExId != null) {
-      unawaited(finishExercises(currentExId));
-    }
+    _goNextIndex();
+  }
 
+  void _goNextIndex() {
     final lastIndex = state.exercises.length - 1;
+
     if (state.currentIndex < lastIndex) {
       emit(state.copyWith(currentIndex: state.currentIndex + 1));
       _startForCurrent();
       return;
     }
+
     publish(
       TasksProcessEffect.navigateFinish(
         calories: 500,
         day: 1,
         durationSeconds: _totalWorkoutDurationSeconds(state.completedExercises),
-        taskCount: state.completedTaskCount,
+        taskCount: state.completedTaskCount, // faqat tugaganlar soni
       ),
     );
   }
@@ -89,7 +99,9 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
     _timer?.cancel();
     final ex = currentExercise;
     if (ex == null) return;
+
     final total = parseDuration(ex.duration).inSeconds;
+
     if (total <= 0) {
       emit(
         state.copyWith(
@@ -98,9 +110,11 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
           isPaused: false,
         ),
       );
-      unawaited(_finishZeroDurationAndGoNext(ex.id));
+
+      onExerciseFinished();
       return;
     }
+
     emit(
       state.copyWith(
         totalSeconds: total,
@@ -112,18 +126,14 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (state.isPaused) return;
 
-      if (state.remainingSeconds <= 0) {
+      if (state.remainingSeconds <= 1) {
         t.cancel();
+        emit(state.copyWith(remainingSeconds: 0));
         onExerciseFinished();
       } else {
         emit(state.copyWith(remainingSeconds: state.remainingSeconds - 1));
       }
     });
-  }
-
-  Future<void> _finishZeroDurationAndGoNext(int exerciseId) async {
-    await finishExercises(exerciseId);
-    onExerciseFinished();
   }
 
   int _totalWorkoutDurationSeconds(List<ExercisesRequest> list) {

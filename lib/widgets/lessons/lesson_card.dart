@@ -10,8 +10,9 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class LessonCard extends StatelessWidget {
   final WorkoutRequest workout;
+  final bool isLocked;
 
-  const LessonCard({super.key, required this.workout});
+  const LessonCard({super.key, required this.workout, required this.isLocked});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,9 @@ class LessonCard extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          if (!workout.hasRest)
+          if (isLocked)
+            Assets.icons.lock.svg()
+          else if (!workout.hasRest)
             Row(
               children: [
                 CircularPercentIndicator(
@@ -54,22 +57,11 @@ class LessonCard extends StatelessWidget {
                     .text(14, 18, 500)
                     .c(context.colors.textSub),
               ],
-            ),
-          if (workout.hasRest) Assets.icons.dayOffIcon.svg() else if (workout.isDone) Assets.icons.twoDone.svg(),
-          // else
-          //   Assets.icons.lock.svg(),
-
-          // if (lessonInfo.isLocked)
-          //   Assets.icons.lock.svg()
-
-          // else if (lessonInfo.isCompleted)
-          //   Row(
-          //     children: [
-          //       Strings.done.text(14, 18, 500).c(context.colors.accentSub),
-          //       const SizedBox(width: 8),
-          //       Assets.icons.done.svg(),
-          //     ],
-          //   )
+            )
+          else if (workout.hasRest)
+            Assets.icons.dayOffIcon.svg()
+          else if (workout.isDone)
+            Assets.icons.twoDone.svg(),
         ],
       ),
     );

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
@@ -43,10 +41,8 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   void _initializePedometerService(HomeManager manager) async {
     _pedometerService = PedometerService(
-      onTodayStepCountUpdated: (todaySteps) {
-        manager.updateTodaySteps(todaySteps);
-      },
-      onError: (error) => log('StepsPageError: $error'),
+      onTodayStepCountUpdated: (todaySteps) => manager.updateTodaySteps(todaySteps),
+      onError: (error) => debugPrint('StepsPageError: $error'),
     );
     await _pedometerService.initializePedometer();
   }

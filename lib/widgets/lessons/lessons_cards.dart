@@ -3,9 +3,11 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
+import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/lessons/lesson_card.dart' show LessonCard;
 import 'package:flutter/material.dart';
+import 'package:management/management.dart';
 
 class LessonsCards extends StatelessWidget {
   final List<WorkoutRequest> workouts;
@@ -16,6 +18,7 @@ class LessonsCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
     return ListView.separated(
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
@@ -35,6 +38,7 @@ class LessonsCards extends StatelessWidget {
                 order: 2,
               )
             : workouts[index];
+        final bool locked = !isUserPremium && index >= 3;
         return ShimmerWrapper(
           loading: isLoading,
           shimmerChild: ShimmerChild(
@@ -42,8 +46,9 @@ class LessonsCards extends StatelessWidget {
             height: 70,
           ),
           child: GestureDetector(
-            onTap: () => context.router.push(TasksRoute(level: level, workout: workout)),
+            onTap: () => locked ? null : context.router.push(TasksRoute(level: level, workout: workout)),
             child: LessonCard(
+              isLocked: locked,
               workout: workout,
             ),
           ),

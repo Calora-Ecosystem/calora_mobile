@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -35,20 +36,29 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
             top: 0,
             left: 0,
             right: 0,
-            child: Assets.images.femaleFinishBackground.image(
-              fit: BoxFit.cover,
+            child: FutureBuilder<Gender>(
+              future: _getGender(),
+              builder: (context, snapshot) {
+                final gender = snapshot.data ?? Gender.Unknown;
+                return Image(
+                  image: _bgByGender(gender),
+                  fit: BoxFit.cover,
+                );
+              },
             ),
           ),
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+          Positioned(
+            top: 24,
+            right: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                shape: BoxShape.circle,
+              ),
               child: IconButton(
                 onPressed: () => _close(context),
-                icon: Icon(
-                  Icons.close,
-                  color: context.colors.black,
-                ),
+                icon: const Icon(Icons.close),
+                color: Colors.white,
               ),
             ),
           ),
@@ -73,7 +83,7 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
                   SizedBox(height: 16),
                   Strings.congratulations.text(32, 40, 700).c(context.colors.textStrong),
                   SizedBox(height: 16),
-                  '$day bajarildi'.text(24, 32, 700).c(context.colors.accentSub),
+                  Strings.dayCompleted(day: day).text(24, 32, 700).c(context.colors.accentSub),
                   SizedBox(height: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,6 +146,22 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
   void _close(BuildContext context) {
     final router = context.router;
     router.removeWhere((r) => r.name == FinishTaskRoute.name || r.name == TasksProcessRoute.name);
+  }
+
+  Future<Gender> _getGender() async {
+    final profile = await profileStore.getProfile();
+    return Gender.fromApi(profile.gender);
+  }
+
+  ImageProvider _bgByGender(Gender gender) {
+    switch (gender) {
+      case Gender.Male:
+        return Assets.images.maleFinishBackground.provider();
+      case Gender.Female:
+        return Assets.images.femaleFinishBackground.provider();
+      case Gender.Unknown:
+        return Assets.images.femaleFinishBackground.provider();
+    }
   }
 
   Widget _buildTaskParametrs(
