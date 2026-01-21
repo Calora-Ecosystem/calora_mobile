@@ -18,8 +18,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
 
-  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo)
-    : super(HomeState());
+  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo) : super(HomeState());
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
     onStart: () => emit(state.copyWith(isLoading: true)),
@@ -198,23 +197,17 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
           NutrientInfo(
             name: Strings.proteins,
             value: summary.sum.Protein,
-            percent: proteinNorm > 0
-                ? (summary.sum.Protein / proteinNorm).clamp(0.0, 1.0)
-                : 0,
+            percent: proteinNorm > 0 ? (summary.sum.Protein / proteinNorm).clamp(0.0, 1.0) : 0,
           ),
           NutrientInfo(
             name: Strings.oils,
             value: summary.sum.Fat,
-            percent: fatNorm > 0
-                ? (summary.sum.Fat / fatNorm).clamp(0.0, 1.0)
-                : 0,
+            percent: fatNorm > 0 ? (summary.sum.Fat / fatNorm).clamp(0.0, 1.0) : 0,
           ),
           NutrientInfo(
             name: Strings.carbohydrates,
             value: summary.sum.Carb,
-            percent: carbNorm > 0
-                ? (summary.sum.Carb / carbNorm).clamp(0.0, 1.0)
-                : 0,
+            percent: carbNorm > 0 ? (summary.sum.Carb / carbNorm).clamp(0.0, 1.0) : 0,
           ),
         ],
       ),

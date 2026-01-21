@@ -4,6 +4,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
+import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/lessons/management/lessons_management.dart';
 import 'package:calora/presentation/lessons/management/lessons_manager.dart';
@@ -51,6 +52,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
     LessonsManager manager,
     LessonsState state,
   ) {
+    final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
     return Scaffold(
       backgroundColor: context.colors.accentDisabled,
       body: Stack(
@@ -75,6 +77,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
             child: Column(
               children: [
                 LessonAppBar(
+                  percent: 0.2,
                   title: Strings.changeWithin30Days,
                   level: _mapIntToLevel(state.levelIndex),
                   onLevelChanged: (value) async {
@@ -99,7 +102,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
                       ),
                       child: Column(
                         children: [
-                          PremiumEntryCard(),
+                          if (!isUserPremium) PremiumEntryCard(),
                           LessonsCards(
                             level: _mapIntToLevel(state.levelIndex),
                             isLoading: state.isLoading,

@@ -119,7 +119,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     DateTime toDate;
 
     switch (period) {
-      case 0: // Daily
+      case 0:
         final targetDay = now.add(Duration(days: offset));
         fromDate = DateTime(targetDay.year, targetDay.month, targetDay.day);
         toDate = DateTime(targetDay.year, targetDay.month, targetDay.day, 23, 59, 59);

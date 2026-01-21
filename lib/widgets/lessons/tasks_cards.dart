@@ -66,7 +66,7 @@ class TasksCards extends StatelessWidget {
                   child: Row(
                     children: [
                       CustomCachedNetworkImage.banner(
-                        imageUrl: '',
+                        imageUrl: exercises[index].assets.first.url,
                         height: 56,
                         width: 56,
                       ),
@@ -106,6 +106,11 @@ class TasksCards extends StatelessWidget {
 
   void _showTask(BuildContext context, ExercisesRequest exercises) {
     context.showAppBottomSheet(child: TaskInfoPage(exercises: exercises));
+  }
+
+  bool isLocked(int index, bool isUserPremium) {
+    if (isUserPremium) return false;
+    return index >= 3;
   }
 
   String levelToLocalizedString(Level level) {

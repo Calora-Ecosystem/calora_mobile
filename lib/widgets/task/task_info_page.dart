@@ -43,8 +43,7 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
             // const SizedBox(height: 12),
             // if (selectedIndex == 0)
             CustomCachedNetworkImage.banner(
-              imageUrl: '',
-              width: double.infinity,
+              imageUrl: widget.exercises.assets.first.url,
             ),
             // if (selectedIndex == 1) VideoPlayerPage(videoUrl: widget.exercises.assets),
             widget.exercises.title.text(20, 24, 700).c(context.colors.textStrong),

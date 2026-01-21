@@ -5,6 +5,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/progress_button.dart';
 import 'package:calora/common/widgets/button/simple_button.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -101,7 +102,7 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
                   total: state.exercises.length,
                 ),
                 const SizedBox(height: 28),
-                Assets.images.taskVideo.image(),
+                CustomCachedNetworkImage.banner(imageUrl: ex.assets.first.url, height: 200),
                 const SizedBox(height: 12),
                 ex.title.text(20, 24, 700).c(context.colors.textStrong),
                 const SizedBox(height: 12),

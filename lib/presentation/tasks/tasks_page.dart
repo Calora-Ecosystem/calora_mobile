@@ -50,10 +50,11 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
             child: Column(
               children: [
                 LessonAppBar(
-                  percent: workout.doneItems / workout.totalItems,
+                  percent: safePercent(done: workout.doneItems, total: workout.totalItems),
                   title: workout.title,
                   level: level,
                   showSettings: false,
+                  showIndicator: !workout.hasRest,
                   onLevelChanged: (value) {},
                 ),
                 const SizedBox(height: 50),
@@ -96,5 +97,20 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
               ),
             ),
     );
+  }
+
+  double safePercent({
+    required num done,
+    required num total,
+    double min = 0.0,
+    double max = 1.0,
+  }) {
+    if (total <= 0) return min;
+
+    final value = done / total;
+
+    if (!value.isFinite || value.isNaN) return min;
+
+    return value.clamp(min, max).toDouble();
   }
 }

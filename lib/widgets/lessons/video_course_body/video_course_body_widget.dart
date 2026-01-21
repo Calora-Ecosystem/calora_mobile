@@ -1,12 +1,15 @@
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonRequest;
+import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/courses_app_bar.dart';
 import 'package:calora/widgets/info/course_info_widget.dart';
@@ -53,6 +56,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
     VideoCourseBodyManager manager,
     VideoCourseBodyState state,
   ) {
+    final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
     return Scaffold(
       body: Stack(
         children: [
@@ -81,7 +85,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                           children: [
                             Expanded(child: course.title.text(24, 32, 700)),
                             const SizedBox(width: 8),
-                            if (!state.isPurchased) Assets.icons.lock.svg(),
+                            if (!isUserPremium) Assets.icons.lock.svg() else Assets.icons.money.svg(),
                           ],
                         ),
                         parameters: [
@@ -181,6 +185,15 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
           ),
         ],
       ),
+      bottomNavigationBar: !isUserPremium
+          ? SafeArea(
+              child: Button(
+                onPressed: () => context.router.push(const PremiumFeaturesRoute()),
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                text: Strings.purchase,
+              ),
+            )
+          : null,
     );
   }
 
