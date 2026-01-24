@@ -24,6 +24,9 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         ),
       );
 
+  bool _gotFirstPedometerValue = false;
+  int? _lastSentSteps;
+
   void updateTodaySteps(int steps) {
     emit(state.copyWith(stepCount: steps));
 
@@ -32,15 +35,48 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     }
   }
 
+  void onPedometerSteps(int steps) {
+    updateTodaySteps(steps);
+
+    if (steps <= 0) return;
+
+    if (!_gotFirstPedometerValue) {
+      _gotFirstPedometerValue = true;
+
+      _sendIfChanged(steps);
+
+      startPeriodicDataSync();
+      return;
+    }
+  }
+
   void startPeriodicDataSync() {
     _periodicTimer?.cancel();
-    _periodicTimer = Timer.periodic(const Duration(minutes: 1), (timer) => sendDailyData());
-    sendDailyData();
+    _periodicTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => sendDailyData(),
+    );
   }
 
   void stopPeriodicDataSync() {
     _periodicTimer?.cancel();
     _periodicTimer = null;
+  }
+
+  Future<void> sendDailyData() async {
+    if (!_gotFirstPedometerValue) return;
+
+    final steps = state.stepCount;
+    if (steps <= 0) return;
+
+    await _sendIfChanged(steps);
+  }
+
+  Future<void> _sendIfChanged(int steps) async {
+    if (_lastSentSteps == steps) return;
+    _lastSentSteps = steps;
+
+    await stepRepo.sendDailyData(metric: 'Step', value: steps);
   }
 
   @override
@@ -216,10 +252,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onDone: () => emit(state.copyWith(isDeletingNorm: false)),
           onError: (_) => emit(state.copyWith(isDeletingNorm: false)),
         );
-  }
-
-  Future<void> sendDailyData() async {
-    await stepRepo.sendDailyData(metric: 'Step', value: state.stepCount);
   }
 
   void changePeriod(int newPeriod) {

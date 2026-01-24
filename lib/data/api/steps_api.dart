@@ -54,6 +54,7 @@ class StepsApi {
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
     final profile = await profileStore.getProfile();
     final currentEmail = profile.email?.toLowerCase() ?? '';
+    final currentUserId = profile.userId ?? 0;
     final response = await _dio.get(
       '/users/steps/stat',
       queryParameters: {
@@ -66,12 +67,13 @@ class StepsApi {
     return content.map((json) {
       final user = json['user'];
       final userEmail = (user['email'] ?? '').toString().toLowerCase();
+      final userId = user['id'] ?? 0;
       return UserStatRequest(
         firstName: user['name'] ?? '',
         lastName: '',
         stepCount: json['sum'] ?? 0,
         talks: json['count'] ?? 0,
-        isMe: userEmail == currentEmail,
+        isMe: userId == currentUserId,
         isWinner: json['index'] == 1,
       );
     }).toList();
@@ -129,9 +131,7 @@ class StepsApi {
         '/users/dailies/reset',
         queryParameters: {'date': date},
       );
-      return response.statusCode != null &&
-          response.statusCode! >= 200 &&
-          response.statusCode! < 300;
+      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } on DioException {
       return false;
     }

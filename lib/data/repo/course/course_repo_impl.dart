@@ -63,4 +63,9 @@ class CourseRepoImpl implements CourseRepo {
   Future<void> finishedExercises(int id) async {
     await _courseApi.finishedExercises(id);
   }
+
+  @override
+  Future<void> finishWorkout(int id) async {
+    await _courseApi.finishWorkout(id);
+  }
 }

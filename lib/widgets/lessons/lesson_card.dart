@@ -42,26 +42,32 @@ class LessonCard extends StatelessWidget {
           const Spacer(),
           if (isLocked)
             Assets.icons.lock.svg()
-          else if (!workout.hasRest)
+          else if (workout.hasRest)
+            Assets.icons.dayOffIcon.svg()
+          else if (workout.isDone)
+            Row(
+              spacing: 8,
+              children: [
+                Strings.done.text(14, 18, 500).c(context.colors.accentSub),
+                Assets.icons.doneLesson.svg(),
+              ],
+            )
+          else
             Row(
               children: [
                 CircularPercentIndicator(
                   radius: 10,
                   lineWidth: 2,
-                  percent: workout.doneItems / workout.totalItems,
+                  percent: workout.totalItems == 0 ? 0 : (workout.doneItems / workout.totalItems).clamp(0, 1),
                   backgroundColor: context.colors.accentWhite,
                   progressColor: context.colors.accentSub,
                 ),
                 const SizedBox(width: 8),
-                '${(workout.doneItems / workout.totalItems * 100).asFixedTruncated(0)}%'
+                '${(workout.totalItems == 0 ? 0 : (workout.doneItems / workout.totalItems * 100).asFixedTruncated(0))}%'
                     .text(14, 18, 500)
                     .c(context.colors.textSub),
               ],
-            )
-          else if (workout.hasRest)
-            Assets.icons.dayOffIcon.svg()
-          else if (workout.isDone)
-            Assets.icons.twoDone.svg(),
+            ),
         ],
       ),
     );

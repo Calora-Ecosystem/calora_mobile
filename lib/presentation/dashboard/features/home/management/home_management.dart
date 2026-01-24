@@ -2,8 +2,7 @@ import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
-import 'package:calora/domain/model/summary/summary_request.dart'
-    hide NutrientData;
+import 'package:calora/domain/model/summary/summary_request.dart' hide NutrientData;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'home_management.freezed.dart';
@@ -20,9 +19,10 @@ abstract class HomeState with _$HomeState {
     @Default(0) double remainedCalories,
     @Default([]) List<NutrientInfo> nutrients,
     @Default(0) int currentSteps,
+    @Default(0) int liveTodaySteps,
     @Default(0) int targetSteps,
     @Default(0) double targetKcal,
-    @Default(0) int timeInSeconds,
+    @Default(0) double timeInSeconds,
     MetricsRequest? metrics,
     @Default(0.25) double bottleCapacity,
     @Default(0) double targetLiters,

@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 @lazySingleton
 class AuthApi {
   final Dio _dio;
+
   AuthApi(this._dio);
 
   Future<Response> sendOtp(String email) async {
@@ -35,6 +36,40 @@ class AuthApi {
     };
     return _dio.post(
       '/auth/sign-in/${email == null ? 'phone' : 'email'}',
+      data: data,
+    );
+  }
+
+  Future<Response> signInGoogle({
+    required String ssoToken,
+    required String key,
+    required String name,
+    required String? fcmToken,
+  }) {
+    final data = {
+      'ssoToken': ssoToken,
+      'deviceInfo': {'key': key, 'name': name, 'fcmToken': fcmToken},
+    };
+
+    return _dio.post(
+      '/auth/sign-in/google',
+      data: data,
+    );
+  }
+
+  Future<Response> signInApple({
+    required String ssoToken,
+    required String key,
+    required String name,
+    required String? fcmToken,
+  }) {
+    final data = {
+      'ssoToken': ssoToken,
+      'deviceInfo': {'key': key, 'name': name, 'fcmToken': fcmToken},
+    };
+
+    return _dio.post(
+      '/auth/sign-in/apple',
       data: data,
     );
   }

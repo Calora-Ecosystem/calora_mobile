@@ -1,4 +1,3 @@
-import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -15,11 +14,12 @@ abstract class VideoCourseBodyState with _$VideoCourseBodyState {
 
 @freezed
 abstract class VideoCourseBodyEffect with _$VideoCourseBodyEffect {
-  const factory VideoCourseBodyEffect.openInfoSheet(String description) =
-      _OpenInfoSheet;
+  const factory VideoCourseBodyEffect.openInfoSheet(String description) = _OpenInfoSheet;
 
   const factory VideoCourseBodyEffect.openVideo(
     LessonRequest lesson,
     int index,
   ) = _OpenVideo;
+
+  const factory VideoCourseBodyEffect.showNeedFinishPrevious() = _ShowNeedFinishPrevious;
 }

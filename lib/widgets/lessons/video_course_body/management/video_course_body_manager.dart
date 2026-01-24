@@ -1,40 +1,54 @@
 import 'package:calora/domain/model/lesson/lesson_request.dart';
 import 'package:calora/domain/repo/course/course_repo.dart';
+import 'package:calora/widgets/lessons/video_course_body/management/video_course_body_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-import 'package:calora/widgets/lessons/video_course_body/management/video_course_body_management.dart';
-
 @injectable
-class VideoCourseBodyManager
-    extends Manager<VideoCourseBodyState, VideoCourseBodyEffect> {
+class VideoCourseBodyManager extends Manager<VideoCourseBodyState, VideoCourseBodyEffect> {
   final CourseRepo _courseRepo;
 
-  VideoCourseBodyManager(this._courseRepo)
-    : super(const VideoCourseBodyState());
+  VideoCourseBodyManager(this._courseRepo) : super(const VideoCourseBodyState());
 
   void getVideoCourse(int id) {
     _courseRepo
         .getLessonsById(id)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (data) =>
-              emit(state.copyWith(lessons: data, isLoading: false)),
+          onData: (data) => emit(state.copyWith(lessons: data, isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
   }
 
-  void videoCompleted(int id) {
+  void videoCompleted(int lessonId) {
     _courseRepo
-        .updateVideoCourseFinished(id)
+        .updateVideoCourseFinished(lessonId)
         .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (e) => emit(state.copyWith(isLoading: false)),
+          onStart: () {},
+          onDone: () {
+            final updated = state.lessons.map((l) {
+              if (l.id == lessonId) return l.copyWith(isFinished: true);
+              return l;
+            }).toList();
+            emit(state.copyWith(lessons: updated));
+          },
+          onError: (e) {},
         );
   }
 
   void onVideoTapped(LessonRequest lesson, int index) {
+    if (index < 1) {
+      final prevIndex = index - 1;
+      if (prevIndex >= 0) {
+        final prev = state.lessons.length > prevIndex ? state.lessons[prevIndex] : null;
+        if (prev != null && prev.isFinished != true) {
+          publish(const VideoCourseBodyEffect.showNeedFinishPrevious());
+          return;
+        }
+      }
+      publish(VideoCourseBodyEffect.openVideo(lesson, index));
+      return;
+    }
     if (lesson.isFree || state.isPurchased) {
       publish(VideoCourseBodyEffect.openVideo(lesson, index));
     }

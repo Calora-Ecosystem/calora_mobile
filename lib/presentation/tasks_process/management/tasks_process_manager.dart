@@ -15,13 +15,26 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
   bool _leaveSheetOpen = false;
 
   TasksProcessManager(this._courseRepo) : super(const TasksProcessState());
+  int? _workoutId;
 
-  void init(List<ExercisesRequest> exercises) {
+  void init(List<ExercisesRequest> exercises, {required int workoutId}) {
     if (exercises.isEmpty) return;
+
+    _workoutId = workoutId;
 
     emit(state.copyWith(exercises: exercises, currentIndex: 0));
     _startForCurrent();
     emit(state.copyWith(isInitialized: true));
+  }
+
+  void finishWorkout(int id) {
+    _courseRepo
+        .finishWorkout(id)
+        .handle(
+          onStart: () => emit(state.copyWith()),
+          onDone: () => emit(state.copyWith()),
+          onError: (e) => emit(state.copyWith()),
+        );
   }
 
   ExercisesRequest? get currentExercise {
@@ -64,13 +77,17 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
       _startForCurrent();
       return;
     }
-
+    final finishedAll = state.completedTaskCount == state.exercises.length;
+    final id = _workoutId;
+    if (finishedAll && id != null) {
+      unawaited(_courseRepo.finishWorkout(id));
+    }
     publish(
       TasksProcessEffect.navigateFinish(
         calories: 500,
         day: 1,
         durationSeconds: _totalWorkoutDurationSeconds(state.completedExercises),
-        taskCount: state.completedTaskCount, // faqat tugaganlar soni
+        taskCount: state.completedTaskCount,
       ),
     );
   }

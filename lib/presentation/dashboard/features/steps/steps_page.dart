@@ -46,7 +46,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
   void init(context, manager) {
     WidgetsBinding.instance.addObserver(this);
     manager.getNorms();
-    manager.startPeriodicDataSync();
     manager.fetchDataForPeriod(0, 0);
     manager.fetchDataForPeriod(1, 0);
     manager.fetchDataForPeriod(2, 0);
@@ -69,9 +68,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
 
   void _initializePedometerService(StepsManager manager) async {
     _pedometerService = PedometerService(
-      onTodayStepCountUpdated: (todaySteps) => manager.updateTodaySteps(todaySteps),
+      onTodayStepCountUpdated: (todaySteps) => manager.onPedometerSteps(todaySteps),
       onError: (error) => debugPrint('StepsPageError: $error'),
     );
+
     await _pedometerService.initializePedometer();
   }
 

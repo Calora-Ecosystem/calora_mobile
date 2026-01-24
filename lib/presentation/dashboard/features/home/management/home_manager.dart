@@ -39,11 +39,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   }
 
   void updateDay(DateTime day) {
+    if (_isToday(day)) {
+      emit(state.copyWith(day: day, currentSteps: state.liveTodaySteps));
+      return;
+    }
     emit(state.copyWith(day: day));
+    getDailyStep();
   }
 
   void updateTodaySteps(int steps) {
-    emit(state.copyWith(currentSteps: steps));
+    emit(state.copyWith(liveTodaySteps: steps));
+    final day = state.day ?? DateTime.now();
+    if (_isToday(day)) {
+      emit(state.copyWith(currentSteps: steps));
+    }
   }
 
   void updateWaterIntake(double liters) {
@@ -60,20 +69,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     );
   }
 
+  bool _isToday(DateTime day) {
+    final now = DateTime.now();
+    return now.year == day.year && now.month == day.month && now.day == day.day;
+  }
+
   void getDailyStep() {
+    final day = state.day ?? DateTime.now();
+    if (_isToday(day)) return;
     _homeRepo
-        .getDailiesSteps(state.day ?? DateTime.now())
+        .getDailiesSteps(day)
         .handle(
           onStart: () => emit(state.copyWith(isMetricsLoading: true)),
-          onData: (data) {
-            emit(
-              state.copyWith(
-                currentSteps: data.value.toInt(),
-                isMetricsLoading: false,
-              ),
-            );
-          },
-          onError: (error) => emit(state.copyWith(isMetricsLoading: false)),
+          onData: (data) => emit(state.copyWith(currentSteps: data.value.toInt(), isMetricsLoading: false)),
+          onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
         );
   }
 
@@ -212,5 +221,16 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         ],
       ),
     );
+  }
+}
+
+extension HomeManagerX on HomeManager {
+  Future<void> refreshAll() async {
+    getUserInfo();
+    getStepNorm();
+    getSummary();
+    getWater();
+    getMetrics();
+    getDailyStep();
   }
 }

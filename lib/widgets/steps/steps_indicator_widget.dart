@@ -24,6 +24,7 @@ class StepsIndicatorWidget extends StatelessWidget {
     return CircularPercentIndicator(
       radius: 100,
       lineWidth: 15,
+      animateFromLastPercent: true,
       animation: true,
       animationDuration: 2000,
       percent: progress,
@@ -35,20 +36,14 @@ class StepsIndicatorWidget extends StatelessWidget {
         children: [
           Assets.icons.stepsHuman.svg(),
           const SizedBox(height: 8),
-          current
-              .toInt()
-              .toString()
-              .text(32, 40, 700)
-              .c(context.colors.textStrong),
+          current.toInt().toString().text(32, 40, 700).c(context.colors.textStrong),
           const SizedBox(height: 8),
           GestureDetector(
             onTap: onEditTap,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ('${Strings.goal}:$goal')
-                    .text(14, 16, 600)
-                    .c(context.colors.textSub),
+                ('${Strings.goal}:$goal').text(14, 16, 600).c(context.colors.textSub),
                 Assets.icons.edit.svg(),
               ],
             ),
