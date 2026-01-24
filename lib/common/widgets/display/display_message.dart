@@ -9,11 +9,5 @@ class DisplayMessage {
   final VoidCallback? onTap;
   final Duration? duration;
 
-  DisplayMessage(
-    this.type,
-    this.description, [
-    this.title,
-    this.onTap,
-    this.duration,
-  ]);
+  DisplayMessage(this.type, this.description, [this.title, this.onTap, this.duration]);
 }

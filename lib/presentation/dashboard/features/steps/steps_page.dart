@@ -11,6 +11,7 @@ import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
+import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
@@ -31,7 +32,6 @@ import 'package:share_plus/share_plus.dart';
 class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with WidgetsBindingObserver {
   StepsPage({super.key});
 
-  late PedometerService _pedometerService;
   final List<ScreenshotController> _screenshotControllers = [
     ScreenshotController(),
     ScreenshotController(),
@@ -44,35 +44,11 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
 
   @override
   void init(context, manager) {
-    WidgetsBinding.instance.addObserver(this);
+    manager.updateTodaySteps(context.read<AppManager>().state.stepCount);
     manager.getNorms();
-    manager.startPeriodicDataSync();
     manager.fetchDataForPeriod(0, 0);
     manager.fetchDataForPeriod(1, 0);
     manager.fetchDataForPeriod(2, 0);
-    _initializePedometerService(manager);
-  }
-
-  @override
-  void onFocusGained(BuildContext context, StepsManager manager) {
-    super.onFocusGained(context, manager);
-    manager.startPeriodicDataSync();
-    log('gaining focus');
-  }
-
-  @override
-  void onFocusLost(BuildContext context, StepsManager manager) {
-    super.onFocusLost(context, manager);
-    manager.stopPeriodicDataSync();
-    log('loosing focus');
-  }
-
-  void _initializePedometerService(StepsManager manager) async {
-    _pedometerService = PedometerService(
-      onTodayStepCountUpdated: (todaySteps) => manager.updateTodaySteps(todaySteps),
-      onError: (error) => debugPrint('StepsPageError: $error'),
-    );
-    await _pedometerService.initializePedometer();
   }
 
   @override
@@ -203,12 +179,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 
   void _showConfirmDialog(BuildContext context, StepsManager manager) {

@@ -13,56 +13,52 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   final PremiumRepo _premiumRepo;
 
   PremiumManager(this._premiumRepo) : super(const PremiumState()) {
+    getPremiumPlans();
     getMyOrders();
-    _initialize();
+    _initializeMethods();
   }
 
-  void _initialize() {
-    final plans = [
-      PlanModel(title: Strings.monthlyPremium, price: 49000, packageMonth: 1),
-      PlanModel(title: Strings.nMothPremium(month: 3), actualPrice: 150000, price: 142000, packageMonth: 3),
-      PlanModel(
-        title: Strings.nMothPremium(month: 6),
-        actualPrice: 300000,
-        price: 270000,
-        isMostPopular: true,
-        packageMonth: 6,
-      ),
-      PlanModel(title: Strings.annualPremium, actualPrice: 600000, price: 480000, packageMonth: 12),
-    ];
-
+  void _initializeMethods() {
     final paymentMethods = [
       PaymentMethod(icon: Assets.icons.payme, code: 'Payme'),
       PaymentMethod(icon: Assets.icons.click, code: 'Click'),
     ];
-
-    PlanModel? initialPlan;
-    try {
-      initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
-    } catch (e) {
-      initialPlan = plans.isNotEmpty ? plans.first : null;
-    }
-
-    emit(state.copyWith(plans: plans, paymentMethods: paymentMethods, selectedPlan: initialPlan));
+    emit(state.copyWith(paymentMethods: paymentMethods));
   }
 
   void selectPlan(PlanModel plan) => emit(state.copyWith(selectedPlan: plan));
   void selectPaymentMethod(PaymentMethod method) => emit(state.copyWith(selectedPaymentMethod: method));
 
-  Future<void> _openPaymentUrl(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-          publish(PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl));
+  Future<void> getPremiumPlans() async => await _premiumRepo.getPremiumPlans().handle(
+    onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
+    onData: (data) {
+      final plans = data.map((e) {
+        if (e.duration == 1) {
+          return PlanModel(
+            title: Strings.monthlyPremium,
+            price: e.fee ?? 0,
+            packageMonth: e.duration ?? 0,
+            isMostPopular: e.isPopular ?? false,
+          );
         }
-      } else {
-        publish(PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl));
+        return PlanModel(
+          title: Strings.nMothPremium(month: e.duration ?? 0),
+          price: e.fee ?? 0,
+          packageMonth: e.duration ?? 0,
+          isMostPopular: e.isPopular ?? false,
+        );
+      }).toList();
+
+      PlanModel? initialPlan;
+      try {
+        initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
+      } catch (e) {
+        initialPlan = plans.isNotEmpty ? plans.first : null;
       }
-    } catch (e) {
-      publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
-    }
-  }
+      emit(state.copyWith(isGettingPremiumPlans: false, plans: plans, selectedPlan: initialPlan));
+    },
+    onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
+  );
 
   Future<void> getMyOrders() async => await _premiumRepo.getMyOrders().handle(
     onStart: () => emit(state.copyWith(isGettingOrders: true)),
@@ -85,11 +81,83 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
     onError: (_) => emit(state.copyWith(isGettingOrders: false)),
   );
 
+  void restoreOriginalPrices() {
+    final restoredPlans = state.plans.map((plan) {
+      return PlanModel(
+        title: plan.title,
+        price: plan.actualPrice ?? plan.price,
+        packageMonth: plan.packageMonth,
+        isMostPopular: plan.isMostPopular,
+      );
+    }).toList();
+
+    PlanModel? newSelectedPlan;
+    try {
+      newSelectedPlan = restoredPlans.firstWhere((plan) => plan.isMostPopular);
+    } catch (e) {
+      newSelectedPlan = restoredPlans.isNotEmpty ? restoredPlans.first : null;
+    }
+
+    emit(
+      state.copyWith(
+        isGettingPromoCodeValue: false,
+        promoCodeValue: null,
+        plans: restoredPlans,
+        selectedPlan: newSelectedPlan,
+      ),
+    );
+  }
+
+  Future<void> getPromoCodeValue(String code) async {
+    if (code.trim().isEmpty) return restoreOriginalPrices();
+
+    await _premiumRepo
+        .getPromoCodeAmount(code: code)
+        .handle(
+          onStart: () => emit(state.copyWith(isGettingPromoCodeValue: true)),
+          onData: (data) {
+            if (data.id != null && data.amount != null) {
+              final discountedPlans = state.plans.map((plan) {
+                final discountedPrice = (plan.actualPrice ?? plan.price) - (data.amount ?? 0);
+                return PlanModel(
+                  title: plan.title,
+                  price: discountedPrice > 0 ? discountedPrice : 0,
+                  actualPrice: plan.actualPrice ?? plan.price,
+                  packageMonth: plan.packageMonth,
+                  isMostPopular: plan.isMostPopular,
+                );
+              }).toList();
+
+              PlanModel? newSelectedPlan;
+              try {
+                newSelectedPlan = discountedPlans.firstWhere((plan) => plan.isMostPopular);
+              } catch (e) {
+                newSelectedPlan = discountedPlans.isNotEmpty ? discountedPlans.first : null;
+              }
+
+              emit(
+                state.copyWith(
+                  isGettingPromoCodeValue: false,
+                  promoCodeValue: data,
+                  plans: discountedPlans,
+                  selectedPlan: newSelectedPlan,
+                ),
+              );
+            } else {
+              restoreOriginalPrices();
+              publish(const PremiumEffect.invalidPromoCode());
+            }
+          },
+          onError: (_) => restoreOriginalPrices(),
+        );
+  }
+
   Future<void> orderSubscription() async => await _premiumRepo
       .orderSubscription(
         provider: state.selectedPaymentMethod?.code ?? '',
         plan: SubscriptionPlanType.premium.toApi(),
         orderMonth: state.selectedPlan?.packageMonth ?? -1,
+        couponId: state.promoCodeValue?.id,
       )
       .handle(
         onStart: () => emit(state.copyWith(isOrderingSubscription: true)),
@@ -104,10 +172,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       .deleteOrder(orderId: state.myOrders.first.id ?? -1)
       .handle(
         onStart: () => emit(state.copyWith(isDeletingOrder: true)),
-        onData: (_) => emit(state.copyWith(isDeletingOrder: false)),
-        onError: (error) {
-          emit(state.copyWith(isDeletingOrder: false));
-        },
+        onData: (_) => emit(state.copyWith(isDeletingOrder: false, isPaymentPending: false)),
+        onError: (_) => emit(state.copyWith(isDeletingOrder: false)),
       );
 
   Future<void> getPaymentLink() async => await _premiumRepo
@@ -120,4 +186,19 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
         },
         onError: (error) => emit(state.copyWith(isGettingPaymentLink: false)),
       );
+
+  Future<void> _openPaymentUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+          publish(PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl));
+        }
+      } else {
+        publish(PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl));
+      }
+    } catch (e) {
+      publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
+    }
+  }
 }

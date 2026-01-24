@@ -16,19 +16,13 @@ import 'package:flutter/material.dart';
 class FoodNotificationSettingsSheet extends StatefulWidget {
   final NotificationSettingsManager manager;
   final bool loading;
-  const FoodNotificationSettingsSheet({
-    super.key,
-    required this.manager,
-    this.loading = false,
-  });
+  const FoodNotificationSettingsSheet({super.key, required this.manager, this.loading = false});
 
   @override
-  State<FoodNotificationSettingsSheet> createState() =>
-      _FoodNotificationSettingsSheetState();
+  State<FoodNotificationSettingsSheet> createState() => _FoodNotificationSettingsSheetState();
 }
 
-class _FoodNotificationSettingsSheetState
-    extends State<FoodNotificationSettingsSheet> {
+class _FoodNotificationSettingsSheetState extends State<FoodNotificationSettingsSheet> {
   late Map<ReminderTypesEnum, ReminderRequest> _originalReminders;
   bool _isSaved = false;
 
@@ -40,18 +34,13 @@ class _FoodNotificationSettingsSheetState
 
   @override
   void dispose() {
-    if (!_isSaved) {
-      widget.manager.setReminders(_originalReminders);
-    }
+    if (!_isSaved) widget.manager.setReminders(_originalReminders);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ManagerBuilder<
-      NotificationSettingsState,
-      NotificationSettingsEffect
-    >(
+    return ManagerBuilder<NotificationSettingsState, NotificationSettingsEffect>(
       manager: widget.manager,
       properties: (state) => [state.reminders, state.isSaving],
       builder: (context, state) {
@@ -112,10 +101,7 @@ class _FoodNotificationSettingsSheetState
                     loading: state.isSaving,
                     onPressed: () async {
                       _isSaved = true;
-                      await widget.manager.saveAllReminderChanges(
-                        originalReminders: _originalReminders,
-                      );
-                      if (context.mounted) context.router.maybePop();
+                      await widget.manager.saveAllReminderChanges(originalReminders: _originalReminders);
                     },
                   ),
                 ),

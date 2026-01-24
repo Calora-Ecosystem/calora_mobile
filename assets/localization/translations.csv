@@ -292,7 +292,7 @@ the_information_in_your_voicemail_is_being_analyzed,The information in your voic
 daily_meal_plan,Daily meal plan,Kunlik ozuqa rejasi,Ежедневный план питания
 add,Add,Qo'shish,Добавлять
 more_details,More details,Batafsill,Более подробная информация
-add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённое количество
+add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённую сумму
 enter_the_amount_of_food_gr,"Enter the amount of food, gr.","Ovqat miqdorini kiriting, gr","Введите количество еды, гр."
 make_your_own_food,Make your own food,O‘zingizni ovqatingizni yarating,Готовьте еду сами
 name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
@@ -374,3 +374,7 @@ chosen_payment_type,Choosen payment type,Tanlangan to’lov turi,Выбранн�
 continue_purchase,Continue purchase,Sotib olishni davom ettirish,Продолжить покупки
 could_not_launch_payment_url,Could not launch payment URL,To'lov URL manzilini ishga tushirib bo'lmadi,Не удалось запустить платежный URL.
 day_completed,{day} completed,{day} bajarildi,{day} завершен
+watch_this_video_previous_video,"To watch this video, first watch the previous video and finish it!",Ushbu videoni ko'rish uchun avvalo oldingi videoni ko'ring va uni tugating!,"Чтобы посмотреть это видео, сначала посмотрите предыдущее видео и досмотрите его до конца!"
+to_do_exercise,"To do this exercise, first complete the previous exercise!",Ushbu mashqni bajarish uchun avvalo oldingi mashqni tugating!,Для выполнения этого упражнения сначала выполните предыдущее!
+invalid_promo_code,Invalid promo code,Promo-kod noto'g'ri,Недействительный промокод
+reminder_changed_successfully,Reminder changed successfully,Eslatma muvaffaqiyatli o'zgartirildi,Напоминание успешно изменено.

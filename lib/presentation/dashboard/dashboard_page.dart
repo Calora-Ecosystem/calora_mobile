@@ -30,9 +30,7 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
             child: Container(
               decoration: BoxDecoration(
                 color: context.colors.transparent,
-                border: Border(
-                  top: BorderSide(color: context.colors.strokeSoft),
-                ),
+                border: Border(top: BorderSide(color: context.colors.strokeSoft)),
               ),
               child: Theme(
                 data: Theme.of(context).copyWith(
