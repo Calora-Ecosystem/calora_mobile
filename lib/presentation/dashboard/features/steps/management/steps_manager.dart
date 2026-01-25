@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -11,6 +12,7 @@ import 'package:management/management.dart';
 @injectable
 class StepsManager extends Manager<StepsState, StepsEffect> {
   final StepRepo stepRepo;
+
   StepsManager(this.stepRepo)
     : super(
         StepsState(
