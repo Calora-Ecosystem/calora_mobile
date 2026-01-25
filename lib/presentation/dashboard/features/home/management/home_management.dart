@@ -29,6 +29,7 @@ abstract class HomeState with _$HomeState {
     SummaryRequest? summary,
     @Default(false) bool isWaterLoading,
     @Default(false) bool isMetricsLoading,
+    @Default(0) int unreadCount,
   }) = _HomeState;
 
   factory HomeState.initial() => HomeState(day: DateTime.now());

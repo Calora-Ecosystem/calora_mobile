@@ -38,6 +38,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     manager.getWater();
     manager.getMetrics();
     manager.getDailyStep();
+    manager.getUnreadCount();
     _initializePedometerService(manager);
   }
 
@@ -70,6 +71,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                         return HomeAppBar(
                           isScrolled: scrolled,
                           profile: snapshot.data,
+                          unreadCount: state.unreadCount,
                           onTabNotification: () => openInbox(context),
                         );
                       },

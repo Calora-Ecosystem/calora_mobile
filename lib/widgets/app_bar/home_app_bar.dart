@@ -9,8 +9,15 @@ class HomeAppBar extends StatelessWidget {
   final bool isScrolled;
   final VoidCallback onTabNotification;
   final ProfileRequest? profile;
+  final int unreadCount;
 
-  const HomeAppBar({super.key, required this.isScrolled, required this.profile, required this.onTabNotification});
+  const HomeAppBar({
+    super.key,
+    required this.isScrolled,
+    required this.profile,
+    required this.unreadCount,
+    required this.onTabNotification,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +48,28 @@ class HomeAppBar extends StatelessWidget {
             children: [Strings.hello.text(12, 14, 500), (profile?.name ?? '').text(16, 20, 500)],
           ),
           const Spacer(),
-          InkWell(onTap: onTabNotification, child: Assets.icons.notification.svg()),
+          InkWell(
+            onTap: onTabNotification,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Assets.icons.notification.svg(),
+                if (unreadCount > 0)
+                  Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );
