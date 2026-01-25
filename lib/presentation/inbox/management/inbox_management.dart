@@ -1,4 +1,4 @@
-import 'package:calora/domain/model/notification/notification.dart' as model;
+import 'package:calora/domain/model/reminder/notification.dart' as model;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 

@@ -240,5 +240,6 @@ extension HomeManagerX on HomeManager {
     getWater();
     getMetrics();
     getDailyStep();
+    getUnreadCount();
   }
 }

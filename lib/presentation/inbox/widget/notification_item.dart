@@ -1,6 +1,7 @@
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/domain/model/notification/notification.dart' as model;
+import 'package:calora/common/gen/strings.dart';
+import 'package:calora/domain/model/reminder/notification.dart' as model;
 import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:calora/presentation/inbox/widget/notification_bottom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class _NotificationItemState extends State<NotificationItem> {
                           .format(widget.notification.sentAt)
                           .text(14, 18, 400)
                           .c(const Color(0xFF9E9E9E)),
-                      'Batafsil'.text(14, 18, 500).c(const Color(0xFF4FC3F7)),
+                      Strings.moreDetails.text(14, 18, 500).c(const Color(0xFF4FC3F7)),
                     ],
                   ),
                 ],

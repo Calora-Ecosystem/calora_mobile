@@ -1,4 +1,5 @@
 import 'dart:developer'; // Import for log function
+
 import 'package:calora/domain/model/reminder/reminder_request.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -10,7 +11,15 @@ class NotificationApi {
   NotificationApi(this._dio);
 
   Future<Response> getNotifications({required int skip, required int take}) {
-    return _dio.get('notifications', queryParameters: {'Skip': skip, 'Take': take});
+    return _dio.get(
+      'notifications',
+      queryParameters: {
+        'Skip': skip,
+        'Take': take,
+        'SortPropName': 'sentAt',
+        'SortDirection': 'Ascending',
+      },
+    );
   }
 
   Future<Response> getUnread() {

@@ -1,5 +1,5 @@
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/domain/model/notification/notification.dart' as model;
+import 'package:calora/domain/model/reminder/notification.dart' as model;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
