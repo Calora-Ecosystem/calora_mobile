@@ -3,6 +3,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/premium/premium_sheet.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
@@ -117,11 +118,7 @@ class _PremiumFeatureCard extends StatelessWidget {
   final String description;
   final SvgGenImage icon;
 
-  const _PremiumFeatureCard({
-    required this.title,
-    required this.description,
-    required this.icon,
-  });
+  const _PremiumFeatureCard({required this.title, required this.description, required this.icon});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,8 @@
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
@@ -15,11 +17,14 @@ import 'package:management/management.dart';
 class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardEffect> {
   const DashboardPage({super.key});
 
-  @override
-  void init(context, manager) async {}
+  showuserid() async {
+    final userid = await profileStore.getUserId();
+    log(userid.toString());
+  }
 
   @override
   Widget builder(context, manager, state) {
+    showuserid();
     return AutoTabsScaffold(
       routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
       bottomNavigationBuilder: (context, tabRouter) {

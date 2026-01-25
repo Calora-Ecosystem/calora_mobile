@@ -1,9 +1,10 @@
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
+import 'package:calora/domain/model/premium/subscription_response_model.dart';
 
 abstract class PremiumRepo {
-  Future<String> orderSubscription({
+  Future<SubscriptionResponseModel> orderSubscription({
     required String provider,
     required String plan,
     required int orderMonth,

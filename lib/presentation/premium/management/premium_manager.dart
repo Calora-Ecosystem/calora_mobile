@@ -162,8 +162,12 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       .handle(
         onStart: () => emit(state.copyWith(isOrderingSubscription: true)),
         onData: (link) {
-          emit(state.copyWith(isOrderingSubscription: false, paymentLink: link));
-          _openPaymentUrl(link);
+          emit(state.copyWith(isOrderingSubscription: false, paymentLink: link.paymentLink ?? ''));
+          if (link.paymentRequired ?? true) {
+            _openPaymentUrl(link.paymentLink ?? '');
+          } else {
+            publish(const PremiumEffect.subscriptionSuccess());
+          }
         },
         onError: (error) => emit(state.copyWith(isOrderingSubscription: false)),
       );

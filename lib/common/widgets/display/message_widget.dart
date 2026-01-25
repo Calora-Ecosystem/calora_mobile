@@ -49,10 +49,18 @@ class MessageWidget extends StatelessWidget {
                                 (message.title ?? '').text(24, 24, 700).c(context.colors.white),
                                 const SizedBox(height: 4),
                               ],
-                              message.description
-                                  .text(14, 16, 400)
-                                  .c(context.colors.white)
-                                  .copyWith(maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.start),
+                              Text(
+                                message.description,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  height: 16 / 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: context.colors.white,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.start,
+                              ),
                             ],
                           ),
                         ),

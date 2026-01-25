@@ -30,9 +30,7 @@ class DailyPlanWidget extends StatelessWidget {
 
   bool get isToday {
     final now = DateTime.now();
-    return now.year == date.year &&
-        now.month == date.month &&
-        now.day == date.day;
+    return now.year == date.year && now.month == date.month && now.day == date.day;
   }
 
   @override
@@ -41,10 +39,7 @@ class DailyPlanWidget extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: context.colors.accentSub,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
           Padding(
@@ -54,29 +49,19 @@ class DailyPlanWidget extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: onBackward,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Assets.icons.icBackward.svg(),
-                  ),
+                  child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
                 ),
                 GestureDetector(
                   onTap: onDateTap,
                   child: Column(
                     children: [
-                      (isToday ? Strings.today : '')
-                          .text(14, 16, 400)
-                          .c(context.colors.white),
+                      (isToday ? Strings.today : '').text(14, 16, 400).c(context.colors.white),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          date.day
-                              .toString()
-                              .text(14, 16, 400)
-                              .c(context.colors.textWhite),
+                          date.day.toString().text(14, 16, 400).c(context.colors.textWhite),
                           const SizedBox(width: 4),
-                          formattedMonth
-                              .text(14, 16, 400)
-                              .c(context.colors.white),
+                          formattedMonth.text(14, 16, 400).c(context.colors.white),
                         ],
                       ),
                     ],
@@ -87,22 +72,15 @@ class DailyPlanWidget extends StatelessWidget {
                     ? const SizedBox(width: 40)
                     : InkWell(
                         onTap: onForward,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: Assets.icons.icForward.svg(),
-                        ),
+                        child: Padding(padding: const EdgeInsets.only(right: 16), child: Assets.icons.icForward.svg()),
                       ),
               ],
             ),
           ),
-
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
+            decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -145,18 +123,11 @@ class DailyPlanWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCaloriesInfo({
-    required BuildContext context,
-    required String item,
-    required Widget icon,
-  }) {
+  Widget _buildCaloriesInfo({required BuildContext context, required String item, required Widget icon}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: context.colors.backgroundElevation,
-          borderRadius: BorderRadius.circular(6),
-        ),
+        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(6)),
         child: Row(
           children: [
             SizedBox(height: 20, width: 20, child: icon),

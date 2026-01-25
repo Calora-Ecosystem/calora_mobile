@@ -31,6 +31,7 @@ sealed class PremiumEffect with _$PremiumEffect {
   const factory PremiumEffect.openPaymentUrlFailure(String error) = _OpenPaymentUrlFailure;
   const factory PremiumEffect.deleteSubscriptionFailure(String error) = _DeleteSubscriptionFailure;
   const factory PremiumEffect.invalidPromoCode() = _InvalidPromoCode;
+  const factory PremiumEffect.subscriptionSuccess() = _SubscriptionSuccess;
 }
 
 @immutable

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/extensions/color_extension.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:calora/common/extensions/text_extensions.dart';

@@ -40,22 +40,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onData: (data) {
             if (period == 0) {
               final displayStepCount = offset == 0 ? state.stepCount : _buildDailySteps(data, offset, now);
-              emit(
-                state.copyWith(
-                  dailySteps: data,
-                  dailyDisplayStepCount: displayStepCount,
-                  isGettingSteps: false,
-                ),
-              );
+              emit(state.copyWith(dailySteps: data, dailyDisplayStepCount: displayStepCount, isGettingSteps: false));
             } else if (period == 1) {
               final primaryValues = _buildWeeklySteps(data, offset, now);
-              emit(
-                state.copyWith(
-                  weeklySteps: data,
-                  weeklyPrimaryValues: primaryValues,
-                  isGettingSteps: false,
-                ),
-              );
+              emit(state.copyWith(weeklySteps: data, weeklyPrimaryValues: primaryValues, isGettingSteps: false));
             } else if (period == 2) {
               final primaryValues = _buildMonthlySteps(data, offset, now);
               emit(state.copyWith(monthlySteps: data, monthlyPrimaryValues: primaryValues, isGettingSteps: false));
@@ -133,15 +121,17 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  Future<void> fetchDataForPeriod(int period, int offset, {bool refresh = false}) async {
+  Future<void> fetchDataForPeriod(int period, int offset, {bool showLoading = false}) async {
     final now = DateTime.now();
 
-    if (period == 0) {
-      emit(state.copyWith(isDailyLoading: true));
-    } else if (period == 1) {
-      emit(state.copyWith(isWeeklyLoading: true));
-    } else if (period == 2) {
-      emit(state.copyWith(isMonthlyLoading: true));
+    if (showLoading) {
+      if (period == 0) {
+        emit(state.copyWith(isDailyLoading: true));
+      } else if (period == 1) {
+        emit(state.copyWith(isWeeklyLoading: true));
+      } else if (period == 2) {
+        emit(state.copyWith(isMonthlyLoading: true));
+      }
     }
 
     await Future.wait([
@@ -212,11 +202,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         fromDate = DateTime(targetDay.year, targetDay.month, targetDay.day);
         toDate = DateTime(targetDay.year, targetDay.month, targetDay.day, 23, 59, 59);
         emit(
-          state.copyWith(
-            period: newPeriod,
-            dailyFrom: fromDate.toIso8601String(),
-            dailyTo: toDate.toIso8601String(),
-          ),
+          state.copyWith(period: newPeriod, dailyFrom: fromDate.toIso8601String(), dailyTo: toDate.toIso8601String()),
         );
         break;
       case 1:
@@ -317,7 +303,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       default:
         return;
     }
-    fetchDataForPeriod(state.period, newOffset);
+    fetchDataForPeriod(state.period, newOffset, showLoading: true);
   }
 
   int get currentOffset {

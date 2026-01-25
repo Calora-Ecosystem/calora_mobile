@@ -9,16 +9,9 @@ class ProfileCard extends StatelessWidget {
   final String name;
   final String surname;
   final String email;
-
   final VoidCallback onEdit;
 
-  const ProfileCard({
-    super.key,
-    required this.surname,
-    required this.name,
-    required this.email,
-    required this.onEdit,
-  });
+  const ProfileCard({super.key, required this.surname, required this.name, required this.email, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {

@@ -41,9 +41,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     _lastIndex = _tabsRouter!.activeIndex;
     _tabsRouter!.addListener(() {
       final idx = _tabsRouter!.activeIndex;
-      if (_lastIndex != 0 && idx == 0) {
-        manager.refreshAll();
-      }
+      if (_lastIndex != 0 && idx == 0) manager.refreshAll();
       _lastIndex = idx;
     });
   }
@@ -65,9 +63,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         return Scaffold(
           body: Stack(
             children: [
-              Positioned.fill(
-                child: Assets.icons.background.image(fit: BoxFit.fill),
-              ),
+              Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
               Positioned.fill(
                 child: Column(
                   children: [
@@ -93,13 +89,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                           return false;
                         },
                         child: DefaultRefreshIndicator(
-                          onRefresh: () async {
-                            manager.refreshAll();
-                          },
+                          onRefresh: () async => manager.refreshAll(),
                           child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(
-                              parent: const ClampingScrollPhysics(),
-                            ),
+                            physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
                               spacing: 16,
@@ -108,22 +100,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   onDateTap: () => openCalendar(context, manager),
                                   loading: state.isLoading,
                                   onBackward: () {
-                                    manager.updateDay(
-                                      (state.day ?? DateTime.now()).subtract(
-                                        const Duration(days: 1),
-                                      ),
-                                    );
+                                    manager.updateDay((state.day ?? DateTime.now()).subtract(const Duration(days: 1)));
                                     manager.getSummary();
                                     manager.getWater();
                                     manager.getMetrics();
                                     manager.getDailyStep();
                                   },
                                   onForward: () {
-                                    manager.updateDay(
-                                      (state.day ?? DateTime.now()).add(
-                                        const Duration(days: 1),
-                                      ),
-                                    );
+                                    manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
                                     manager.getSummary();
                                     manager.getWater();
                                     manager.getMetrics();
@@ -137,19 +121,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                    ),
+                                    padding: EdgeInsets.symmetric(horizontal: 20),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       gradient: RadialGradient(
                                         radius: 1.5,
                                         center: Alignment(0.7, 0),
-                                        colors: const [
-                                          Color(0xFFECFFEF),
-                                          Color(0xFF58AE8A),
-                                        ],
+                                        colors: const [Color(0xFFECFFEF), Color(0xFF58AE8A)],
                                       ),
                                     ),
                                     child: Row(
@@ -165,11 +144,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                             ],
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 100,
-                                          width: 100,
-                                          child: Assets.images.ai.image(),
-                                        ),
+                                        SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
                                       ],
                                     ),
                                   ),
