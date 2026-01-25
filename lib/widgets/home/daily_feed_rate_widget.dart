@@ -70,10 +70,7 @@ class DailyFeedRateWidget extends StatelessWidget {
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: _SideCalories(
-                      title: Strings.norm,
-                      value: normCalories,
-                    ),
+                    child: _SideCalories(title: Strings.norm, value: normCalories),
                   ),
                   Align(
                     alignment: Alignment.centerRight,
@@ -125,10 +122,7 @@ class DailyFeedRateWidget extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: BoxDecoration(
-                    color: context.colors.accentSub,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(16)),
                   child: Strings.addFood
                       .text(16, 20, 500)
                       .c(context.colors.white)
@@ -152,11 +146,7 @@ class _SideCalories extends StatelessWidget {
   final String value;
   final bool alignRight;
 
-  const _SideCalories({
-    required this.title,
-    required this.value,
-    this.alignRight = false,
-  });
+  const _SideCalories({required this.title, required this.value, this.alignRight = false});
 
   @override
   Widget build(BuildContext context) {
@@ -170,9 +160,7 @@ class _SideCalories extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(
-                child: value.text(16, 20, 500).copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
-              ),
+              Flexible(child: value.text(16, 20, 500).copyWith(maxLines: 1, overflow: TextOverflow.ellipsis)),
               const SizedBox(width: 4),
               Strings.kcal.text(12, 14, 400),
             ],

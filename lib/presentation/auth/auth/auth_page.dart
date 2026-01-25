@@ -28,11 +28,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
   @override
   void listener(context, manager, effect) {
     effect.when(
-      verify: (verification) => context.router.push(
-        VerifyRoute(
-          verification: verification,
-        ),
-      ),
+      verify: (verification) => context.router.push(VerifyRoute(verification: verification)),
       showError: (message) => CustomSnackBar.show(context, message),
       openDashboard: () => context.router.replaceAll([const DashboardRoute()]),
       openQuestions: (email) => context.router.push(

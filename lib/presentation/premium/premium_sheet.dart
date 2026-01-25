@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/color_extension.dart';
 import 'package:calora/common/extensions/number_extension/number_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
@@ -12,6 +13,7 @@ import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/sheets/default_bottom_sheet.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
+import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
@@ -22,15 +24,10 @@ import 'package:management/management.dart';
 class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> {
   PremiumSheet({super.key});
 
-  late final AppLifecycleObserverServer _lifecycleObserver;
-
   @override
-  void init(BuildContext context, PremiumManager manager) {
-    super.init(context, manager);
-    _lifecycleObserver = AppLifecycleObserverServer(
-      onResumed: () => manager.getMyOrders(),
-    );
-    WidgetsBinding.instance.addObserver(_lifecycleObserver);
+  void onFocusGained(BuildContext context, PremiumManager manager) {
+    super.onFocusGained(context, manager);
+    manager.getMyOrders();
   }
 
   @override
@@ -40,13 +37,12 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
       openPaymentUrlFailure: (error) => CustomSnackBar.show(context, error),
       deleteSubscriptionFailure: (error) => CustomSnackBar.show(context, error),
       invalidPromoCode: () => CustomSnackBar.show(context, Strings.invalidPromoCode),
+      subscriptionSuccess: () {
+        CustomSnackBar.showSuccess(context, Strings.subscriptionSuccess);
+        context.read<AppManager>().sendDailyData();
+        context.router.maybePop();
+      },
     );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(_lifecycleObserver);
-    super.dispose();
   }
 
   Widget builder(context, manager, state) {
@@ -119,10 +115,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                           ),
                       ],
                     ),
-                    if (!state.isPaymentPending) ...[
-                      const SizedBox(height: 16),
-                      PromoCodeWidget(),
-                    ],
+                    if (!state.isPaymentPending) ...[const SizedBox(height: 16), PromoCodeWidget()],
                     const SizedBox(height: 16),
                     if (state.isPaymentPending && state.selectedPaymentMethod != null)
                       Column(
@@ -204,7 +197,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                   : Button(
                       height: 40,
                       text: Strings.purchase,
-                      enabled: state.selectedPlan != null && state.selectedPaymentMethod != null,
+                      enabled: (state.selectedPlan != null && state.selectedPaymentMethod != null),
                       loading: state.isOrderingSubscription,
                       onPressed: () => manager.orderSubscription(),
                     ),

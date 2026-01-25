@@ -2,6 +2,7 @@ import 'package:calora/data/api/premium_api.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
+import 'package:calora/domain/model/premium/subscription_response_model.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:injectable/injectable.dart';
 
@@ -21,7 +22,7 @@ class PremiumRepoImpl implements PremiumRepo {
   Future<String> getPaymentLink({required int orderId}) async => await _api.getPaymentLink(orderId: orderId);
 
   @override
-  Future<String> orderSubscription({
+  Future<SubscriptionResponseModel> orderSubscription({
     required String provider,
     required String plan,
     required int orderMonth,

@@ -133,15 +133,17 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  Future<void> fetchDataForPeriod(int period, int offset, {bool refresh = false}) async {
+  Future<void> fetchDataForPeriod(int period, int offset, {bool showLoading = false}) async {
     final now = DateTime.now();
 
-    if (period == 0) {
-      emit(state.copyWith(isDailyLoading: true));
-    } else if (period == 1) {
-      emit(state.copyWith(isWeeklyLoading: true));
-    } else if (period == 2) {
-      emit(state.copyWith(isMonthlyLoading: true));
+    if (showLoading) {
+      if (period == 0) {
+        emit(state.copyWith(isDailyLoading: true));
+      } else if (period == 1) {
+        emit(state.copyWith(isWeeklyLoading: true));
+      } else if (period == 2) {
+        emit(state.copyWith(isMonthlyLoading: true));
+      }
     }
 
     await Future.wait([
@@ -317,7 +319,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       default:
         return;
     }
-    fetchDataForPeriod(state.period, newOffset);
+    fetchDataForPeriod(state.period, newOffset, showLoading: true);
   }
 
   int get currentOffset {

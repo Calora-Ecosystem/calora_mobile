@@ -45,26 +45,22 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
   @override
   void init(context, manager) {
     manager.updateTodaySteps(context.read<AppManager>().state.stepCount);
-    manager.getNorms();
-    manager.fetchDataForPeriod(0, 0);
-    manager.fetchDataForPeriod(1, 0);
-    manager.fetchDataForPeriod(2, 0);
+    manager.fetchDataForPeriod(0, 0, showLoading: true);
+    manager.fetchDataForPeriod(1, 0, showLoading: true);
+    manager.fetchDataForPeriod(2, 0, showLoading: true);
   }
 
   @override
   Widget builder(context, manager, state) {
     final stepValue = state.norms
-        .firstWhere(
-          (norm) => norm.metric == 'Step',
-          orElse: () => NormsRequest(metric: 'Step', value: 0),
-        )
+        .firstWhere((norm) => norm.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
         .value;
     return Scaffold(
       backgroundColor: context.colors.softGray,
       body: DefaultRefreshIndicator(
         notificationPredicate: (notification) => notification.depth == 1,
         edgeOffset: context.topPadding + kToolbarHeight,
-        onRefresh: () async => await manager.fetchDataForPeriod(state.period, manager.currentOffset, refresh: true),
+        onRefresh: () async => await manager.fetchDataForPeriod(state.period, manager.currentOffset, showLoading: true),
         child: DefaultTabController(
           length: 3,
           child: Builder(
@@ -74,6 +70,23 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
                 if (!tabController.indexIsChanging && tabController.index != _previousTabIndex) {
                   _previousTabIndex = tabController.index;
                   manager.changePeriod(tabController.index);
+                  final newIndex = tabController.index;
+                  int offset = 0;
+                  switch (newIndex) {
+                    case 0:
+                      offset = manager.state.dailyOffset;
+                      break;
+                    case 1:
+                      offset = manager.state.weeklyOffset;
+                      break;
+                    case 2:
+                      offset = manager.state.monthlyOffset;
+                      break;
+                  }
+
+                  if (offset == 0) {
+                    manager.fetchDataForPeriod(newIndex, offset);
+                  }
                 }
               });
               return Stack(
@@ -163,7 +176,12 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
                                           2 => state.monthlyUserStates,
                                           _ => [],
                                         },
-                                        isGettingStats: state.isGettingStats,
+                                        isGettingStats: switch (entry.key) {
+                                          0 => state.isDailyLoading,
+                                          1 => state.isWeeklyLoading,
+                                          2 => state.isMonthlyLoading,
+                                          _ => false,
+                                        },
                                       ),
                                     )
                                     .toList(),
