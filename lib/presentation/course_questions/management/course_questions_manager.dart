@@ -69,7 +69,7 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
 
     final activityLevelApi = _activityLevelFromId(info.activityTime);
 
-    final physicalActivity = info.condition?.toString();
+    final physicalActivity = _physicalActivityFromCondition(info.condition);
 
     await profileStore.updateProfile(
       bmi: bmi,
@@ -105,6 +105,17 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
       return ActivityLevelEnum.Unknown.toApi();
     }
     return ActivityLevelEnum.values[id].toApi();
+  }
+
+  String? _physicalActivityFromCondition(int? condition) {
+    switch (condition) {
+      case 1:
+        return Strings.iAmFine;
+      case 2:
+        return Strings.minimumLoad;
+      default:
+        return null;
+    }
   }
 
   String? _formatTimeToApi(String? time) {
