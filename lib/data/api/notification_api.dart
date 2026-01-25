@@ -1,13 +1,34 @@
 import 'dart:developer'; // Import for log function
+
 import 'package:calora/domain/model/reminder/reminder_request.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
-@injectable
+@lazySingleton
 class NotificationApi {
   final Dio _dio;
 
   NotificationApi(this._dio);
+
+  Future<Response> getNotifications({required int skip, required int take}) {
+    return _dio.get(
+      'notifications',
+      queryParameters: {
+        'Skip': skip,
+        'Take': take,
+        'SortPropName': 'sentAt',
+        'SortDirection': 'Ascending',
+      },
+    );
+  }
+
+  Future<Response> getUnread() {
+    return _dio.get('notifications/unread');
+  }
+
+  Future<Response> markAsRead(int notificationId) {
+    return _dio.put('notifications/mark-as-read/$notificationId');
+  }
 
   Future<List<ReminderRequest>> getReminders() async {
     final response = await _dio.get('/reminder');

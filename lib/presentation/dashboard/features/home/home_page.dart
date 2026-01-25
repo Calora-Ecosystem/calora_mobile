@@ -73,6 +73,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                         return HomeAppBar(
                           isScrolled: scrolled,
                           profile: snapshot.data,
+                          unreadCount: state.unreadCount,
                           onTabNotification: () => openInbox(context),
                         );
                       },
