@@ -33,15 +33,28 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   );
 
   Future<void> requestPedometerPermissions() async {
-    await [Permission.activityRecognition, Permission.sensors, Permission.locationWhenInUse].request();
+    await [
+      Permission.activityRecognition,
+      Permission.sensors,
+      Permission.locationWhenInUse,
+    ].request();
   }
 
   void updateDay(DateTime day) {
+    if (_isToday(day)) {
+      emit(state.copyWith(day: day, currentSteps: state.liveTodaySteps));
+      return;
+    }
     emit(state.copyWith(day: day));
+    getDailyStep();
   }
 
   void updateTodaySteps(int steps) {
-    emit(state.copyWith(currentSteps: steps));
+    emit(state.copyWith(liveTodaySteps: steps));
+    final day = state.day ?? DateTime.now();
+    if (_isToday(day)) {
+      emit(state.copyWith(currentSteps: steps));
+    }
   }
 
   void updateWaterIntake(double liters) {
@@ -58,15 +71,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     );
   }
 
+  bool _isToday(DateTime day) {
+    final now = DateTime.now();
+    return now.year == day.year && now.month == day.month && now.day == day.day;
+  }
+
   void getDailyStep() {
+    final day = state.day ?? DateTime.now();
+    if (_isToday(day)) return;
     _homeRepo
-        .getDailiesSteps(state.day ?? DateTime.now())
+        .getDailiesSteps(day)
         .handle(
           onStart: () => emit(state.copyWith(isMetricsLoading: true)),
-          onData: (data) {
-            emit(state.copyWith(currentSteps: data.value.toInt(), isMetricsLoading: false));
-          },
-          onError: (error) => emit(state.copyWith(isMetricsLoading: false)),
+          onData: (data) => emit(state.copyWith(currentSteps: data.value.toInt(), isMetricsLoading: false)),
+          onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
         );
   }
 
@@ -76,7 +94,9 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         .handle(
           onStart: () => emit(state.copyWith(isWaterLoading: true)),
           onData: (data) {
-            emit(state.copyWith(waterIntake: data.value, isWaterLoading: false));
+            emit(
+              state.copyWith(waterIntake: data.value, isWaterLoading: false),
+            );
           },
           onError: (error) => emit(state.copyWith(isWaterLoading: false)),
         );
@@ -112,22 +132,40 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       onStart: () => emit(state.copyWith(isLoading: true)),
       onData: (data) {
         final stepValue = data
-            .firstWhere((e) => e.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Step',
+              orElse: () => NormsRequest(metric: 'Step', value: 0),
+            )
             .value;
         final waterValue = data
-            .firstWhere((e) => e.metric == 'Water', orElse: () => NormsRequest(metric: 'Water', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Water',
+              orElse: () => NormsRequest(metric: 'Water', value: 0),
+            )
             .value;
         final kcalValue = data
-            .firstWhere((e) => e.metric == 'Kcal', orElse: () => NormsRequest(metric: 'Kcal', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Kcal',
+              orElse: () => NormsRequest(metric: 'Kcal', value: 0),
+            )
             .value;
         final proteinValue = data
-            .firstWhere((e) => e.metric == 'Protein', orElse: () => NormsRequest(metric: 'Protein', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Protein',
+              orElse: () => NormsRequest(metric: 'Protein', value: 0),
+            )
             .value;
         final fatValue = data
-            .firstWhere((e) => e.metric == 'Fat', orElse: () => NormsRequest(metric: 'Fat', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Fat',
+              orElse: () => NormsRequest(metric: 'Fat', value: 0),
+            )
             .value;
         final carbsValue = data
-            .firstWhere((e) => e.metric == 'Carb', orElse: () => NormsRequest(metric: 'Carb', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Carb',
+              orElse: () => NormsRequest(metric: 'Carb', value: 0),
+            )
             .value;
 
         emit(
@@ -147,20 +185,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   void updateNutrientsPercent(SummaryRequest summary) {
     final proteinNorm = state.norms
         .firstWhere(
-          (e) => e.metric == "Protein",
-          orElse: () => NormsRequest(metric: "Protein", value: 1),
+          (e) => e.metric == 'Protein',
+          orElse: () => NormsRequest(metric: 'Protein', value: 1),
         )
         .value;
     final fatNorm = state.norms
         .firstWhere(
-          (e) => e.metric == "Fat",
-          orElse: () => NormsRequest(metric: "Fat", value: 1),
+          (e) => e.metric == 'Fat',
+          orElse: () => NormsRequest(metric: 'Fat', value: 1),
         )
         .value;
     final carbNorm = state.norms
         .firstWhere(
-          (e) => e.metric == "Carb",
-          orElse: () => NormsRequest(metric: "Carb", value: 1),
+          (e) => e.metric == 'Carb',
+          orElse: () => NormsRequest(metric: 'Carb', value: 1),
         )
         .value;
 
@@ -191,5 +229,16 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     _notificationRepo.getUnread().listen((unreadCount) {
       emit(state.copyWith(unreadCount: unreadCount));
     });
+  }
+}
+
+extension HomeManagerX on HomeManager {
+  Future<void> refreshAll() async {
+    getUserInfo();
+    getStepNorm();
+    getSummary();
+    getWater();
+    getMetrics();
+    getDailyStep();
   }
 }

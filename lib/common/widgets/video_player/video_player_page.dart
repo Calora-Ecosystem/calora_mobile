@@ -11,27 +11,50 @@ import 'package:video_player/video_player.dart';
 
 class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
   final String videoUrl;
+  final VoidCallback? onVideoComplete;
 
-  const VideoPlayerPage({@pathParam required this.videoUrl, super.key});
+  const VideoPlayerPage({
+    @pathParam required this.videoUrl,
+    this.onVideoComplete,
+    super.key,
+  });
 
   @override
   void init(BuildContext context, VideoManager manager) {
+    print(
+      'VideoPlayerPage init - onVideoComplete is null: ${onVideoComplete == null}',
+    );
+    if (onVideoComplete != null) {
+      print('Setting onVideoComplete listener');
+    }
+    manager.setOnVideoCompleteListener(onVideoComplete);
     manager.initializeVideo(videoUrl);
   }
 
   @override
-  void listener(BuildContext context, VideoManager manager, VideoEffect effect) {
+  void listener(
+    BuildContext context,
+    VideoManager manager,
+    VideoEffect effect,
+  ) {
     effect.when(
       showError: (message) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Xatolik: $message')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Xatolik: $message')));
       },
       openFullscreen: () {
         if (manager.controller != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => FullscreenVideoPlayer(controller: manager.controller!)),
+          Navigator.of(context, rootNavigator: true).push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  FullscreenVideoPlayer(controller: manager.controller!),
+            ),
           );
         }
+      },
+      videoCompleted: () {
+        print('Video completed effect received');
       },
     );
   }
@@ -46,24 +69,37 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
   @override
   Widget builder(BuildContext context, VideoManager manager, VideoState state) {
     if (!state.isInitialized) {
+      Widget content;
+      Color backgroundColor;
+
+      if (state.errorMessage != null) {
+        content = Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Xatolik: ${state.errorMessage}',
+            style: const TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+        );
+        backgroundColor = Colors.black;
+      } else {
+        content = const CircularProgressIndicator();
+        backgroundColor = context.colors.backgroundElevation;
+      }
+
       return Container(
         height: 200,
-        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(8)),
-        width: double.infinity,
-        child: const Center(child: CircularProgressIndicator()),
-      );
-    }
-    final videoController = state.controller;
-    if (videoController == null || !videoController.value.isInitialized) {
-      return AspectRatio(
-        aspectRatio: state.aspectRatio,
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
-          child: const Center(child: Text('Error: Video not initialized')),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(8),
         ),
+        width: double.infinity,
+        child: Center(child: content),
       );
     }
+
+    final videoController = state.controller!;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: GestureDetector(
@@ -88,7 +124,12 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.black54, Colors.transparent, Colors.transparent, Colors.black54],
+                      colors: [
+                        Colors.black54,
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.black54,
+                      ],
                     ),
                   ),
                   child: Stack(
@@ -96,15 +137,29 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: IconButton(icon: Assets.icons.fullScreen.svg(), onPressed: manager.openFullscreen),
+                        child: IconButton(
+                          icon: Assets.icons.fullScreen.svg(),
+                          onPressed: manager.openFullscreen,
+                        ),
                       ),
                       Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            IconButton(icon: Assets.icons.replay10.svg(), onPressed: manager.skipBackward),
-                            IconButton(icon: Assets.icons.start.svg(), onPressed: manager.togglePlayPause),
-                            IconButton(icon: Assets.icons.forward10.svg(), onPressed: manager.skipForward),
+                            IconButton(
+                              icon: Assets.icons.replay10.svg(),
+                              onPressed: manager.skipBackward,
+                            ),
+                            IconButton(
+                              icon: state.isPlaying
+                                  ? Assets.icons.icPause.svg()
+                                  : Assets.icons.start.svg(),
+                              onPressed: manager.togglePlayPause,
+                            ),
+                            IconButton(
+                              icon: Assets.icons.forward10.svg(),
+                              onPressed: manager.skipForward,
+                            ),
                           ],
                         ),
                       ),
@@ -116,16 +171,22 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                              ),
                               child: Row(
                                 children: [
-                                  _formatDuration(state.position).text(12, 16, 400).c(context.colors.textWhite),
+                                  _formatDuration(state.position)
+                                      .text(12, 16, 400)
+                                      .c(context.colors.textWhite),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: VideoProgressIndicator(
                                       videoController,
                                       allowScrubbing: true,
-                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
                                       colors: const VideoProgressColors(
                                         playedColor: Colors.blue,
                                         bufferedColor: Colors.white38,
@@ -134,7 +195,9 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  _formatDuration(state.duration).text(12, 16, 400).c(context.colors.textWhite),
+                                  _formatDuration(state.duration)
+                                      .text(12, 16, 400)
+                                      .c(context.colors.textWhite),
                                 ],
                               ),
                             ),

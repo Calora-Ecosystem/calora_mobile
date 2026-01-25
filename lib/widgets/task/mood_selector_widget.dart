@@ -19,7 +19,11 @@ class _MoodSelectorState extends State<MoodSelector> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildMoodButton(icon: Assets.icons.sad.svg(), label: Strings.heavy, value: 'heavy'),
+        _buildMoodButton(
+          icon: Assets.icons.sad.svg(),
+          label: Strings.heavy,
+          value: 'heavy',
+        ),
         SizedBox(width: 20),
         _buildMoodButton(
           icon: Assets.icons.neutral.svg(),
@@ -27,12 +31,20 @@ class _MoodSelectorState extends State<MoodSelector> {
           value: 'average',
         ),
         SizedBox(width: 20),
-        _buildMoodButton(icon: Assets.icons.smile.svg(), label: Strings.good, value: 'good'),
+        _buildMoodButton(
+          icon: Assets.icons.smile.svg(),
+          label: Strings.good,
+          value: 'good',
+        ),
       ],
     );
   }
 
-  Widget _buildMoodButton({required Widget icon, required String label, required String value}) {
+  Widget _buildMoodButton({
+    required Widget icon,
+    required String label,
+    required String value,
+  }) {
     final isSelected = selectedMood == value;
     return Expanded(
       child: GestureDetector(

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 class DailyPlanWidget extends StatelessWidget {
   final VoidCallback onBackward;
   final VoidCallback onForward;
+  final VoidCallback onDateTap;
   final DateTime date;
   final String calories;
   final String water;
@@ -24,11 +25,14 @@ class DailyPlanWidget extends StatelessWidget {
     required this.water,
     required this.steps,
     this.loading = false,
+    required this.onDateTap,
   });
 
   bool get isToday {
     final now = DateTime.now();
-    return now.year == date.year && now.month == date.month && now.day == date.day;
+    return now.year == date.year &&
+        now.month == date.month &&
+        now.day == date.day;
   }
 
   @override
@@ -37,7 +41,10 @@ class DailyPlanWidget extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.colors.accentSub,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(
         children: [
           Padding(
@@ -47,28 +54,43 @@ class DailyPlanWidget extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: onBackward,
-                  child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Assets.icons.icBackward.svg(),
+                  ),
                 ),
-
-                Column(
-                  children: [
-                    (isToday ? 'Bugun' : '').text(14, 16, 400).c(context.colors.white),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        date.day.toString().text(14, 16, 400).c(context.colors.textWhite),
-                        const SizedBox(width: 4),
-                        formattedMonth.text(14, 16, 400).c(context.colors.white),
-                      ],
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: onDateTap,
+                  child: Column(
+                    children: [
+                      (isToday ? Strings.today : '')
+                          .text(14, 16, 400)
+                          .c(context.colors.white),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          date.day
+                              .toString()
+                              .text(14, 16, 400)
+                              .c(context.colors.textWhite),
+                          const SizedBox(width: 4),
+                          formattedMonth
+                              .text(14, 16, 400)
+                              .c(context.colors.white),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
 
                 isToday
                     ? const SizedBox(width: 40)
                     : InkWell(
                         onTap: onForward,
-                        child: Padding(padding: const EdgeInsets.only(right: 16), child: Assets.icons.icForward.svg()),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: Assets.icons.icForward.svg(),
+                        ),
                       ),
               ],
             ),
@@ -77,7 +99,10 @@ class DailyPlanWidget extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(
+              color: context.colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -95,9 +120,21 @@ class DailyPlanWidget extends StatelessWidget {
                     : Row(
                         spacing: 8,
                         children: [
-                          _buildCaloriesInfo(context: context, item: calories, icon: Assets.icons.vegetarianFood.svg()),
-                          _buildCaloriesInfo(context: context, item: water, icon: Assets.icons.droplet.svg()),
-                          _buildCaloriesInfo(context: context, item: steps, icon: Assets.icons.workoutRun.svg()),
+                          _buildCaloriesInfo(
+                            context: context,
+                            item: calories,
+                            icon: Assets.icons.vegetarianFood.svg(),
+                          ),
+                          _buildCaloriesInfo(
+                            context: context,
+                            item: water,
+                            icon: Assets.icons.droplet.svg(),
+                          ),
+                          _buildCaloriesInfo(
+                            context: context,
+                            item: steps,
+                            icon: Assets.icons.workoutRun.svg(),
+                          ),
                         ],
                       ),
               ],
@@ -108,11 +145,18 @@ class DailyPlanWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCaloriesInfo({required BuildContext context, required String item, required Widget icon}) {
+  Widget _buildCaloriesInfo({
+    required BuildContext context,
+    required String item,
+    required Widget icon,
+  }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(6)),
+        decoration: BoxDecoration(
+          color: context.colors.backgroundElevation,
+          borderRadius: BorderRadius.circular(6),
+        ),
         child: Row(
           children: [
             SizedBox(height: 20, width: 20, child: icon),

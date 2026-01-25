@@ -14,32 +14,47 @@ class DashedBorderPainter extends CustomPainter {
     final Path topLeftCorner = Path()
       ..moveTo(0, radius + dashLength)
       ..lineTo(0, radius)
-      ..arcToPoint(const Offset(radius, 0), radius: const Radius.circular(radius))
+      ..arcToPoint(
+        const Offset(radius, 0),
+        radius: const Radius.circular(radius),
+      )
       ..lineTo(radius + dashLength, 0);
     canvas.drawPath(topLeftCorner, paint);
 
     final Path topRightCorner = Path()
       ..moveTo(size.width - radius - dashLength, 0)
       ..lineTo(size.width - radius, 0)
-      ..arcToPoint(Offset(size.width, radius), radius: const Radius.circular(radius))
+      ..arcToPoint(
+        Offset(size.width, radius),
+        radius: const Radius.circular(radius),
+      )
       ..lineTo(size.width, radius + dashLength);
     canvas.drawPath(topRightCorner, paint);
 
     final Path bottomLeftCorner = Path()
       ..moveTo(0, size.height - radius - dashLength)
       ..lineTo(0, size.height - radius)
-      ..arcToPoint(Offset(radius, size.height), radius: const Radius.circular(radius), clockwise: false)
+      ..arcToPoint(
+        Offset(radius, size.height),
+        radius: const Radius.circular(radius),
+        clockwise: false,
+      )
       ..lineTo(radius + dashLength, size.height);
     canvas.drawPath(bottomLeftCorner, paint);
 
     final Path bottomRightCorner = Path()
       ..moveTo(size.width - radius - dashLength, size.height)
       ..lineTo(size.width - radius, size.height)
-      ..arcToPoint(Offset(size.width, size.height - radius), radius: const Radius.circular(radius), clockwise: false)
+      ..arcToPoint(
+        Offset(size.width, size.height - radius),
+        radius: const Radius.circular(radius),
+        clockwise: false,
+      )
       ..lineTo(size.width, size.height - radius - dashLength);
     canvas.drawPath(bottomRightCorner, paint);
 
-    final leftGap = (size.height - 2 * radius - 2 * dashLength - 2 * dashLength) / 3;
+    final leftGap =
+        (size.height - 2 * radius - 2 * dashLength - 2 * dashLength) / 3;
     canvas.drawLine(
       Offset(0, radius + dashLength + leftGap),
       Offset(0, radius + dashLength + leftGap + dashLength),
@@ -51,7 +66,8 @@ class DashedBorderPainter extends CustomPainter {
       paint,
     );
 
-    final rightGap = (size.height - 2 * radius - 2 * dashLength - 2 * dashLength) / 3;
+    final rightGap =
+        (size.height - 2 * radius - 2 * dashLength - 2 * dashLength) / 3;
     canvas.drawLine(
       Offset(size.width, radius + dashLength + rightGap),
       Offset(size.width, radius + dashLength + rightGap + dashLength),
@@ -64,7 +80,11 @@ class DashedBorderPainter extends CustomPainter {
     );
 
     final topCenter = size.width / 2;
-    canvas.drawLine(Offset(topCenter - dashLength / 2, 0), Offset(topCenter + dashLength / 2, 0), paint);
+    canvas.drawLine(
+      Offset(topCenter - dashLength / 2, 0),
+      Offset(topCenter + dashLength / 2, 0),
+      paint,
+    );
 
     final bottomCenter = size.width / 2;
     canvas.drawLine(

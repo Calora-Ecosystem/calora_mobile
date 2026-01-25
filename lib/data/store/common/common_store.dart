@@ -22,4 +22,16 @@ class CommonStore {
     serialize: (value) => value.toString(),
     deserialize: (value) => value == 'true',
   );
+
+  final isQuestionaryFinished = BaseStore<bool>(
+    'isQuestionaryFinished',
+    serialize: (value) => value.toString(),
+    deserialize: (value) => value == 'true',
+  );
+
+  final isUserPremium = BaseStore<bool>(
+    'isUserPremium',
+    serialize: (value) => value.toString(),
+    deserialize: (value) => value == 'true',
+  );
 }

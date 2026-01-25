@@ -17,12 +17,15 @@ abstract class LessonRequest with _$LessonRequest {
     required List<LessonAsset> assets,
   }) = _LessonRequest;
 
-  factory LessonRequest.fromJson(Map<String, dynamic> json) => _$LessonRequestFromJson(json);
+  factory LessonRequest.fromJson(Map<String, dynamic> json) =>
+      _$LessonRequestFromJson(json);
 }
 
 @freezed
 abstract class LessonAsset with _$LessonAsset {
-  const factory LessonAsset({required String type, required String url}) = _LessonAsset;
+  const factory LessonAsset({required String type, required String url}) =
+      _LessonAsset;
 
-  factory LessonAsset.fromJson(Map<String, dynamic> json) => _$LessonAssetFromJson(json);
+  factory LessonAsset.fromJson(Map<String, dynamic> json) =>
+      _$LessonAssetFromJson(json);
 }

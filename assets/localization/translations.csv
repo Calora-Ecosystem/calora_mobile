@@ -142,11 +142,7 @@ choose_activity_level,Choose activity level,Aktivlik tarajasini tanlang,Выбе
 choose_metrics,Choose metrics,Metrikalarni tanlang,Выберите метрики
 setting_up_reminders,Setting up reminders,Eslatmalarni sozlash,Настройка напоминаний
 water_drink_reminder,Water drinking reminder,Suv ichish vaqtini eslatish,Напоминание о питье воды
-every_1_hour,Every 1 hour,Har 1 soatda,Каждый 1 час
-every_2_hour,Every 2 hour,Har 2 soatda,Каждый 2 час
-every_3_hour,Every 3 hour,Har 3 soatda,Каждый 3 час
-every_4_hour,Every 4 hour,Har 4 soatda,Каждый 4 час
-every_5_hour,Every 5 hour,Har 5 soatda,Каждый 5 час
+every_n_hour,Every {hour} hour,Har {hour} soatda,Каждый {hour} час
 before_10_min,10 minutes before,10 daqiqa oldin,За 10 минут до
 before_20_min,20 minutes before,20 daqiqa oldin,За 20 минут до
 before_30_min,30 minutes before,30 daqiqa oldin,За 30 минут до
@@ -334,6 +330,52 @@ please_enter_food_metrics,"Please, enter food metrics","Please, enter food metri
 number_of_lessons,Number of lessons,Darslar soni,Количество уроков
 price,Price,Narxi,Цена
 snack,snack,gazak,перекус
+try_again,Try again,Qayta urunish,Попробуйте еще раз
 snack_time_reminder,snack time reminder,gazak vaqtini eslatish,напоминание о перекусе
 minute,minute,minut,минута
 yourDataHasBeenSuccessfullySaved,You data has been saved successfully,Ma'lumotlaringiz muaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+limited_internet_title,Internet is unavailable.,Internet mavjud emas,Интернет недоступен
+limited_internet_subtitle,"You’re connected to a network, but can’t reach the internet.","Tarmoq ulangan, ammo internetga kirish imkoni yo‘q.","Вы подключены к сети, но нет доступа к интернету."
+no_internet_title,You’re Offline,Siz oflaynsiz,Вы офлайн
+no_internet_subtitle,Turn on Wi-Fi or mobile data to reconnect.,Qayta ulanish uchun Wi-Fi yoki mobil maʼlumotlarni yoqing.,"Включите Wi-Fi или мобильные данные, чтобы подключиться снова."
+enter_valid_number,Please enter a valid phone number,"Iltimos, to'g'ri telefon raqamini kiriting","Пожалуйста, введите действительный номер телефона."
+minimal,Minimal,Boshlang‘ich,Начальный
+less,Less,Yengil,Лёгкий
+medium,Medium,O‘rtacha,Средний
+high,High,Qiyin,Сложный
+maximal,Maximal,Juda qiyin,Очень сложный
+calora_premium,Calora Premium,Calora Premium,Калора Премиум
+price_per_month,For {price} soums per month,Xar oy {price} so‘m evaziga,За {цена} сумов в месяц
+ai_health_analysis_title,AI-powered health level analysis,AI orqali sog‘lomlik darajasini aniqlash,Определение уровня здоровья с помощью ИИ
+ai_health_analysis_subtitle,Discover optimal health indicators for your body,Tanangiz uchun optimal sog‘lomlik ko‘rsatkichlarini bilib oling,Узнайте оптимальные показатели здоровья для вашего организма
+ai_food_photo_analysis_title,AI food analysis from photos,AI orqali suratdagi taomlarni tahlil qilish,Анализ блюд по фото с помощью ИИ
+ai_food_photo_analysis_subtitle,Quickly identify calories and ingredients from images,Rasmdan kaloriyalarni va tarkibini tezda aniqlash,Быстрое определение калорий и состава по изображению
+voice_food_input_title,Add food using voice,Ovoz orqali taom qo‘shish,Добавление еды голосом
+voice_food_input_subtitle,Log meals by voice without manual typing,Taomlaringizni qo‘lda yozmasdan ovoz bilan kiriting,Вводите блюда голосом без ручного набора
+men_30_day_workout_title,30-day weight loss workouts for men,Erkaklar uchun 30 kunlik ozish mashqlari,30-дневные тренировки для похудения для мужчин
+men_30_day_workout_subtitle,Lose weight with expert-recommended workouts,Mutaxassislar tavsiya qilgan mashqlar orqali ozishga yordam,Помощь в снижении веса с тренировками от специалистов
+women_30_day_workout_title,30-day weight loss workouts for women,Ayollar uchun 30 kunlik ozish mashqlari,30-дневные тренировки для похудения для женщин
+women_30_day_workout_subtitle,Lose weight with expert-recommended workouts,Mutaxassislar tavsiya qilgan mashqlar orqali ozishga yordam,Помощь в снижении веса с тренировками от специалистов
+ad_free_experience_title,Ad-free experience,Reklamasiz foydalanish,Использование без рекламы
+ad_free_experience_subtitle,Enjoy all features without ads,Barcha funksiyalardan reklamasiz qulay foydalaning,Пользуйтесь всеми функциями без рекламы
+payment,Payment,To’lov qilish,Оплата
+choose_right_package,Choose the right package!,Mos paketni tanlang !,Выберите подходящий пакет!
+promokod,Promo code,Promokod,Promokod
+choose_payment_method,Choose a payment type!,To'lov turini tanlang !,Выберите способ оплаты!
+purchase,Purchase,Sotib olish,Покупка
+apply,Apply,Qo‘llash,Применить
+best_offer,Best offer,Eng yaxshi taklif,Лучшее предложение
+excess,Excess,Ortiqcha,Избыток
+monthly_premium,Monthly Premium,Oylik Premium,Ежемесячная премия
+n_moth_premium,{month} months Premium,{month} oylik Premium,{month} месяца Премиум
+annual_premium,Annual Premium,Yillik Premium,Годовая премия
+purchase_is_pending,Purchase is pending,Xarid amalga oshirilishi kutilmoqda,Ожидается совершение покупки
+chosen_payment_type,Choosen payment type,Tanlangan to’lov turi,Выбранный тип оплаты
+continue_purchase,Continue purchase,Sotib olishni davom ettirish,Продолжить покупки
+could_not_launch_payment_url,Could not launch payment URL,To'lov URL manzilini ishga tushirib bo'lmadi,Не удалось запустить платежный URL.
+day_completed,{day} completed,{day} bajarildi,{day} завершен
+watch_this_video_previous_video,"To watch this video, first watch the previous video and finish it!",Ushbu videoni ko'rish uchun avvalo oldingi videoni ko'ring va uni tugating!,"Чтобы посмотреть это видео, сначала посмотрите предыдущее видео и досмотрите его до конца!"
+to_do_exercise,"To do this exercise, first complete the previous exercise!",Ushbu mashqni bajarish uchun avvalo oldingi mashqni tugating!,Для выполнения этого упражнения сначала выполните предыдущее!
+invalid_promo_code,Invalid promo code,Promo-kod noto'g'ri,Недействительный промокод
+reminder_changed_successfully,Reminder changed successfully,Eslatma muvaffaqiyatli o'zgartirildi,Напоминание успешно изменено.
+hour,Hour,Soat,Час

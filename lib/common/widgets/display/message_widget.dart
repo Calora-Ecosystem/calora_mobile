@@ -1,59 +1,74 @@
+import 'dart:ui';
+
+import 'package:calora/common/extensions/color_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/widgets/display/display_message.dart';
 import 'package:calora/common/widgets/display/display_type.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class MessageWidget extends StatelessWidget {
-  const MessageWidget({super.key, required this.message, required this.onClosed});
-
   final DisplayMessage message;
   final VoidCallback onClosed;
+  const MessageWidget({super.key, required this.message, required this.onClosed});
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: GestureDetector(
-        onTap: () {
-          message.onTap?.call();
-          onClosed();
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 72),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+        child: GestureDetector(
+          onTap: () {
+            message.onTap?.call();
+            onClosed();
+          },
           child: Material(
-            color: Colors.transparent,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Transform.translate(
-                  offset: const Offset(0, 16),
-                  child: Container(
-                    height: 62,
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: BoxDecoration(
-                      boxShadow: [BoxShadow(color: message.type.shadow(context), blurRadius: 50)],
-                    ),
-                  ),
-                ),
-                Container(
+            color: context.colors.transparent,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+                child: Container(
                   decoration: BoxDecoration(
-                    color: message.type.fill(context),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: message.type.stroke(context)),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Color(0xFF141417).withOpacityLevel(0.6),
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(12),
-                    title: (message.title ?? message.description).text(16, 16, 500),
-                    subtitle: message.title == null ? null : message.description.text(14, 14, 500),
-                    leading: Container(
-                      height: 42,
-                      width: 42,
-                      decoration: BoxDecoration(shape: BoxShape.circle),
-                      child: Center(child: message.type.icon(context)),
-                    ),
-                    trailing: IconButton(onPressed: onClosed, icon: Icon(Icons.close)),
+
+                  child: Row(
+                    children: [
+                      Padding(padding: const EdgeInsets.all(12), child: message.type.icon(context)),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 17),
+                          child: Column(
+                            crossAxisAlignment: .start,
+                            mainAxisSize: .min,
+                            children: [
+                              if (message.title != null) ...[
+                                (message.title ?? '').text(24, 24, 700).c(context.colors.white),
+                                const SizedBox(height: 4),
+                              ],
+                              message.description
+                                  .text(14, 16, 400)
+                                  .c(context.colors.white)
+                                  .copyWith(maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.start),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Assets.icons.cancel.svg(
+                          colorFilter: ColorFilter.mode(context.colors.zirkon, BlendMode.srcIn),
+                          height: 14,
+                          width: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),

@@ -9,13 +9,27 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 @module
 abstract class NetworkModule {
   @lazySingleton
+  @Named('country')
+  Dio countryDio() {
+    final options = BaseOptions(
+      baseUrl: 'https://api.country.is/',
+      connectTimeout: const Duration(seconds: 50),
+      receiveTimeout: const Duration(seconds: 50),
+      sendTimeout: const Duration(seconds: 50),
+    );
+    final dio = Dio(options);
+    dio.interceptors.clear();
+    return dio;
+  }
+
+  @lazySingleton
   @Named('refresh')
   Dio refreshDio() {
     final options = BaseOptions(
       baseUrl: kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl,
-      connectTimeout: const Duration(seconds: 80),
-      receiveTimeout: const Duration(seconds: 80),
-      sendTimeout: const Duration(seconds: 80),
+      connectTimeout: const Duration(seconds: 50),
+      receiveTimeout: const Duration(seconds: 50),
+      sendTimeout: const Duration(seconds: 50),
     );
     final dio = Dio(options);
     dio.interceptors.clear();
@@ -41,12 +55,13 @@ abstract class NetworkModule {
   @lazySingleton
   BaseOptions baseOptions() => BaseOptions(
     baseUrl: kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl,
-    connectTimeout: const Duration(seconds: 100),
-    receiveTimeout: const Duration(seconds: 100),
-    sendTimeout: const Duration(seconds: 100),
+    connectTimeout: const Duration(seconds: 50),
+    receiveTimeout: const Duration(seconds: 50),
+    sendTimeout: const Duration(seconds: 50),
     headers: {'Connection': 'close', 'Content-Type': 'application/json'},
   );
 
   @lazySingleton
-  PrettyDioLogger get logger => PrettyDioLogger(requestHeader: true, requestBody: true, maxWidth: 100);
+  PrettyDioLogger get logger =>
+      PrettyDioLogger(requestHeader: true, requestBody: true, maxWidth: 100);
 }

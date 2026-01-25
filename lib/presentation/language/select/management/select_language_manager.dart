@@ -5,7 +5,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class SelectLanguageManager extends Manager<SelectLanguageState, SelectLanguageEffect> {
+class SelectLanguageManager
+    extends Manager<SelectLanguageState, SelectLanguageEffect> {
   SelectLanguageManager(this._commonRepo) : super(const SelectLanguageState());
 
   final CommonRepo _commonRepo;
@@ -18,7 +19,9 @@ class SelectLanguageManager extends Manager<SelectLanguageState, SelectLanguageE
   void getSelectedLanguage() async {
     await _commonRepo.getSelectedLanguage().handle(
       onStart: () => {},
-      onData: (data) => {emit(state.copyWith(languages: _languages, selectedLanguage: data))},
+      onData: (data) => {
+        emit(state.copyWith(languages: _languages, selectedLanguage: data)),
+      },
       onDone: () => {},
       onError: (error) {},
     );

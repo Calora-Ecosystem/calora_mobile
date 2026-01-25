@@ -9,7 +9,8 @@ class LanguageItemBuilder extends StatelessWidget {
   final bool isChecked;
   final Function(Language) onTap;
 
-  LanguageItemBuilder({super.key, 
+  LanguageItemBuilder({
+    super.key,
     required this.language,
     required this.isChecked,
     required this.onTap,
@@ -41,7 +42,7 @@ class LanguageItemBuilder extends StatelessWidget {
               SizedBox(width: 12),
               Expanded(child: _currentText(language, context)),
               SizedBox(width: 12),
-              isChecked ? Assets.icons.icSingleCheck.svg():const SizedBox(),
+              isChecked ? Assets.icons.icSingleCheck.svg() : const SizedBox(),
             ],
           ),
         ),

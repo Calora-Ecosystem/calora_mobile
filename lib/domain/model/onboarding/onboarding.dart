@@ -1,4 +1,3 @@
-
 class Onboarding {
   String title;
   String message;

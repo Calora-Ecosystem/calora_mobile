@@ -42,25 +42,19 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   void _initializePedometerService() async {
     _pedometerService = PedometerService(
       onTodayStepCountUpdated: (todaySteps) {},
-      onError: (error) {
-      },
+      onError: (error) {},
     );
     await _pedometerService.initializePedometer();
   }
 
   void _getRangeSteps(DateTime fromDate, DateTime toDate) async {
     final toDate = DateTime.now();
-    final Map<DateTime, int> result = await _pedometerService.getDailyStepsForRange(
-      fromDate,
-      toDate,
-    );
+    final Map<DateTime, int> result = await _pedometerService
+        .getDailyStepsForRange(fromDate, toDate);
     final List<StepsWithMetricsRequest> steps = [];
     for (var entry in result.entries) {
       steps.add(
-        StepsWithMetricsRequest(
-          date: entry.key,
-          value: entry.value.toDouble(),
-        ),
+        StepsWithMetricsRequest(date: entry.key, value: entry.value.toDouble()),
       );
       log(
         "Results: ${entry.key.toIso8601String().split('T')[0]}: ${entry.value}",

@@ -40,10 +40,20 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
     final cameras = await availableCameras();
 
     final selectedCamera = widget.useFrontCamera
-        ? cameras.firstWhere((c) => c.lensDirection == CameraLensDirection.front, orElse: () => cameras.first)
-        : cameras.firstWhere((c) => c.lensDirection == CameraLensDirection.back, orElse: () => cameras.first);
+        ? cameras.firstWhere(
+            (c) => c.lensDirection == CameraLensDirection.front,
+            orElse: () => cameras.first,
+          )
+        : cameras.firstWhere(
+            (c) => c.lensDirection == CameraLensDirection.back,
+            orElse: () => cameras.first,
+          );
 
-    _controller = CameraController(selectedCamera, ResolutionPreset.high, enableAudio: false);
+    _controller = CameraController(
+      selectedCamera,
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
 
     await _controller!.initialize();
 
@@ -61,7 +71,6 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
     try {
       final XFile file = await _controller!.takePicture();
       await widget.onImageCaptured?.call(file.path);
-      context.router.pop();
     } catch (e) {
       debugPrint('Foto olishda xatolik: $e');
     } finally {
@@ -110,10 +119,20 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
                   children: [
                     Text(
                       widget.title,
-                      style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    Text(widget.subtitle, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                    Text(
+                      widget.subtitle,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -125,13 +144,19 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
                       left: 0,
                       top: 0,
                       bottom: 0,
-                      child: Container(width: 20, color: Colors.black.withAlpha(72)),
+                      child: Container(
+                        width: 20,
+                        color: Colors.black.withAlpha(72),
+                      ),
                     ),
                     Positioned(
                       right: 0,
                       top: 0,
                       bottom: 0,
-                      child: Container(width: 20, color: Colors.black.withAlpha(72)),
+                      child: Container(
+                        width: 20,
+                        color: Colors.black.withAlpha(72),
+                      ),
                     ),
                     Positioned(
                       left: 20,
@@ -151,11 +176,20 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 4,
+                      ),
                       decoration: const BoxDecoration(
                         border: Border(bottom: BorderSide(color: Colors.white)),
                       ),
-                      child: Text(widget.bottomText, style: const TextStyle(color: Colors.white, fontSize: 16)),
+                      child: Text(
+                        widget.bottomText,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     GestureDetector(
@@ -171,9 +205,17 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
                           child: Container(
                             width: 80,
                             height: 80,
-                            decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
                             child: isTaking
-                                ? const Center(child: CircularProgressIndicator(strokeWidth: 4, color: Colors.black))
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 4,
+                                      color: Colors.black,
+                                    ),
+                                  )
                                 : null,
                           ),
                         ),

@@ -4,9 +4,8 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/indicator/card_indicator.dart';
-import 'package:flutter/material.dart';
-
 import 'package:calora/widgets/train_level/train_level_page.dart';
+import 'package:flutter/material.dart';
 
 class LessonAppBar extends StatelessWidget {
   final ValueChanged<int> onLevelChanged;
@@ -31,7 +30,7 @@ class LessonAppBar extends StatelessWidget {
     return SafeArea(
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         color: Colors.transparent,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,16 +42,25 @@ class LessonAppBar extends StatelessWidget {
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                    decoration: BoxDecoration(color: context.colors.white, shape: BoxShape.circle),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colors.white,
+                      shape: BoxShape.circle,
+                    ),
                     child: Assets.icons.arrowLeft.svg(),
                   ),
                 ),
                 if (showSettings)
                   GestureDetector(
-                    onTap: () => _openSettings(context),
+                    onTap: () => _openSettings(context, level.index),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: context.colors.white,
                         shape: BoxShape.circle,
@@ -76,17 +84,25 @@ class LessonAppBar extends StatelessWidget {
                         children: [
                           RatingStars(level: level),
                           const SizedBox(width: 8),
-                          Strings.startEasy.text(12, 14, 500).c(context.colors.textSub),
+                          Strings.startEasy
+                              .text(12, 14, 500)
+                              .c(context.colors.textSub),
                         ],
                       ),
-                      title.text(24, 32, 700).c(context.colors.accentSub).copyWith(maxLines: 2),
+                      title
+                          .text(24, 32, 700)
+                          .c(context.colors.accentSub)
+                          .copyWith(maxLines: 2),
                     ],
                   ),
                 ),
                 if (showIndicator)
                   Padding(
                     padding: const EdgeInsets.only(left: 16),
-                    child: SizedBox(width: 128, child: CardIndicator(percent: percent)),
+                    child: SizedBox(
+                      width: 128,
+                      child: CardIndicator(percent: percent),
+                    ),
                   ),
               ],
             ),
@@ -96,20 +112,17 @@ class LessonAppBar extends StatelessWidget {
     );
   }
 
-  void _openSettings(BuildContext context) async {
+  void _openSettings(BuildContext context, int level) async {
     final result = await showModalBottomSheet<int>(
       backgroundColor: context.colors.backgroundBase,
       isScrollControlled: true,
       context: context,
       builder: (context) {
         return TrainLevelPage(
-          onSave: (value) {
-            Navigator.pop(context, value);
-          },
+          currentLevel: level,
         );
       },
     );
-
     if (result != null) {
       onLevelChanged(result);
     }

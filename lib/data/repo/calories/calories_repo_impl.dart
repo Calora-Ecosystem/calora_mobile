@@ -50,7 +50,15 @@ class CaloriesRepoImpl extends CaloriesRepo {
     final response = await _api.getFoodCategory();
     final List list = response.data['content'];
 
-    return list.map((e) => MealTypeData(id: e['id'], name: e['name'], imageUrl: e['coverUrl'])).toList();
+    return list
+        .map(
+          (e) => MealTypeData(
+            id: e['id'],
+            name: e['name'],
+            imageUrl: e['coverUrl'],
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -65,7 +73,9 @@ class CaloriesRepoImpl extends CaloriesRepo {
       categoryId: data['categoryId'],
       categoryName: data['categoryName'],
       coverUrl: data['coverUrl'],
-      metrics: (data['metrics'] as List).map((e) => Metric.fromJson(e)).toList(),
+      metrics: (data['metrics'] as List)
+          .map((e) => Metric.fromJson(e))
+          .toList(),
       isUserFood: data['isUserFood'] ?? false,
       isFavourite: data['isFavourite'] ?? false,
       userId: data['userId'],
@@ -171,13 +181,17 @@ class CaloriesRepoImpl extends CaloriesRepo {
   Future<List<FoodModel>> fetchUserFoods() async {
     final response = await _api.fetchUserFoods();
     final List content = response.data['content'];
-    return content.map((e) => FoodModel.fromJson(e as Map<String, dynamic>)).toList();
+    return content
+        .map((e) => FoodModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
   Future<List<FoodModel>> fetchSearchFood(String name) async {
     final response = await _api.fetchSearchFood(name);
     final List content = response.data['content'];
-    return content.map((e) => FoodModel.fromJson(e as Map<String, dynamic>)).toList();
+    return content
+        .map((e) => FoodModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

@@ -6,19 +6,22 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/auth/verify/management/verify_management.dart';
+import 'package:calora/presentation/auth/verify/management/verify_manager.dart';
 import 'package:calora/widgets/verify/verify_code_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'package:calora/presentation/auth/verify/management/verify_management.dart';
-import 'package:calora/presentation/auth/verify/management/verify_manager.dart';
 
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   final Verification verification;
   final Future<void> Function()? onVerified;
 
-  const VerifyPage({super.key, required this.verification, this.onVerified});
+  const VerifyPage({
+    super.key,
+    required this.verification,
+    this.onVerified,
+  });
 
   @override
   void init(context, manager) {
@@ -28,12 +31,8 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   @override
   void listener(context, manager, effect) {
     effect.when(
-      openQuestions: (email) {
-        context.router.replaceAll([QuestionsRoute(email: email)]);
-      },
-      openDashboard: () {
-        context.router.replaceAll([DashboardRoute()]);
-      },
+      openQuestions: (email) => context.router.replaceAll([QuestionsRoute()]),
+      openDashboard: () => context.router.replaceAll([DashboardRoute()]),
     );
   }
 
@@ -42,7 +41,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Container(
               width: double.infinity,

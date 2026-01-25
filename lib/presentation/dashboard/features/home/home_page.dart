@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
@@ -29,25 +27,31 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   late final PedometerService _pedometerService;
 
+  TabsRouter? _tabsRouter;
+  int _lastIndex = 0;
+
   @override
   void init(context, manager) {
-    manager.getUserInfo();
-    manager.getStepNorm();
+    manager.updateDay(DateTime.now());
+    manager.refreshAll();
     manager.requestPedometerPermissions();
-    manager.getSummary();
-    manager.getWater();
-    manager.getMetrics();
-    manager.getDailyStep();
-    manager.getUnreadCount();
     _initializePedometerService(manager);
+
+    _tabsRouter = AutoTabsRouter.of(context);
+    _lastIndex = _tabsRouter!.activeIndex;
+    _tabsRouter!.addListener(() {
+      final idx = _tabsRouter!.activeIndex;
+      if (_lastIndex != 0 && idx == 0) {
+        manager.refreshAll();
+      }
+      _lastIndex = idx;
+    });
   }
 
   void _initializePedometerService(HomeManager manager) async {
     _pedometerService = PedometerService(
-      onTodayStepCountUpdated: (todaySteps) {
-        manager.updateTodaySteps(todaySteps);
-      },
-      onError: (error) => log('StepsPageError: $error'),
+      onTodayStepCountUpdated: (todaySteps) => manager.updateTodaySteps(todaySteps),
+      onError: (error) => debugPrint('StepsPageError: $error'),
     );
     await _pedometerService.initializePedometer();
   }
@@ -61,7 +65,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         return Scaffold(
           body: Stack(
             children: [
-              Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+              Positioned.fill(
+                child: Assets.icons.background.image(fit: BoxFit.fill),
+              ),
               Positioned.fill(
                 child: Column(
                   children: [
@@ -88,56 +94,62 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                         },
                         child: DefaultRefreshIndicator(
                           onRefresh: () async {
-                            manager.getUserInfo();
-                            manager.getSummary();
-                            manager.getStepNorm();
-                            manager.getWater();
-                            manager.getMetrics();
-                            manager.getDailyStep();
+                            manager.refreshAll();
                           },
                           child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: const ClampingScrollPhysics(),
+                            ),
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
                               spacing: 16,
                               children: [
-                                GestureDetector(
-                                  onTap: () => openCalendar(context, manager),
-                                  child: DailyPlanWidget(
-                                    loading: state.isLoading,
-                                    onBackward: () {
-                                      manager.updateDay(
-                                        (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
-                                      );
-                                      manager.getSummary();
-                                      manager.getWater();
-                                      manager.getMetrics();
-                                      manager.getDailyStep();
-                                    },
-                                    onForward: () {
-                                      manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
-                                      manager.getSummary();
-                                      manager.getWater();
-                                      manager.getMetrics();
-                                      manager.getDailyStep();
-                                    },
-                                    date: state.day ?? DateTime.now(),
-                                    calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
-                                    water: '${state.targetLiters} litr',
-                                    steps: state.targetSteps.toString(),
-                                  ),
+                                DailyPlanWidget(
+                                  onDateTap: () => openCalendar(context, manager),
+                                  loading: state.isLoading,
+                                  onBackward: () {
+                                    manager.updateDay(
+                                      (state.day ?? DateTime.now()).subtract(
+                                        const Duration(days: 1),
+                                      ),
+                                    );
+                                    manager.getSummary();
+                                    manager.getWater();
+                                    manager.getMetrics();
+                                    manager.getDailyStep();
+                                  },
+                                  onForward: () {
+                                    manager.updateDay(
+                                      (state.day ?? DateTime.now()).add(
+                                        const Duration(days: 1),
+                                      ),
+                                    );
+                                    manager.getSummary();
+                                    manager.getWater();
+                                    manager.getMetrics();
+                                    manager.getDailyStep();
+                                  },
+                                  date: state.day ?? DateTime.now(),
+                                  calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
+                                  water: '${state.targetLiters} ${Strings.liter}',
+                                  steps: state.targetSteps.toString(),
                                 ),
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       gradient: RadialGradient(
                                         radius: 1.5,
                                         center: Alignment(0.7, 0),
-                                        colors: const [Color(0xFFECFFEF), Color(0xFF58AE8A)],
+                                        colors: const [
+                                          Color(0xFFECFFEF),
+                                          Color(0xFF58AE8A),
+                                        ],
                                       ),
                                     ),
                                     child: Row(
@@ -153,7 +165,11 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                             ],
                                           ),
                                         ),
-                                        SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
+                                        SizedBox(
+                                          height: 100,
+                                          width: 100,
+                                          child: Assets.images.ai.image(),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -165,15 +181,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   progressPercent:
                                       (state.summary?.sum.Kcal ?? 0) / (state.summary?.kcalNorm.value ?? 0),
                                   remainedCalories:
-                                      ((state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0))
-                                          .asFixedTruncated(0),
+                                      (state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0),
                                   loading: state.isSummaryLoading,
                                 ),
                                 StepCardWidget(
                                   loading: state.isMetricsLoading,
                                   currentSteps: state.currentSteps,
                                   targetSteps: state.targetSteps,
-                                  timeInSeconds: state.timeInSeconds,
+                                  timeInSeconds: state.metrics?.duration ?? 0,
                                   distanceInKm: state.metrics?.distance ?? 0,
                                   caloriesBurned: state.metrics?.kcal ?? 0,
                                 ),
@@ -207,9 +222,13 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void openCalendar(BuildContext context, HomeManager manager) {
     context.showAppBottomSheet(
       child: CalendarSelectorWidget(
+        initialDate: manager.state.day ?? DateTime.now(),
         onDaySelected: (date) {
           manager.updateDay(date);
           manager.getSummary();
+          manager.getWater();
+          manager.getMetrics();
+          manager.getDailyStep();
         },
       ),
     );

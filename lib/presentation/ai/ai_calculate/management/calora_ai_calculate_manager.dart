@@ -15,24 +15,36 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 @injectable
-class CaloraAiCalculateManager extends Manager<CaloraAiCalculateState, CaloraAiCalculateEffect> {
+class CaloraAiCalculateManager
+    extends Manager<CaloraAiCalculateState, CaloraAiCalculateEffect> {
   final AiRepo _aiRepo;
 
-  CaloraAiCalculateManager(this._aiRepo) : super(CaloraAiCalculateState.initial());
+  CaloraAiCalculateManager(this._aiRepo)
+    : super(CaloraAiCalculateState.initial());
 
   Timer? _animationTimer;
 
   Future<void> analyzeFace(String filePath) async {
-    emit(state.copyWith(isLoading: true, progressPercent: 0.0, errorMessage: null, isCompleted: false));
+    emit(
+      state.copyWith(
+        isLoading: true,
+        progressPercent: 0.0,
+        errorMessage: null,
+        isCompleted: false,
+      ),
+    );
 
     _animationTimer?.cancel();
-    _animationTimer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
+    _animationTimer = Timer.periodic(const Duration(milliseconds: 150), (
+      timer,
+    ) {
       final newProgress = (state.progressPercent + 0.01).clamp(0.0, 0.9);
       emit(state.copyWith(progressPercent: newProgress));
     });
 
     try {
-      final BaseResponse<FaceAnalysisModel> response = await _aiRepo.analyzeFace(filePath);
+      final BaseResponse<FaceAnalysisModel> response = await _aiRepo
+          .analyzeFace(filePath);
 
       if (response.error != null || response.content == null) {
         _animationTimer?.cancel();
@@ -58,31 +70,38 @@ class CaloraAiCalculateManager extends Manager<CaloraAiCalculateState, CaloraAiC
     const double animationSpeed = 0.05;
     const int animationFramerate = 60;
 
-    _animationTimer = Timer.periodic(const Duration(milliseconds: 1000 ~/ animationFramerate), (timer) {
-      final newProgress = (state.progressPercent + animationSpeed).clamp(0.0, 1.0);
-      emit(state.copyWith(progressPercent: newProgress));
-
-      if (newProgress >= 1.0) {
-        timer.cancel();
-        final items = _mapResultToAnalysisItems(result);
-        emit(
-          state.copyWith(
-            isLoading: false,
-            isCompleted: true,
-            faceAnalysis: result,
-            analysisItems: items,
-            finalScore: result.healthPercent ?? 0,
-          ),
+    _animationTimer = Timer.periodic(
+      const Duration(milliseconds: 1000 ~/ animationFramerate),
+      (timer) {
+        final newProgress = (state.progressPercent + animationSpeed).clamp(
+          0.0,
+          1.0,
         );
-      }
-    });
+        emit(state.copyWith(progressPercent: newProgress));
+
+        if (newProgress >= 1.0) {
+          timer.cancel();
+          final items = _mapResultToAnalysisItems(result);
+          emit(
+            state.copyWith(
+              isLoading: false,
+              isCompleted: true,
+              faceAnalysis: result,
+              analysisItems: items,
+              finalScore: result.healthPercent ?? 0,
+            ),
+          );
+        }
+      },
+    );
   }
 
   List<AnalysisItem> _mapResultToAnalysisItems(FaceAnalysisModel model) {
     return [
       if (model.rashes != null)
         AnalysisItem(
-          description: 'Yuzda toshmaalar bor - Jigarlangiz yoki oshqozoningizni tekshirting.',
+          description:
+              'Yuzda toshmaalar bor - Jigarlangiz yoki oshqozoningizni tekshirting.',
           iconPath: Assets.icons.redUser.svg(),
           percentage: model.rashes!,
           status: 'Normal',
@@ -121,7 +140,9 @@ class CaloraAiCalculateManager extends Manager<CaloraAiCalculateState, CaloraAiC
   Future<void> shareResults(ScreenshotController controller) async {
     emit(state.copyWith(isSharing: true));
     try {
-      final imageBytes = await controller.capture(delay: const Duration(milliseconds: 10));
+      final imageBytes = await controller.capture(
+        delay: const Duration(milliseconds: 10),
+      );
       if (imageBytes == null) {
         throw Exception('Failed to capture screenshot.');
       }
@@ -138,7 +159,11 @@ class CaloraAiCalculateManager extends Manager<CaloraAiCalculateState, CaloraAiC
       );
     } catch (e) {
       log('Share error: $e');
-      publish(CaloraAiCalculateEffect.error('Could not share results: ${e.toString()}'));
+      publish(
+        CaloraAiCalculateEffect.error(
+          'Could not share results: ${e.toString()}',
+        ),
+      );
     } finally {
       emit(state.copyWith(isSharing: false));
     }

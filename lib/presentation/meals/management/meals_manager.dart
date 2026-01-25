@@ -36,13 +36,8 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
         .handle(
           onStart: () => emit(state.copyWith(isSummary: true)),
           onData: (result) {
-            var meal = getMealByType(type, result.meals);
-            emit(
-              state.copyWith(
-                meal: meal,
-                isSummary: false,
-              ),
-            );
+            final meal = getMealByType(type, result.meals);
+            emit(state.copyWith(meal: meal, isSummary: false));
           },
           onDone: () => emit(state.copyWith(isSummary: false)),
           onError: (error) => emit(state.copyWith(isSummary: false)),

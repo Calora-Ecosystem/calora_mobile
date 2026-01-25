@@ -9,6 +9,7 @@ import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:calora/presentation/profile_details/management/profile_detail_management.dart';
 import 'package:calora/presentation/profile_details/management/profile_detail_manager.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
+import 'package:calora/widgets/premium/premium_entry_card.dart';
 import 'package:calora/widgets/social_button/social_button.dart';
 import 'package:calora/widgets/svg_buttons_row/svg_buttons_row.dart';
 import 'package:flutter/material.dart';
@@ -71,7 +72,7 @@ class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState
                   onTap: () {},
                 ),
                 const SizedBox(height: 16),
-                Image.asset('assets/images/yandex-banner.png'),
+                PremiumEntryCard(),
                 const SizedBox(height: 8),
                 Strings.automaticTracking.text(16, 20, 500).c(context.colors.textStrong),
                 const SizedBox(height: 8),
@@ -150,7 +151,7 @@ class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState
 
   void logOut(ProfileDetailManager manager, BuildContext context) {
     manager.logOut();
-    context.router.replaceAll([const AuthRoute()]);
+    context.router.replaceAll([AuthRoute()]);
   }
 
   Widget _buildRow(String label, String value, BuildContext context) {

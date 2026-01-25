@@ -4,7 +4,8 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/course_questions/management/course_questions_manager.dart';
 import 'package:calora/widgets/questions/purposes_widget.dart';
-import 'package:calora/widgets/questions/questions_widget.dart' show QuestionWidget;
+import 'package:calora/widgets/questions/questions_widget.dart'
+    show QuestionWidget;
 import 'package:flutter/cupertino.dart';
 import 'package:management/management.dart';
 
@@ -12,7 +13,8 @@ class CourseQuestionsBodyWidget extends StatefulWidget {
   const CourseQuestionsBodyWidget({super.key});
 
   @override
-  State<CourseQuestionsBodyWidget> createState() => _CourseQuestionsBodyWidgetState();
+  State<CourseQuestionsBodyWidget> createState() =>
+      _CourseQuestionsBodyWidgetState();
 }
 
 class _CourseQuestionsBodyWidgetState extends State<CourseQuestionsBodyWidget> {
@@ -71,7 +73,9 @@ class _CourseQuestionsBodyWidgetState extends State<CourseQuestionsBodyWidget> {
               },
               children: List.generate(24, (index) {
                 final time = '${index.toString().padLeft(2, '0')}:00';
-                return Center(child: time.text(35.8, 40, 400).c(context.colors.textPrimary));
+                return Center(
+                  child: time.text(35.8, 40, 400).c(context.colors.textPrimary),
+                );
               }),
             ),
           ),

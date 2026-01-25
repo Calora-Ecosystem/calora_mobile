@@ -19,12 +19,17 @@ abstract class FoodModel with _$FoodModel {
     int? userId,
   }) = _FoodModel;
 
-  factory FoodModel.fromJson(Map<String, dynamic> json) => _$FoodModelFromJson(json);
+  factory FoodModel.fromJson(Map<String, dynamic> json) =>
+      _$FoodModelFromJson(json);
 }
 
 @freezed
 abstract class Metric with _$Metric {
-  const factory Metric({int? userId, required String metric, required num value}) = _Metric;
+  const factory Metric({
+    int? userId,
+    required String metric,
+    required num value,
+  }) = _Metric;
 
   factory Metric.fromJson(Map<String, dynamic> json) => _$MetricFromJson(json);
 }
@@ -37,7 +42,8 @@ abstract class ScannerFood with _$ScannerFood {
     required List<Metric> metrics,
   }) = _ScannerFood;
 
-  factory ScannerFood.fromJson(Map<String, dynamic> json) => _$ScannerFoodFromJson(json);
+  factory ScannerFood.fromJson(Map<String, dynamic> json) =>
+      _$ScannerFoodFromJson(json);
 }
 
 class MealInfo {
@@ -47,5 +53,11 @@ class MealInfo {
   final Widget image;
   final VoidCallback? onTap;
 
-  MealInfo({required this.title, required this.value, required this.max, required this.image, required this.onTap});
+  MealInfo({
+    required this.title,
+    required this.value,
+    required this.max,
+    required this.image,
+    required this.onTap,
+  });
 }

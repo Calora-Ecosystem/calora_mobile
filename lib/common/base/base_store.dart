@@ -16,10 +16,7 @@ class BaseStore<T> {
   Future<String> Function() suffixer;
 
   Future<void> set(T value) async {
-    return _preferences.setString(
-      key + await suffixer(),
-      serialize(value),
-    );
+    return _preferences.setString(key + await suffixer(), serialize(value));
   }
 
   Future<T> call() async {

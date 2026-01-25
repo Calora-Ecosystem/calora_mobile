@@ -1,22 +1,30 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/tasks/management/tasks_management.dart';
 import 'package:calora/presentation/tasks/management/tasks_manager.dart';
+import 'package:calora/widgets/task/mood_selector_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'package:calora/widgets/task/mood_selector_widget.dart';
-
 @RoutePage()
 class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
-  final int day;
+  final String day;
   final int taskCount;
   final double calories;
   final int duration;
-  const FinishTaskPage(this.day, this.taskCount, this.calories, this.duration, {super.key});
+
+  const FinishTaskPage(
+    this.day,
+    this.taskCount,
+    this.calories,
+    this.duration, {
+    super.key,
+  });
 
   @override
   Widget builder(BuildContext context, TasksManager manager, TasksState state) {
@@ -28,7 +36,31 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
             top: 0,
             left: 0,
             right: 0,
-            child: Assets.images.femaleFinishBackground.image(fit: BoxFit.cover),
+            child: FutureBuilder<Gender>(
+              future: _getGender(),
+              builder: (context, snapshot) {
+                final gender = snapshot.data ?? Gender.Unknown;
+                return Image(
+                  image: _bgByGender(gender),
+                  fit: BoxFit.cover,
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: 24,
+            right: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: () => _close(context),
+                icon: const Icon(Icons.close),
+                color: Colors.white,
+              ),
+            ),
           ),
           Positioned(
             left: 0,
@@ -43,11 +75,15 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
               ),
               child: Column(
                 children: [
-                  SizedBox(height: 200, width: 200, child: Assets.images.finishIcon.image()),
+                  SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Assets.images.finishIcon.image(),
+                  ),
                   SizedBox(height: 16),
                   Strings.congratulations.text(32, 40, 700).c(context.colors.textStrong),
                   SizedBox(height: 16),
-                  '$day-kun bajarildi'.text(24, 32, 700).c(context.colors.accentSub),
+                  Strings.dayCompleted(day: day).text(24, 32, 700).c(context.colors.accentSub),
                   SizedBox(height: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,15 +92,24 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildTaskParametrs(Strings.exercises, '$taskCount ta', context),
+                            child: _buildTaskParametrs(
+                              Strings.exercises,
+                              '$taskCount ta',
+                              context,
+                            ),
                           ),
                           Expanded(
                             child: Container(
                               margin: EdgeInsets.only(right: 12),
-                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              padding: EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 12,
+                              ),
                               decoration: BoxDecoration(
                                 border: Border.symmetric(
-                                  vertical: BorderSide(color: context.colors.neutral200Stroke),
+                                  vertical: BorderSide(
+                                    color: context.colors.neutral200Stroke,
+                                  ),
                                 ),
                               ),
                               child: _buildTaskParametrs(
@@ -98,7 +143,32 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
     );
   }
 
-  Widget _buildTaskParametrs(String parameterName, String parameterValue, BuildContext context) {
+  void _close(BuildContext context) {
+    final router = context.router;
+    router.removeWhere((r) => r.name == FinishTaskRoute.name || r.name == TasksProcessRoute.name);
+  }
+
+  Future<Gender> _getGender() async {
+    final profile = await profileStore.getProfile();
+    return Gender.fromApi(profile.gender);
+  }
+
+  ImageProvider _bgByGender(Gender gender) {
+    switch (gender) {
+      case Gender.Male:
+        return Assets.images.maleFinishBackground.provider();
+      case Gender.Female:
+        return Assets.images.femaleFinishBackground.provider();
+      case Gender.Unknown:
+        return Assets.images.femaleFinishBackground.provider();
+    }
+  }
+
+  Widget _buildTaskParametrs(
+    String parameterName,
+    String parameterValue,
+    BuildContext context,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

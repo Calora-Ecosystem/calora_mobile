@@ -13,7 +13,8 @@ abstract class SummaryRequest with _$SummaryRequest {
     required DateTime date,
   }) = _SummaryRequest;
 
-  factory SummaryRequest.fromJson(Map<String, dynamic> json) => _$SummaryRequestFromJson(json);
+  factory SummaryRequest.fromJson(Map<String, dynamic> json) =>
+      _$SummaryRequestFromJson(json);
 }
 
 @freezed
@@ -24,7 +25,8 @@ abstract class KcalNorm with _$KcalNorm {
     required double value,
   }) = _KcalNorm;
 
-  factory KcalNorm.fromJson(Map<String, dynamic> json) => _$KcalNormFromJson(json);
+  factory KcalNorm.fromJson(Map<String, dynamic> json) =>
+      _$KcalNormFromJson(json);
 }
 
 @freezed
@@ -38,7 +40,8 @@ abstract class NutrientData with _$NutrientData {
     required double weight,
   }) = _NutrientData;
 
-  factory NutrientData.fromJson(Map<String, dynamic> json) => _$NutrientDataFromJson(json);
+  factory NutrientData.fromJson(Map<String, dynamic> json) =>
+      _$NutrientDataFromJson(json);
 }
 
 @freezed
@@ -50,5 +53,6 @@ abstract class SumData with _$SumData {
     required double Fat,
   }) = _SumData;
 
-  factory SumData.fromJson(Map<String, dynamic> json) => _$SumDataFromJson(json);
+  factory SumData.fromJson(Map<String, dynamic> json) =>
+      _$SumDataFromJson(json);
 }

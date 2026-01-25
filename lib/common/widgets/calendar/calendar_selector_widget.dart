@@ -7,8 +7,13 @@ import 'package:intl/intl.dart';
 
 class CalendarSelectorWidget extends StatefulWidget {
   final ValueChanged<DateTime> onDaySelected;
+  final DateTime initialDate;
 
-  const CalendarSelectorWidget({super.key, required this.onDaySelected});
+  const CalendarSelectorWidget({
+    super.key,
+    required this.onDaySelected,
+    required this.initialDate,
+  });
 
   @override
   _CalendarSelectorWidgetState createState() => _CalendarSelectorWidgetState();
@@ -24,7 +29,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
     super.initState();
     _scrollController = ScrollController();
     _initializeMonths();
-    _selectedDate = DateTime.now();
+    _selectedDate = widget.initialDate;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentMonth();
@@ -32,13 +37,22 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
   }
 
   void _scrollToCurrentMonth() {
-    const currentMonthIndex = 5;
+    if (_selectedDate == null) return;
 
-    _scrollController.animateTo(
-      currentMonthIndex * 330,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
+    final selected = _selectedDate!;
+    final index = _months.indexWhere(
+      (m) => m.year == selected.year && m.month == selected.month,
     );
+
+    if (index != -1) {
+      final targetIndex = (index - 1).clamp(0, _months.length - 1);
+
+      _scrollController.animateTo(
+        targetIndex * 330,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   void _initializeMonths() {
@@ -79,7 +93,9 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 16),
-              child: Strings.chooseDay.text(20, 24, 600).c(context.colors.textStrong),
+              child: Strings.chooseDay
+                  .text(20, 24, 600)
+                  .c(context.colors.textStrong),
             ),
             const SizedBox(height: 8),
             _buildWeekdayHeaders(),
@@ -96,7 +112,10 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: Button(onPressed: _onContinuePressed, text: Strings.continueBtn),
+              child: Button(
+                onPressed: _onContinuePressed,
+                text: Strings.continueBtn,
+              ),
             ),
           ],
         ),
@@ -114,7 +133,13 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: days
-            .map((day) => DateFormat.E(locale).format(day).capitalize().text(16, 20, 400).c(context.colors.textStrong))
+            .map(
+              (day) => DateFormat.E(locale)
+                  .format(day)
+                  .capitalize()
+                  .text(16, 20, 400)
+                  .c(context.colors.textStrong),
+            )
             .toList(),
       ),
     );
@@ -129,7 +154,11 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-          child: DateFormat.yMMMM('Uz').format(month).capitalize().text(20, 24, 600).c(context.colors.textStrong),
+          child: DateFormat.yMMMM('Uz')
+              .format(month)
+              .capitalize()
+              .text(20, 24, 600)
+              .c(context.colors.textStrong),
         ),
         GridView.builder(
           shrinkWrap: true,
@@ -143,13 +172,18 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
           itemBuilder: (context, index) {
             final DateTime day = daysInMonth[index];
             final bool isCurrentMonth = day.month == month.month;
-            final bool isAfterToday = day.isAfter(DateTime(today.year, today.month, today.day));
+            final bool isAfterToday = day.isAfter(
+              DateTime(today.year, today.month, today.day),
+            );
             final bool isSelected =
                 _selectedDate != null &&
                 day.year == _selectedDate!.year &&
                 day.month == _selectedDate!.month &&
                 day.day == _selectedDate!.day;
-            final bool isToday = day.year == today.year && day.month == today.month && day.day == today.day;
+            final bool isToday =
+                day.year == today.year &&
+                day.month == today.month &&
+                day.day == today.day;
 
             final canSelect = isCurrentMonth && !isAfterToday;
 
@@ -159,7 +193,9 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? context.colors.backgroundElevation
-                      : (isToday && isCurrentMonth ? context.colors.backgroundElevation6 : Colors.transparent),
+                      : isToday
+                      ? context.colors.backgroundElevation6
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
@@ -169,7 +205,9 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
                     .c(
                       !isCurrentMonth || isAfterToday
                           ? context.colors.lightGray
-                          : (isSelected ? context.colors.textStrong : context.colors.textStrong),
+                          : (isSelected
+                                ? context.colors.textStrong
+                                : context.colors.textStrong),
                     ),
               ),
             );
@@ -186,7 +224,9 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
     final int monthNum = month.month;
 
     final DateTime firstDayOfMonth = DateTime(year, monthNum);
-    final int firstWeekday = firstDayOfMonth.weekday == 7 ? 0 : firstDayOfMonth.weekday;
+    final int firstWeekday = firstDayOfMonth.weekday == 7
+        ? 0
+        : firstDayOfMonth.weekday;
 
     for (int i = 0; i < firstWeekday - 1; i++) {
       days.add(firstDayOfMonth.subtract(Duration(days: firstWeekday - i - 1)));

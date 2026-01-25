@@ -96,7 +96,9 @@ class _SelectCalendarPageState extends State<SelectCalendarPage> {
             text: Strings.save,
             onPressed: () {
               if (_selectedDate != null) {
-                final formattedDate = DateFormatter.getDateTimeWithoutHours(_selectedDate);
+                final formattedDate = DateFormatter.getDateTimeWithoutHours(
+                  _selectedDate,
+                );
                 widget.onSave(formattedDate);
               }
             },

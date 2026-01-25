@@ -9,9 +9,15 @@ import 'package:flutter/material.dart';
 
 class AboutVideoPage extends StatelessWidget {
   final LessonRequest lesson;
+  final VoidCallback? onVideoCompleted;
   final int index;
 
-  const AboutVideoPage({super.key, required this.lesson, required this.index});
+  const AboutVideoPage({
+    super.key,
+    required this.lesson,
+    required this.index,
+    this.onVideoCompleted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +28,10 @@ class AboutVideoPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 12,
         children: [
-          VideoPlayerPage(videoUrl: lesson.videoUrl ?? ''),
-
+          VideoPlayerPage(
+            onVideoComplete: onVideoCompleted,
+            videoUrl: lesson.videoUrl ?? '',
+          ),
           Row(
             spacing: 8,
             children: [
@@ -34,12 +42,23 @@ class AboutVideoPage extends StatelessWidget {
                 isDisabled: index == 0,
                 onTap: () {},
               ),
-              customIconTextBox(context: context, icon: Assets.icons.icHelp.svg(), text: Strings.help, onTap: () {}),
-              customIconTextBox(context: context, icon: Assets.icons.icNext.svg(), text: Strings.next, onTap: () {}),
+              customIconTextBox(
+                context: context,
+                icon: Assets.icons.icHelp.svg(),
+                text: Strings.help,
+                onTap: () {},
+              ),
+              customIconTextBox(
+                context: context,
+                icon: Assets.icons.icNext.svg(),
+                text: Strings.next,
+                onTap: () {},
+              ),
             ],
           ),
-
-          Strings.briefInformation.text(16, 20, 500).c(context.colors.textStrong),
+          Strings.briefInformation
+              .text(16, 20, 500)
+              .c(context.colors.textStrong),
           lesson.description.text(14, 18, 400),
         ],
       ),
@@ -64,7 +83,12 @@ class AboutVideoPage extends StatelessWidget {
               color: context.colors.backgroundElevation,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Column(children: [icon, text.text(12, 16, 500).c(context.colors.textSub)]),
+            child: Column(
+              children: [
+                icon,
+                text.text(12, 16, 500).c(context.colors.textSub),
+              ],
+            ),
           ),
         ),
       ),

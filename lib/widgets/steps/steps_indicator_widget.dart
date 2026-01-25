@@ -10,7 +10,12 @@ class StepsIndicatorWidget extends StatelessWidget {
   final int goal;
   final VoidCallback? onEditTap;
 
-  const StepsIndicatorWidget({super.key, required this.current, required this.goal, this.onEditTap});
+  const StepsIndicatorWidget({
+    super.key,
+    required this.current,
+    required this.goal,
+    this.onEditTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +24,7 @@ class StepsIndicatorWidget extends StatelessWidget {
     return CircularPercentIndicator(
       radius: 100,
       lineWidth: 15,
+      animateFromLastPercent: true,
       animation: true,
       animationDuration: 2000,
       percent: progress,

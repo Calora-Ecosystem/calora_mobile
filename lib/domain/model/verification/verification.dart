@@ -9,6 +9,7 @@ abstract class Verification with _$Verification {
     String? verificationCode,
     DateTime? expireDate,
     String? email,
+    String? phone,
   }) = _Verification;
 
   factory Verification.fromJson(Map<String, dynamic> json) =>

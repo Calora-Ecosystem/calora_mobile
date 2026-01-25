@@ -1,7 +1,7 @@
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/flavor/flavor_config.dart';
 import 'package:calora/firebase_options.dart';
-import 'package:calora/presentation/app/app.dart';
+import 'package:calora/presentation/app/app/app.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +19,9 @@ Future<void> main() async {
     SystemUiMode.edgeToEdge,
     overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
   );
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(App());
 }

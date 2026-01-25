@@ -131,19 +131,21 @@ class HealthStepService {
         return 0;
       }
 
-      final List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-        types: _stepDataTypes,
-        startTime: startOfLast24Hours,
-        endTime: now,
-        recordingMethodsToFilter: recordingMethodsToFilter,
-      );
+      final List<HealthDataPoint> healthData = await health
+          .getHealthDataFromTypes(
+            types: _stepDataTypes,
+            startTime: startOfLast24Hours,
+            endTime: now,
+            recordingMethodsToFilter: recordingMethodsToFilter,
+          );
 
       log('HealthStep - ResultDataPoint->${healthData.length}');
 
       int totalSteps = 0;
       for (var dataPoint in healthData) {
         if (dataPoint.value is NumericHealthValue) {
-          final int stepValue = (dataPoint.value as NumericHealthValue).numericValue
+          final int stepValue = (dataPoint.value as NumericHealthValue)
+              .numericValue
               .toInt();
           totalSteps += stepValue;
           log('HealthStep - Step entry: $stepValue at ${dataPoint.dateFrom}');
@@ -174,11 +176,12 @@ class HealthStepService {
         return {};
       }
 
-      final List<HealthDataPoint> stepsData = await health.getHealthDataFromTypes(
-        types: _stepDataTypes,
-        startTime: startDate,
-        endTime: now,
-      );
+      final List<HealthDataPoint> stepsData = await health
+          .getHealthDataFromTypes(
+            types: _stepDataTypes,
+            startTime: startDate,
+            endTime: now,
+          );
 
       final Map<DateTime, int> dailySteps = {};
 
@@ -246,19 +249,21 @@ class HealthStepService {
         'HealthStep - Querying steps from $adjustedStartDate to $adjustedEndDate',
       );
 
-      final List<HealthDataPoint> stepsData = await health.getHealthDataFromTypes(
-        types: _stepDataTypes,
-        startTime: adjustedStartDate,
-        endTime: adjustedEndDate,
-        recordingMethodsToFilter: [RecordingMethod.automatic],
-      );
+      final List<HealthDataPoint> stepsData = await health
+          .getHealthDataFromTypes(
+            types: _stepDataTypes,
+            startTime: adjustedStartDate,
+            endTime: adjustedEndDate,
+            recordingMethodsToFilter: [RecordingMethod.automatic],
+          );
 
       log('HealthStep - Found ${stepsData.length} data points');
 
       int totalSteps = 0;
       for (var dataPoint in stepsData) {
         if (dataPoint.value is NumericHealthValue) {
-          final int stepValue = (dataPoint.value as NumericHealthValue).numericValue
+          final int stepValue = (dataPoint.value as NumericHealthValue)
+              .numericValue
               .toInt();
           totalSteps += stepValue;
           log(
@@ -385,11 +390,12 @@ class HealthStepService {
       final yesterday = now.subtract(const Duration(hours: 24));
 
       // Fetch health data from the past 24 hours
-      final List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-        startTime: yesterday,
-        endTime: now,
-        types: _stepDataTypes,
-      );
+      final List<HealthDataPoint> healthData = await health
+          .getHealthDataFromTypes(
+            startTime: yesterday,
+            endTime: now,
+            types: _stepDataTypes,
+          );
 
       // Filter step data
       final List<HealthDataPoint> stepData = healthData

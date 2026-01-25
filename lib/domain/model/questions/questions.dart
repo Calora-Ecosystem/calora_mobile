@@ -11,8 +11,7 @@ enum ActivityLevelEnum {
   Medium,
   High,
   Maximal,
-  Unknown
-  ;
+  Unknown;
 
   bool get isMinimal => this == ActivityLevelEnum.Minimal;
   bool get isLess => this == ActivityLevelEnum.Less;
@@ -96,5 +95,6 @@ abstract class Questions with _$Questions {
     String? activityHours,
   }) = _Questions;
 
-  factory Questions.fromJson(Map<String, dynamic> json) => _$QuestionsFromJson(json);
+  factory Questions.fromJson(Map<String, dynamic> json) =>
+      _$QuestionsFromJson(json);
 }

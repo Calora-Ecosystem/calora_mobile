@@ -46,7 +46,10 @@ class PodiumBarWidget extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [context.colors.accentLightSub, context.colors.accentGreenWhite],
+              colors: [
+                context.colors.accentLightSub,
+                context.colors.accentGreenWhite,
+              ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -56,7 +59,9 @@ class PodiumBarWidget extends StatelessWidget {
             children: [
               RotatedBox(
                 quarterTurns: 0,
-                child: rankingText.text(24, 32, 700).c(context.colors.textWhite),
+                child: rankingText
+                    .text(24, 32, 700)
+                    .c(context.colors.textWhite),
               ),
             ],
           ),

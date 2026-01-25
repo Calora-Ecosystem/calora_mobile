@@ -24,7 +24,10 @@ class AiApi {
     final croppedBytes = await compute(_cropImageIsolate, originalBytes);
 
     final FormData formData = FormData.fromMap({
-      'File': MultipartFile.fromBytes(croppedBytes, filename: 'cropped_face.jpg'),
+      'File': MultipartFile.fromBytes(
+        croppedBytes,
+        filename: 'cropped_face.jpg',
+      ),
     });
     return _dio.post('face/analyze', data: formData);
   }

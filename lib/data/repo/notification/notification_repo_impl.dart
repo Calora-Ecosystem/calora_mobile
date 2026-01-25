@@ -5,6 +5,8 @@ import 'package:calora/domain/model/notification/notificaiton_setting.dart';
 import 'package:calora/domain/model/notification/notification.dart' as model;
 import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/domain/model/notification/reminder_request.dart';
+import 'package:calora/data/api/notification_api.dart';
+import 'package:calora/domain/model/reminder/reminder_request.dart';
 import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:injectable/injectable.dart';
@@ -52,20 +54,18 @@ class NotificationRepoImpl extends NotificationRepo {
   ];
 
   @override
-  Future<void> deleteNotificationSetting(int id) async {
-    await profileApi.deleteReminder(id);
-  }
-
-  @override
-  Future<void> postNotificationSettings(ReminderRequest reminder) async {
-    await profileApi.postReminders(reminder: reminder);
-  }
-
-  @override
   Future<List<ReminderRequest>> getReminders() async {
-    final response = await profileApi.getReminders();
-    final List<dynamic> content = response.data['content'] ?? [];
-    return content.map((e) => ReminderRequest.fromJson(e as Map<String, dynamic>)).toList();
+    return await _api.getReminders();
+  }
+
+  @override
+  Future<ReminderRequest> updateReminder(ReminderRequest request) async {
+    return await _api.updateReminder(request);
+  }
+
+  @override
+  Future<void> deleteReminder(int id) async {
+    await _api.deleteReminder(id);
   }
 
   @override

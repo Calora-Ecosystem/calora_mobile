@@ -62,7 +62,9 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
               width: 48,
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected ? context.colors.accentSub : context.colors.white,
+                color: isSelected
+                    ? context.colors.accentSub
+                    : context.colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -92,7 +94,8 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
             ),
           );
         },
-        separatorBuilder: (BuildContext context, int index) => const SizedBox(width: 8),
+        separatorBuilder: (BuildContext context, int index) =>
+            const SizedBox(width: 8),
       ),
     );
   }

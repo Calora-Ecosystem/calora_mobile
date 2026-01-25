@@ -11,13 +11,19 @@ class SplashPage extends Managed<SplashManager, SplashState, SplashEffect> {
   const SplashPage({super.key});
 
   @override
-  void listener(BuildContext context, SplashManager manager, SplashEffect effect) {
+  void listener(
+    BuildContext context,
+    SplashManager manager,
+    SplashEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.when(
       language: () => context.router.replaceAll([const SelectLanguageRoute()]),
       onboarding: () => context.router.replaceAll([const OnboardingRoute()]),
-      auth: () => context.router.replaceAll([const AuthRoute()]),
+      auth: (isUzbekistan) =>
+          context.router.replaceAll([AuthRoute(isUzbekistan: isUzbekistan)]),
       dashboard: () => context.router.replaceAll([const DashboardRoute()]),
+      questionary: () => context.router.replaceAll([QuestionsRoute()]),
     );
   }
 
@@ -28,8 +34,12 @@ class SplashPage extends Managed<SplashManager, SplashState, SplashEffect> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.cover)),
-          Center(child: Assets.icons.icSplashCalora.image(height: 52, width: 200)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.cover),
+          ),
+          Center(
+            child: Assets.icons.icSplashCalora.image(height: 52, width: 200),
+          ),
         ],
       ),
     );

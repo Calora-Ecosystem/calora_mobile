@@ -41,7 +41,11 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
   }
 
   @override
-  void listener(BuildContext context, DishesManager manager, DishesEffect effect) {
+  void listener(
+    BuildContext context,
+    DishesManager manager,
+    DishesEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.mapOrNull(
       openInfoSheet: (value) {
@@ -51,7 +55,11 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
   }
 
   @override
-  Widget builder(BuildContext context, DishesManager manager, DishesState state) {
+  Widget builder(
+    BuildContext context,
+    DishesManager manager,
+    DishesState state,
+  ) {
     return Scaffold(
       backgroundColor: context.colors.white,
       appBar: CustomAppBar(title: data.name),
@@ -106,9 +114,13 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
     );
   }
 
-  void openAboutDishPage(BuildContext context, FoodModel food, DishesManager manager, bool isFavourite) {
+  void openAboutDishPage(
+    BuildContext context,
+    FoodModel food,
+    DishesManager manager,
+    bool isFavourite,
+  ) {
     context.showAppBottomSheet(
-      initialChildSize: 0.75,
       child: DishInfoPage(
         isFavourite: isFavourite,
         foodItem: food,
@@ -122,7 +134,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
               menu: type.name,
               date: DateTime.now(),
               foodId: food.id ?? 0,
-              weightInGr: value.toInt(),
+              weightInGr: value == 0 ? 400 : value.toInt(),
             ),
           );
           if (context.mounted) context.router.pop();
@@ -148,14 +160,18 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
             ),
             child: Assets.icons.twoDone.svg(),
           ),
-          content: Strings.yourDataHasBeenSuccessfullySaved
+          content: Strings.yourDataHasBeenSaved
               .text(16, 20, 400)
               .c(context.colors.textStrong)
               .copyWith(textAlign: TextAlign.center),
           actions: [
             Center(
               child: Button(
-                onPressed: () => dialogContext.pop(),
+                onPressed: () {
+                  dialogContext.pop();
+                  context.router.pop();
+                  context.router.pop(true);
+                },
                 text: Strings.close,
                 textColor: context.colors.textStrong,
                 type: ButtonType.secondary,

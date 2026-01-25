@@ -8,7 +8,11 @@ class EditStepGoalPage extends StatefulWidget {
   final int initialValue;
   final ValueChanged<int> onSave;
 
-  const EditStepGoalPage({super.key, required this.initialValue, required this.onSave});
+  const EditStepGoalPage({
+    super.key,
+    required this.initialValue,
+    required this.onSave,
+  });
 
   @override
   State<EditStepGoalPage> createState() => _EditStepGoalPageState();
@@ -18,11 +22,10 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
   late FixedExtentScrollController _controller;
   late int _selectedValue;
 
-  Shader linearGradient = const LinearGradient(
-    colors: <Color>[Color(0xFFEEEEEE), Color(0xFF999999)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+  late final LinearGradient selectedGradient;
+  late final LinearGradient aboveGradient;
+  late final LinearGradient belowGradient;
+  late final LinearGradient defaultGradient;
 
   @override
   void initState() {
@@ -46,6 +49,36 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    selectedGradient = LinearGradient(
+      colors: [
+        context.colors.defaultText,
+        context.colors.defaultText,
+      ],
+    );
+    aboveGradient = LinearGradient(
+      colors: [
+        context.colors.white,
+        context.colors.defaultText,
+      ],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    );
+    belowGradient = LinearGradient(
+      colors: [
+        context.colors.defaultText,
+        context.colors.white,
+      ],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    );
+    defaultGradient = LinearGradient(
+      colors: const [Colors.grey, Colors.grey],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -59,12 +92,17 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
           Container(
             width: 24,
             height: 3,
-            decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(
+              color: Colors.grey[400],
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
           SizedBox(height: 12),
           Align(
             alignment: AlignmentGeometry.topLeft,
-            child: Strings.stepsToSetAGoal.text(20, 24, 700).c(context.colors.textStrong),
+            child: Strings.stepsToSetAGoal
+                .text(20, 24, 700)
+                .c(context.colors.textStrong),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -86,37 +124,20 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
                   LinearGradient gradient;
 
                   if (isSelected) {
-                    gradient = LinearGradient(
-                      colors: [
-                        context.colors.defaultText,
-                        context.colors.defaultText,
-                      ],
-                    );
+                    gradient = selectedGradient;
                   } else if (isAbove) {
-                    gradient = LinearGradient(
-                      colors: [
-                        context.colors.white,
-                        context.colors.defaultText,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    );
+                    gradient = aboveGradient;
                   } else if (isBelow) {
-                    gradient = LinearGradient(
-                      colors: [
-                        context.colors.defaultText,
-                        context.colors.white,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    );
+                    gradient = belowGradient;
                   } else {
-                    gradient = LinearGradient(
-                      colors: const [Colors.grey, Colors.grey],
-                    );
+                    gradient = defaultGradient;
                   }
                   return Center(
-                    child: value.toString().text(32, 40, 700).c(context.colors.defaultText).gradient(gradient),
+                    child: value
+                        .toString()
+                        .text(32, 40, 700)
+                        .c(context.colors.defaultText)
+                        .gradient(gradient),
                   );
                 },
                 childCount: 50,
@@ -136,7 +157,10 @@ class _EditStepGoalPageState extends State<EditStepGoalPage> {
                 color: context.colors.accentSub,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Strings.save.text(16, 20, 500).c(context.colors.white).copyWith(textAlign: TextAlign.center),
+              child: Strings.save
+                  .text(16, 20, 500)
+                  .c(context.colors.white)
+                  .copyWith(textAlign: TextAlign.center),
             ),
           ),
           SizedBox(height: 28),

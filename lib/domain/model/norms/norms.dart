@@ -5,7 +5,9 @@ part 'norms.g.dart';
 
 @freezed
 abstract class NormsRequest with _$NormsRequest {
-  const factory NormsRequest({required String metric, required double value}) = _NormsRequest;
+  const factory NormsRequest({required String metric, required double value}) =
+      _NormsRequest;
 
-  factory NormsRequest.fromJson(Map<String, dynamic> json) => _$NormsRequestFromJson(json);
+  factory NormsRequest.fromJson(Map<String, dynamic> json) =>
+      _$NormsRequestFromJson(json);
 }

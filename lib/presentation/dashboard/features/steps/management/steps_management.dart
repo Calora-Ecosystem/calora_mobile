@@ -9,17 +9,33 @@ part 'steps_management.freezed.dart';
 @freezed
 abstract class StepsState with _$StepsState {
   const factory StepsState({
-    @Default([]) List<StepsWithMetricsRequest> steps,
-    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0)) MetricsRequest metrics,
+    @Default([]) List<StepsWithMetricsRequest> dailySteps,
+    @Default([]) List<StepsWithMetricsRequest> weeklySteps,
+    @Default([]) List<StepsWithMetricsRequest> monthlySteps,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0)) MetricsRequest dailyMetrics,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0)) MetricsRequest weeklyMetrics,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0)) MetricsRequest monthlyMetrics,
+    @Default([]) List<double> dailyPrimaryValues,
+    @Default([]) List<double> weeklyPrimaryValues,
+    @Default([]) List<double> monthlyPrimaryValues,
+    @Default(0) int dailyDisplayStepCount,
+    @Default(0) int weeklyDisplayStepCount,
+    @Default(0) int monthlyDisplayStepCount,
+    @Default('') String dailyFrom,
+    @Default('') String weeklyFrom,
+    @Default('') String monthlyFrom,
+    @Default('') String dailyTo,
+    @Default('') String weeklyTo,
+    @Default('') String monthlyTo,
     @Default([]) List<NormsRequest> norms,
-    @Default([]) List<double> primaryValues,
-    @Default([]) List<UserStatRequest> userStates,
+    @Default([]) List<UserStatRequest> dailyUserStates,
+    @Default([]) List<UserStatRequest> weeklyUserStates,
+    @Default([]) List<UserStatRequest> monthlyUserStates,
     @Default(0) int stepCount,
-    @Default(0) int displayStepCount,
     @Default(0) int period,
-    @Default(0) int offset,
-    @Default('') String from,
-    @Default('') String to,
+    @Default(0) int dailyOffset,
+    @Default(0) int weeklyOffset,
+    @Default(0) int monthlyOffset,
     @Default(false) bool isGettingSteps,
     @Default(false) bool isGettingStats,
     @Default(false) bool isGettingUserMetrics,
@@ -27,22 +43,57 @@ abstract class StepsState with _$StepsState {
     @Default(false) bool isGettingNorms,
     @Default(false) bool isDeletingNorm,
     @Default(false) bool isDeletingUserDailyData,
+    @Default(false) bool isDailyLoading,
+    @Default(false) bool isWeeklyLoading,
+    @Default(false) bool isMonthlyLoading,
   }) = _StepsState;
 
   const StepsState._();
 
   List<UserStatRequest> getUserStates() {
-    if (userStates.length <= 3) return [];
-    return userStates.sublist(3);
+    List<UserStatRequest> currentPeriodUserStates;
+    switch (period) {
+      case 0:
+        currentPeriodUserStates = dailyUserStates;
+        break;
+      case 1:
+        currentPeriodUserStates = weeklyUserStates;
+        break;
+      case 2:
+        currentPeriodUserStates = monthlyUserStates;
+        break;
+      default:
+        currentPeriodUserStates = [];
+        break;
+    }
+    if (currentPeriodUserStates.length <= 3) return [];
+    return currentPeriodUserStates.sublist(3);
   }
 
-  bool get canGoForward => offset < 0;
+  bool get canGoForward {
+    switch (period) {
+      case 0:
+        return dailyOffset < 0;
+      case 1:
+        return weeklyOffset < 0;
+      case 2:
+        return monthlyOffset < 0;
+      default:
+        return false;
+    }
+  }
 
   int get currentStepCount {
-    if (period == 0 && offset == 0) {
-      return stepCount;
+    switch (period) {
+      case 0:
+        return dailyOffset == 0 ? stepCount : dailyDisplayStepCount;
+      case 1:
+        return weeklyDisplayStepCount;
+      case 2:
+        return monthlyDisplayStepCount;
+      default:
+        return 0;
     }
-    return displayStepCount;
   }
 }
 

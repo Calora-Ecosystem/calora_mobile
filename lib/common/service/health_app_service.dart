@@ -38,10 +38,7 @@ class HealthAppService {
     await Permission.activityRecognition.request();
     await Permission.location.request();
 
-    final permissions = [
-      HealthDataAccess.READ,
-      HealthDataAccess.WRITE,
-    ];
+    final permissions = [HealthDataAccess.READ, HealthDataAccess.WRITE];
     // Check if we have health permissions
     bool? hasPermissions = false;
     // hasPermissions = false because the hasPermission cannot disclose if WRITE access exists.
@@ -54,7 +51,7 @@ class HealthAppService {
       try {
         authorized = await health.requestAuthorization(
           types,
-          permissions:permissions,
+          permissions: permissions,
         );
 
         // request access to read historic data
@@ -72,10 +69,7 @@ class HealthAppService {
   Future<void> fetchStepData() async {
     final now = DateTime.now();
     final midnight = DateTime(now.year, now.month, now.day);
-    final permissions = [
-      HealthDataAccess.READ,
-      HealthDataAccess.WRITE,
-    ];
+    final permissions = [HealthDataAccess.READ, HealthDataAccess.WRITE];
     // Check current permission status
     bool? hasPermissions = await health.hasPermissions([HealthDataType.STEPS]);
     log('HealthAppService - Initial permission check: $hasPermissions');

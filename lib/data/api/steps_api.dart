@@ -4,6 +4,7 @@ import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:injectable/injectable.dart' show lazySingleton;
 
 @lazySingleton
@@ -34,7 +35,10 @@ class StepsApi {
     if (to != null) {
       queryParams['to'] = to.toIso8601String();
     }
-    final response = await _dio.get('users/dailies', queryParameters: queryParams);
+    final response = await _dio.get(
+      'users/dailies',
+      queryParameters: queryParams,
+    );
 
     final data = response.data;
 
@@ -51,21 +55,26 @@ class StepsApi {
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
     final profile = await profileStore.getProfile();
     final currentEmail = profile.email?.toLowerCase() ?? '';
+    final currentUserId = profile.userId ?? 0;
     final response = await _dio.get(
       '/users/steps/stat',
-      queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String()},
+      queryParameters: {
+        'from': fromUtc.toIso8601String(),
+        'to': toUtc.toIso8601String(),
+      },
     );
     final data = response.data;
     final content = data['content'] as List<dynamic>;
     return content.map((json) {
       final user = json['user'];
       final userEmail = (user['email'] ?? '').toString().toLowerCase();
+      final userId = user['id'] ?? 0;
       return UserStatRequest(
         firstName: user['name'] ?? '',
         lastName: '',
         stepCount: json['sum'] ?? 0,
         talks: json['count'] ?? 0,
-        isMe: userEmail == currentEmail,
+        isMe: userId == currentUserId,
         isWinner: json['index'] == 1,
       );
     }).toList();
@@ -92,19 +101,31 @@ class StepsApi {
     await _dio.delete('/users/norms/$metric');
   }
 
-  Future<void> sendDailyData({required String metric, required int value}) async {
-    final body = {'metric': metric, 'value': value, 'date': DateTime.now().toUtc().toIso8601String()};
+  Future<void> sendDailyData({
+    required String metric,
+    required int value,
+  }) async {
+    final body = {
+      'metric': metric,
+      'value': value,
+      'date': DateTime.now().toUtc().toIso8601String(),
+    };
     await _dio.post('/users/dailies', data: body);
   }
 
-  Future<void> sendStepDataDateRange({List<StepsWithMetricsRequest> steps = const []}) async {
+  Future<void> sendStepDataDateRange({
+    List<StepsWithMetricsRequest> steps = const [],
+  }) async {
     final payload = steps.map((element) => element.toJson()).toList();
     await _dio.post('/users/dailies/batch', data: payload);
   }
 
   Future<bool> deleteUserDailyData({required String date}) async {
     try {
-      final response = await _dio.delete('/users/dailies/reset', queryParameters: {'date': date});
+      final response = await _dio.delete(
+        '/users/dailies/reset',
+        queryParameters: {'date': date},
+      );
       return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } on DioException {
       return false;

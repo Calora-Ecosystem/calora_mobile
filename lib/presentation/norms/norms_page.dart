@@ -31,7 +31,11 @@ class NormsPage extends Managed<NormsManager, NormsState, NormsEffect> {
     );
   }
 
-  Widget _uiBuilder(NormsState state, BuildContext context, NormsManager manager) {
+  Widget _uiBuilder(
+    NormsState state,
+    BuildContext context,
+    NormsManager manager,
+  ) {
     if (state.loading) {
       return Loadable(
         builder: (context) {
@@ -60,7 +64,11 @@ class NormsPage extends Managed<NormsManager, NormsState, NormsEffect> {
     }
   }
 
-  void _openInputPage(DetailInfo info, BuildContext context, NormsManager manager) {
+  void _openInputPage(
+    DetailInfo info,
+    BuildContext context,
+    NormsManager manager,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

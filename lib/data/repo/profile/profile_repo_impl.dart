@@ -23,7 +23,10 @@ class ProfileRepoImpl extends ProfileRepo {
     final extrasData = extrasResponse.data['content'];
     final target = targetWeight.data['content'][0];
     final profile = ProfileRequest.fromJson(extrasData);
-    final updated = profile.copyWith(email: meData['email'], targetWeight: target['value'].toDouble());
+    final updated = profile.copyWith(
+      email: meData['email'],
+      targetWeight: target['value'].toDouble(),
+    );
     return updated;
   }
 
@@ -43,7 +46,9 @@ class ProfileRepoImpl extends ProfileRepo {
   @override
   Future<void> updateProfile(ProfileRequest request) async {
     double? calculatedBmi;
-    if (request.weight != null && request.height != null && request.height! > 0) {
+    if (request.weight != null &&
+        request.height != null &&
+        request.height! > 0) {
       final heightInMeters = request.height! / 100;
       calculatedBmi = request.weight! / (heightInMeters * heightInMeters);
       calculatedBmi = double.parse(calculatedBmi.toStringAsFixed(2));

@@ -1,4 +1,4 @@
-import 'package:calora/domain/model/lesson/lesson_info.dart';
+import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'tasks_management.freezed.dart';
@@ -7,8 +7,9 @@ part 'tasks_management.freezed.dart';
 abstract class TasksState with _$TasksState {
   const factory TasksState({
     @Default(0) int levelIndex,
-    @Default([]) List<TaskInfo> tasks,
+    @Default([]) List<ExercisesRequest> exercises,
     @Default(0) int currentTaskIndex,
+    @Default(false) bool isLoading,
   }) = _TasksState;
 }
 

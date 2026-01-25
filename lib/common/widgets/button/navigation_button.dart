@@ -29,7 +29,9 @@ class NavigationButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [_buildBackButton(context), _buildMainButton(context)]);
+    return Row(
+      children: [_buildBackButton(context), _buildMainButton(context)],
+    );
   }
 
   Widget _buildBackButton(BuildContext context) {
@@ -50,7 +52,10 @@ class NavigationButtons extends StatelessWidget {
   }
 
   Widget _buildMainButton(BuildContext context) {
-    return Expanded(flex: hasPrevious ? 1 : 2, child: _buildActionButton(context));
+    return Expanded(
+      flex: hasPrevious ? 1 : 2,
+      child: _buildActionButton(context),
+    );
   }
 
   Widget _buildActionButton(BuildContext context) {
@@ -80,15 +85,22 @@ class NavigationButtons extends StatelessWidget {
   }) {
     final colors = context.colors;
 
-    final bgColor = isPrimary ? (enabled ? colors.accentSub : colors.white) : colors.accentWhite;
+    final bgColor = isPrimary
+        ? (enabled ? colors.accentSub : colors.white)
+        : colors.accentWhite;
 
-    final textColor = isPrimary ? (enabled ? colors.white : colors.black) : colors.black;
+    final textColor = isPrimary
+        ? (enabled ? colors.white : colors.black)
+        : colors.black;
 
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
         alignment: Alignment.center,
         child: text.text(16, 20, 500).c(textColor),
       ),

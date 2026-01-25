@@ -13,7 +13,12 @@ import 'package:calora/presentation/course_questions/management/course_questions
 
 @RoutePage()
 class CourseQuestionsPage
-    extends Managed<CourseQuestionsManager, CourseQuestionsState, CourseQuestionsEffect> {
+    extends
+        Managed<
+          CourseQuestionsManager,
+          CourseQuestionsState,
+          CourseQuestionsEffect
+        > {
   const CourseQuestionsPage({super.key});
 
   @override
@@ -25,7 +30,9 @@ class CourseQuestionsPage
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),

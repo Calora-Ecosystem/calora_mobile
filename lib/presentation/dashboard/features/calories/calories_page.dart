@@ -1,22 +1,18 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/extensions/bottom_sheet.dart';
+import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
-import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
-import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/week_day_selector.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
-import 'package:calora/domain/model/notification/notification_setting_type.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/input/date/notification_setting_sheet.dart';
+import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
+import 'package:calora/presentation/dashboard/features/calories/management/calories_manager.dart';
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
 import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
+import 'package:calora/widgets/notification_widgets/calory_notification_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-
-import 'management/calories_management.dart';
-import 'management/calories_manager.dart';
 
 @RoutePage()
 class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
@@ -29,18 +25,23 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   }
 
   @override
-  void listener(BuildContext context, CaloriesManager manager, CaloriesEffect effect) {
+  void listener(
+    BuildContext context,
+    CaloriesManager manager,
+    CaloriesEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.when(
-      openMealPage: (type, meals, date) =>
-          context.pushRoute<bool>(MealsRoute(type: type, dateTime: date, categoryId: 1)).then(
-            (value) {
-              if (value == true) {
-                manager.fetchCaloriesAndMeals(date);
-                manager.getSummary(date);
-              }
-            },
-          ),
+      openMealPage: (type, meals, date) => context
+          .pushRoute<bool>(
+            MealsRoute(type: type, dateTime: date, categoryId: 1),
+          )
+          .then((value) async {
+            if (value == true && context.mounted) {
+              manager.fetchCaloriesAndMeals(date);
+              manager.getSummary(date);
+            }
+          }),
     );
   }
 
@@ -48,13 +49,16 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
   Widget builder(context, manager, state) {
     return Scaffold(
       body: DefaultRefreshIndicator(
+        edgeOffset: context.topPadding + kToolbarHeight,
         onRefresh: () async {
           manager.fetchCaloriesAndMeals(state.date ?? DateTime.now());
           manager.getSummary(state.date ?? DateTime.now());
         },
         child: Stack(
           children: [
-            Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+            Positioned.fill(
+              child: Assets.icons.background.image(fit: BoxFit.fill),
+            ),
             Container(
               color: state.isScrolled ? context.colors.softGray : Colors.transparent,
               child: SafeArea(
@@ -83,8 +87,13 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                          decoration: BoxDecoration(color: context.colors.white),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.colors.white,
+                          ),
                           child: Column(
                             spacing: 8,
                             children: [
@@ -98,32 +107,7 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                 meals: manager.meals,
                                 isLoading: state.isLoading,
                               ),
-                              GestureDetector(
-                                onTap: () => _openNotificationSettings(context),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: context.colors.backgroundElevation,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Assets.icons.greenNotification.svg(),
-                                          const SizedBox(width: 8),
-                                          Strings.notification.text(20, 24, 600).c(context.colors.textStrong),
-                                          Spacer(),
-                                          Assets.icons.setting.svg(),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Strings.toRemindYouOfMealTimes.text(14, 16, 400).c(context.colors.textSub),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              CaloryNotificationSettings(),
                             ],
                           ),
                         ),
@@ -136,15 +120,6 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
           ],
         ),
       ),
-    );
-  }
-
-  void _openNotificationSettings(BuildContext context) {
-    context.showAppBottomSheet(
-      maxChildSize: 0.5,
-      initialChildSize: 0.5,
-      minChildSize: 0.4,
-      child: NotificationSettingSheet(type: NotificationSettingType.mealReminder, reminders: List.empty()),
     );
   }
 }

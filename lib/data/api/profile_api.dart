@@ -1,6 +1,5 @@
 import 'package:calora/domain/model/norms/daily_norms_info.dart';
 import 'package:calora/domain/model/norms/norms.dart';
-import 'package:calora/domain/model/notification/reminder_request.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
@@ -74,17 +73,5 @@ class ProfileApi {
 
   Future<void> logout() async {
     print('Log out');
-  }
-
-  Future<Response> getReminders() {
-    return _dio.get('/reminder');
-  }
-
-  Future<Response> postReminders({required ReminderRequest reminder}) async {
-    return _dio.post('/reminder', data: reminder.toJson());
-  }
-
-  Future<void> deleteReminder(int id) async {
-    _dio.delete('/reminder/$id');
   }
 }

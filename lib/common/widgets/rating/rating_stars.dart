@@ -1,7 +1,7 @@
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 
-enum Level { easy, withoutOverload, returnToActivity, increaseActivity, high }
+enum Level { minimal, less, medium, high, maximal }
 
 class RatingStars extends StatelessWidget {
   final Level level;
@@ -10,15 +10,15 @@ class RatingStars extends StatelessWidget {
 
   int get filledStars {
     switch (level) {
-      case Level.easy:
+      case Level.minimal:
         return 1;
-      case Level.withoutOverload:
+      case Level.less:
         return 2;
-      case Level.returnToActivity:
+      case Level.medium:
         return 3;
-      case Level.increaseActivity:
-        return 4;
       case Level.high:
+        return 4;
+      case Level.maximal:
         return 5;
     }
   }

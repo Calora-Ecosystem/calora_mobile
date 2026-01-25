@@ -11,13 +11,21 @@ class ChartWidget extends StatelessWidget {
   final List<double> primaryValues;
   final double? target;
 
-  const ChartWidget({super.key, required this.type, required this.primaryValues, this.target});
+  const ChartWidget({
+    super.key,
+    required this.type,
+    required this.primaryValues,
+    this.target,
+  });
 
   @override
   Widget build(BuildContext context) {
     final int itemCount = type == ChartType.weekly ? 7 : 30;
 
-    final values = List<double>.generate(itemCount, (i) => i < primaryValues.length ? primaryValues[i] : 0);
+    final values = List<double>.generate(
+      itemCount,
+      (i) => i < primaryValues.length ? primaryValues[i] : 0,
+    );
 
     final average = values.isNotEmpty ? values.reduce((a, b) => a + b) / values.length : 0;
     final total = values.isNotEmpty ? values.reduce((a, b) => a + b) : 0;

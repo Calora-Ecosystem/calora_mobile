@@ -13,6 +13,7 @@ abstract class VideoState with _$VideoState {
     @Default(Duration.zero) Duration duration,
     @Default(0.5) double aspectRatio,
     VideoPlayerController? controller,
+    @Default(false) bool isCompleted,
     String? errorMessage,
   }) = _VideoState;
 }
@@ -20,5 +21,8 @@ abstract class VideoState with _$VideoState {
 @freezed
 class VideoEffect with _$VideoEffect {
   const factory VideoEffect.showError(String message) = _ShowError;
+
   const factory VideoEffect.openFullscreen() = _OpenFullscreen;
+
+  const factory VideoEffect.videoCompleted() = _VideoCompleted;
 }

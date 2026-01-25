@@ -6,7 +6,11 @@ class CourseCards extends StatelessWidget {
   final List<CourseRequest> courses;
   final Map<int, VoidCallback> onTapCallbacks;
 
-  const CourseCards({super.key, required this.courses, required this.onTapCallbacks});
+  const CourseCards({
+    super.key,
+    required this.courses,
+    required this.onTapCallbacks,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +20,10 @@ class CourseCards extends StatelessWidget {
       itemCount: courses.length,
       itemBuilder: (context, index) {
         final course = courses[index];
-        return CourseCard(onTap: onTapCallbacks[course.id] ?? () {}, course: course);
+        return CourseCard(
+          onTap: onTapCallbacks[course.id] ?? () {},
+          course: course,
+        );
       },
       separatorBuilder: (context, index) => const SizedBox(height: 20),
     );

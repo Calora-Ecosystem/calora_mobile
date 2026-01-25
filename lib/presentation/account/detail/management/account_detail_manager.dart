@@ -10,7 +10,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class AccountDetailManager extends Manager<AccountDetailState, AccountDetailEffect> {
+class AccountDetailManager
+    extends Manager<AccountDetailState, AccountDetailEffect> {
   final ProfileRepo profileRepo;
 
   AccountDetailManager(this.profileRepo) : super(const AccountDetailState());
@@ -30,13 +31,19 @@ class AccountDetailManager extends Manager<AccountDetailState, AccountDetailEffe
     final updatedInfos = state.detailInfos?.map((element) {
       if (element.type == info.type) {
         if (info.type == DetailInfoType.gender) {
-          return element.copyWith(message: Gender.fromDisplayName(lastResult).toApi());
+          return element.copyWith(
+            message: Gender.fromDisplayName(lastResult).toApi(),
+          );
         }
         if (info.type == DetailInfoType.goal) {
-          return element.copyWith(message: PurposeEnum.fromDisplayName(lastResult).toApi());
+          return element.copyWith(
+            message: PurposeEnum.fromDisplayName(lastResult).toApi(),
+          );
         }
         if (info.type == DetailInfoType.activityLevel) {
-          return element.copyWith(message: ActivityLevelEnum.fromDisplayName(lastResult).toApi());
+          return element.copyWith(
+            message: ActivityLevelEnum.fromDisplayName(lastResult).toApi(),
+          );
         }
         return element.copyWith(message: lastResult);
       }
@@ -50,7 +57,9 @@ class AccountDetailManager extends Manager<AccountDetailState, AccountDetailEffe
       return;
     }
 
-    final profileRequest = _buildProfileRequestFromDetailInfos(state.detailInfos!);
+    final profileRequest = _buildProfileRequestFromDetailInfos(
+      state.detailInfos!,
+    );
 
     await profileRepo
         .updateProfile(profileRequest)

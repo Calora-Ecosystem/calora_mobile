@@ -59,7 +59,9 @@ class _GenderWidgetState extends State<GenderWidget> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 26),
           decoration: BoxDecoration(
-            border: Border.all(color: isSelected ? borderColor : Colors.transparent),
+            border: Border.all(
+              color: isSelected ? borderColor : Colors.transparent,
+            ),
             color: context.colors.commonBackground,
             borderRadius: BorderRadius.circular(12),
           ),

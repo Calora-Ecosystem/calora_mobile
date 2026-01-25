@@ -45,7 +45,9 @@ class _UniversalStepperWidgetState extends State<UniversalStepperWidget> {
   @override
   void initState() {
     super.initState();
-    value = widget.type == StepperType.int ? widget.initialInt : widget.initialDuration;
+    value = widget.type == StepperType.int
+        ? widget.initialInt
+        : widget.initialDuration;
   }
 
   String _formatDuration(Duration d) {
@@ -86,13 +88,21 @@ class _UniversalStepperWidgetState extends State<UniversalStepperWidget> {
             '$value/${widget.totalInt}',
             style:
                 widget.styleInt ??
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, height: 0.8),
+                const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  height: 0.8,
+                ),
           )
         : Text(
             _formatDuration(value),
             style:
                 widget.styleDuration ??
-                const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, height: 0.83),
+                const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  height: 0.83,
+                ),
           );
 
     return Row(
@@ -104,7 +114,10 @@ class _UniversalStepperWidgetState extends State<UniversalStepperWidget> {
               : const Icon(Icons.remove),
           onPressed: _decrement,
         ),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: textWidget),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: textWidget,
+        ),
         IconButton(
           icon: widget.type == StepperType.int
               ? Assets.icons.arrowRight.svg()

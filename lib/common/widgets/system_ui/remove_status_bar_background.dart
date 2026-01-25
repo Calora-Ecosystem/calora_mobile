@@ -14,8 +14,13 @@ class RemoveStatusBarBackground extends StatelessWidget {
       statusBarIconBrightness: Brightness.dark,
       statusBarBrightness: Brightness.light,
       systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
       systemNavigationBarIconBrightness: Brightness.dark,
     );
-    return AnnotatedRegion<SystemUiOverlayStyle>(value: systemUiOverlayStyle, child: child);
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: systemUiOverlayStyle,
+      child: child,
+    );
   }
 }

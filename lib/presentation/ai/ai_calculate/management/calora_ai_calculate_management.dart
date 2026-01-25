@@ -32,7 +32,9 @@ abstract class AnalysisItem with _$AnalysisItem {
 
 @freezed
 sealed class CaloraAiCalculateEffect with _$CaloraAiCalculateEffect {
-  const factory CaloraAiCalculateEffect.error(String message) = _CaloraAiCalculateEffectError;
+  const factory CaloraAiCalculateEffect.error(String message) =
+      _CaloraAiCalculateEffectError;
 
-  const factory CaloraAiCalculateEffect.analysisComplete() = _CaloraAiCalculateEffectAnalysisComplete;
+  const factory CaloraAiCalculateEffect.analysisComplete() =
+      _CaloraAiCalculateEffectAnalysisComplete;
 }

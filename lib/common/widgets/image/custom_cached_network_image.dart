@@ -36,10 +36,16 @@ class CustomCachedNetworkImage extends StatelessWidget {
   }) {
     final isValidUrl = imageUrl != null && imageUrl.trim().isNotEmpty;
 
-    developer.log('🎯 Avatar Factory Called:', name: 'CustomCachedNetworkImage');
+    developer.log(
+      '🎯 Avatar Factory Called:',
+      name: 'CustomCachedNetworkImage',
+    );
     developer.log('  size: $size', name: 'CustomCachedNetworkImage');
     developer.log('  imageUrl: $imageUrl', name: 'CustomCachedNetworkImage');
-    developer.log('  isValidUrl: $isValidUrl', name: 'CustomCachedNetworkImage');
+    developer.log(
+      '  isValidUrl: $isValidUrl',
+      name: 'CustomCachedNetworkImage',
+    );
 
     return CustomCachedNetworkImage(
       imageUrl: isValidUrl ? imageUrl : null,
@@ -121,7 +127,9 @@ class CustomCachedNetworkImage extends StatelessWidget {
 
     if (sanitizedUrl == null) return _buildError(context);
 
-    final borderRadius = customBorderRadius ?? (shape == BoxShape.rectangle ? BorderRadius.circular(radius) : null);
+    final borderRadius =
+        customBorderRadius ??
+        (shape == BoxShape.rectangle ? BorderRadius.circular(radius) : null);
 
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
 
@@ -160,7 +168,9 @@ class CustomCachedNetworkImage extends StatelessWidget {
 
     String trimmed = url.trim();
     if (trimmed.isEmpty) return null;
-    final String baseUrl = kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl;
+    final String baseUrl = kReleaseMode
+        ? AppConfigs.baseUrl
+        : AppConfigs.stagingBaseUrl;
     trimmed = '${baseUrl}file/$trimmed';
 
     final uri = Uri.tryParse(trimmed);
@@ -193,7 +203,8 @@ class CustomCachedNetworkImage extends StatelessWidget {
   }
 
   Widget _buildError(BuildContext context) {
-    final bgColor = widgetBgColor ?? Theme.of(context).disabledColor.withOpacityLevel(0.1);
+    final bgColor =
+        widgetBgColor ?? Theme.of(context).disabledColor.withOpacityLevel(0.1);
 
     return Container(
       height: height,

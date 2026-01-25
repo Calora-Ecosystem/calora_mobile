@@ -5,16 +5,25 @@ import 'package:calora/widgets/questions/purposes_widget.dart';
 import 'package:flutter/material.dart';
 
 class TrainLevelPage extends StatefulWidget {
-  final ValueChanged<int> onSave;
+  final int currentLevel;
 
-  const TrainLevelPage({super.key, required this.onSave});
+  const TrainLevelPage({
+    super.key,
+    this.currentLevel = 0,
+  });
 
   @override
   State<TrainLevelPage> createState() => _TrainLevelPageState();
 }
 
 class _TrainLevelPageState extends State<TrainLevelPage> {
-  int level = 0;
+  late int level;
+
+  @override
+  void initState() {
+    super.initState();
+    level = widget.currentLevel;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +41,9 @@ class _TrainLevelPageState extends State<TrainLevelPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            Strings.chooseYourWorkoutLevel.text(20, 24, 700).c(context.colors.textStrong),
+            Strings.chooseYourWorkoutLevel
+                .text(20, 24, 700)
+                .c(context.colors.textStrong),
             const SizedBox(height: 16),
             PurposesWidget(
               goals: degrees,
@@ -44,9 +55,7 @@ class _TrainLevelPageState extends State<TrainLevelPage> {
             ),
             const SizedBox(height: 36),
             GestureDetector(
-              onTap: () {
-                widget.onSave(level);
-              },
+              onTap: () => Navigator.of(context).pop(level),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -54,10 +63,7 @@ class _TrainLevelPageState extends State<TrainLevelPage> {
                   color: context.colors.accentSub,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Strings.save
-                    .text(16, 20, 500)
-                    .c(context.colors.white)
-                    .copyWith(textAlign: TextAlign.center),
+                child: Strings.save.text(16, 20, 500).c(context.colors.white).copyWith(textAlign: TextAlign.center),
               ),
             ),
             const SizedBox(height: 16),

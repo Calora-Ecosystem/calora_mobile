@@ -22,8 +22,13 @@ class EmptyFoodScreen extends StatelessWidget {
             child: Assets.images.empty.image(fit: BoxFit.fill),
           ),
         ),
-        Strings.mealsAreNotAvailable.text(16, 20, 500).c(context.colors.textStrong),
-        message.text(14, 18, 400).c(context.colors.textSub).copyWith(textAlign: TextAlign.center),
+        Strings.mealsAreNotAvailable
+            .text(16, 20, 500)
+            .c(context.colors.textStrong),
+        message
+            .text(14, 18, 400)
+            .c(context.colors.textSub)
+            .copyWith(textAlign: TextAlign.center),
       ],
     );
   }

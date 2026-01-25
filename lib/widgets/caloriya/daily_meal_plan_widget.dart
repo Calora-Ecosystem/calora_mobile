@@ -23,13 +23,17 @@ class DailyMealPlanWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: context.colors.backgroundElevation,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 8,
         children: [
           Strings.dailyMealPlan.text(20, 24, 600).c(context.colors.textStrong),
           _tile(
+            textColor: context.colors.textStrong,
             context,
             icon: Assets.icons.icSms.svg(),
             title: Strings.accordingToPlan,
@@ -37,6 +41,7 @@ class DailyMealPlanWidget extends StatelessWidget {
             loading: loading,
           ),
           _tile(
+            textColor: context.colors.textStrong,
             context,
             icon: Assets.icons.icDoneCircle.svg(),
             title: Strings.foodConsumed,
@@ -44,10 +49,13 @@ class DailyMealPlanWidget extends StatelessWidget {
             loading: loading,
           ),
           _tile(
+            textColor: double.parse(leftover) < 0
+                ? context.colors.red
+                : context.colors.textStrong,
             context,
             icon: Assets.icons.icFood.svg(),
             title: Strings.leftoverFoodPlan,
-            value: leftover,
+            value: leftover.toString(),
             loading: loading,
           ),
         ],
@@ -61,6 +69,7 @@ class DailyMealPlanWidget extends StatelessWidget {
     required String title,
     required String value,
     required bool loading,
+    required Color textColor,
   }) {
     return ShimmerWrapper(
       loading: loading,
@@ -68,25 +77,39 @@ class DailyMealPlanWidget extends StatelessWidget {
       child: Container(
         height: 52,
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: context.colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: context.colors.accentSub,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: icon,
             ),
             const SizedBox(width: 8),
-            Expanded(child: title.text(14, 16, 400).c(context.colors.textSub).auto(maxLines: 2, minSize: 14)),
+            Expanded(
+              child: title
+                  .text(14, 16, 400)
+                  .c(context.colors.textSub)
+                  .auto(maxLines: 2, minSize: 14),
+            ),
             Spacer(),
             Row(
               children: [
-                value.text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
+                value.text(20, 24, 600).c(textColor).auto(minSize: 16),
                 const SizedBox(width: 4),
                 Strings.kcal
                     .text(20, 24, 600)
                     .c(context.colors.textSub)
-                    .copyWith(textAlign: TextAlign.end, overflow: TextOverflow.ellipsis)
+                    .copyWith(
+                      textAlign: TextAlign.end,
+                      overflow: TextOverflow.ellipsis,
+                    )
                     .auto(minSize: 16),
               ],
             ),

@@ -18,12 +18,16 @@ class LeaveQuestionsPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Strings.whyDidYouFinishTheExercises.text(20, 24, 700).c(context.colors.textStrong),
+            Strings.whyDidYouFinishTheExercises
+                .text(20, 24, 700)
+                .c(context.colors.textStrong),
             const SizedBox(height: 16),
             SimpleButton(
               text: Strings.iJustWantedToSee,
               onPressed: () {
-                context.router.popUntil((route) => route.settings.name == TasksRoute.name);
+                context.router.popUntil(
+                  (route) => route.settings.name == TasksRoute.name,
+                );
               },
               color: context.colors.backgroundElevation,
               textColor: context.colors.textStrong,
@@ -32,7 +36,9 @@ class LeaveQuestionsPage extends StatelessWidget {
             SimpleButton(
               text: Strings.exercisesAreVeryEasy,
               onPressed: () {
-                context.router.popUntil((route) => route.settings.name == TasksRoute.name);
+                context.router.popUntil(
+                  (route) => route.settings.name == TasksRoute.name,
+                );
               },
               color: context.colors.backgroundElevation,
               textColor: context.colors.textStrong,
@@ -41,7 +47,9 @@ class LeaveQuestionsPage extends StatelessWidget {
             SimpleButton(
               text: Strings.exercisesAreVeryDificult,
               onPressed: () {
-                context.router.popUntil((route) => route.settings.name == TasksRoute.name);
+                context.router.popUntil(
+                  (route) => route.settings.name == TasksRoute.name,
+                );
               },
               color: context.colors.backgroundElevation,
               textColor: context.colors.textStrong,

@@ -1,4 +1,5 @@
-import 'package:calora/domain/model/meal/food/food_models.dart' show ScannerFood;
+import 'package:calora/domain/model/meal/food/food_models.dart'
+    show ScannerFood;
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
 import 'package:dio/dio.dart';
@@ -12,7 +13,10 @@ class CaloriesApi {
   CaloriesApi(this._dio);
 
   Future<Response> getSummary(DateTime date) {
-    return _dio.get('/food/summary', queryParameters: {'date': date.toIso8601String()});
+    return _dio.get(
+      '/food/summary',
+      queryParameters: {'date': date.toIso8601String()},
+    );
   }
 
   Future<Response> getFoodCategory() {
@@ -28,7 +32,10 @@ class CaloriesApi {
   }
 
   Future<Response> fetchSearchFood(String name) {
-    return _dio.get('/food', queryParameters: {'FilteringExpression': 'name\$\$${name}'});
+    return _dio.get(
+      '/food',
+      queryParameters: {'FilteringExpression': 'name\$\$${name}'},
+    );
   }
 
   Future<Response> addFood(FoodRequest food) {
@@ -40,7 +47,10 @@ class CaloriesApi {
   }
 
   Future<Response> fetchMenuItem(DateTime date, String menu) {
-    return _dio.get('/food/menu', queryParameters: {'date': date.toIso8601String(), 'menu': menu});
+    return _dio.get(
+      '/food/menu',
+      queryParameters: {'date': date.toIso8601String(), 'menu': menu},
+    );
   }
 
   Future<void> saveMenuItem(MenuInfo item) {
@@ -63,10 +73,7 @@ class CaloriesApi {
       ),
     });
 
-    final response = await _dio.post(
-      '/food/recognization',
-      data: formData,
-    );
+    final response = await _dio.post('/food/recognization', data: formData);
 
     final List content = response.data['content'] ?? [];
 
@@ -82,10 +89,7 @@ class CaloriesApi {
       ),
     });
 
-    final response = await _dio.post(
-      '/food/recognization',
-      data: formData,
-    );
+    final response = await _dio.post('/food/recognization', data: formData);
 
     final List content = response.data['content'] ?? [];
 

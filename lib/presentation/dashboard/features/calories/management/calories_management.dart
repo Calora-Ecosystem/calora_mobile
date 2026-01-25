@@ -22,5 +22,9 @@ abstract class CaloriesState with _$CaloriesState {
 
 @freezed
 abstract class CaloriesEffect with _$CaloriesEffect {
-  const factory CaloriesEffect.openMealPage(MealType type, List<MealData> meals, DateTime dateTime) = _CaloriesEffect;
+  const factory CaloriesEffect.openMealPage(
+    MealType type,
+    List<MealData> meals,
+    DateTime dateTime,
+  ) = _CaloriesEffect;
 }

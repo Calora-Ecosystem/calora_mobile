@@ -24,13 +24,18 @@ class BmiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final double bmi = calculateBmi(weight, height);
     return Container(
-      decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Strings.bodyMassIndex.text(16, 20, 500).c(context.colors.textStrong),
+            Strings.bodyMassIndex
+                .text(16, 20, 500)
+                .c(context.colors.textStrong),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -38,8 +43,13 @@ class BmiCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(color: context.colors.errorLighter, borderRadius: BorderRadius.circular(8)),
-                  child: getBmiCategory(bmi).text(14, 16, 400).c(context.colors.errorBase),
+                  decoration: BoxDecoration(
+                    color: context.colors.errorLighter,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: getBmiCategory(
+                    bmi,
+                  ).text(14, 16, 400).c(context.colors.errorBase),
                 ),
               ],
             ),
@@ -49,9 +59,17 @@ class BmiCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _infoBox('Progress', '${(entryWeight - weight).abs()}', context),
+                _infoBox(
+                  'Progress',
+                  '${(entryWeight - weight).abs()}',
+                  context,
+                ),
                 SizedBox(width: 16),
-                _infoBox(Strings.remained, '${(weight - targetWeight).abs()} kg', context),
+                _infoBox(
+                  Strings.remained,
+                  '${(weight - targetWeight).abs()} kg',
+                  context,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -61,7 +79,11 @@ class BmiCard extends StatelessWidget {
                   child: LinearPercentIndicator(
                     animation: true,
                     lineHeight: 16,
-                    percent: calculateWeightProgress(entryWeight, weight, targetWeight),
+                    percent: calculateWeightProgress(
+                      entryWeight,
+                      weight,
+                      targetWeight,
+                    ),
                     backgroundColor: context.colors.backgroundElevation,
                     progressColor: context.colors.accentSub,
                     barRadius: Radius.circular(12),
@@ -76,8 +98,14 @@ class BmiCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                entryWeight.toString().text(12, 14, 400).c(context.colors.neutral900Primary),
-                targetWeight.toString().text(12, 14, 400).c(context.colors.neutral900Primary),
+                entryWeight
+                    .toString()
+                    .text(12, 14, 400)
+                    .c(context.colors.neutral900Primary),
+                targetWeight
+                    .toString()
+                    .text(12, 14, 400)
+                    .c(context.colors.neutral900Primary),
               ],
             ),
           ],
@@ -90,7 +118,10 @@ class BmiCard extends StatelessWidget {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: context.colors.commonBackground),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: context.colors.commonBackground,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -117,7 +148,11 @@ class BmiCard extends StatelessWidget {
     return Strings.obesityStage3;
   }
 
-  double calculateWeightProgress(double entryWeight, double weight, double targetWeight) {
+  double calculateWeightProgress(
+    double entryWeight,
+    double weight,
+    double targetWeight,
+  ) {
     if (entryWeight == targetWeight) return 1.0;
     if (entryWeight == 0 || targetWeight == 0) return 0.0;
 

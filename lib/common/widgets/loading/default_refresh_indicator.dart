@@ -10,24 +10,30 @@ class DefaultRefreshIndicator extends StatefulWidget {
     required this.child,
     required this.onRefresh,
     this.edgeOffset,
+    this.notificationPredicate,
   });
 
   final Future<void> Function() onRefresh;
   final double? edgeOffset;
   final Widget child;
+  final bool Function(ScrollNotification)? notificationPredicate;
 
   @override
-  State<DefaultRefreshIndicator> createState() => _DefaultRefreshIndicatorState();
+  State<DefaultRefreshIndicator> createState() =>
+      _DefaultRefreshIndicatorState();
 }
 
 class _DefaultRefreshIndicatorState extends State<DefaultRefreshIndicator> {
   @override
   Widget build(BuildContext context) {
-    return CustomMaterialIndicator(
+    return CustomMaterialIndicator.adaptive(
       onRefresh: () async {
         HapticFeedback.mediumImpact();
         return widget.onRefresh();
       },
+      notificationPredicate:
+          widget.notificationPredicate ??
+          CustomRefreshIndicator.defaultScrollNotificationPredicate,
       displacement: 0,
       edgeOffset: widget.edgeOffset ?? 0,
       backgroundColor: Colors.transparent,
@@ -44,10 +50,15 @@ class _DefaultRefreshIndicatorState extends State<DefaultRefreshIndicator> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  image: DecorationImage(image: AssetImage(Assets.icons.icLogo.path)),
+                  image: DecorationImage(
+                    image: AssetImage(Assets.icons.icLogo.path),
+                  ),
                 ),
               ),
-              CircularProgressIndicator(color: context.colors.white, strokeWidth: 3),
+              CircularProgressIndicator(
+                color: context.colors.white,
+                strokeWidth: 3,
+              ),
             ],
           ),
         );

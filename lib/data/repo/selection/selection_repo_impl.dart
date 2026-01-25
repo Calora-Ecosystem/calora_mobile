@@ -26,18 +26,33 @@ class SelectionRepoImpl extends SelectionRepo {
   }
 
   List<Selection> genders = [
-    Selection(name: Gender.Male.displayName, icon: Assets.icons.icMale.path, isChecked: true),
-    Selection(name: Gender.Female.displayName, icon: Assets.icons.icFemale.path),
+    Selection(
+      name: Gender.Male.displayName,
+      icon: Assets.icons.icMale.path,
+      isChecked: true,
+    ),
+    Selection(
+      name: Gender.Female.displayName,
+      icon: Assets.icons.icFemale.path,
+    ),
   ];
   List<Selection> goals = [
-    Selection(name: PurposeEnum.WeightLoss.displayName, isChecked: true, id: '1'),
+    Selection(
+      name: PurposeEnum.WeightLoss.displayName,
+      isChecked: true,
+      id: '1',
+    ),
     Selection(name: PurposeEnum.SaveCurrent.displayName, id: '2'),
     Selection(name: PurposeEnum.MuscleDevelopment.displayName, id: '3'),
   ];
   List<Selection> activityLevels = [
     Selection(name: ActivityLevelEnum.Minimal.displayName, id: '1'),
     Selection(name: ActivityLevelEnum.Less.displayName, id: '2'),
-    Selection(name: ActivityLevelEnum.Medium.displayName, isChecked: true, id: '3'),
+    Selection(
+      name: ActivityLevelEnum.Medium.displayName,
+      isChecked: true,
+      id: '3',
+    ),
     Selection(name: ActivityLevelEnum.High.displayName, id: '4'),
     Selection(name: ActivityLevelEnum.Maximal.displayName, id: '5'),
   ];

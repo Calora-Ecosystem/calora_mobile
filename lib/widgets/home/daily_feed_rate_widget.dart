@@ -10,7 +10,7 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class DailyFeedRateWidget extends StatelessWidget {
   final String normCalories;
-  final String remainedCalories;
+  final double remainedCalories;
   final double progressPercent;
   final List<NutrientInfo> nutrients;
   final VoidCallback onAddFoodTap;
@@ -28,14 +28,14 @@ class DailyFeedRateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final allNutrientsDone = nutrients.isNotEmpty && nutrients.every((n) => n.percent.clamp(0.0, 1.0) == 1.0);
+    final caloriesDone = remainedCalories <= 0;
+    final hideAddFoodButton = allNutrientsDone && caloriesDone;
     return ShimmerWrapper(
       loading: loading,
-      shimmerChild: const ShimmerChild(
-        height: 272,
-        radius: 20,
-      ),
+      shimmerChild: const ShimmerChild(height: 272, radius: 20),
       child: Container(
-        height: 272,
+        // height: 272,
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -47,7 +47,6 @@ class DailyFeedRateWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Strings.dailyFeedRate.text(20, 24, 600),
-
             SizedBox(
               height: 100,
               child: Stack(
@@ -62,14 +61,13 @@ class DailyFeedRateWidget extends StatelessWidget {
                       lineWidth: 10,
                       percent: safePercent(progressPercent),
                       circularStrokeCap: CircularStrokeCap.round,
-                      progressColor: context.colors.accentSub,
+                      progressColor: safePercent(progressPercent) >= 1 ? context.colors.red : context.colors.accentSub,
                       backgroundColor: context.colors.backgroundElevation,
                       center: '${(safePercent(progressPercent) * 100).round()}%'
                           .text(16, 20, 500)
                           .c(context.colors.textStrong),
                     ),
                   ),
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _SideCalories(
@@ -77,19 +75,17 @@ class DailyFeedRateWidget extends StatelessWidget {
                       value: normCalories,
                     ),
                   ),
-
                   Align(
                     alignment: Alignment.centerRight,
                     child: _SideCalories(
-                      title: Strings.remained,
-                      value: remainedCalories,
+                      title: remainedCalories < 0 ? Strings.excess : Strings.remained,
+                      value: remainedCalories.abs().asFixedTruncated(0),
                       alignRight: true,
                     ),
                   ),
                 ],
               ),
             ),
-
             Row(
               spacing: 16,
               children: nutrients.map((nutrient) {
@@ -110,7 +106,9 @@ class DailyFeedRateWidget extends StatelessWidget {
                         animation: true,
                         percent: nutrient.percent.clamp(0, 1),
                         lineHeight: 8,
-                        progressColor: context.colors.blueAccent,
+                        progressColor: nutrient.percent.clamp(0, 1) >= 1
+                            ? context.colors.red
+                            : context.colors.blueAccent,
                         backgroundColor: context.colors.backgroundElevation,
                         padding: EdgeInsets.zero,
                         barRadius: const Radius.circular(6),
@@ -121,19 +119,22 @@ class DailyFeedRateWidget extends StatelessWidget {
                 );
               }).toList(),
             ),
-
-            GestureDetector(
-              onTap: onAddFoodTap,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: context.colors.accentSub,
-                  borderRadius: BorderRadius.circular(16),
+            if (!hideAddFoodButton)
+              GestureDetector(
+                onTap: onAddFoodTap,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  decoration: BoxDecoration(
+                    color: context.colors.accentSub,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Strings.addFood
+                      .text(16, 20, 500)
+                      .c(context.colors.white)
+                      .copyWith(textAlign: TextAlign.center),
                 ),
-                child: Strings.addFood.text(16, 20, 500).c(context.colors.white).copyWith(textAlign: TextAlign.center),
               ),
-            ),
           ],
         ),
       ),
@@ -165,22 +166,12 @@ class _SideCalories extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 6,
         children: [
-          title
-              .text(14, 16, 400)
-              .copyWith(
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+          title.text(14, 16, 400).copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(
-                child: value
-                    .text(16, 20, 500)
-                    .copyWith(
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                child: value.text(16, 20, 500).copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
               const SizedBox(width: 4),
               Strings.kcal.text(12, 14, 400),

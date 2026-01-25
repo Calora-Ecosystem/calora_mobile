@@ -10,7 +10,9 @@ class CommonTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final bool obscureText;
   final Widget? prefix;
+  final Widget? suffixIcon;
   final Widget? suffix;
+  final EdgeInsets? contentPadding;
 
   const CommonTextField({
     super.key,
@@ -21,7 +23,9 @@ class CommonTextField extends StatefulWidget {
     this.inputFormatters,
     this.obscureText = false,
     this.prefix,
+    this.suffixIcon,
     this.suffix,
+    this.contentPadding,
   });
 
   @override
@@ -40,30 +44,26 @@ class _CommonTextFieldState extends State<CommonTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onTapOutside: (_) => FocusManager.instance.primaryFocus!.unfocus(),
       controller: widget.controller,
       focusNode: _focusNode,
       onChanged: widget.onChanged,
       obscureText: widget.obscureText,
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,
-      onTap: () {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted && _focusNode.hasFocus) {
-            Scrollable.ensureVisible(
-              context,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              alignment: 0.2,
-            );
-          }
-        });
-      },
       decoration: InputDecoration(
         hintText: widget.hint,
-        hintStyle: TextStyle(color: context.colors.textSub, fontSize: 16, fontWeight: FontWeight.w400, height: 0.8),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        hintStyle: TextStyle(
+          color: context.colors.textSub,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          height: 0.8,
+          leadingDistribution: TextLeadingDistribution.even,
+        ),
+        contentPadding: widget.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16),
+        suffix: widget.suffix,
         prefixIcon: widget.prefix,
-        suffixIcon: widget.suffix,
+        suffixIcon: widget.suffixIcon,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: context.colors.strokeSoft, width: 1.5),
