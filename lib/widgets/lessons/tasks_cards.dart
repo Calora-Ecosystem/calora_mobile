@@ -66,7 +66,7 @@ class TasksCards extends StatelessWidget {
                   child: Row(
                     children: [
                       CustomCachedNetworkImage.banner(
-                        imageUrl: exercises[index].assets.first.url,
+                        imageUrl: _assetUrlByType('Default', exercises[index]),
                         height: 56,
                         width: 56,
                       ),
@@ -111,6 +111,16 @@ class TasksCards extends StatelessWidget {
   bool isLocked(int index, bool isUserPremium) {
     if (isUserPremium) return false;
     return index >= 3;
+  }
+
+  String? _assetUrlByType(String type, ExercisesRequest exercises) {
+    final item = exercises.assets.cast<dynamic>().firstWhere(
+      (e) => (e.type?.toString() ?? e['type']?.toString())?.toLowerCase() == type.toLowerCase(),
+      orElse: () => null,
+    );
+    if (item == null) return null;
+    final url = (item.url?.toString() ?? item['url']?.toString())?.trim();
+    return (url == null || url.isEmpty) ? null : url;
   }
 
   String levelToLocalizedString(Level level) {

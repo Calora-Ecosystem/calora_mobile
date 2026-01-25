@@ -11,32 +11,51 @@ import 'package:management/management.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 @RoutePage()
-class ProgressPage
-    extends Managed<CalculateManager, CalculateState, CalculateEffect> {
+class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEffect> {
   final bool fetchGoals;
   final int mode;
   final PageRouteInfo? nextRoute;
+  final Future<void> Function()? apiCall;
+
+  final String title;
+  final List<ProgressAnalyzeItem> analyzeItems;
 
   const ProgressPage({
     super.key,
+    required this.title,
+    required this.analyzeItems,
     this.mode = 1,
     this.nextRoute,
     this.fetchGoals = false,
+    this.apiCall,
   });
 
   @override
   void init(BuildContext context, CalculateManager manager) {
+    manager.resetProgress();
     super.init(context, manager);
+
     if (fetchGoals) {
       manager.getDailyGoals();
     }
-    manager.startProgressAnimation(
-      onComplete: () {
-        if (mode == 2 && nextRoute != null) {
-          context.router.replace(nextRoute!);
-        }
-      },
-    );
+    if (apiCall != null) {
+      manager.startProgressWithApi(
+        apiCall: apiCall!,
+        onComplete: () {
+          if (mode == 2 && nextRoute != null) {
+            context.router.replace(nextRoute!);
+          }
+        },
+      );
+    } else {
+      manager.startProgressAnimation(
+        onComplete: () {
+          if (mode == 2 && nextRoute != null) {
+            context.router.replace(nextRoute!);
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -47,9 +66,7 @@ class ProgressPage
   ) {
     effect.when(
       error: (message) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
       },
       navigateNext: () {
         if (nextRoute != null) {
@@ -68,9 +85,7 @@ class ProgressPage
     double currentProgress,
   ) {
     final bool done = currentProgress >= threshold;
-    final Color textColor = done
-        ? context.colors.textSub
-        : context.colors.textStrong;
+    final Color textColor = done ? context.colors.textSub : context.colors.textStrong;
 
     return Container(
       padding: const EdgeInsets.all(8),
@@ -81,9 +96,7 @@ class ProgressPage
       ),
       child: Row(
         children: [
-          done
-              ? Assets.icons.done.svg()
-              : const CupertinoActivityIndicator(radius: 12),
+          done ? Assets.icons.done.svg() : const CupertinoActivityIndicator(radius: 12),
           const SizedBox(width: 8),
           Expanded(child: text.text(14, 16, 400).c(textColor)),
         ],
@@ -112,13 +125,6 @@ class ProgressPage
                   padding: const EdgeInsets.all(16),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                     color: context.colors.accentWhite,
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -127,10 +133,7 @@ class ProgressPage
                     children: [
                       SizedBox(
                         width: 300,
-                        child: Strings.planningDailySchedule
-                            .text(16, 20, 500)
-                            .c(context.colors.textStrong)
-                            .copyWith(maxLines: 2),
+                        child: title.text(16, 20, 500).c(context.colors.textStrong).copyWith(maxLines: 2),
                       ),
                       const SizedBox(height: 20),
                       Center(
@@ -147,32 +150,26 @@ class ProgressPage
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _analyzingItem(
-                        context,
-                        Strings.analyzingActivityLevel,
-                        0.3,
-                        state.progressPercent,
-                      ),
-                      const SizedBox(height: 16),
-                      _analyzingItem(
-                        context,
-                        Strings.smartReminderPlan,
-                        0.5,
-                        state.progressPercent,
-                      ),
-                      const SizedBox(height: 16),
-                      _analyzingItem(
-                        context,
-                        Strings.analyzingActivityLevel,
-                        0.8,
-                        state.progressPercent,
+                      ...analyzeItems.map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _analyzingItem(
+                            context,
+                            item.text,
+                            item.threshold,
+                            state.progressPercent,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 if (mode == 1 && state.progressPercent >= 1.0)
                   GestureDetector(
-                    onTap: () => manager.goToNextPage(),
+                    onTap: () {
+                      context.router.popUntilRoot();
+                      context.router.push(nextRoute!);
+                    },
                     child: Container(
                       margin: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -197,4 +194,14 @@ class ProgressPage
       ),
     );
   }
+}
+
+class ProgressAnalyzeItem {
+  final String text;
+  final double threshold;
+
+  const ProgressAnalyzeItem({
+    required this.text,
+    required this.threshold,
+  });
 }

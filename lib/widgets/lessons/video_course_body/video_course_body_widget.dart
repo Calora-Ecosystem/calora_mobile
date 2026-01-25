@@ -34,6 +34,8 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
 
   @override
   void init(BuildContext context, VideoCourseBodyManager manager) {
+    final isUserPremium = context.read<AppManager>().state.isUserPremium;
+    manager.setPurchased(isPurchased || isUserPremium);
     manager.getVideoCourse(course.id ?? 0);
     super.init(context, manager);
   }
@@ -173,6 +175,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                                         ],
                                       ),
                                     ),
+                                    if (lesson.isFinished) Assets.icons.done.svg(),
                                     if (showLock) Assets.icons.lock.svg(),
                                   ],
                                 ),

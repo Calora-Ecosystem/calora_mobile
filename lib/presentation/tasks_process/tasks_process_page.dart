@@ -102,7 +102,7 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
                   total: state.exercises.length,
                 ),
                 const SizedBox(height: 28),
-                CustomCachedNetworkImage.banner(imageUrl: ex.assets.first.url, height: 200),
+                CustomCachedNetworkImage.banner(imageUrl: _assetUrlByType('Default', ex), height: 200),
                 const SizedBox(height: 12),
                 ex.title.text(20, 24, 700).c(context.colors.textStrong),
                 const SizedBox(height: 12),
@@ -146,6 +146,16 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
         ),
       ),
     );
+  }
+
+  String? _assetUrlByType(String type, ExercisesRequest exercises) {
+    final item = exercises.assets.cast<dynamic>().firstWhere(
+      (e) => (e.type?.toString() ?? e['type']?.toString())?.toLowerCase() == type.toLowerCase(),
+      orElse: () => null,
+    );
+    if (item == null) return null;
+    final url = (item.url?.toString() ?? item['url']?.toString())?.trim();
+    return (url == null || url.isEmpty) ? null : url;
   }
 
   String _formatSeconds(int totalSeconds) {

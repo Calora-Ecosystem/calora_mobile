@@ -63,6 +63,7 @@ class ProfileStore extends BaseStore<ProfileRequest> {
     double? bmi,
     String? metrics,
     int? userId,
+    String? physicalActivity,
     dynamic activityLevel,
   }) async {
     final current = await call();
@@ -78,6 +79,7 @@ class ProfileStore extends BaseStore<ProfileRequest> {
       birthDay: birthDay ?? current.birthDay,
       bmi: bmi ?? current.bmi,
       activityLevel: activityLevel ?? current.activityLevel,
+      physicalActivity: physicalActivity ?? current.physicalActivity,
     );
     await set(updated);
   }
@@ -88,7 +90,8 @@ final profileStore = GetIt.I<ProfileStore>();
 enum Gender {
   Male,
   Female,
-  Unknown;
+  Unknown
+  ;
 
   bool get isMale => this == Gender.Male;
 

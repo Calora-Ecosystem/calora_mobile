@@ -16,11 +16,16 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
 
   CalculateManager(this.questionsRepo) : super(CalculateState.initial());
 
+  void resetProgress() {
+    _apiProgressTimer?.cancel();
+    _animationTimer?.cancel();
+    emit(state.copyWith(progressPercent: 0.0));
+  }
+
   void getDailyGoals() async {
     await questionsRepo.getDailyGoals().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (goals) =>
-          emit(state.copyWith(dailyGoals: goals, isLoading: false)),
+      onData: (goals) => emit(state.copyWith(dailyGoals: goals, isLoading: false)),
       onError: (error) {
         emit(state.copyWith(isLoading: false));
         publish(CalculateEffect.error(error.toString()));
@@ -29,6 +34,7 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
   }
 
   void startProgressAnimation({VoidCallback? onComplete}) {
+    resetProgress();
     _animationTimer?.cancel();
 
     final totalTicks = _animationDurationSeconds * _ticksPerSecond;
@@ -50,8 +56,40 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
     );
   }
 
-  void goToNextPage() {
-    publish(const CalculateEffect.navigateNext());
+  Timer? _apiProgressTimer;
+
+  void startProgressWithApi({
+    required Future<void> Function() apiCall,
+    VoidCallback? onComplete,
+  }) async {
+    _apiProgressTimer?.cancel();
+
+    emit(state.copyWith(progressPercent: 0));
+
+    _apiProgressTimer = Timer.periodic(const Duration(milliseconds: 80), (_) {
+      final p = state.progressPercent;
+
+      if (p < 0.95) {
+        final inc = (0.95 - p) * 0.08;
+        final next = (p + inc).clamp(0.0, 0.95);
+        emit(state.copyWith(progressPercent: next));
+      }
+    });
+
+    try {
+      await apiCall();
+
+      _apiProgressTimer?.cancel();
+
+      emit(state.copyWith(progressPercent: 1.0));
+
+      onComplete?.call();
+      publish(const CalculateEffect.navigateNext());
+    } catch (e) {
+      _apiProgressTimer?.cancel();
+
+      publish(CalculateEffect.error(e.toString()));
+    }
   }
 
   @override

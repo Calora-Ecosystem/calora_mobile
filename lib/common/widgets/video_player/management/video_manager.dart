@@ -12,7 +12,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
   Timer? _controlsTimer;
 
   VoidCallback? _onVideoComplete;
-  bool _hasCalledOnComplete = false; // Flag to prevent multiple calls
+  bool _hasCalledOnComplete = false;
 
   VideoManager() : super(const VideoState());
 
@@ -26,12 +26,14 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
         await _controller!.dispose();
       }
 
-      // Reset the flag when initializing a new video
       _hasCalledOnComplete = false;
 
       _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
-
       await _controller!.initialize();
+
+      _controller!.addListener(_onVideoUpdate);
+
+      await _controller!.pause();
 
       emit(
         state.copyWith(
@@ -40,15 +42,13 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
           duration: _controller!.value.duration,
           aspectRatio: _controller!.value.aspectRatio,
           isControlsVisible: true,
+          isPlaying: false,
+          position: Duration.zero,
+          isCompleted: false,
         ),
       );
 
-      _controller!.addListener(_onVideoUpdate);
-
-      await _controller!.play();
-      emit(state.copyWith(isPlaying: true));
-
-      _startHideControlsTimer();
+      _cancelHideControlsTimer();
     } catch (e) {
       emit(state.copyWith(errorMessage: e.toString()));
       publish(VideoEffect.showError(e.toString()));
@@ -69,11 +69,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
         isPlaying: value.isPlaying,
       ),
     );
-
-    // Check if video is 2 seconds away from completion
-    if (!_hasCalledOnComplete &&
-        videoDuration != Duration.zero &&
-        videoDuration.inSeconds > 0) {
+    if (!_hasCalledOnComplete && videoDuration != Duration.zero && videoDuration.inSeconds > 0) {
       final remainingSeconds = (videoDuration - currentPosition).inSeconds;
 
       if (remainingSeconds <= 2 && remainingSeconds >= 0) {
@@ -102,12 +98,13 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
 
     if (_controller!.value.isPlaying) {
       _controller!.pause();
+      _cancelHideControlsTimer();
     } else {
       _controller!.play();
+      _startHideControlsTimer();
     }
 
     emit(state.copyWith(isPlaying: _controller!.value.isPlaying));
-    _startHideControlsTimer();
   }
 
   void toggleControls() {
@@ -123,9 +120,7 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
   void _startHideControlsTimer() {
     _cancelHideControlsTimer();
     _controlsTimer = Timer(const Duration(seconds: 5), () {
-      if (state.isControlsVisible &&
-          _controller != null &&
-          _controller!.value.isPlaying) {
+      if (state.isControlsVisible && _controller != null && _controller!.value.isPlaying) {
         emit(state.copyWith(isControlsVisible: false));
       }
     });
