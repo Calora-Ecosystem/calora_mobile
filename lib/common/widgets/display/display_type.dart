@@ -1,3 +1,4 @@
+import 'package:calora/common/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 enum DisplayType { error, warning, info, success }
@@ -45,13 +46,13 @@ extension DisplayTypeExtensions on DisplayType {
   Widget icon(BuildContext context) {
     switch (this) {
       case DisplayType.error:
-        return Icon(Icons.info, color: const Color(0xFFEE655C));
+        return Assets.icons.alertError.svg(height: 28, width: 28);
       case DisplayType.warning:
-        return Icon(Icons.info, color: const Color(0xFFFF9721));
+        return Assets.icons.alertWarning.svg(height: 28, width: 28);
       case DisplayType.info:
-        return Icon(Icons.info, color: const Color(0xff3F9CFB));
+        return Assets.icons.alertInfo.svg(height: 28, width: 28);
       case DisplayType.success:
-        return Icon(Icons.info, color: const Color(0xff54CF85));
+        return Assets.icons.alertSuccess.svg(height: 28, width: 28);
     }
   }
 }

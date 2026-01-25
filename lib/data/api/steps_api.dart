@@ -4,6 +4,7 @@ import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:injectable/injectable.dart' show lazySingleton;
 
 @lazySingleton
@@ -56,37 +57,29 @@ class StepsApi {
     final currentEmail = profile.email?.toLowerCase() ?? '';
     final response = await _dio.get(
       '/users/steps/stat',
-      queryParameters: {
-        'from': fromUtc.toIso8601String(),
-        'to': toUtc.toIso8601String(),
-      },
+      queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String()},
     );
-    final data = response.data;
+    final data = response.data as Map<String, dynamic>;
     final content = data['content'] as List<dynamic>;
-    return content.map((json) {
-      final user = json['user'];
+    return content.map((e) {
+      final Map<String, dynamic> json = e as Map<String, dynamic>;
+      final Map<String, dynamic> user = json['user'];
       final userEmail = (user['email'] ?? '').toString().toLowerCase();
       return UserStatRequest(
         firstName: user['name'] ?? '',
         lastName: '',
         stepCount: json['sum'] ?? 0,
         talks: json['count'] ?? 0,
-        isMe: userEmail == currentEmail,
+        isMe: userEmail == currentEmail && userEmail.trim().isNotEmpty && currentEmail.trim().isNotEmpty,
         isWinner: json['index'] == 1,
       );
     }).toList();
   }
 
-  Future<MetricsRequest> getUserMetrics({
-    required String from,
-    required String to,
-  }) async {
+  Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {
     final int? userId = await profileStore.getUserId();
     final query = {'from': from, 'to': to, 'userId': userId};
-    final response = await _dio.get(
-      'users/steps/metrics',
-      queryParameters: query,
-    );
+    final response = await _dio.get('users/steps/metrics', queryParameters: query);
     return MetricsRequest.fromJson(response.data['content']);
   }
 
@@ -129,9 +122,7 @@ class StepsApi {
         '/users/dailies/reset',
         queryParameters: {'date': date},
       );
-      return response.statusCode != null &&
-          response.statusCode! >= 200 &&
-          response.statusCode! < 300;
+      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } on DioException {
       return false;
     }

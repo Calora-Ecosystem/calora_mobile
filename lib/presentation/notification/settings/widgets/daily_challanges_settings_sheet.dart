@@ -20,12 +20,10 @@ class DailyChallengesNotificationSettingsSheet extends StatefulWidget {
   });
 
   @override
-  State<DailyChallengesNotificationSettingsSheet> createState() =>
-      _DailyChallengesNotificationSettingsSheetState();
+  State<DailyChallengesNotificationSettingsSheet> createState() => _DailyChallengesNotificationSettingsSheetState();
 }
 
-class _DailyChallengesNotificationSettingsSheetState
-    extends State<DailyChallengesNotificationSettingsSheet> {
+class _DailyChallengesNotificationSettingsSheetState extends State<DailyChallengesNotificationSettingsSheet> {
   late Map<ReminderTypesEnum, ReminderRequest> _originalReminders;
   bool _isSaved = false;
 
@@ -45,10 +43,7 @@ class _DailyChallengesNotificationSettingsSheetState
 
   @override
   Widget build(BuildContext context) {
-    return ManagerBuilder<
-      NotificationSettingsState,
-      NotificationSettingsEffect
-    >(
+    return ManagerBuilder<NotificationSettingsState, NotificationSettingsEffect>(
       manager: widget.manager,
       properties: (state) => [state.reminders, state.isSaving],
       builder: (context, state) {
@@ -84,8 +79,7 @@ class _DailyChallengesNotificationSettingsSheetState
                   _isSaved = true;
                   await widget.manager.saveSingleReminderChange(
                     type: ReminderTypesEnum.dailyChallenge,
-                    originalRequest:
-                        _originalReminders[ReminderTypesEnum.dailyChallenge],
+                    originalRequest: _originalReminders[ReminderTypesEnum.dailyChallenge],
                   );
                   if (context.mounted) context.router.maybePop();
                 },

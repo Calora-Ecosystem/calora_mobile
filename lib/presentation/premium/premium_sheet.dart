@@ -39,6 +39,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
     effect.when(
       openPaymentUrlFailure: (error) => CustomSnackBar.show(context, error),
       deleteSubscriptionFailure: (error) => CustomSnackBar.show(context, error),
+      invalidPromoCode: () => CustomSnackBar.show(context, Strings.invalidPromoCode),
     );
   }
 
@@ -76,9 +77,9 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                       children: [
                         Column(
                           children: List.generate(
-                            state.plans.length,
+                            state.isGettingOrders || state.isGettingPremiumPlans ? 3 : state.plans.length,
                             (index) {
-                              if (state.isGettingOrders) {
+                              if (state.isGettingOrders || state.isGettingPremiumPlans) {
                                 return ShimmerWrapper(
                                   loading: true,
                                   type: ShimmerType.backgroundElevation,
@@ -118,9 +119,10 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                           ),
                       ],
                     ),
-
-                    const SizedBox(height: 16),
-                    // PromoCodeWidget(),
+                    if (!state.isPaymentPending) ...[
+                      const SizedBox(height: 16),
+                      PromoCodeWidget(),
+                    ],
                     const SizedBox(height: 16),
                     if (state.isPaymentPending && state.selectedPaymentMethod != null)
                       Column(
@@ -174,11 +176,11 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                           ),
                         ],
                       ),
+                    const SizedBox(height: 60),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 60),
             BottomBox(
               child: state.isPaymentPending
                   ? Column(
@@ -202,6 +204,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                   : Button(
                       height: 40,
                       text: Strings.purchase,
+                      enabled: state.selectedPlan != null && state.selectedPaymentMethod != null,
                       loading: state.isOrderingSubscription,
                       onPressed: () => manager.orderSubscription(),
                     ),

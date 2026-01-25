@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -11,8 +12,6 @@ import 'package:management/management.dart';
 @injectable
 class StepsManager extends Manager<StepsState, StepsEffect> {
   final StepRepo stepRepo;
-  Timer? _periodicTimer;
-
   StepsManager(this.stepRepo)
     : super(
         StepsState(
@@ -30,23 +29,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     if (state.period == 0 && state.dailyOffset == 0) {
       emit(state.copyWith(dailyDisplayStepCount: steps));
     }
-  }
-
-  void startPeriodicDataSync() {
-    _periodicTimer?.cancel();
-    _periodicTimer = Timer.periodic(const Duration(minutes: 1), (timer) => sendDailyData());
-    sendDailyData();
-  }
-
-  void stopPeriodicDataSync() {
-    _periodicTimer?.cancel();
-    _periodicTimer = null;
-  }
-
-  @override
-  Future<void> close() async {
-    stopPeriodicDataSync();
-    super.close();
   }
 
   Future<void> getSteps({required int period, required int offset, required DateTime now}) async {
@@ -75,19 +57,11 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
               );
             } else if (period == 2) {
               final primaryValues = _buildMonthlySteps(data, offset, now);
-              emit(
-                state.copyWith(
-                  monthlySteps: data,
-                  monthlyPrimaryValues: primaryValues,
-                  isGettingSteps: false,
-                ),
-              );
+              emit(state.copyWith(monthlySteps: data, monthlyPrimaryValues: primaryValues, isGettingSteps: false));
             }
           },
           onDone: () => emit(state.copyWith(isGettingSteps: false)),
-          onError: (e) {
-            emit(state.copyWith(isGettingSteps: false));
-          },
+          onError: (e) => emit(state.copyWith(isGettingSteps: false)),
         );
   }
 
@@ -110,11 +84,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  Future<void> getUserMetrics({
-    required int period,
-    required int offset,
-    required DateTime now,
-  }) async {
+  Future<void> getUserMetrics({required int period, required int offset, required DateTime now}) async {
     DateTime fromDate;
     DateTime toDate;
 
@@ -173,10 +143,12 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       emit(state.copyWith(isMonthlyLoading: true));
     }
 
-    await getNorms();
-    await getSteps(period: period, offset: offset, now: now);
-    await getStats(period: period, offset: offset, now: now);
-    await getUserMetrics(period: period, offset: offset, now: now);
+    await Future.wait([
+      _safeTrigger(getNorms),
+      _safeTrigger(() => getSteps(period: period, offset: offset, now: now)),
+      _safeTrigger(() => getStats(period: period, offset: offset, now: now)),
+      _safeTrigger(() => getUserMetrics(period: period, offset: offset, now: now)),
+    ]);
 
     if (period == 0) {
       emit(state.copyWith(isDailyLoading: false));
@@ -184,6 +156,14 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       emit(state.copyWith(isWeeklyLoading: false));
     } else if (period == 2) {
       emit(state.copyWith(isMonthlyLoading: false));
+    }
+  }
+
+  Future<void> _safeTrigger(Future<void> Function() task) async {
+    try {
+      await task();
+    } catch (e, s) {
+      log(e.toString() + s.toString());
     }
   }
 
@@ -216,10 +196,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onDone: () => emit(state.copyWith(isDeletingNorm: false)),
           onError: (_) => emit(state.copyWith(isDeletingNorm: false)),
         );
-  }
-
-  Future<void> sendDailyData() async {
-    await stepRepo.sendDailyData(metric: 'Step', value: state.stepCount);
   }
 
   void changePeriod(int newPeriod) {
@@ -358,17 +334,11 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   int _buildDailySteps(List<StepsWithMetricsRequest> data, int offset, DateTime now) {
     if (data.isEmpty) {
-      if (offset == 0) {
-        return state.stepCount;
-      }
+      if (offset == 0) return state.stepCount;
       return 0;
     }
 
-    final targetDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).add(Duration(days: offset));
+    final targetDate = DateTime(now.year, now.month, now.day).add(Duration(days: offset));
 
     final item = data.firstWhere(
       (e) => e.date.year == targetDate.year && e.date.month == targetDate.month && e.date.day == targetDate.day,
@@ -411,9 +381,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     for (final step in data) {
       if (step.date.year == targetMonth.year && step.date.month == targetMonth.month) {
         final dayIndex = step.date.day - 1;
-        if (dayIndex >= 0 && dayIndex < daysInMonth) {
-          month[dayIndex] = step.value;
-        }
+        if (dayIndex >= 0 && dayIndex < daysInMonth) month[dayIndex] = step.value;
       }
     }
 
