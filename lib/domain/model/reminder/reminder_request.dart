@@ -10,6 +10,7 @@ abstract class ReminderRequest with _$ReminderRequest {
     String? time,
     String? type,
     String? menu,
+    @Default(true) bool isActive,
   }) = _ReminderRequest;
 
   factory ReminderRequest.fromJson(Map<String, dynamic> json) =>

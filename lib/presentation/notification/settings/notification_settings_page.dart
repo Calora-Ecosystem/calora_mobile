@@ -16,30 +16,11 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class NotificationSettingsPage
-    extends
-        Managed<
-          NotificationSettingsManager,
-          NotificationSettingsState,
-          NotificationSettingsEffect
-        > {
+    extends Managed<NotificationSettingsManager, NotificationSettingsState, NotificationSettingsEffect> {
   const NotificationSettingsPage({super.key});
 
   @override
-  void init(BuildContext context, NotificationSettingsManager manager) {}
-
-  @override
-  void listener(
-    BuildContext context,
-    NotificationSettingsManager manager,
-    NotificationSettingsEffect effect,
-  ) {}
-
-  @override
-  Widget builder(
-    BuildContext context,
-    NotificationSettingsManager manager,
-    NotificationSettingsState state,
-  ) {
+  Widget builder(BuildContext context, NotificationSettingsManager manager, NotificationSettingsState state) {
     return Scaffold(
       backgroundColor: context.colors.white,
       appBar: CustomAppBar(
@@ -59,11 +40,7 @@ class NotificationSettingsPage
               ? const SizedBox.shrink()
               : NotificationSettingItemBuilder(
                   notificationName: type.displayName,
-                  onClickItem: () => _onItemClick(
-                    context: context,
-                    type: type,
-                    manager: manager,
-                  ),
+                  onClickItem: () => _onItemClick(context: context, type: type, manager: manager),
                 );
         },
       ),
@@ -102,21 +79,13 @@ class NotificationSettingsPage
     }
   }
 
-  void _showBottomSheet({
-    required BuildContext context,
-    required Widget child,
-    required String title,
-  }) {
+  void _showBottomSheet({required BuildContext context, required Widget child, required String title}) {
     final manager = context.read<NotificationSettingsManager>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => DefaultBottomSheet(
-        padding: EdgeInsets.zero,
-        title: title,
-        child: child,
-      ),
+      builder: (_) => DefaultBottomSheet(padding: EdgeInsets.zero, title: title, child: child),
     );
   }
 }

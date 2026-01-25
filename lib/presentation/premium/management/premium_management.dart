@@ -1,5 +1,7 @@
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
+import 'package:calora/domain/model/premium/premium_plan_model.dart';
+import 'package:calora/domain/model/premium/promo_code_model.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'premium_management.freezed.dart';
@@ -15,9 +17,12 @@ abstract class PremiumState with _$PremiumState {
     @Default(false) bool isOrderingSubscription,
     @Default(false) bool isDeletingOrder,
     @Default(false) bool isGettingPaymentLink,
+    @Default(false) bool isGettingPremiumPlans,
+    @Default(false) bool isGettingPromoCodeValue,
     @Default(false) bool isPaymentPending,
     @Default(const []) List<MySubscriptionOrderModel> myOrders,
     @Default('') String paymentLink,
+    PromoCodeModel? promoCodeValue,
   }) = _PremiumState;
 }
 
@@ -25,6 +30,7 @@ abstract class PremiumState with _$PremiumState {
 sealed class PremiumEffect with _$PremiumEffect {
   const factory PremiumEffect.openPaymentUrlFailure(String error) = _OpenPaymentUrlFailure;
   const factory PremiumEffect.deleteSubscriptionFailure(String error) = _DeleteSubscriptionFailure;
+  const factory PremiumEffect.invalidPromoCode() = _InvalidPromoCode;
 }
 
 @immutable

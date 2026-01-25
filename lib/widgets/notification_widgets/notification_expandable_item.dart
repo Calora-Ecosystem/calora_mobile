@@ -67,13 +67,11 @@ class _NotificationExpandableItemState
         if (expanded && !isEnabled) {
           setState(() => isEnabled = true);
           _notifyParent();
-        } else if (!expanded && isEnabled) {
-          setState(() {
-            isEnabled = false;
-            selectedTime = currentTime;
-          });
-          _notifyParent();
-        }
+                  } else if (!expanded && isEnabled) {
+                    setState(() {
+                      isEnabled = false;
+                    });
+                    _notifyParent();        }
       },
       children: [
         ExpandableContainer(
@@ -85,11 +83,10 @@ class _NotificationExpandableItemState
             TimePickerWidget(
               isInterval: widget.isInterval,
               initialTime: selectedTime,
-              onChanged: (time) {
-                setState(() => selectedTime = time);
-                if (isEnabled) _notifyParent();
-              },
-            ),
+                        onChanged: (time) {
+                          setState(() => selectedTime = time);
+                          _notifyParent();
+                        },            ),
           ],
         ),
       ],

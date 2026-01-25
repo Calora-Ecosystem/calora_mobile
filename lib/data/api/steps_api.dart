@@ -4,6 +4,7 @@ import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:injectable/injectable.dart' show lazySingleton;
 
 @lazySingleton
@@ -79,16 +80,10 @@ class StepsApi {
     }).toList();
   }
 
-  Future<MetricsRequest> getUserMetrics({
-    required String from,
-    required String to,
-  }) async {
+  Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {
     final int? userId = await profileStore.getUserId();
     final query = {'from': from, 'to': to, 'userId': userId};
-    final response = await _dio.get(
-      'users/steps/metrics',
-      queryParameters: query,
-    );
+    final response = await _dio.get('users/steps/metrics', queryParameters: query);
     return MetricsRequest.fromJson(response.data['content']);
   }
 
