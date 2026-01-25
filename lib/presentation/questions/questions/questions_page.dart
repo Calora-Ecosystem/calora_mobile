@@ -6,14 +6,14 @@ import 'package:calora/common/widgets/button/navigation_button.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/questions/questions/management/questions_management.dart';
 import 'package:calora/presentation/questions/questions/management/questions_manager.dart';
+import 'package:calora/widgets/progress/progress_page.dart';
 import 'package:calora/widgets/questions/question_progress_widget.dart';
 import 'package:calora/widgets/questions/questions_body_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class QuestionsPage
-    extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
+class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsEffect> {
   QuestionsPage({super.key});
 
   @override
@@ -92,9 +92,7 @@ class QuestionsPage
                   padding: EdgeInsets.only(
                     left: 20,
                     right: 20,
-                    bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                        ? 10
-                        : 30,
+                    bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? 10 : 30,
                     top: 10,
                   ),
                   child: NavigationButtons(
@@ -117,10 +115,30 @@ class QuestionsPage
 
   void pushProgressPage(BuildContext context) {
     context.router.push(
+      // ProgressRoute(
+      //   mode: 2,
+      //   fetchGoals: true,
+      //   nextRoute: const CalculateRoute(),
+      // ),
       ProgressRoute(
         mode: 2,
         fetchGoals: true,
         nextRoute: const CalculateRoute(),
+        title: Strings.planningDailySchedule,
+        analyzeItems: [
+          ProgressAnalyzeItem(
+            text: Strings.analyzingActivityLevel,
+            threshold: 0.3,
+          ),
+          ProgressAnalyzeItem(
+            text: Strings.smartReminderPlan,
+            threshold: 0.5,
+          ),
+          ProgressAnalyzeItem(
+            text: Strings.analyzingActivityLevel,
+            threshold: 0.8,
+          ),
+        ],
       ),
     );
   }

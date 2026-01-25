@@ -76,6 +76,7 @@ dependencies:
   collection: any
   connectivity_plus: ^6.1.5
   lottie: ^3.3.2
+  youtube_player_iframe: ^5.2.2
 
 dev_dependencies:
   flutter_test:

@@ -3,23 +3,19 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/navigation_button.dart';
+import 'package:calora/presentation/course_questions/management/course_questions_management.dart';
+import 'package:calora/presentation/course_questions/management/course_questions_manager.dart';
+import 'package:calora/widgets/progress/progress_page.dart';
 import 'package:calora/widgets/questions/course_questions_body_widget.dart';
 import 'package:calora/widgets/questions/question_progress_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
-import 'package:calora/presentation/course_questions/management/course_questions_management.dart';
-import 'package:calora/presentation/course_questions/management/course_questions_manager.dart';
-
 @RoutePage()
-class CourseQuestionsPage
-    extends
-        Managed<
-          CourseQuestionsManager,
-          CourseQuestionsState,
-          CourseQuestionsEffect
-        > {
-  const CourseQuestionsPage({super.key});
+class CourseQuestionsPage extends Managed<CourseQuestionsManager, CourseQuestionsState, CourseQuestionsEffect> {
+  final int courseId;
+
+  const CourseQuestionsPage({super.key, required this.courseId});
 
   @override
   void init(context, manager) {}
@@ -59,7 +55,29 @@ class CourseQuestionsPage
                       onNext: manager.next,
                       onBack: manager.back,
                       onFinish: () {
-                        context.router.push(CalculateRoute());
+                        context.router.popUntilRoot();
+                        context.router.push(
+                          ProgressRoute(
+                            key: UniqueKey(),
+                            nextRoute: LessonsRoute(courseId: courseId),
+                            apiCall: () => manager.finish(),
+                            title: Strings.weWillMakeDailyPlan,
+                            analyzeItems: [
+                              ProgressAnalyzeItem(
+                                text: Strings.weAreAnalyzingYourActivityLevel,
+                                threshold: 0.3,
+                              ),
+                              ProgressAnalyzeItem(
+                                text: Strings.configuringSmartReminderPlan,
+                                threshold: 0.5,
+                              ),
+                              ProgressAnalyzeItem(
+                                text: Strings.additionalInformationBeingAnalyzed,
+                                threshold: 0.8,
+                              ),
+                            ],
+                          ),
+                        );
                       },
                     ),
                   ),

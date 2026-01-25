@@ -37,20 +37,19 @@ class VideoCourseBodyManager extends Manager<VideoCourseBodyState, VideoCourseBo
   }
 
   void onVideoTapped(LessonRequest lesson, int index) {
-    if (index < 1) {
-      final prevIndex = index - 1;
-      if (prevIndex >= 0) {
-        final prev = state.lessons.length > prevIndex ? state.lessons[prevIndex] : null;
-        if (prev != null && prev.isFinished != true) {
-          publish(const VideoCourseBodyEffect.showNeedFinishPrevious());
-          return;
-        }
+    if (index > 0) {
+      final prev = state.lessons.length > index - 1 ? state.lessons[index - 1] : null;
+      if (prev != null && prev.isFinished != true) {
+        publish(const VideoCourseBodyEffect.showNeedFinishPrevious());
+        return;
       }
-      publish(VideoCourseBodyEffect.openVideo(lesson, index));
-      return;
     }
     if (lesson.isFree || state.isPurchased) {
       publish(VideoCourseBodyEffect.openVideo(lesson, index));
     }
+  }
+
+  void setPurchased(bool value) {
+    emit(state.copyWith(isPurchased: value));
   }
 }

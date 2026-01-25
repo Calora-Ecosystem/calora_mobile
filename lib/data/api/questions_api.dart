@@ -22,4 +22,6 @@ class QuestionsApi {
     final result = request.toJson();
     return _dio.post('users/norms', data: result);
   }
+
+  Future<void> send30DailyNotification() async {}
 }

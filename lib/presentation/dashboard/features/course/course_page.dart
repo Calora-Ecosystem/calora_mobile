@@ -1,4 +1,6 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -106,12 +108,19 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                           ),
                           child: CourseCard(
                             course: course,
-                            onTap: () {
-                              course.type == 'Workout'
-                                  ? context.router.push(LessonsRoute(courseId: course.id ?? 0))
-                                  : context.router.push(
-                                      VideoCourseBodyWidgetRoute(course: course),
-                                    );
+                            onTap: () async {
+                              if (course.type != 'Workout') {
+                                context.router.push(VideoCourseBodyWidgetRoute(course: course));
+                                return;
+                              }
+                              final profile = await getIt<ProfileStore>().getProfile();
+                              final physicalActivity = profile.physicalActivity;
+                              final needsQuestions = physicalActivity == null || physicalActivity.trim().isEmpty;
+                              if (needsQuestions) {
+                                context.router.push(CourseQuestionsRoute(courseId: course.id ?? 0));
+                              } else {
+                                context.router.push(LessonsRoute(courseId: course.id ?? 0));
+                              }
                             },
                           ),
                         );
