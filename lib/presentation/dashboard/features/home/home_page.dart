@@ -27,16 +27,25 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   late final PedometerService _pedometerService;
 
+  TabsRouter? _tabsRouter;
+  int _lastIndex = 0;
+
   @override
   void init(context, manager) {
-    manager.getUserInfo();
-    manager.getStepNorm();
+    manager.updateDay(DateTime.now());
+    manager.refreshAll();
     manager.requestPedometerPermissions();
-    manager.getSummary();
-    manager.getWater();
-    manager.getMetrics();
-    manager.getDailyStep();
     _initializePedometerService(manager);
+
+    _tabsRouter = AutoTabsRouter.of(context);
+    _lastIndex = _tabsRouter!.activeIndex;
+    _tabsRouter!.addListener(() {
+      final idx = _tabsRouter!.activeIndex;
+      if (_lastIndex != 0 && idx == 0) {
+        manager.refreshAll();
+      }
+      _lastIndex = idx;
+    });
   }
 
   void _initializePedometerService(HomeManager manager) async {
@@ -84,12 +93,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                         },
                         child: DefaultRefreshIndicator(
                           onRefresh: () async {
-                            manager.getUserInfo();
-                            manager.getSummary();
-                            manager.getStepNorm();
-                            manager.getWater();
-                            manager.getMetrics();
-                            manager.getDailyStep();
+                            manager.refreshAll();
                           },
                           child: SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(

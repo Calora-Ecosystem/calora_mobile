@@ -12,6 +12,7 @@ import 'package:management/management.dart';
 @injectable
 class StepsManager extends Manager<StepsState, StepsEffect> {
   final StepRepo stepRepo;
+
   StepsManager(this.stepRepo)
     : super(
         StepsState(

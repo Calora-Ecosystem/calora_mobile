@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -24,6 +26,13 @@ class LessonsCards extends StatelessWidget {
       physics: const BouncingScrollPhysics(),
       itemCount: workouts.isEmpty ? 0 : workouts.length,
       itemBuilder: (context, index) {
+        final int playableIndex = nextPlayableIndex(workouts);
+
+        final bool lockedByPremium = !isUserPremium && index >= 3;
+
+        final bool lockedByProgress = index > playableIndex;
+
+        final bool visualLocked = lockedByPremium;
         final WorkoutRequest workout = workouts.isEmpty
             ? WorkoutRequest(
                 id: 1,
@@ -38,7 +47,6 @@ class LessonsCards extends StatelessWidget {
                 order: 2,
               )
             : workouts[index];
-        final bool locked = !isUserPremium && index >= 3;
         return ShimmerWrapper(
           loading: isLoading,
           shimmerChild: ShimmerChild(
@@ -46,9 +54,20 @@ class LessonsCards extends StatelessWidget {
             height: 70,
           ),
           child: GestureDetector(
-            onTap: () => locked ? null : context.router.push(TasksRoute(level: level, workout: workout)),
+            onTap: () {
+              if (lockedByPremium) {
+                return;
+              }
+              if (lockedByProgress) {
+                _showNeedFinishPrevSnack(context);
+                return;
+              }
+              context.router.push(
+                TasksRoute(level: level, workout: workout),
+              );
+            },
             child: LessonCard(
-              isLocked: locked,
+              isLocked: visualLocked,
               workout: workout,
             ),
           ),
@@ -58,5 +77,14 @@ class LessonsCards extends StatelessWidget {
         return SizedBox(height: 16);
       },
     );
+  }
+
+  int nextPlayableIndex(List<WorkoutRequest> workouts) {
+    final i = workouts.indexWhere((w) => !w.isDone);
+    return i == -1 ? workouts.length - 1 : i;
+  }
+
+  void _showNeedFinishPrevSnack(BuildContext context) {
+    CustomSnackBar.showInfo(context, Strings.toDoExercise);
   }
 }

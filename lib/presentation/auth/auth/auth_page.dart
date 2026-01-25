@@ -17,6 +17,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 @RoutePage()
 class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
   final bool? isUzbekistan;
+
   AuthPage({super.key, this.isUzbekistan});
 
   @override
@@ -30,10 +31,13 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
       verify: (verification) => context.router.push(
         VerifyRoute(
           verification: verification,
-          isPhoneAuth: manager.state.isUzbekistan,
         ),
       ),
       showError: (message) => CustomSnackBar.show(context, message),
+      openDashboard: () => context.router.replaceAll([const DashboardRoute()]),
+      openQuestions: (email) => context.router.push(
+        QuestionsRoute(),
+      ),
     );
   }
 
@@ -88,9 +92,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Strings.or
-                                .text(14, 18, 500)
-                                .c(context.colors.textStrong),
+                            Strings.or.text(14, 18, 500).c(context.colors.textStrong),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Container(
@@ -103,30 +105,26 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                         const SizedBox(height: 32),
                         Button(
                           type: ButtonType.secondary,
-                          onPressed: () {},
+                          onPressed: () => manager.loginWithApple(),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Assets.icons.apple.svg(),
                               const SizedBox(width: 8),
-                              Strings.continueWithApple
-                                  .text(14, 18, 500)
-                                  .c(context.colors.textStrong),
+                              Strings.continueWithApple.text(14, 18, 500).c(context.colors.textStrong),
                             ],
                           ),
                         ),
                         const SizedBox(height: 16),
                         Button(
                           type: ButtonType.secondary,
-                          onPressed: () {},
+                          onPressed: () => manager.loginWithGoogle(),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Assets.icons.google.svg(),
                               const SizedBox(width: 8),
-                              Strings.continueWithGoogle
-                                  .text(14, 18, 500)
-                                  .c(context.colors.textStrong),
+                              Strings.continueWithGoogle.text(14, 18, 500).c(context.colors.textStrong),
                             ],
                           ),
                         ),

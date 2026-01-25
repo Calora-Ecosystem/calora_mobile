@@ -102,9 +102,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: dish.name
-                          .text(14, 16, 600)
-                          .c(context.colors.textStrong),
+                      child: dish.name.text(14, 16, 600).c(context.colors.textStrong),
                     ),
                   ],
                 ),
@@ -136,7 +134,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
               menu: type.name,
               date: DateTime.now(),
               foodId: food.id ?? 0,
-              weightInGr: value.toInt(),
+              weightInGr: value == 0 ? 400 : value.toInt(),
             ),
           );
           if (context.mounted) context.router.pop();

@@ -7,6 +7,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/domain/model/lesson/lesson_request.dart' show LessonRequest;
 import 'package:calora/presentation/app/app/management/app_manager.dart';
@@ -47,6 +48,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
     effect.when(
       openInfoSheet: (description) => _openInfoSheet(context, description),
       openVideo: (lesson, index) => _openVideo(context, lesson, index, manager),
+      showNeedFinishPrevious: () => CustomSnackBar.showInfo(context, Strings.watchThisVideoPreviousVideo),
     );
   }
 
@@ -57,6 +59,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
     VideoCourseBodyState state,
   ) {
     final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -118,6 +121,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                             ),
                           ),
                           itemBuilder: (context, index) {
+                            final showLock = index >= 1 && !isUserPremium;
                             final lesson = state.isLoading
                                 ? LessonRequest(
                                     id: 0,
@@ -169,7 +173,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                                         ],
                                       ),
                                     ),
-                                    if (!lesson.isFree && !state.isPurchased) Assets.icons.lock.svg(),
+                                    if (showLock) Assets.icons.lock.svg(),
                                   ],
                                 ),
                               ),

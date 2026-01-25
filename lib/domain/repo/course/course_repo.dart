@@ -18,4 +18,6 @@ abstract class CourseRepo {
   Future<void> refreshActivityLevel(QuestionsRequest answer);
 
   Future<void> finishedExercises(int id);
+
+  Future<void> finishWorkout(int id);
 }

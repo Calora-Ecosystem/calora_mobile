@@ -55,22 +55,26 @@ class StepsApi {
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
     final profile = await profileStore.getProfile();
     final currentEmail = profile.email?.toLowerCase() ?? '';
+    final currentUserId = profile.userId ?? 0;
     final response = await _dio.get(
       '/users/steps/stat',
-      queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String()},
+      queryParameters: {
+        'from': fromUtc.toIso8601String(),
+        'to': toUtc.toIso8601String(),
+      },
     );
-    final data = response.data as Map<String, dynamic>;
+    final data = response.data;
     final content = data['content'] as List<dynamic>;
-    return content.map((e) {
-      final Map<String, dynamic> json = e as Map<String, dynamic>;
-      final Map<String, dynamic> user = json['user'];
+    return content.map((json) {
+      final user = json['user'];
       final userEmail = (user['email'] ?? '').toString().toLowerCase();
+      final userId = user['id'] ?? 0;
       return UserStatRequest(
         firstName: user['name'] ?? '',
         lastName: '',
         stepCount: json['sum'] ?? 0,
         talks: json['count'] ?? 0,
-        isMe: userEmail == currentEmail && userEmail.trim().isNotEmpty && currentEmail.trim().isNotEmpty,
+        isMe: userId == currentUserId,
         isWinner: json['index'] == 1,
       );
     }).toList();

@@ -4,24 +4,29 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-enum SnackBarType { error, success }
+enum SnackBarType { error, success, info }
 
 class CustomSnackBar {
   static void show(BuildContext context, String message) {
-    final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
-      builder: (context) => _CustomSnackBarWidget(message: message, type: SnackBarType.error, onDismiss: () {}),
-    );
-
-    overlay.insert(overlayEntry);
-
-    Future.delayed(const Duration(milliseconds: 1500), overlayEntry.remove);
+    _show(context, message, SnackBarType.error);
   }
 
   static void showSuccess(BuildContext context, String message) {
+    _show(context, message, SnackBarType.success);
+  }
+
+  static void showInfo(BuildContext context, String message) {
+    _show(context, message, SnackBarType.info);
+  }
+
+  static void _show(BuildContext context, String message, SnackBarType type) {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
-      builder: (context) => _CustomSnackBarWidget(message: message, type: SnackBarType.success, onDismiss: () {}),
+      builder: (context) => _CustomSnackBarWidget(
+        message: message,
+        type: type,
+        onDismiss: () {},
+      ),
     );
 
     overlay.insert(overlayEntry);
@@ -35,15 +40,19 @@ class _CustomSnackBarWidget extends StatefulWidget {
   final VoidCallback onDismiss;
   final SnackBarType type;
 
-  const _CustomSnackBarWidget({required this.message, required this.onDismiss, required this.type});
+  const _CustomSnackBarWidget({
+    required this.message,
+    required this.onDismiss,
+    required this.type,
+  });
 
   @override
   State<_CustomSnackBarWidget> createState() => _CustomSnackBarWidgetState();
 }
 
 class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _offsetAnimation;
+  late final AnimationController _controller;
+  late final Animation<Offset> _offsetAnimation;
 
   @override
   void initState() {
@@ -67,6 +76,28 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget> with Singl
     super.dispose();
   }
 
+  Color _backgroundColor(BuildContext context) {
+    switch (widget.type) {
+      case SnackBarType.error:
+        return context.colors.black;
+      case SnackBarType.success:
+        return context.colors.green;
+      case SnackBarType.info:
+        return context.colors.black;
+    }
+  }
+
+  Widget _icon() {
+    switch (widget.type) {
+      case SnackBarType.error:
+        return Assets.icons.errorIcon.svg();
+      case SnackBarType.success:
+        return Assets.icons.checkmarkCircle.svg();
+      case SnackBarType.info:
+        return Assets.icons.triangleInfo.svg();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -80,7 +111,7 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget> with Singl
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             decoration: BoxDecoration(
-              color: widget.type == SnackBarType.error ? context.colors.black : context.colors.green,
+              color: _backgroundColor(context),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
@@ -93,9 +124,11 @@ class _CustomSnackBarWidgetState extends State<_CustomSnackBarWidget> with Singl
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                widget.type == SnackBarType.error ? Assets.icons.errorIcon.svg() : Assets.icons.checkmarkCircle.svg(),
+                _icon(),
                 const SizedBox(width: 8),
-                Expanded(child: widget.message.text(14, 18, 400).c(context.colors.textWhite)),
+                Expanded(
+                  child: widget.message.text(14, 18, 400).c(context.colors.textWhite),
+                ),
               ],
             ),
           ),

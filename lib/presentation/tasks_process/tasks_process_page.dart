@@ -30,7 +30,7 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
   @override
   void init(BuildContext context, TasksProcessManager manager) {
     super.init(context, manager);
-    manager.init(exercises);
+    manager.init(exercises, workoutId: workout.id);
   }
 
   @override

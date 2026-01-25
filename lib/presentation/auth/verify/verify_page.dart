@@ -14,7 +14,6 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
-  final bool isPhoneAuth;
   final Verification verification;
   final Future<void> Function()? onVerified;
 
@@ -22,7 +21,6 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     super.key,
     required this.verification,
     this.onVerified,
-    required this.isPhoneAuth,
   });
 
   @override
@@ -69,9 +67,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       child: Button(
                         loading: state.loading,
                         onPressed: manager.verify,
-                        child: Strings.doContinue
-                            .text(16, 20, 500)
-                            .c(context.colors.textWhite),
+                        child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
                       ),
                     ),
                   ],

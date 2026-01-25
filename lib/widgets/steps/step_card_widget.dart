@@ -10,7 +10,7 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 class StepCardWidget extends StatelessWidget {
   final int currentSteps;
   final int targetSteps;
-  final int timeInSeconds;
+  final num timeInSeconds;
   final double distanceInKm;
   final int caloriesBurned;
   final bool loading;
@@ -29,20 +29,6 @@ class StepCardWidget extends StatelessWidget {
     if (targetSteps == 0) return 0.0;
     final percent = currentSteps / targetSteps;
     return percent > 1.0 ? 1.0 : percent;
-  }
-
-  String get formattedTime {
-    final hours = timeInSeconds ~/ 3600;
-    final minutes = (timeInSeconds % 3600) ~/ 60;
-    final seconds = timeInSeconds % 60;
-
-    if (hours > 0) {
-      return '$hours S $minutes D';
-    } else if (minutes > 0) {
-      return '$minutes D $seconds S';
-    } else {
-      return '$seconds S';
-    }
   }
 
   @override
@@ -98,9 +84,7 @@ class StepCardWidget extends StatelessWidget {
                   children: [
                     Assets.icons.icStopwatch.svg(),
                     const SizedBox(height: 4),
-                    formattedTime
-                        .text(16, 20, 500)
-                        .c(context.colors.textStrong),
+                    timeInSeconds.toDouble().asFixedTruncated(1).text(16, 20, 500).c(context.colors.textStrong),
                     const SizedBox(height: 2),
                     Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
                   ],
@@ -110,14 +94,9 @@ class StepCardWidget extends StatelessWidget {
                   children: [
                     Assets.icons.icDistance.svg(),
                     const SizedBox(height: 4),
-                    distanceInKm
-                        .asFixedTruncated(2)
-                        .text(16, 20, 500)
-                        .c(context.colors.textStrong),
+                    distanceInKm.asFixedTruncated(2).text(16, 20, 500).c(context.colors.textStrong),
                     const SizedBox(height: 2),
-                    Strings.distanceInKm
-                        .text(14, 20, 400)
-                        .c(context.colors.textSub),
+                    Strings.distanceInKm.text(14, 20, 400).c(context.colors.textSub),
                   ],
                 ),
                 Column(
@@ -125,9 +104,7 @@ class StepCardWidget extends StatelessWidget {
                   children: [
                     Assets.icons.icCalorie.svg(),
                     const SizedBox(height: 4),
-                    '$caloriesBurned'
-                        .text(16, 20, 500)
-                        .c(context.colors.textStrong),
+                    '$caloriesBurned'.text(16, 20, 500).c(context.colors.textStrong),
                     const SizedBox(height: 2),
                     Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
                   ],

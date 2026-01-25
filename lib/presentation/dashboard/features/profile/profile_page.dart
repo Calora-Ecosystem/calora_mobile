@@ -56,11 +56,13 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       onNormsTap: () => _openNormsPage(context),
                       onLanguageTap: () => _showLanguageBottomSheet(context),
                       onNotificationsTap: () => _openNotificationSettingsPage(context),
-                      onInviteTap: () => SharePlus.instance.share(
-                        ShareParams(
-                          text: 'Men Calora ilovasidan foydalanayapman.\nSiz ham sog‘lom hayot uchun yuklab oling!',
-                        ),
-                      ),
+                      onInviteTap: () {
+                        SharePlus.instance.share(
+                          ShareParams(
+                            text: 'Men Calora ilovasidan foydalanayapman.\nSiz ham sog\'lom hayot uchun yuklab oling!',
+                          ),
+                        );
+                      },
                       onAboutTap: () => _showAboutBottomSheet(context),
                       onHelpTap: () => _showHelpBottomSheet(context),
                     ),

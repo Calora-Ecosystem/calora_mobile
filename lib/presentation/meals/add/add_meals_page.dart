@@ -19,7 +19,6 @@ import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
 import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/auth/auth/management/auth_manager.dart';
 import 'package:calora/presentation/meals/add/management/add_meals_management.dart';
 import 'package:calora/presentation/meals/add/management/add_meals_manager.dart';
 import 'package:calora/presentation/speech/speech_page.dart';
@@ -97,103 +96,110 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
 
   @override
   Widget builder(BuildContext context, AddMealsManager manager, AddMealsState state) {
-    return Scaffold(
-      backgroundColor: context.colors.white,
-      appBar: CustomAppBar(
-        title: Strings.add,
-        onBack: () => context.router.pop(true),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            children: [
-              CommonTextField(
-                hint: Strings.searchForFoodOrProduct,
-                controller: _searchController,
-              ),
-              if (context.read<AppManager>().state.isUserPremium) const SizedBox(height: 12),
-              if (!state.isSearchMode) ...[
-                Row(
-                  children: [
-                    buildActionCard(
-                      onTap: () => openCreatePage(context, manager),
-                      context: context,
-                      text: Strings.creation,
-                      isPremiumFeature: false,
-                      textColor: context.colors.textStrong,
-                      icon: Assets.icons.icPlusCircle.svg(),
-                    ),
-                    const SizedBox(width: 8),
-                    buildActionCard(
-                      onTap: () => openCameraPage(context, manager),
-                      context: context,
-                      icon: Assets.icons.icScan.svg(),
-                      text: Strings.scanning,
-                      textColor: context.colors.textWhite,
-                      useGradient: true,
-                    ),
-                    buildActionCard(
-                      onTap: () => openSpeechPage(context, manager),
-                      context: context,
-                      icon: Assets.icons.icChat.svg(),
-                      text: Strings.byVoice,
-                      textColor: context.colors.textWhite,
-                      useGradient: true,
-                    ),
-                  ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.router.pop(true);
+      },
+      child: Scaffold(
+        backgroundColor: context.colors.white,
+        appBar: CustomAppBar(
+          title: Strings.add,
+          onBack: () => context.router.pop(true),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              children: [
+                CommonTextField(
+                  hint: Strings.searchForFoodOrProduct,
+                  controller: _searchController,
                 ),
-                const SizedBox(height: 12),
-                ToggleButtonsWidget(
-                  onChanged: (value) => manager.onToggleChanged(value),
-                  titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
-                ),
-                const SizedBox(height: 12),
-                Flexible(
-                  child: state.selectedToggleIndex == 3
-                      ? RepaintBoundary(
-                          child: FavouriteFoodGrid(
-                            isLoading: state.isFavourite,
-                            foods: state.favouriteFoods,
-                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                          ),
-                        )
-                      : state.selectedToggleIndex == 1
-                      ? RepaintBoundary(
-                          child: FavouriteFoodGrid(
-                            isLoading: state.isLatest,
-                            foods: state.latestFoods,
-                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                          ),
-                        )
-                      : state.selectedToggleIndex == 2
-                      ? RepaintBoundary(
-                          child: FavouriteFoodGrid(
-                            isLoading: state.isUserFoods,
-                            foods: state.userFoods,
-                            onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                          ),
-                        )
-                      : RepaintBoundary(
-                          child: MealTypeGrid(
-                            isLoading: state.isMealCategory,
-                            mealTypes: state.mealCategories,
-                            onMealTypeSelected: (meal) => manager.openDishesPage(meal),
-                          ),
-                        ),
-                ),
-              ],
-              if (state.isSearchMode) ...[
-                const SizedBox(height: 12),
-                Expanded(
-                  child: FavouriteFoodGrid(
-                    isLoading: state.isSearch,
-                    foods: state.searchFoods,
-                    onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                if (context.read<AppManager>().state.isUserPremium) const SizedBox(height: 12),
+                if (!state.isSearchMode) ...[
+                  Row(
+                    children: [
+                      buildActionCard(
+                        onTap: () => openCreatePage(context, manager),
+                        context: context,
+                        text: Strings.creation,
+                        isPremiumFeature: false,
+                        textColor: context.colors.textStrong,
+                        icon: Assets.icons.icPlusCircle.svg(),
+                      ),
+                      const SizedBox(width: 8),
+                      buildActionCard(
+                        onTap: () => openCameraPage(context, manager),
+                        context: context,
+                        icon: Assets.icons.icScan.svg(),
+                        text: Strings.scanning,
+                        textColor: context.colors.textWhite,
+                        useGradient: true,
+                      ),
+                      buildActionCard(
+                        onTap: () => openSpeechPage(context, manager),
+                        context: context,
+                        icon: Assets.icons.icChat.svg(),
+                        text: Strings.byVoice,
+                        textColor: context.colors.textWhite,
+                        useGradient: true,
+                      ),
+                    ],
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  ToggleButtonsWidget(
+                    onChanged: (value) => manager.onToggleChanged(value),
+                    titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
+                  ),
+                  const SizedBox(height: 12),
+                  Flexible(
+                    child: state.selectedToggleIndex == 3
+                        ? RepaintBoundary(
+                            child: FavouriteFoodGrid(
+                              isLoading: state.isFavourite,
+                              foods: state.favouriteFoods,
+                              onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                            ),
+                          )
+                        : state.selectedToggleIndex == 1
+                        ? RepaintBoundary(
+                            child: FavouriteFoodGrid(
+                              isLoading: state.isLatest,
+                              foods: state.latestFoods,
+                              onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                            ),
+                          )
+                        : state.selectedToggleIndex == 2
+                        ? RepaintBoundary(
+                            child: FavouriteFoodGrid(
+                              isLoading: state.isUserFoods,
+                              foods: state.userFoods,
+                              onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                            ),
+                          )
+                        : RepaintBoundary(
+                            child: MealTypeGrid(
+                              isLoading: state.isMealCategory,
+                              mealTypes: state.mealCategories,
+                              onMealTypeSelected: (meal) => manager.openDishesPage(meal),
+                            ),
+                          ),
+                  ),
+                ],
+                if (state.isSearchMode) ...[
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: FavouriteFoodGrid(
+                      isLoading: state.isSearch,
+                      foods: state.searchFoods,
+                      onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -211,10 +217,14 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         onSave: (value) async {
           manager.addFavourite(food.id ?? 0);
           final success = await manager.saveMenuItem(
-            MenuInfo(menu: type.name, date: DateTime.now(), foodId: food.id ?? 0, weightInGr: value.toInt()),
+            MenuInfo(
+              menu: type.name,
+              date: DateTime.now(),
+              foodId: food.id ?? 0,
+              weightInGr: value == 0 ? 400 : value.toInt(),
+            ),
           );
           if (context.mounted) context.router.pop();
-
           if (success) {
             _showInfoDialog(context);
           }

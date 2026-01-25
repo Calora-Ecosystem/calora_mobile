@@ -15,8 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class CaloriesPage
-    extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
+class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffect> {
   const CaloriesPage({super.key});
 
   @override
@@ -37,8 +36,8 @@ class CaloriesPage
           .pushRoute<bool>(
             MealsRoute(type: type, dateTime: date, categoryId: 1),
           )
-          .then((value) {
-            if (value == true) {
+          .then((value) async {
+            if (value == true && context.mounted) {
               manager.fetchCaloriesAndMeals(date);
               manager.getSummary(date);
             }
@@ -61,14 +60,11 @@ class CaloriesPage
               child: Assets.icons.background.image(fit: BoxFit.fill),
             ),
             Container(
-              color: state.isScrolled
-                  ? context.colors.softGray
-                  : Colors.transparent,
+              color: state.isScrolled ? context.colors.softGray : Colors.transparent,
               child: SafeArea(
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (notification) {
-                    if (notification.metrics.axis == Axis.horizontal)
-                      return false;
+                    if (notification.metrics.axis == Axis.horizontal) return false;
                     if (notification is ScrollUpdateNotification) {
                       manager.setScrolled(notification.metrics.pixels > 0);
                     }

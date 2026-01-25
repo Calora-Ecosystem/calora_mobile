@@ -32,4 +32,8 @@ class CourseApi {
   Future<void> finishedExercises(int id) async {
     await _dio.put('/exercises/finish/${id}');
   }
+
+  Future<void> finishWorkout(int id) async {
+    await _dio.put('/workouts/finish/${id}');
+  }
 }

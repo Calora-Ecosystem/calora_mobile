@@ -12,7 +12,20 @@
           "package_name": "ai.calora.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "638398407864-qouqc9d899tc7360rumou06kc867g7rs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ai.calora.app",
+            "certificate_hash": "37f30460c724ff1a6c664058743f71c5d4792d37"
+          }
+        },
+        {
+          "client_id": "638398407864-kt5orfc7nipvl9trmcvt0mlrrfc7k2tg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBPDg3HGHnx7qdjiayJOsBZg4GTPciPEOM"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "638398407864-e2qthkeciq05a3conbgd4tujlrn146lq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "638398407864-9m6jblkcqs1fiavqh3nr76irdvnu5bka.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ai.calora.app"
+              }
+            }
+          ]
         }
       }
     }
