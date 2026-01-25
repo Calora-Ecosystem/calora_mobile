@@ -126,18 +126,29 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
                           child: TabBarView(
                             children:
                                 [
-                                      DailyFitnessTrackWidget(
-                                        key: dailyShareAnchorKey,
-                                        goal: stepValue.toInt(),
-                                        metrics: state.dailyMetrics,
-                                        stepCount: state.dailyDisplayStepCount,
-                                        offset: state.dailyOffset,
-                                        loading: state.isDailyLoading,
-                                        onClickBackward: () => manager.changeOffset(-1),
-                                        onClickForward: () => manager.changeOffset(1),
-                                        onClickMoreVert: () => _showActionsSheet(context, manager),
-                                        onClickPause: () {},
-                                        onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+                                      ManagerBuilder(
+                                        manager: context.read<AppManager>(),
+                                        properties: (appState) => [appState.stepCount],
+                                        builder: (context, appState) {
+                                          if (manager.state.stepCount != appState.stepCount) {
+                                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                                              manager.updateTodaySteps(appState.stepCount);
+                                            });
+                                          }
+                                          return DailyFitnessTrackWidget(
+                                            key: dailyShareAnchorKey,
+                                            goal: stepValue.toInt(),
+                                            metrics: state.dailyMetrics,
+                                            stepCount: state.dailyDisplayStepCount,
+                                            offset: state.dailyOffset,
+                                            loading: state.isDailyLoading,
+                                            onClickBackward: () => manager.changeOffset(-1),
+                                            onClickForward: () => manager.changeOffset(1),
+                                            onClickMoreVert: () => _showActionsSheet(context, manager),
+                                            onClickPause: () {},
+                                            onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+                                          );
+                                        },
                                       ),
                                       WeeklyFitnessTrackWidget(
                                         key: weeklyShareAnchorKey,

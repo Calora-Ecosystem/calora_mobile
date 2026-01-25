@@ -1,5 +1,7 @@
+import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
+import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/base_fitness_track_widget.dart';
 import 'package:calora/widgets/steps/steps_indicator_widget.dart';
 import 'package:flutter/material.dart';
