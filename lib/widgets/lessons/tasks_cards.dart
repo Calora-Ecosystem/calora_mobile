@@ -74,13 +74,13 @@ class TasksCards extends StatelessWidget {
                       Expanded(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: .start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 8,
                           children: [
                             exercises[index].title
                                 .text(16, 20, 500)
                                 .c(context.colors.textStrong)
-                                .copyWith(overflow: .ellipsis, maxLines: 1),
+                                .copyWith(overflow: TextOverflow.ellipsis, maxLines: 1),
                             exercises[index].duration.text(14, 18, 500).c(context.colors.textSub),
                           ],
                         ),

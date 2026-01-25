@@ -5,6 +5,7 @@ import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
 import 'package:calora/domain/model/summary/summary_request.dart';
 import 'package:calora/domain/repo/home/home_repo.dart';
+import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
@@ -17,8 +18,9 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final ProfileRepo _profileRepo;
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
+  final NotificationRepo _notificationRepo;
 
-  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo) : super(HomeState());
+  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo, this._notificationRepo) : super(HomeState());
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
     onStart: () => emit(state.copyWith(isLoading: true)),
@@ -222,6 +224,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       ),
     );
   }
+
+  void getUnreadCount() {
+    _notificationRepo.getUnread().listen((unreadCount) {
+      emit(state.copyWith(unreadCount: unreadCount));
+    });
+  }
 }
 
 extension HomeManagerX on HomeManager {
@@ -232,5 +240,6 @@ extension HomeManagerX on HomeManager {
     getWater();
     getMetrics();
     getDailyStep();
+    getUnreadCount();
   }
 }

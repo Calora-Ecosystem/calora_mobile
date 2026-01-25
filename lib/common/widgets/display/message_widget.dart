@@ -42,8 +42,8 @@ class MessageWidget extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 17),
                           child: Column(
-                            crossAxisAlignment: .start,
-                            mainAxisSize: .min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               if (message.title != null) ...[
                                 (message.title ?? '').text(24, 24, 700).c(context.colors.white),
