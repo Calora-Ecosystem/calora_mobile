@@ -109,10 +109,10 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
 
   String? _physicalActivityFromCondition(int? condition) {
     switch (condition) {
+      case 0:
+        return 'Healthy';
       case 1:
-        return Strings.iAmFine;
-      case 2:
-        return Strings.minimumLoad;
+        return 'Unhealthy ';
       default:
         return null;
     }
