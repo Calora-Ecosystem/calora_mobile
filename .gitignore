@@ -3,7 +3,6 @@
 *.log
 *.pyc
 *.swp
-.env
 .DS_Store
 .atom/
 .build/
@@ -52,6 +51,3 @@ app.*.map.json
 *.config.dart
 *.gen.dart
 *.module.dart
-
-# Environment variables
-.env
