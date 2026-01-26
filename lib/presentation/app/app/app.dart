@@ -23,7 +23,7 @@ import 'package:management/management.dart';
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
-  late final PedometerService? _pedometerService;
+  PedometerService? _pedometerService;
 
   @override
   void init(BuildContext context, AppManager manager) {

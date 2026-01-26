@@ -28,7 +28,7 @@ class _YoutubeInlinePlayerState extends State<YoutubeInlinePlayer> {
 
     if (id.isNotEmpty) {
       _controller.loadVideoById(videoId: id);
-      _controller.pauseVideo(); // ochilishi bilan autoplay bo'lmasin
+      _controller.pauseVideo();
     }
   }
 
