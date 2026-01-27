@@ -144,7 +144,7 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                               ),
                               loading: state.isLoading,
                               child: GestureDetector(
-                                onTap: () => manager.onVideoTapped(lesson, index),
+                                onTap: () => showLock ? null : manager.onVideoTapped(lesson, index),
                                 child: Row(
                                   children: [
                                     Container(

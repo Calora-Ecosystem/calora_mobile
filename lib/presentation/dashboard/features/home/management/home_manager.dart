@@ -20,7 +20,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final HomeRepo _homeRepo;
   final NotificationRepo _notificationRepo;
 
-  HomeManager(this._profileRepo, this._stepRepo, this._homeRepo, this._notificationRepo) : super(HomeState());
+  HomeManager(
+    this._profileRepo,
+    this._stepRepo,
+    this._homeRepo,
+    this._notificationRepo,
+  ) : super(HomeState());
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
     onStart: () => emit(state.copyWith(isLoading: true)),
@@ -41,16 +46,14 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   }
 
   void updateDay(DateTime day) {
-    if (_isToday(day)) {
-      emit(state.copyWith(day: day, currentSteps: state.liveTodaySteps));
-      return;
-    }
     emit(state.copyWith(day: day));
-    getDailyStep();
+
+    if (!_isToday(day)) {
+      getDailyStep();
+    }
   }
 
   void updateTodaySteps(int steps) {
-    emit(state.copyWith(liveTodaySteps: steps));
     final day = state.day ?? DateTime.now();
     if (_isToday(day)) {
       emit(state.copyWith(currentSteps: steps));
@@ -78,12 +81,21 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   void getDailyStep() {
     final day = state.day ?? DateTime.now();
+
+    // ✅ Bugun bo'lsa, stream o'zi yangilaydi
     if (_isToday(day)) return;
+
+    // O'tgan kunlar uchun - backend'dan
     _homeRepo
         .getDailiesSteps(day)
         .handle(
           onStart: () => emit(state.copyWith(isMetricsLoading: true)),
-          onData: (data) => emit(state.copyWith(currentSteps: data.value.toInt(), isMetricsLoading: false)),
+          onData: (data) => emit(
+            state.copyWith(
+              currentSteps: data.value.toInt(),
+              isMetricsLoading: false,
+            ),
+          ),
           onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
         );
   }
@@ -147,24 +159,6 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
             .firstWhere(
               (e) => e.metric == 'Kcal',
               orElse: () => NormsRequest(metric: 'Kcal', value: 0),
-            )
-            .value;
-        final proteinValue = data
-            .firstWhere(
-              (e) => e.metric == 'Protein',
-              orElse: () => NormsRequest(metric: 'Protein', value: 0),
-            )
-            .value;
-        final fatValue = data
-            .firstWhere(
-              (e) => e.metric == 'Fat',
-              orElse: () => NormsRequest(metric: 'Fat', value: 0),
-            )
-            .value;
-        final carbsValue = data
-            .firstWhere(
-              (e) => e.metric == 'Carb',
-              orElse: () => NormsRequest(metric: 'Carb', value: 0),
             )
             .value;
 

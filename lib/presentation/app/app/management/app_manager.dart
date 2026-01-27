@@ -5,7 +5,6 @@ import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/app/app/management/app_management.dart';
-import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -31,11 +30,8 @@ class AppManager extends Manager<AppState, AppEffect> {
   void startPeriodicDataSync() {
     _periodicTimer?.cancel();
     _periodicTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      log('Sending daily data from AppManager...');
-      sendDailyData();
+      log('⏰ Periodic sync timer triggered');
     });
-    log('Sending initial daily data from AppManager...');
-    sendDailyData();
   }
 
   void stopPeriodicDataSync() {
@@ -44,17 +40,6 @@ class AppManager extends Manager<AppState, AppEffect> {
     log('Stopped periodic data sync from AppManager.');
   }
 
-  Future<void> sendDailyData() async {
-    try {
-      final currentStepCount = state.stepCount;
-      await _stepRepo.sendDailyData(metric: 'Step', value: currentStepCount);
-      log('Daily data sent: $currentStepCount steps.');
-    } catch (e, s) {
-      log('Error sending daily data from AppManager: $e \n $s');
-    }
-  }
-
-  void updateSteps(int steps) => emit(state.copyWith(stepCount: steps));
   void select(Language language) => emit(state.copyWith(language: language));
 
   @override

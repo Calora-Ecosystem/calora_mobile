@@ -86,7 +86,7 @@ class StepCardWidget extends StatelessWidget {
                     const SizedBox(height: 4),
                     timeInSeconds.toDouble().asFixedTruncated(1).text(16, 20, 500).c(context.colors.textStrong),
                     const SizedBox(height: 2),
-                    Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
+                    Strings.hour.text(14, 20, 400).c(context.colors.textSub),
                   ],
                 ),
                 Column(

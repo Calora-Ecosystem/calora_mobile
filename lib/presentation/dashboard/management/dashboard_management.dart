@@ -4,7 +4,9 @@ part 'dashboard_management.freezed.dart';
 
 @freezed
 abstract class DashboardState with _$DashboardState {
-  const factory DashboardState() = _DashboardState;
+  const factory DashboardState({
+    @Default(0) int todaySteps,
+  }) = _DashboardState;
 }
 
 @freezed
