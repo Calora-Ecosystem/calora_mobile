@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -11,7 +12,6 @@ import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
-import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
@@ -37,14 +37,19 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
     ScreenshotController(),
     ScreenshotController(),
   ];
+
   int _previousTabIndex = 0;
+
   final GlobalKey dailyShareAnchorKey = GlobalKey();
   final GlobalKey weeklyShareAnchorKey = GlobalKey();
   final GlobalKey monthlyShareAnchorKey = GlobalKey();
 
   @override
   void init(context, manager) {
-    manager.updateTodaySteps(context.read<AppManager>().state.stepCount);
+    // ✅ Initial fetch - bugungi kun uchun pedometer'dan olamiz
+    final pedometerService = getIt<PedometerService>();
+    manager.updateTodaySteps(pedometerService.dailySteps);
+
     manager.fetchDataForPeriod(0, 0, showLoading: true);
     manager.fetchDataForPeriod(1, 0, showLoading: true);
     manager.fetchDataForPeriod(2, 0, showLoading: true);
@@ -53,14 +58,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
   @override
   Widget builder(context, manager, state) {
     final stepValue = state.norms
-        .firstWhere((norm) => norm.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
+        .firstWhere(
+          (norm) => norm.metric == 'Step',
+          orElse: () => NormsRequest(metric: 'Step', value: 0),
+        )
         .value;
+
+    // ✅ PedometerService singleton
+    final pedometerService = getIt<PedometerService>();
+
     return Scaffold(
       backgroundColor: context.colors.softGray,
       body: DefaultRefreshIndicator(
         notificationPredicate: (notification) => notification.depth == 1,
         edgeOffset: context.topPadding + kToolbarHeight,
-        onRefresh: () async => await manager.fetchDataForPeriod(state.period, manager.currentOffset, showLoading: true),
+        onRefresh: () async => await manager.fetchDataForPeriod(
+          state.period,
+          manager.currentOffset,
+          showLoading: true,
+        ),
         child: DefaultTabController(
           length: 3,
           child: Builder(
@@ -83,7 +99,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
                       offset = manager.state.monthlyOffset;
                       break;
                   }
-
                   if (offset == 0) {
                     manager.fetchDataForPeriod(newIndex, offset);
                   }
@@ -91,19 +106,27 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
               });
               return Stack(
                 children: [
-                  Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
+                  Positioned.fill(
+                    child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill),
+                  ),
                   SafeArea(
                     child: Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 42, left: 20, right: 20),
-                          child: Align(alignment: Alignment.centerLeft, child: Strings.steps.text(32, 36, 700)),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Strings.steps.text(32, 36, 700),
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Container(
                           height: 40,
                           margin: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                           child: TabBar(
                             indicatorPadding: const EdgeInsets.all(2),
                             indicatorSize: TabBarIndicatorSize.tab,
@@ -124,78 +147,49 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
                         const SizedBox(height: 16),
                         Expanded(
                           child: TabBarView(
-                            children:
-                                [
-                                      ManagerBuilder(
-                                        manager: context.read<AppManager>(),
-                                        properties: (appState) => [appState.stepCount],
-                                        builder: (context, appState) {
-                                          if (manager.state.stepCount != appState.stepCount) {
-                                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                                              manager.updateTodaySteps(appState.stepCount);
-                                            });
-                                          }
-                                          return DailyFitnessTrackWidget(
-                                            key: dailyShareAnchorKey,
-                                            goal: stepValue.toInt(),
-                                            metrics: state.dailyMetrics,
-                                            stepCount: state.dailyDisplayStepCount,
-                                            offset: state.dailyOffset,
-                                            loading: state.isDailyLoading,
-                                            onClickBackward: () => manager.changeOffset(-1),
-                                            onClickForward: () => manager.changeOffset(1),
-                                            onClickMoreVert: () => _showActionsSheet(context, manager),
-                                            onClickPause: () {},
-                                            onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
-                                          );
-                                        },
-                                      ),
-                                      WeeklyFitnessTrackWidget(
-                                        key: weeklyShareAnchorKey,
-                                        primaryValues: state.weeklyPrimaryValues,
-                                        goal: stepValue.toInt(),
-                                        metrics: state.weeklyMetrics,
-                                        offset: state.weeklyOffset,
-                                        loading: state.isWeeklyLoading,
-                                        onClickBackward: () => manager.changeOffset(-1),
-                                        onClickForward: () => manager.changeOffset(1),
-                                        onClickMoreVert: () => _showActionsSheet(context, manager),
-                                        onClickPause: () {},
-                                      ),
-                                      MonthlyFitnessTrackWidget(
-                                        key: monthlyShareAnchorKey,
-                                        primaryValues: state.monthlyPrimaryValues,
-                                        goal: stepValue.toInt(),
-                                        metrics: state.monthlyMetrics,
-                                        offset: state.monthlyOffset,
-                                        loading: state.isMonthlyLoading,
-                                        onClickBackward: () => manager.changeOffset(-1),
-                                        onClickForward: () => manager.changeOffset(1),
-                                        onClickMoreVert: () => _showActionsSheet(context, manager),
-                                        onClickPause: () {},
-                                      ),
-                                    ]
-                                    .asMap()
-                                    .entries
-                                    .map(
-                                      (entry) => _buildTabContent(
-                                        screenshotController: _screenshotControllers[entry.key],
-                                        fitnessTrackWidget: entry.value,
-                                        allUserStatsForPeriod: switch (entry.key) {
-                                          0 => state.dailyUserStates,
-                                          1 => state.weeklyUserStates,
-                                          2 => state.monthlyUserStates,
-                                          _ => [],
-                                        },
-                                        isGettingStats: switch (entry.key) {
-                                          0 => state.isDailyLoading,
-                                          1 => state.isWeeklyLoading,
-                                          2 => state.isMonthlyLoading,
-                                          _ => false,
-                                        },
-                                      ),
-                                    )
-                                    .toList(),
+                            children: [
+                              _buildDailyTabWithStream(
+                                context: context,
+                                pedometerService: pedometerService,
+                                manager: manager,
+                                state: state,
+                                stepValue: stepValue,
+                              ),
+                              _buildTabContent(
+                                screenshotController: _screenshotControllers[1],
+                                fitnessTrackWidget: WeeklyFitnessTrackWidget(
+                                  key: weeklyShareAnchorKey,
+                                  primaryValues: state.weeklyPrimaryValues,
+                                  goal: stepValue.toInt(),
+                                  metrics: state.weeklyMetrics,
+                                  offset: state.weeklyOffset,
+                                  loading: state.isWeeklyLoading,
+                                  onClickBackward: () => manager.changeOffset(-1),
+                                  onClickForward: () => manager.changeOffset(1),
+                                  onClickMoreVert: () => _showActionsSheet(context, manager),
+                                  onClickPause: () {},
+                                ),
+                                allUserStatsForPeriod: state.weeklyUserStates,
+                                isGettingStats: state.isWeeklyLoading,
+                              ),
+                              _buildTabContent(
+                                screenshotController: _screenshotControllers[2],
+                                fitnessTrackWidget: MonthlyFitnessTrackWidget(
+                                  key: monthlyShareAnchorKey,
+                                  primaryValues: state.monthlyPrimaryValues,
+                                  goal: stepValue.toInt(),
+                                  metrics: state.monthlyMetrics,
+                                  offset: state.monthlyOffset,
+                                  loading: state.isMonthlyLoading,
+                                  onClickBackward: () => manager.changeOffset(-1),
+                                  onClickForward: () => manager.changeOffset(1),
+                                  onClickMoreVert: () => _showActionsSheet(context, manager),
+                                  onClickPause: () {},
+                                ),
+                                allUserStatsForPeriod: state.monthlyUserStates,
+                                isGettingStats: state.isMonthlyLoading,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -208,6 +202,67 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
         ),
       ),
     );
+  }
+
+  Widget _buildDailyTabWithStream({
+    required BuildContext context,
+    required PedometerService pedometerService,
+    required StepsManager manager,
+    required StepsState state,
+    required double stepValue,
+  }) {
+    final isToday = state.period == 0 && state.dailyOffset == 0;
+    if (isToday) {
+      return StreamBuilder<int>(
+        stream: pedometerService.todayStepsStream,
+        initialData: pedometerService.dailySteps,
+        builder: (context, snapshot) {
+          final currentSteps = snapshot.data ?? state.dailyDisplayStepCount;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (currentSteps != state.stepCount) {
+              manager.updateTodaySteps(currentSteps);
+            }
+          });
+          return _buildTabContent(
+            screenshotController: _screenshotControllers[0],
+            fitnessTrackWidget: DailyFitnessTrackWidget(
+              key: dailyShareAnchorKey,
+              goal: stepValue.toInt(),
+              metrics: state.dailyMetrics,
+              stepCount: currentSteps,
+              offset: state.dailyOffset,
+              loading: state.isDailyLoading,
+              onClickBackward: () => manager.changeOffset(-1),
+              onClickForward: () => manager.changeOffset(1),
+              onClickMoreVert: () => _showActionsSheet(context, manager),
+              onClickPause: () {},
+              onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+            ),
+            allUserStatsForPeriod: state.dailyUserStates,
+            isGettingStats: state.isDailyLoading,
+          );
+        },
+      );
+    } else {
+      return _buildTabContent(
+        screenshotController: _screenshotControllers[0],
+        fitnessTrackWidget: DailyFitnessTrackWidget(
+          key: dailyShareAnchorKey,
+          goal: stepValue.toInt(),
+          metrics: state.dailyMetrics,
+          stepCount: state.dailyDisplayStepCount,
+          offset: state.dailyOffset,
+          loading: state.isDailyLoading,
+          onClickBackward: () => manager.changeOffset(-1),
+          onClickForward: () => manager.changeOffset(1),
+          onClickMoreVert: () => _showActionsSheet(context, manager),
+          onClickPause: () {},
+          onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+        ),
+        allUserStatsForPeriod: state.dailyUserStates,
+        isGettingStats: state.isDailyLoading,
+      );
+    }
   }
 
   void _showConfirmDialog(BuildContext context, StepsManager manager) {
@@ -236,15 +291,21 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
 
   void _showEditStepGoalSheet(BuildContext context, StepsManager manager) {
     final stepValue = manager.state.norms
-        .firstWhere((norm) => norm.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
+        .firstWhere(
+          (norm) => norm.metric == 'Step',
+          orElse: () => NormsRequest(metric: 'Step', value: 0),
+        )
         .value;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => EditStepGoalPage(
         initialValue: stepValue.toInt(),
-        onSave: (value) => manager.updateNorm(NormsRequest(metric: 'Step', value: value.toDouble())),
+        onSave: (value) => manager.updateNorm(
+          NormsRequest(metric: 'Step', value: value.toDouble()),
+        ),
       ),
     );
   }
@@ -252,7 +313,9 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
   void _showActionsSheet(BuildContext context, StepsManager manager) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (sheetContext) {
         String from;
         switch (manager.state.period) {
@@ -268,7 +331,9 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
           default:
             return const SizedBox.shrink();
         }
+
         final fromDate = DateTime.parse(from);
+
         return ActionsPage(
           onTapDelete:
               manager.state.period == 0 &&
@@ -279,12 +344,12 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
                   _showConfirmDialog(context, manager);
                 }
               : null,
-
           onTapShare: () {
             sheetContext.router.maybePop();
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               final image = await _screenshotControllers[manager.state.period].capture();
               if (image == null) return;
+
               GlobalKey shareAnchorKey;
               switch (manager.state.period) {
                 case 0:
@@ -304,7 +369,9 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
               final directory = await getTemporaryDirectory();
               final imagePath = await File('${directory.path}/screenshot.png').create();
               await imagePath.writeAsBytes(image);
-              await SharePlus.instance.share(ShareParams(files: [XFile(imagePath.path)], sharePositionOrigin: origin));
+              await SharePlus.instance.share(
+                ShareParams(files: [XFile(imagePath.path)], sharePositionOrigin: origin),
+              );
             });
           },
         );
@@ -313,12 +380,15 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
   }
 
   Rect _getWidgetRect(GlobalKey key) {
-    final context = key.currentContext;
-    if (context == null) return Offset.zero & Size.zero;
-    final renderBox = context.findRenderObject() as RenderBox?;
+    final ctx = key.currentContext;
+    if (ctx == null) return Offset.zero & Size.zero;
+
+    final renderBox = ctx.findRenderObject() as RenderBox?;
     if (renderBox == null) return Offset.zero & Size.zero;
+
     final offset = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
+
     return offset & size;
   }
 
@@ -334,7 +404,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
       child: Column(
         children: [
           Screenshot(controller: screenshotController, child: fitnessTrackWidget),
-          LeaderboardSection(allUserStatsForPeriod: allUserStatsForPeriod, isGettingStats: isGettingStats),
+          LeaderboardSection(
+            allUserStatsForPeriod: allUserStatsForPeriod,
+            isGettingStats: isGettingStats,
+          ),
         ],
       ),
     );

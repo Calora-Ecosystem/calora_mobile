@@ -6,7 +6,6 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.dart';
 import 'package:calora/common/router/custom_navigator_observer.dart';
-import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/display/display_widget.dart';
 import 'package:calora/common/widgets/system_ui/remove_status_bar_background.dart';
 import 'package:calora/presentation/app/app/management/app_management.dart';
@@ -23,49 +22,23 @@ import 'package:management/management.dart';
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
-  PedometerService? _pedometerService;
-
   @override
   void init(BuildContext context, AppManager manager) {
     super.init(context, manager);
-    _initializePedometerService(manager);
   }
 
   @override
   void onFocusGained(BuildContext context, AppManager manager) {
     super.onFocusGained(context, manager);
     manager.startPeriodicDataSync();
-    log('gaining focus');
+    log('App gained focus');
   }
 
   @override
   void onFocusLost(BuildContext context, AppManager manager) {
     super.onFocusLost(context, manager);
     manager.stopPeriodicDataSync();
-    log('loosing focus');
-  }
-
-  Future<void> _initializePedometerService(AppManager manager) async {
-    try {
-      _pedometerService = PedometerService(
-        onTodayStepCountUpdated: (todaySteps) => manager.updateSteps(todaySteps),
-        onError: (error) => debugPrint('StepsPageError: $error'),
-      );
-      final hasPermission = await _pedometerService!.checkPermissions();
-      if (hasPermission) {
-        manager.startPeriodicDataSync();
-      } else {
-        debugPrint('Pedometer permissions denied');
-      }
-    } catch (e, stackTrace) {
-      debugPrint('Failed to initialize pedometer: $e\n$stackTrace');
-    }
-  }
-
-  @override
-  void dispose() {
-    _pedometerService?.dispose();
-    super.dispose();
+    log('App lost focus');
   }
 
   @override

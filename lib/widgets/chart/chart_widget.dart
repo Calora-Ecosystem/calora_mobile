@@ -31,8 +31,9 @@ class ChartWidget extends StatelessWidget {
     final total = values.isNotEmpty ? values.reduce((a, b) => a + b) : 0;
 
     final maxValue = [...values, if (target != null) target!, average].reduce((a, b) => a > b ? a : b);
+    final maxY = maxValue == 0 ? 10.0 : maxValue * 1.1;
 
-    final maxY = maxValue == 0 ? 10 : maxValue * 1.1;
+    final double minBarY = maxY * 0.02;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +51,7 @@ class ChartWidget extends StatelessWidget {
           child: BarChart(
             BarChartData(
               alignment: type == ChartType.monthly ? BarChartAlignment.spaceBetween : BarChartAlignment.spaceAround,
-              maxY: maxY.toDouble(),
+              maxY: maxY,
               borderData: FlBorderData(show: false),
               gridData: FlGridData(
                 getDrawingVerticalLine: (value) => FlLine(color: const Color(0xFFF0F0F0), dashArray: [2, 2]),
@@ -71,17 +72,24 @@ class ChartWidget extends StatelessWidget {
                     getTitlesWidget: (value, meta) => _buildBottomTitle(context, value.toInt()),
                   ),
                 ),
-                rightTitles: AxisTitles(sideTitles: SideTitles()),
-                topTitles: AxisTitles(sideTitles: SideTitles()),
+                rightTitles: const AxisTitles(),
+                topTitles: const AxisTitles(),
               ),
               barTouchData: BarTouchData(
                 enabled: true,
                 touchTooltipData: BarTouchTooltipData(
                   getTooltipColor: (_) => context.colors.primarySolid,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    final int x = group.x.toInt();
+                    final double realValue = (x >= 0 && x < values.length) ? values[x] : 0;
+
                     return BarTooltipItem(
-                      rod.toY.toStringAsFixed(0),
-                      TextStyle(color: context.colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      realValue.toStringAsFixed(0),
+                      TextStyle(
+                        color: context.colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     );
                   },
                 ),
@@ -94,15 +102,13 @@ class ChartWidget extends StatelessWidget {
               barGroups: values.asMap().entries.map((entry) {
                 final index = entry.key;
                 final value = entry.value;
-
-                final adjustedValue = value == 0 ? (maxY * 0.05) : value;
+                final double displayY = value == 0 ? minBarY : value;
                 final color = context.colors.blueAccent;
-
                 return BarChartGroupData(
                   x: index,
                   barRods: [
                     BarChartRodData(
-                      toY: adjustedValue,
+                      toY: displayY,
                       color: color,
                       width: type == ChartType.monthly ? 4 : 12,
                       borderRadius: BorderRadius.circular(2),
@@ -132,13 +138,13 @@ class ChartWidget extends StatelessWidget {
       if ([7, 14, 21, 28].contains(day)) {
         return day.toString().text(14, 16, 400).c(context.colors.neutralPrimary);
       }
-      return const SizedBox();
+      return const SizedBox.shrink();
     } else {
       const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
       if (index >= 0 && index < days.length) {
         return days[index].text(14, 16, 400).c(context.colors.neutralPrimary);
       }
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
   }
 

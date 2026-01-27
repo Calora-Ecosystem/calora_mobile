@@ -8,7 +8,6 @@ abstract class AppState with _$AppState {
   const factory AppState({
     Language? language,
     @Default(false) isUserPremium,
-    @Default(0) int stepCount,
   }) = _AppState;
 }
 

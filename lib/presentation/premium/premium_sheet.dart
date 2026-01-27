@@ -15,6 +15,7 @@ import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
 import 'package:calora/widgets/premium/promo_code_widget.dart';
@@ -39,7 +40,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
       invalidPromoCode: () => CustomSnackBar.show(context, Strings.invalidPromoCode),
       subscriptionSuccess: () {
         CustomSnackBar.showSuccess(context, Strings.subscriptionSuccess);
-        context.read<AppManager>().sendDailyData();
+        context.read<DashboardManager>().sendTodayStepsToBackend();
         context.router.maybePop();
       },
     );

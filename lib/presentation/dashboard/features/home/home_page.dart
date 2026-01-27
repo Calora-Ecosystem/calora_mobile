@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
@@ -25,8 +26,6 @@ import 'package:management/management.dart';
 class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   HomePage({super.key});
 
-  late final PedometerService _pedometerService;
-
   TabsRouter? _tabsRouter;
   int _lastIndex = 0;
 
@@ -35,7 +34,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     manager.updateDay(DateTime.now());
     manager.refreshAll();
     manager.requestPedometerPermissions();
-    _initializePedometerService(manager);
 
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
@@ -46,16 +44,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     });
   }
 
-  void _initializePedometerService(HomeManager manager) async {
-    _pedometerService = PedometerService(
-      onTodayStepCountUpdated: (todaySteps) => manager.updateTodaySteps(todaySteps),
-      onError: (error) => debugPrint('StepsPageError: $error'),
-    );
-    await _pedometerService.initializePedometer();
-  }
-
   @override
   Widget builder(context, manager, state) {
+    final pedometerService = getIt<PedometerService>();
+
     return StreamBuilder<ProfileRequest>(
       stream: profileStore.watch(),
       builder: (context, snapshot) {
@@ -91,7 +83,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                         child: DefaultRefreshIndicator(
                           onRefresh: () async => manager.refreshAll(),
                           child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(parent: const ClampingScrollPhysics()),
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: const ClampingScrollPhysics(),
+                            ),
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
                               spacing: 16,
@@ -100,14 +94,18 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   onDateTap: () => openCalendar(context, manager),
                                   loading: state.isLoading,
                                   onBackward: () {
-                                    manager.updateDay((state.day ?? DateTime.now()).subtract(const Duration(days: 1)));
+                                    manager.updateDay(
+                                      (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
+                                    );
                                     manager.getSummary();
                                     manager.getWater();
                                     manager.getMetrics();
                                     manager.getDailyStep();
                                   },
                                   onForward: () {
-                                    manager.updateDay((state.day ?? DateTime.now()).add(const Duration(days: 1)));
+                                    manager.updateDay(
+                                      (state.day ?? DateTime.now()).add(const Duration(days: 1)),
+                                    );
                                     manager.getSummary();
                                     manager.getWater();
                                     manager.getMetrics();
@@ -159,13 +157,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                       (state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0),
                                   loading: state.isSummaryLoading,
                                 ),
-                                StepCardWidget(
-                                  loading: state.isMetricsLoading,
-                                  currentSteps: state.currentSteps,
-                                  targetSteps: state.targetSteps,
-                                  timeInSeconds: state.metrics?.duration ?? 0,
-                                  distanceInKm: state.metrics?.distance ?? 0,
-                                  caloriesBurned: state.metrics?.kcal ?? 0,
+                                _buildStepCardWithStream(
+                                  pedometerService: pedometerService,
+                                  state: state,
+                                  manager: manager,
                                 ),
                                 WaterIntakeSelector(
                                   loading: state.isWaterLoading,
@@ -192,6 +187,54 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         );
       },
     );
+  }
+
+  Widget _buildStepCardWithStream({
+    required PedometerService pedometerService,
+    required HomeState state,
+    required HomeManager manager,
+  }) {
+    final isToday = _isToday(state.day ?? DateTime.now());
+
+    if (isToday) {
+      return StreamBuilder<int>(
+        stream: pedometerService.todayStepsStream,
+        initialData: pedometerService.dailySteps,
+        builder: (context, snapshot) {
+          final currentSteps = snapshot.data ?? state.currentSteps;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (currentSteps != state.currentSteps) {
+              manager.updateTodaySteps(currentSteps);
+            }
+          });
+
+          return StepCardWidget(
+            loading: state.isMetricsLoading,
+            currentSteps: currentSteps,
+            targetSteps: state.targetSteps,
+            timeInSeconds: state.metrics?.duration ?? 0,
+            distanceInKm: state.metrics?.distance ?? 0,
+            caloriesBurned: state.metrics?.kcal ?? 0,
+          );
+        },
+      );
+    } else {
+      // O'tgan kunlar - static qiymat
+      return StepCardWidget(
+        loading: state.isMetricsLoading,
+        currentSteps: state.currentSteps,
+        targetSteps: state.targetSteps,
+        timeInSeconds: state.metrics?.duration ?? 0,
+        distanceInKm: state.metrics?.distance ?? 0,
+        caloriesBurned: state.metrics?.kcal ?? 0,
+      );
+    }
+  }
+
+  bool _isToday(DateTime day) {
+    final now = DateTime.now();
+    return now.year == day.year && now.month == day.month && now.day == day.day;
   }
 
   void openCalendar(BuildContext context, HomeManager manager) {
