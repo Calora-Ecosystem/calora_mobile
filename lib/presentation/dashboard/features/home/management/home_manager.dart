@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
@@ -12,6 +15,7 @@ import 'package:calora/presentation/dashboard/features/home/management/home_mana
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:developer';
 
 @injectable
 class HomeManager extends Manager<HomeState, HomeEffect> {
@@ -19,23 +23,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
   final NotificationRepo _notificationRepo;
+  final MetricsSyncService _metricsSync;
 
   HomeManager(
     this._profileRepo,
     this._stepRepo,
     this._homeRepo,
     this._notificationRepo,
+    this._metricsSync,
   ) : super(HomeState());
 
-  Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
-    onStart: () => emit(state.copyWith(isLoading: true)),
-    onError: (error) => emit(state.copyWith(isLoading: false)),
-    onData: (profile) {
-      emit(state.copyWith(profile: profile, isLoading: false));
-      profileStore.clear();
-      profileStore.set(profile);
-    },
-  );
+  StreamSubscription<int>? _metricsSyncSub;
+
+  Timer? _metricsDebounce;
+  bool _metricsInFlight = false;
 
   Future<void> requestPedometerPermissions() async {
     await [
@@ -45,12 +46,60 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     ].request();
   }
 
+  Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
+    onStart: () => emit(state.copyWith(isLoading: true)),
+    onError: (_) => emit(state.copyWith(isLoading: false)),
+    onData: (profile) {
+      emit(state.copyWith(profile: profile, isLoading: false));
+      profileStore.clear();
+      profileStore.set(profile);
+    },
+  );
+
   void updateDay(DateTime day) {
     emit(state.copyWith(day: day));
 
-    if (!_isToday(day)) {
+    if (_isToday(day)) {
+      _startMetricsLiveSync();
+      getMetrics(showLoading: false);
+    } else {
+      _stopMetricsLiveSync();
       getDailyStep();
+      getMetrics();
     }
+  }
+
+  void _startMetricsLiveSync() {
+    _metricsSyncSub?.cancel();
+
+    _metricsSyncSub = _metricsSync.stream.listen((steps) {
+      log('📣 HomeManager received sync notification: steps=$steps', name: 'HomeManager');
+      _scheduleMetricsRefresh();
+    });
+
+    _scheduleMetricsRefresh(immediate: true);
+  }
+
+  void _stopMetricsLiveSync() {
+    _metricsDebounce?.cancel();
+    _metricsDebounce = null;
+
+    _metricsSyncSub?.cancel();
+    _metricsSyncSub = null;
+  }
+
+  void _scheduleMetricsRefresh({bool immediate = false}) {
+    if (!_isToday(state.day ?? DateTime.now())) return;
+
+    _metricsDebounce?.cancel();
+
+    if (immediate) {
+      getMetrics(showLoading: false);
+      return;
+    }
+    _metricsDebounce = Timer(const Duration(milliseconds: 800), () {
+      getMetrics(showLoading: false);
+    });
   }
 
   void updateTodaySteps(int steps) {
@@ -81,11 +130,6 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   void getDailyStep() {
     final day = state.day ?? DateTime.now();
-
-    // ✅ Bugun bo'lsa, stream o'zi yangilaydi
-    if (_isToday(day)) return;
-
-    // O'tgan kunlar uchun - backend'dan
     _homeRepo
         .getDailiesSteps(day)
         .handle(
@@ -105,12 +149,8 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         .getDailiesWater(state.day ?? DateTime.now())
         .handle(
           onStart: () => emit(state.copyWith(isWaterLoading: true)),
-          onData: (data) {
-            emit(
-              state.copyWith(waterIntake: data.value, isWaterLoading: false),
-            );
-          },
-          onError: (error) => emit(state.copyWith(isWaterLoading: false)),
+          onData: (data) => emit(state.copyWith(waterIntake: data.value, isWaterLoading: false)),
+          onError: (_) => emit(state.copyWith(isWaterLoading: false)),
         );
   }
 
@@ -123,19 +163,30 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
             emit(state.copyWith(summary: data, isSummaryLoading: false));
             updateNutrientsPercent(data);
           },
-          onError: (error) => emit(state.copyWith(isSummaryLoading: false)),
+          onError: (_) => emit(state.copyWith(isSummaryLoading: false)),
         );
   }
 
-  void getMetrics() {
+  void getMetrics({bool showLoading = true}) {
+    if (_metricsInFlight) return;
+    _metricsInFlight = true;
+
+    final day = state.day ?? DateTime.now();
+    final isToday = _isToday(day);
+
     _homeRepo
-        .getMetrics(state.day ?? DateTime.now())
+        .getMetrics(day)
         .handle(
-          onStart: () => emit(state.copyWith(isMetricsLoading: true)),
+          onStart: () {
+            if (showLoading && !isToday) {
+              emit(state.copyWith(isMetricsLoading: true));
+            }
+          },
           onData: (data) {
             emit(state.copyWith(metrics: data, isMetricsLoading: false));
           },
-          onError: (error) => emit(state.copyWith(isMetricsLoading: false)),
+          onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
+          onDone: () => _metricsInFlight = false,
         );
   }
 
@@ -144,22 +195,13 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       onStart: () => emit(state.copyWith(isLoading: true)),
       onData: (data) {
         final stepValue = data
-            .firstWhere(
-              (e) => e.metric == 'Step',
-              orElse: () => NormsRequest(metric: 'Step', value: 0),
-            )
+            .firstWhere((e) => e.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
             .value;
         final waterValue = data
-            .firstWhere(
-              (e) => e.metric == 'Water',
-              orElse: () => NormsRequest(metric: 'Water', value: 0),
-            )
+            .firstWhere((e) => e.metric == 'Water', orElse: () => NormsRequest(metric: 'Water', value: 0))
             .value;
         final kcalValue = data
-            .firstWhere(
-              (e) => e.metric == 'Kcal',
-              orElse: () => NormsRequest(metric: 'Kcal', value: 0),
-            )
+            .firstWhere((e) => e.metric == 'Kcal', orElse: () => NormsRequest(metric: 'Kcal', value: 0))
             .value;
 
         emit(
@@ -172,28 +214,19 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
           ),
         );
       },
-      onError: (error) => emit(state.copyWith(isLoading: false)),
+      onError: (_) => emit(state.copyWith(isLoading: false)),
     );
   }
 
   void updateNutrientsPercent(SummaryRequest summary) {
     final proteinNorm = state.norms
-        .firstWhere(
-          (e) => e.metric == 'Protein',
-          orElse: () => NormsRequest(metric: 'Protein', value: 1),
-        )
+        .firstWhere((e) => e.metric == 'Protein', orElse: () => NormsRequest(metric: 'Protein', value: 1))
         .value;
     final fatNorm = state.norms
-        .firstWhere(
-          (e) => e.metric == 'Fat',
-          orElse: () => NormsRequest(metric: 'Fat', value: 1),
-        )
+        .firstWhere((e) => e.metric == 'Fat', orElse: () => NormsRequest(metric: 'Fat', value: 1))
         .value;
     final carbNorm = state.norms
-        .firstWhere(
-          (e) => e.metric == 'Carb',
-          orElse: () => NormsRequest(metric: 'Carb', value: 1),
-        )
+        .firstWhere((e) => e.metric == 'Carb', orElse: () => NormsRequest(metric: 'Carb', value: 1))
         .value;
 
     emit(
@@ -224,6 +257,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       emit(state.copyWith(unreadCount: unreadCount));
     });
   }
+
+  @override
+  Future<void> close() {
+    _stopMetricsLiveSync();
+    return super.close();
+  }
 }
 
 extension HomeManagerX on HomeManager {
@@ -232,8 +271,16 @@ extension HomeManagerX on HomeManager {
     getStepNorm();
     getSummary();
     getWater();
-    getMetrics();
-    getDailyStep();
     getUnreadCount();
+
+    final day = state.day ?? DateTime.now();
+    if (_isToday(day)) {
+      _startMetricsLiveSync();
+      getMetrics(showLoading: false);
+    } else {
+      _stopMetricsLiveSync();
+      getDailyStep();
+      getMetrics();
+    }
   }
 }

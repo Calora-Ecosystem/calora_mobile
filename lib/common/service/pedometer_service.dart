@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
@@ -54,12 +55,12 @@ class PedometerService {
     return now
         .subtract(Duration(days: now.weekday - 1))
         .copyWith(
-          hour: 0,
-          minute: 0,
-          second: 0,
-          millisecond: 0,
-          microsecond: 0,
-        );
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+      microsecond: 0,
+    );
   }
 
   DateTime get _endOfWeek {
@@ -67,12 +68,12 @@ class PedometerService {
     return now
         .add(Duration(days: DateTime.daysPerWeek - now.weekday))
         .copyWith(
-          hour: 23,
-          minute: 59,
-          second: 59,
-          millisecond: 999,
-          microsecond: 999,
-        );
+      hour: 23,
+      minute: 59,
+      second: 59,
+      millisecond: 999,
+      microsecond: 999,
+    );
   }
 
   DateTime get _startOfMonth {
@@ -193,7 +194,7 @@ class PedometerService {
 
       _stepStreamSubscription?.cancel();
       _stepStreamSubscription = Pedometer().stepCountStream().listen(
-        (int steps) async {
+            (int steps) async {
           log('Real-time step count: $steps', name: 'PedometerService');
 
           if (!isStreamInitialized) {
@@ -251,7 +252,7 @@ class PedometerService {
     try {
       _pedestrianStatusSubscription?.cancel();
       _pedestrianStatusSubscription = Pedometer().pedestrianStatusStream().listen(
-        (PedestrianStatus status) {
+            (PedestrianStatus status) {
           log('Pedestrian status: $status', name: 'PedometerService');
           _emitStatus(status);
         },

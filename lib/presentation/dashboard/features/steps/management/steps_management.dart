@@ -46,6 +46,7 @@ abstract class StepsState with _$StepsState {
     @Default(false) bool isDailyLoading,
     @Default(false) bool isWeeklyLoading,
     @Default(false) bool isMonthlyLoading,
+    @Default(false) bool hasLoadedTodayInitial,
   }) = _StepsState;
 
   const StepsState._();
