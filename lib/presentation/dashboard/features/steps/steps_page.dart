@@ -22,6 +22,7 @@ import 'package:calora/presentation/dashboard/features/steps/widgets/daily_fitne
 import 'package:calora/presentation/dashboard/features/steps/widgets/leaderboard_section.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/monthly_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/weekly_fitness_track_widget.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,7 +30,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 @RoutePage()
-class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with WidgetsBindingObserver {
+class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   StepsPage({super.key});
 
   final List<ScreenshotController> _screenshotControllers = [
@@ -38,21 +39,22 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
     ScreenshotController(),
   ];
 
-  int _previousTabIndex = 0;
-
   final GlobalKey dailyShareAnchorKey = GlobalKey();
   final GlobalKey weeklyShareAnchorKey = GlobalKey();
   final GlobalKey monthlyShareAnchorKey = GlobalKey();
 
+  TabController? _tabController;
+  bool _tabListenerAttached = false;
+
   @override
   void init(context, manager) {
-    // ✅ Initial fetch - bugungi kun uchun pedometer'dan olamiz
-    final pedometerService = getIt<PedometerService>();
-    manager.updateTodaySteps(pedometerService.dailySteps);
-
     manager.fetchDataForPeriod(0, 0, showLoading: true);
-    manager.fetchDataForPeriod(1, 0, showLoading: true);
-    manager.fetchDataForPeriod(2, 0, showLoading: true);
+    manager.fetchDataForPeriod(1, 0);
+    manager.fetchDataForPeriod(2, 0);
+
+    manager.startLiveSyncIfNeeded();
+
+    context.read<DashboardManager>().initialize();
   }
 
   @override
@@ -64,7 +66,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
         )
         .value;
 
-    // ✅ PedometerService singleton
     final pedometerService = getIt<PedometerService>();
 
     return Scaffold(
@@ -72,7 +73,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
       body: DefaultRefreshIndicator(
         notificationPredicate: (notification) => notification.depth == 1,
         edgeOffset: context.topPadding + kToolbarHeight,
-        onRefresh: () async => await manager.fetchDataForPeriod(
+        onRefresh: () async => manager.fetchDataForPeriod(
           state.period,
           manager.currentOffset,
           showLoading: true,
@@ -81,29 +82,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
           length: 3,
           child: Builder(
             builder: (context) {
-              final tabController = DefaultTabController.of(context);
-              tabController.addListener(() {
-                if (!tabController.indexIsChanging && tabController.index != _previousTabIndex) {
-                  _previousTabIndex = tabController.index;
-                  manager.changePeriod(tabController.index);
-                  final newIndex = tabController.index;
+              final controller = DefaultTabController.of(context);
+
+              if (_tabController != controller || !_tabListenerAttached) {
+                _tabController = controller;
+                _tabListenerAttached = true;
+                controller.addListener(() {
+                  if (controller.indexIsChanging) return;
+                  final newPeriod = controller.index;
+                  manager.changePeriod(newPeriod);
                   int offset = 0;
-                  switch (newIndex) {
-                    case 0:
-                      offset = manager.state.dailyOffset;
-                      break;
-                    case 1:
-                      offset = manager.state.weeklyOffset;
-                      break;
-                    case 2:
-                      offset = manager.state.monthlyOffset;
-                      break;
-                  }
+                  if (newPeriod == 0) offset = manager.state.dailyOffset;
+                  if (newPeriod == 1) offset = manager.state.weeklyOffset;
+                  if (newPeriod == 2) offset = manager.state.monthlyOffset;
                   if (offset == 0) {
-                    manager.fetchDataForPeriod(newIndex, offset);
+                    manager.fetchDataForPeriod(newPeriod, offset);
                   }
-                }
-              });
+                });
+              }
+
               return Stack(
                 children: [
                   Positioned.fill(
@@ -212,57 +209,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
     required double stepValue,
   }) {
     final isToday = state.period == 0 && state.dailyOffset == 0;
-    if (isToday) {
-      return StreamBuilder<int>(
-        stream: pedometerService.todayStepsStream,
-        initialData: pedometerService.dailySteps,
-        builder: (context, snapshot) {
-          final currentSteps = snapshot.data ?? state.dailyDisplayStepCount;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (currentSteps != state.stepCount) {
-              manager.updateTodaySteps(currentSteps);
-            }
-          });
-          return _buildTabContent(
-            screenshotController: _screenshotControllers[0],
-            fitnessTrackWidget: DailyFitnessTrackWidget(
-              key: dailyShareAnchorKey,
-              goal: stepValue.toInt(),
-              metrics: state.dailyMetrics,
-              stepCount: currentSteps,
-              offset: state.dailyOffset,
-              loading: state.isDailyLoading,
-              onClickBackward: () => manager.changeOffset(-1),
-              onClickForward: () => manager.changeOffset(1),
-              onClickMoreVert: () => _showActionsSheet(context, manager),
-              onClickPause: () {},
-              onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
-            ),
-            allUserStatsForPeriod: state.dailyUserStates,
-            isGettingStats: state.isDailyLoading,
-          );
-        },
-      );
-    } else {
-      return _buildTabContent(
-        screenshotController: _screenshotControllers[0],
-        fitnessTrackWidget: DailyFitnessTrackWidget(
-          key: dailyShareAnchorKey,
-          goal: stepValue.toInt(),
-          metrics: state.dailyMetrics,
-          stepCount: state.dailyDisplayStepCount,
-          offset: state.dailyOffset,
-          loading: state.isDailyLoading,
-          onClickBackward: () => manager.changeOffset(-1),
-          onClickForward: () => manager.changeOffset(1),
-          onClickMoreVert: () => _showActionsSheet(context, manager),
-          onClickPause: () {},
-          onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
-        ),
-        allUserStatsForPeriod: state.dailyUserStates,
-        isGettingStats: state.isDailyLoading,
-      );
-    }
+    final currentSteps = isToday ? state.stepCount : state.dailyDisplayStepCount;
+    return _buildTabContent(
+      screenshotController: _screenshotControllers[0],
+      fitnessTrackWidget: DailyFitnessTrackWidget(
+        key: dailyShareAnchorKey,
+        goal: stepValue.toInt(),
+        metrics: state.dailyMetrics,
+        stepCount: currentSteps,
+        offset: state.dailyOffset,
+        loading: isToday ? false : state.isDailyLoading,
+        onClickBackward: () => manager.changeOffset(-1),
+        onClickForward: () => manager.changeOffset(1),
+        onClickMoreVert: () => _showActionsSheet(context, manager),
+        onClickPause: () {},
+        onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+      ),
+      allUserStatsForPeriod: state.dailyUserStates,
+      isGettingStats: state.isDailyLoading,
+    );
   }
 
   void _showConfirmDialog(BuildContext context, StepsManager manager) {
@@ -369,6 +334,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> with Widg
               final directory = await getTemporaryDirectory();
               final imagePath = await File('${directory.path}/screenshot.png').create();
               await imagePath.writeAsBytes(image);
+
               await SharePlus.instance.share(
                 ShareParams(files: [XFile(imagePath.path)], sharePositionOrigin: origin),
               );

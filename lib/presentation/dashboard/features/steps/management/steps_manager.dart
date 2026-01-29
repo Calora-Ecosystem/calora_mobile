@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:calora/common/service/pedometer_service.dart';
+import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
@@ -12,9 +14,21 @@ import 'package:management/management.dart';
 @injectable
 class StepsManager extends Manager<StepsState, StepsEffect> {
   final StepRepo stepRepo;
+  final PedometerService pedometerService;
+  final MetricsSyncService _metricsSync;
 
-  StepsManager(this.stepRepo)
-    : super(
+  StreamSubscription<int>? _stepsSub;
+  StreamSubscription? _syncSubscription;
+  StreamSubscription<int>? _metricsSyncSub;
+
+  Timer? _metricsSafetyTimer;
+  Timer? _metricsDebounce;
+
+  StepsManager(
+    this.stepRepo,
+    this.pedometerService,
+    this._metricsSync,
+  ) : super(
         StepsState(
           dailyFrom: DateTime.now().toIso8601String(),
           dailyTo: DateTime.now().toIso8601String(),
@@ -24,10 +38,105 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         ),
       );
 
+  bool get _isTodayDailyView => state.period == 0 && state.dailyOffset == 0;
+
+  @override
+  void initialize() {
+    super.initialize();
+    _listenToMetricsSyncFromDashboard();
+  }
+
+  void _listenToMetricsSyncFromDashboard() {
+    _syncSubscription?.cancel();
+
+    _syncSubscription = _metricsSync.stream.listen((updatedSteps) {
+      if (!_isTodayDailyView) return;
+      log('StepsManager ← Dashboard sync bildirish: $updatedSteps qadam', name: 'StepsManager');
+      _metricsDebounce?.cancel();
+      _metricsDebounce = Timer(const Duration(milliseconds: 800), () {
+        if (_isTodayDailyView) {
+          log('StepsManager: today metrics silent refresh (sync tufayli)', name: 'StepsManager');
+          getUserMetrics(period: 0, offset: 0, now: DateTime.now(), showLoading: false);
+        }
+      });
+    });
+  }
+
+  void startLiveSyncIfNeeded() {
+    if (_isTodayDailyView) {
+      _startStepsListener();
+      _listenToMetricsSyncFromDashboard();
+      _startMetricsSafetyRefresh();
+      _refreshTodayMetricsNow();
+    } else {
+      stopLiveSync();
+    }
+  }
+
+  int get currentOffset {
+    switch (state.period) {
+      case 0:
+        return state.dailyOffset;
+      case 1:
+        return state.weeklyOffset;
+      case 2:
+        return state.monthlyOffset;
+      default:
+        return 0;
+    }
+  }
+
+  void stopLiveSync() {
+    _stepsSub?.cancel();
+    _stepsSub = null;
+
+    _syncSubscription?.cancel();
+    _syncSubscription = null;
+
+    _metricsSyncSub?.cancel();
+    _metricsSyncSub = null;
+
+    _metricsDebounce?.cancel();
+    _metricsDebounce = null;
+
+    _metricsSafetyTimer?.cancel();
+    _metricsSafetyTimer = null;
+  }
+
+  void _startStepsListener() {
+    _stepsSub?.cancel();
+
+    _stepsSub = pedometerService.todayStepsStream.listen(
+      (steps) {
+        if (!_isTodayDailyView) return;
+        updateTodaySteps(steps);
+      },
+      onError: (e) => log('❌ Steps stream xatosi: $e', name: 'StepsManager'),
+    );
+
+    if (_isTodayDailyView) {
+      updateTodaySteps(pedometerService.dailySteps);
+    }
+  }
+
+  void _startMetricsSafetyRefresh() {
+    _metricsSafetyTimer?.cancel();
+    _metricsSafetyTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      if (_isTodayDailyView) {
+        log('⏰ Safety refresh — metrics yangilanmoqda', name: 'StepsManager');
+        _refreshTodayMetricsNow();
+      }
+    });
+  }
+
+  Future<void> _refreshTodayMetricsNow() async {
+    await _safeTrigger(() => getUserMetrics(period: 0, offset: 0, now: DateTime.now()));
+  }
+
   void updateTodaySteps(int steps) {
     emit(state.copyWith(stepCount: steps));
 
-    if (state.period == 0 && state.dailyOffset == 0) {
+    if (_isTodayDailyView) {
       emit(state.copyWith(dailyDisplayStepCount: steps));
     }
   }
@@ -73,7 +182,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
             }
           },
           onDone: () => emit(state.copyWith(isGettingSteps: false)),
-          onError: (e) => emit(state.copyWith(isGettingSteps: false)),
+          onError: (_) => emit(state.copyWith(isGettingSteps: false)),
         );
   }
 
@@ -104,7 +213,9 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     required int period,
     required int offset,
     required DateTime now,
+    bool showLoading = true,
   }) async {
+    final isTodayDaily = (period == 0 && offset == 0);
     DateTime fromDate;
     DateTime toDate;
 
@@ -131,13 +242,15 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         return;
     }
 
-    final from = fromDate.toIso8601String();
-    final to = toDate.toIso8601String();
-
     await stepRepo
-        .getUserMetrics(from: from, to: to)
+        .getUserMetrics(from: fromDate.toIso8601String(), to: toDate.toIso8601String())
         .handle(
-          onStart: () => emit(state.copyWith(isGettingUserMetrics: true)),
+          onStart: () {
+            final isTodayDaily = (period == 0 && offset == 0);
+            if (showLoading && !isTodayDaily) {
+              emit(state.copyWith(isGettingUserMetrics: true));
+            }
+          },
           onData: (data) {
             if (period == 0) {
               emit(state.copyWith(dailyMetrics: data, isGettingUserMetrics: false));
@@ -156,13 +269,9 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     final now = DateTime.now();
 
     if (showLoading) {
-      if (period == 0) {
-        emit(state.copyWith(isDailyLoading: true));
-      } else if (period == 1) {
-        emit(state.copyWith(isWeeklyLoading: true));
-      } else if (period == 2) {
-        emit(state.copyWith(isMonthlyLoading: true));
-      }
+      if (period == 0) emit(state.copyWith(isDailyLoading: true));
+      if (period == 1) emit(state.copyWith(isWeeklyLoading: true));
+      if (period == 2) emit(state.copyWith(isMonthlyLoading: true));
     }
 
     await Future.wait([
@@ -172,20 +281,18 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       _safeTrigger(() => getUserMetrics(period: period, offset: offset, now: now)),
     ]);
 
-    if (period == 0) {
-      emit(state.copyWith(isDailyLoading: false));
-    } else if (period == 1) {
-      emit(state.copyWith(isWeeklyLoading: false));
-    } else if (period == 2) {
-      emit(state.copyWith(isMonthlyLoading: false));
-    }
+    if (period == 0) emit(state.copyWith(isDailyLoading: false));
+    if (period == 1) emit(state.copyWith(isWeeklyLoading: false));
+    if (period == 2) emit(state.copyWith(isMonthlyLoading: false));
+
+    startLiveSyncIfNeeded();
   }
 
   Future<void> _safeTrigger(Future<void> Function() task) async {
     try {
       await task();
     } catch (e, s) {
-      log(e.toString() + s.toString());
+      log('Safe trigger xatosi: $e\n$s', name: 'StepsManager');
     }
   }
 
@@ -209,17 +316,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  Future<void> deleteNorm(String metric) async {
-    await stepRepo
-        .deleteNorm(metric)
-        .handle(
-          onStart: () => emit(state.copyWith(isDeletingNorm: true)),
-          onData: (_) => getNorms(),
-          onDone: () => emit(state.copyWith(isDeletingNorm: false)),
-          onError: (_) => emit(state.copyWith(isDeletingNorm: false)),
-        );
-  }
-
   void changePeriod(int newPeriod) {
     final now = DateTime.now();
     DateTime fromDate;
@@ -233,11 +329,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         fromDate = DateTime(targetDay.year, targetDay.month, targetDay.day);
         toDate = DateTime(targetDay.year, targetDay.month, targetDay.day, 23, 59, 59);
         emit(
-          state.copyWith(
-            period: newPeriod,
-            dailyFrom: fromDate.toIso8601String(),
-            dailyTo: toDate.toIso8601String(),
-          ),
+          state.copyWith(period: newPeriod, dailyFrom: fromDate.toIso8601String(), dailyTo: toDate.toIso8601String()),
         );
         break;
       case 1:
@@ -248,11 +340,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         final endOfTargetWeek = startOfTargetWeek.add(const Duration(days: 6));
         toDate = DateTime(endOfTargetWeek.year, endOfTargetWeek.month, endOfTargetWeek.day, 23, 59, 59);
         emit(
-          state.copyWith(
-            period: newPeriod,
-            weeklyFrom: fromDate.toIso8601String(),
-            weeklyTo: toDate.toIso8601String(),
-          ),
+          state.copyWith(period: newPeriod, weeklyFrom: fromDate.toIso8601String(), weeklyTo: toDate.toIso8601String()),
         );
         break;
       case 2:
@@ -272,14 +360,14 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       default:
         return;
     }
+
+    startLiveSyncIfNeeded();
   }
 
   void changeOffset(int change) {
     int currentOffset;
     int newOffset;
-    final DateTime now = DateTime.now();
-    DateTime fromDate;
-    DateTime toDate;
+    final now = DateTime.now();
 
     switch (state.period) {
       case 0:
@@ -289,17 +377,15 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         if (newOffset == currentOffset) return;
 
         final targetDay = now.add(Duration(days: newOffset));
-        fromDate = DateTime(targetDay.year, targetDay.month, targetDay.day);
-        toDate = DateTime(targetDay.year, targetDay.month, targetDay.day, 23, 59, 59);
-
         emit(
           state.copyWith(
             dailyOffset: newOffset,
-            dailyFrom: fromDate.toIso8601String(),
-            dailyTo: toDate.toIso8601String(),
+            dailyFrom: DateTime(targetDay.year, targetDay.month, targetDay.day).toIso8601String(),
+            dailyTo: DateTime(targetDay.year, targetDay.month, targetDay.day, 23, 59, 59).toIso8601String(),
           ),
         );
         break;
+
       case 1:
         currentOffset = state.weeklyOffset;
         newOffset = currentOffset + change;
@@ -308,18 +394,28 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
         final startOfCurrentWeek = now.subtract(Duration(days: now.weekday - 1));
         final startOfTargetWeek = startOfCurrentWeek.add(Duration(days: 7 * newOffset));
-        fromDate = DateTime(startOfTargetWeek.year, startOfTargetWeek.month, startOfTargetWeek.day);
         final endOfTargetWeek = startOfTargetWeek.add(const Duration(days: 6));
-        toDate = DateTime(endOfTargetWeek.year, endOfTargetWeek.month, endOfTargetWeek.day, 23, 59, 59);
 
         emit(
           state.copyWith(
             weeklyOffset: newOffset,
-            weeklyFrom: fromDate.toIso8601String(),
-            weeklyTo: toDate.toIso8601String(),
+            weeklyFrom: DateTime(
+              startOfTargetWeek.year,
+              startOfTargetWeek.month,
+              startOfTargetWeek.day,
+            ).toIso8601String(),
+            weeklyTo: DateTime(
+              endOfTargetWeek.year,
+              endOfTargetWeek.month,
+              endOfTargetWeek.day,
+              23,
+              59,
+              59,
+            ).toIso8601String(),
           ),
         );
         break;
+
       case 2:
         currentOffset = state.monthlyOffset;
         newOffset = currentOffset + change;
@@ -327,45 +423,31 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         if (newOffset == currentOffset) return;
 
         final targetMonth = DateTime(now.year, now.month + newOffset);
-        fromDate = DateTime(targetMonth.year, targetMonth.month);
         final endOfMonth = DateTime(targetMonth.year, targetMonth.month + 1, 0);
-        toDate = DateTime(endOfMonth.year, endOfMonth.month, endOfMonth.day, 23, 59, 59);
 
         emit(
           state.copyWith(
             monthlyOffset: newOffset,
-            monthlyFrom: fromDate.toIso8601String(),
-            monthlyTo: toDate.toIso8601String(),
+            monthlyFrom: DateTime(targetMonth.year, targetMonth.month).toIso8601String(),
+            monthlyTo: DateTime(endOfMonth.year, endOfMonth.month, endOfMonth.day, 23, 59, 59).toIso8601String(),
           ),
         );
         break;
+
       default:
         return;
     }
-    fetchDataForPeriod(state.period, newOffset, showLoading: true);
-  }
 
-  int get currentOffset {
-    switch (state.period) {
-      case 0:
-        return state.dailyOffset;
-      case 1:
-        return state.weeklyOffset;
-      case 2:
-        return state.monthlyOffset;
-      default:
-        return 0;
-    }
+    fetchDataForPeriod(state.period, newOffset, showLoading: true);
+    startLiveSyncIfNeeded();
   }
 
   int _buildDailySteps(List<StepsWithMetricsRequest> data, int offset, DateTime now) {
     if (data.isEmpty) {
-      if (offset == 0) return state.stepCount;
-      return 0;
+      return offset == 0 ? state.stepCount : 0;
     }
 
     final targetDate = DateTime(now.year, now.month, now.day).add(Duration(days: offset));
-
     final item = data.firstWhere(
       (e) => e.date.year == targetDate.year && e.date.month == targetDate.month && e.date.day == targetDate.day,
       orElse: () => StepsWithMetricsRequest(date: targetDate, value: 0),
@@ -382,8 +464,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       startOfWeek.day,
     ).add(Duration(days: 7 * offset));
 
-    final List<double> week = List.filled(7, 0);
-
+    final week = List<double>.filled(7, 0);
     for (int i = 0; i < 7; i++) {
       final currentDay = DateTime(targetWeekStart.year, targetWeekStart.month, targetWeekStart.day + i);
 
@@ -402,15 +483,23 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     final targetMonth = DateTime(now.year, now.month + offset);
     final daysInMonth = DateUtils.getDaysInMonth(targetMonth.year, targetMonth.month);
 
-    final List<double> month = List.filled(daysInMonth, 0);
+    final month = List<double>.filled(daysInMonth, 0);
 
     for (final step in data) {
       if (step.date.year == targetMonth.year && step.date.month == targetMonth.month) {
         final dayIndex = step.date.day - 1;
-        if (dayIndex >= 0 && dayIndex < daysInMonth) month[dayIndex] = step.value;
+        if (dayIndex >= 0 && dayIndex < daysInMonth) {
+          month[dayIndex] = step.value;
+        }
       }
     }
 
     return month;
+  }
+
+  @override
+  Future<void> close() {
+    stopLiveSync();
+    return super.close();
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:calora/common/service/pedometer_service.dart';
+import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
@@ -12,134 +13,132 @@ import 'package:management/management.dart';
 class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   final StepRepo _stepRepo;
   final PedometerService _pedometerService;
+  final MetricsSyncService _metricsSync;
 
-  Timer? _syncTimer;
   StreamSubscription<int>? _stepsSub;
+  Timer? _syncTimer;
 
-  DashboardManager(this._stepRepo, this._pedometerService) : super(const DashboardState());
+  int _latestSteps = 0;
+  int _lastSentSteps = -1;
+  int _lastMetricsRefreshedAtSteps = -1;
+
+  static const int MIN_DELTA_STEPS_TO_SEND = 30;
+  static const int MIN_DELTA_STEPS_TO_REFRESH_METRICS = 25;
+  static const Duration PERIODIC_SYNC_INTERVAL = Duration(minutes: 2);
+
+  DashboardManager(
+    this._stepRepo,
+    this._pedometerService,
+    this._metricsSync,
+  ) : super(const DashboardState());
 
   @override
   void initialize() async {
     super.initialize();
     await _startPedometer();
+    await sendTodayStepsToBackend(force: true);
   }
 
   Future<void> _startPedometer() async {
     try {
       final hasPermission = await _pedometerService.ensurePermissionGranted();
       if (!hasPermission) {
-        log('DashboardManager: Permission denied');
+        log('Pedometer ruxsati rad etildi', name: 'DashboardManager');
         return;
       }
 
       await _pedometerService.initializePedometer();
 
-      await _syncWithBackend();
+      _latestSteps = _pedometerService.dailySteps;
+      emit(state.copyWith(todaySteps: _latestSteps));
+
+      await sendTodayStepsToBackend(force: true);
 
       _listenToStepUpdates();
-
       _startPeriodicSync();
 
-      log('DashboardManager: Pedometer started successfully');
+      log('Pedometer muvaffaqiyatli ishga tushdi', name: 'DashboardManager');
     } catch (e, s) {
-      log('DashboardManager: Failed to start pedometer: $e', error: e, stackTrace: s);
+      log('Pedometer ishga tushmadi: $e', name: 'DashboardManager', error: e, stackTrace: s);
     }
   }
 
   void _listenToStepUpdates() {
     _stepsSub?.cancel();
-    _stepsSub = _pedometerService.todayStepsStream.listen((steps) {
-      log('📊 Real-time steps: $steps');
-      emit(state.copyWith(todaySteps: steps));
-    });
+    _stepsSub = _pedometerService.todayStepsStream.listen(
+      (steps) {
+        _latestSteps = steps;
+        emit(state.copyWith(todaySteps: steps));
+
+        if (_shouldSendToBackend(steps)) {
+          sendTodayStepsToBackend();
+        }
+
+        if (_shouldRefreshMetrics(steps)) {
+          _refreshMetrics();
+        }
+      },
+      onError: (e) {
+        log('Steps stream xatosi: $e', name: 'DashboardManager');
+      },
+    );
+  }
+
+  bool _shouldSendToBackend(int current) {
+    if (_lastSentSteps < 0) return true;
+    final delta = current - _lastSentSteps;
+    return delta >= MIN_DELTA_STEPS_TO_SEND;
+  }
+
+  bool _shouldRefreshMetrics(int current) {
+    if (_lastMetricsRefreshedAtSteps < 0) return true;
+    final delta = current - _lastMetricsRefreshedAtSteps;
+    return delta >= MIN_DELTA_STEPS_TO_REFRESH_METRICS;
+  }
+
+  Future<void> sendTodayStepsToBackend({bool force = false}) async {
+    final currentSteps = _latestSteps;
+
+    if (!force) {
+      if (_lastSentSteps >= 0) {
+        final delta = currentSteps - _lastSentSteps;
+        if (delta < MIN_DELTA_STEPS_TO_SEND) {
+          return;
+        }
+      }
+    }
+    try {
+      await _stepRepo.sendDailyData(metric: 'Step', value: currentSteps);
+      _lastSentSteps = currentSteps;
+      log('Qadamlar backendga yuborildi: $currentSteps (force: $force)', name: 'DashboardManager');
+      _refreshMetrics();
+    } catch (e) {
+      log('Qadam yuborish xatosi: $e', name: 'DashboardManager');
+    }
+  }
+
+  Future<void> _refreshMetrics() async {
+    if (_latestSteps <= _lastMetricsRefreshedAtSteps) return;
+
+    try {
+      _lastMetricsRefreshedAtSteps = _latestSteps;
+
+      _metricsSync.notifyUpdated(_latestSteps);
+
+      log('Metrikalar yangilandi — qadamlar: $_latestSteps', name: 'DashboardManager');
+    } catch (e) {
+      log('Metrikalarni yangilashda xato: $e', name: 'DashboardManager');
+    }
   }
 
   void _startPeriodicSync() {
     _syncTimer?.cancel();
-    _syncTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      log('⏰ Periodic sync triggered');
-      sendTodayStepsToBackend();
+
+    _syncTimer = Timer.periodic(PERIODIC_SYNC_INTERVAL, (_) {
+      sendTodayStepsToBackend(force: true);
     });
 
-    // Initial send
-    sendTodayStepsToBackend();
-  }
-
-  Future<void> sendTodayStepsToBackend() async {
-    try {
-      final steps = _pedometerService.dailySteps;
-      log('📤 Sending steps to backend: $steps');
-
-      await _stepRepo
-          .sendDailyData(metric: 'Step', value: steps)
-          .handle(
-            onStart: () {},
-            onData: (_) => log('✅ Steps sent successfully: $steps'),
-            onDone: () {},
-            onError: (e) => log('❌ Failed to send steps: $e'),
-          );
-    } catch (e, s) {
-      log('Error sending steps to backend: $e', error: e, stackTrace: s);
-    }
-  }
-
-  Future<void> _syncWithBackend() async {
-    try {
-      await _stepRepo
-          .getSteps(0)
-          .handle(
-            onStart: () {},
-            onData: (data) async {
-              if (data.isNotEmpty) {
-                await _getRangeSteps(data.first.date, DateTime.now());
-              } else {
-                await sendTodayStepsToBackend();
-              }
-            },
-            onDone: () {},
-            onError: (e) => log('Error getting steps from backend: $e'),
-          );
-    } catch (e, s) {
-      log('Error syncing with backend: $e', error: e, stackTrace: s);
-    }
-  }
-
-  Future<void> _getRangeSteps(DateTime fromDate, DateTime toDate) async {
-    try {
-      final result = await _pedometerService.getDailyStepsForRange(
-        fromDate,
-        toDate,
-      );
-      final steps = result.entries
-          .map(
-            (e) => StepsWithMetricsRequest(
-              date: e.key,
-              value: e.value.toDouble(),
-            ),
-          )
-          .toList();
-
-      for (final e in result.entries) {
-        log("📅 ${e.key.toIso8601String().split('T')[0]}: ${e.value} steps");
-      }
-
-      await _sendStepsDataDateRange(steps);
-    } catch (e, s) {
-      log('DashboardManager _getRangeSteps error: $e', error: e, stackTrace: s);
-    }
-  }
-
-  Future<void> _sendStepsDataDateRange(
-    List<StepsWithMetricsRequest> steps,
-  ) async {
-    await _stepRepo
-        .sendStepDataDateRange(steps: steps)
-        .handle(
-          onStart: () {},
-          onData: (_) => log('✅ Range steps sent successfully'),
-          onDone: () {},
-          onError: (e) => log('❌ Failed to send range steps: $e'),
-        );
+    sendTodayStepsToBackend(force: true);
   }
 
   @override

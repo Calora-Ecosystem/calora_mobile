@@ -14,6 +14,7 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_manager.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:calora/widgets/app_bar/home_app_bar.dart' show HomeAppBar;
 import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
 import 'package:calora/widgets/plan/daily_plan_widget.dart';
@@ -33,8 +34,8 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void init(context, manager) {
     manager.updateDay(DateTime.now());
     manager.refreshAll();
+    context.read<DashboardManager>().initialize();
     manager.requestPedometerPermissions();
-
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
     _tabsRouter!.addListener(() {
@@ -73,18 +74,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                     Expanded(
                       child: NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
-                          if (notification.metrics.pixels > 10) {
-                            isScrolled.value = true;
-                          } else {
-                            isScrolled.value = false;
-                          }
+                          isScrolled.value = notification.metrics.pixels > 10;
                           return false;
                         },
                         child: DefaultRefreshIndicator(
                           onRefresh: () async => manager.refreshAll(),
                           child: SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(
-                              parent: const ClampingScrollPhysics(),
+                              parent: ClampingScrollPhysics(),
                             ),
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
@@ -94,22 +91,18 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   onDateTap: () => openCalendar(context, manager),
                                   loading: state.isLoading,
                                   onBackward: () {
-                                    manager.updateDay(
-                                      (state.day ?? DateTime.now()).subtract(const Duration(days: 1)),
-                                    );
+                                    final newDay = (state.day ?? DateTime.now()).subtract(const Duration(days: 1));
+                                    manager.updateDay(newDay);
+
                                     manager.getSummary();
                                     manager.getWater();
-                                    manager.getMetrics();
-                                    manager.getDailyStep();
                                   },
                                   onForward: () {
-                                    manager.updateDay(
-                                      (state.day ?? DateTime.now()).add(const Duration(days: 1)),
-                                    );
+                                    final newDay = (state.day ?? DateTime.now()).add(const Duration(days: 1));
+                                    manager.updateDay(newDay);
+
                                     manager.getSummary();
                                     manager.getWater();
-                                    manager.getMetrics();
-                                    manager.getDailyStep();
                                   },
                                   date: state.day ?? DateTime.now(),
                                   calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
@@ -119,14 +112,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
-                                      gradient: RadialGradient(
+                                      gradient: const RadialGradient(
                                         radius: 1.5,
                                         center: Alignment(0.7, 0),
-                                        colors: const [Color(0xFFECFFEF), Color(0xFF58AE8A)],
+                                        colors: [Color(0xFFECFFEF), Color(0xFF58AE8A)],
                                       ),
                                     ),
                                     child: Row(
@@ -194,33 +187,10 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     required HomeState state,
     required HomeManager manager,
   }) {
-    final isToday = _isToday(state.day ?? DateTime.now());
+    final selectedDay = state.day ?? DateTime.now();
+    final isToday = _isToday(selectedDay);
 
-    if (isToday) {
-      return StreamBuilder<int>(
-        stream: pedometerService.todayStepsStream,
-        initialData: pedometerService.dailySteps,
-        builder: (context, snapshot) {
-          final currentSteps = snapshot.data ?? state.currentSteps;
-
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (currentSteps != state.currentSteps) {
-              manager.updateTodaySteps(currentSteps);
-            }
-          });
-
-          return StepCardWidget(
-            loading: state.isMetricsLoading,
-            currentSteps: currentSteps,
-            targetSteps: state.targetSteps,
-            timeInSeconds: state.metrics?.duration ?? 0,
-            distanceInKm: state.metrics?.distance ?? 0,
-            caloriesBurned: state.metrics?.kcal ?? 0,
-          );
-        },
-      );
-    } else {
-      // O'tgan kunlar - static qiymat
+    if (!isToday) {
       return StepCardWidget(
         loading: state.isMetricsLoading,
         currentSteps: state.currentSteps,
@@ -230,6 +200,29 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         caloriesBurned: state.metrics?.kcal ?? 0,
       );
     }
+
+    return StreamBuilder<int>(
+      stream: pedometerService.todayStepsStream,
+      initialData: pedometerService.dailySteps,
+      builder: (context, snapshot) {
+        final currentSteps = snapshot.data ?? state.currentSteps;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (currentSteps != state.currentSteps) {
+            manager.updateTodaySteps(currentSteps);
+          }
+        });
+
+        return StepCardWidget(
+          loading: false,
+          currentSteps: currentSteps,
+          targetSteps: state.targetSteps,
+          timeInSeconds: state.metrics?.duration ?? 0,
+          distanceInKm: state.metrics?.distance ?? 0,
+          caloriesBurned: state.metrics?.kcal ?? 0,
+        );
+      },
+    );
   }
 
   bool _isToday(DateTime day) {
@@ -243,10 +236,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         initialDate: manager.state.day ?? DateTime.now(),
         onDaySelected: (date) {
           manager.updateDay(date);
+
           manager.getSummary();
           manager.getWater();
-          manager.getMetrics();
-          manager.getDailyStep();
         },
       ),
     );
