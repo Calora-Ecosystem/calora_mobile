@@ -209,7 +209,11 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     required double stepValue,
   }) {
     final isToday = state.period == 0 && state.dailyOffset == 0;
+
     final currentSteps = isToday ? state.stepCount : state.dailyDisplayStepCount;
+
+    final shouldShowTodayInitialShimmer = isToday && !state.hasLoadedTodayInitial && state.isDailyLoading;
+
     return _buildTabContent(
       screenshotController: _screenshotControllers[0],
       fitnessTrackWidget: DailyFitnessTrackWidget(
@@ -218,7 +222,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         metrics: state.dailyMetrics,
         stepCount: currentSteps,
         offset: state.dailyOffset,
-        loading: isToday ? false : state.isDailyLoading,
+        loading: isToday ? shouldShowTodayInitialShimmer : state.isDailyLoading,
         onClickBackward: () => manager.changeOffset(-1),
         onClickForward: () => manager.changeOffset(1),
         onClickMoreVert: () => _showActionsSheet(context, manager),

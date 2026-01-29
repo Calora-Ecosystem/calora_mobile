@@ -268,7 +268,11 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   Future<void> fetchDataForPeriod(int period, int offset, {bool showLoading = false}) async {
     final now = DateTime.now();
 
-    if (showLoading) {
+    final isTodayDaily = (period == 0 && offset == 0);
+
+    final shouldShowShimmer = showLoading && (!isTodayDaily || (isTodayDaily && !state.hasLoadedTodayInitial));
+
+    if (shouldShowShimmer) {
       if (period == 0) emit(state.copyWith(isDailyLoading: true));
       if (period == 1) emit(state.copyWith(isWeeklyLoading: true));
       if (period == 2) emit(state.copyWith(isMonthlyLoading: true));
@@ -284,6 +288,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     if (period == 0) emit(state.copyWith(isDailyLoading: false));
     if (period == 1) emit(state.copyWith(isWeeklyLoading: false));
     if (period == 2) emit(state.copyWith(isMonthlyLoading: false));
+
+    if (isTodayDaily && !state.hasLoadedTodayInitial) {
+      emit(state.copyWith(hasLoadedTodayInitial: true));
+    }
 
     startLiveSyncIfNeeded();
   }
