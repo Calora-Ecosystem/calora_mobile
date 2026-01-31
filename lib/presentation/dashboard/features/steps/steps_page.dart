@@ -51,7 +51,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.fetchDataForPeriod(0, 0, showLoading: true);
     manager.fetchDataForPeriod(1, 0);
     manager.fetchDataForPeriod(2, 0);
-
     manager.startLiveSyncIfNeeded();
 
     context.read<DashboardManager>().initialize();
