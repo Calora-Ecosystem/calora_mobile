@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -13,11 +14,9 @@ import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:developer';
 
 @injectable
 class HomeManager extends Manager<HomeState, HomeEffect> {
@@ -35,29 +34,59 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     this._metricsSync,
   ) : super(HomeState());
 
+  // ===== Metrics live sync =====
   StreamSubscription<int>? _metricsSyncSub;
-
   Timer? _metricsDebounce;
   bool _metricsInFlight = false;
+
+  // ===== Foreground service =====
   bool _fgsStarted = false;
   Future<void>? _fgsInitFuture;
+
+  // ===== Permission single-flight (FIX) =====
+  Future<Map<Permission, PermissionStatus>>? _permFuture;
+
+  // ===== Fake notif (debug) =====
   Timer? _fakeDataTimer;
   int _fakeSteps = 0;
 
+  /// Public API: safe init (won't run twice).
   Future<void> initStepsForeground() {
-    _fgsInitFuture ??= _initStepsForegroundInternal().whenComplete(() {});
+    // Agar allaqachon init ketayotgan bo‘lsa — o‘sha future qaytadi.
+    _fgsInitFuture ??= _initStepsForegroundInternal().whenComplete(() {
+      // init tugagach, _fgsInitFuture ni null qilmaymiz — chunki qayta-qayta
+      // init qilish shart emas. Faqat stop bo‘lsa qayta init bo‘ladi.
+    });
+
     return _fgsInitFuture!;
+  }
+
+  /// Single-flight permission request.
+  /// Bir paytda bir nechta .request() bo‘lib ketmasin — asosiy fix shu.
+  Future<Map<Permission, PermissionStatus>> _requestPermissionsOnce({
+    required bool includeNotifications,
+  }) {
+    if (_permFuture != null) return _permFuture!;
+
+    final perms = <Permission>[
+      Permission.activityRecognition,
+      Permission.sensors,
+      Permission.locationWhenInUse,
+      if (includeNotifications) Permission.notification, // Android 13+
+    ];
+
+    _permFuture = perms.request().whenComplete(() {
+      // User settingsni o‘zgartirib qaytib kelsa, keyingi safar qayta so‘rashi mumkin.
+      _permFuture = null;
+    });
+
+    return _permFuture!;
   }
 
   Future<void> _initStepsForegroundInternal() async {
     if (_fgsStarted) return;
 
-    final statuses = await [
-      Permission.activityRecognition,
-      Permission.sensors,
-      Permission.locationWhenInUse,
-      Permission.notification, // Android 13+
-    ].request();
+    final statuses = await _requestPermissionsOnce(includeNotifications: true);
 
     final arOk = statuses[Permission.activityRecognition]?.isGranted == true;
     final notifOk = statuses[Permission.notification]?.isGranted == true;
@@ -70,12 +99,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
     StepsForegroundService.instance.setGoalSteps(goalSteps);
 
-    final ok = await StepsForegroundService.instance.start(initialSteps: state.currentSteps);
-    _fgsStarted = ok;
+    final ok = await StepsForegroundService.instance.start(
+      initialSteps: state.currentSteps,
+    );
 
+    _fgsStarted = ok;
     log('Native FGS started=$_fgsStarted goal=$goalSteps', name: 'HomeManager');
   }
 
+  // Optional: agar siz faqat permission so‘rashni alohida chaqirsangiz ham conflict bo‘lmaydi.
+  Future<void> requestPedometerPermissions() async {
+    await _requestPermissionsOnce(includeNotifications: false);
+  }
+
+  // Debug helper
   Future<void> startFakeNativeNotif() async {
     await initStepsForeground();
     if (!_fgsStarted) return;
@@ -86,7 +123,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     _fakeDataTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
       _fakeSteps += 37;
       updateTodaySteps(_fakeSteps);
-      await StepsForegroundService.instance.updateSteps(_fakeSteps);
+
+      try {
+        await StepsForegroundService.instance.updateSteps(_fakeSteps);
+      } catch (e, s) {
+        log('updateSteps error: $e', name: 'HomeManager', stackTrace: s);
+      }
     });
 
     log('Fake native notification started', name: 'HomeManager');
@@ -96,19 +138,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     _fakeDataTimer?.cancel();
     _fakeDataTimer = null;
 
-    await StepsForegroundService.instance.stop();
+    try {
+      await StepsForegroundService.instance.stop();
+    } catch (e, s) {
+      log('stop FGS error: $e', name: 'HomeManager', stackTrace: s);
+    }
+
     _fgsStarted = false;
+    // Stop bo‘lgach qayta init kerak bo‘lishi mumkin:
+    _fgsInitFuture = null;
 
     log('Fake native notification stopped', name: 'HomeManager');
   }
 
-  Future<void> requestPedometerPermissions() async {
-    await [
-      Permission.activityRecognition,
-      Permission.sensors,
-      Permission.locationWhenInUse,
-    ].request();
-  }
+  // ===== Profile / daily flow =====
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
     onStart: () => emit(state.copyWith(isLoading: true)),
@@ -161,6 +204,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       getMetrics(showLoading: false);
       return;
     }
+
     _metricsDebounce = Timer(const Duration(milliseconds: 800), () {
       getMetrics(showLoading: false);
     });
@@ -168,11 +212,21 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   void updateTodaySteps(int steps) {
     final day = state.day ?? DateTime.now();
-    if (_isToday(day)) {
-      emit(state.copyWith(currentSteps: steps));
-      if (_fgsStarted) {
-        StepsForegroundService.instance.updateSteps(steps);
-      }
+    if (!_isToday(day)) return;
+
+    emit(state.copyWith(currentSteps: steps));
+
+    if (_fgsStarted) {
+      // fire-and-forget; exception bo‘lsa crash qilmasin
+      unawaited(_safeUpdateFgsSteps(steps));
+    }
+  }
+
+  Future<void> _safeUpdateFgsSteps(int steps) async {
+    try {
+      await StepsForegroundService.instance.updateSteps(steps);
+    } catch (e, s) {
+      log('FGS updateSteps error: $e', name: 'HomeManager', stackTrace: s);
     }
   }
 
@@ -216,7 +270,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         .getDailiesWater(state.day ?? DateTime.now())
         .handle(
           onStart: () => emit(state.copyWith(isWaterLoading: true)),
-          onData: (data) => emit(state.copyWith(waterIntake: data.value, isWaterLoading: false)),
+          onData: (data) => emit(
+            state.copyWith(
+              waterIntake: data.value,
+              isWaterLoading: false,
+            ),
+          ),
           onError: (_) => emit(state.copyWith(isWaterLoading: false)),
         );
   }
@@ -262,13 +321,24 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       onStart: () => emit(state.copyWith(isLoading: true)),
       onData: (data) {
         final stepValue = data
-            .firstWhere((e) => e.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Step',
+              orElse: () => NormsRequest(metric: 'Step', value: 0),
+            )
             .value;
+
         final waterValue = data
-            .firstWhere((e) => e.metric == 'Water', orElse: () => NormsRequest(metric: 'Water', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Water',
+              orElse: () => NormsRequest(metric: 'Water', value: 0),
+            )
             .value;
+
         final kcalValue = data
-            .firstWhere((e) => e.metric == 'Kcal', orElse: () => NormsRequest(metric: 'Kcal', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Kcal',
+              orElse: () => NormsRequest(metric: 'Kcal', value: 0),
+            )
             .value;
 
         emit(
@@ -287,13 +357,24 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   void updateNutrientsPercent(SummaryRequest summary) {
     final proteinNorm = state.norms
-        .firstWhere((e) => e.metric == 'Protein', orElse: () => NormsRequest(metric: 'Protein', value: 1))
+        .firstWhere(
+          (e) => e.metric == 'Protein',
+          orElse: () => NormsRequest(metric: 'Protein', value: 1),
+        )
         .value;
+
     final fatNorm = state.norms
-        .firstWhere((e) => e.metric == 'Fat', orElse: () => NormsRequest(metric: 'Fat', value: 1))
+        .firstWhere(
+          (e) => e.metric == 'Fat',
+          orElse: () => NormsRequest(metric: 'Fat', value: 1),
+        )
         .value;
+
     final carbNorm = state.norms
-        .firstWhere((e) => e.metric == 'Carb', orElse: () => NormsRequest(metric: 'Carb', value: 1))
+        .firstWhere(
+          (e) => e.metric == 'Carb',
+          orElse: () => NormsRequest(metric: 'Carb', value: 1),
+        )
         .value;
 
     emit(
@@ -325,19 +406,26 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     });
   }
 
+  // ===== Lifecycle =====
+
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _stopMetricsLiveSync();
 
     _fakeDataTimer?.cancel();
     _fakeDataTimer = null;
 
     if (_fgsStarted) {
-      StepsForegroundService.instance.stop();
+      try {
+        await StepsForegroundService.instance.stop();
+      } catch (e, s) {
+        log('close stop FGS error: $e', name: 'HomeManager', stackTrace: s);
+      }
       _fgsStarted = false;
+      _fgsInitFuture = null;
     }
 
-    return super.close();
+    await super.close();
   }
 }
 
