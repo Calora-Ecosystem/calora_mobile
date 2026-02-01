@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_management.dart';
 import 'package:flutter/animation.dart';
@@ -20,6 +21,12 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
     _apiProgressTimer?.cancel();
     _animationTimer?.cancel();
     emit(state.copyWith(progressPercent: 0.0));
+  }
+
+  Future<void> getProfile() async {
+    final profile = await profileStore.getProfile();
+    final bool showBmiProgress = (profile.goal ?? '').trim() != 'SaveCurrent';
+    emit(state.copyWith(startValue: profile.weight ?? 0, endValue: profile.targetWeight ?? 0));
   }
 
   void getDailyGoals() async {

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
@@ -8,16 +10,19 @@ import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_management.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_manager.dart';
+import 'package:calora/presentation/questions/calculate_plane/widget/weight_progress_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class CalculatePage
-    extends Managed<CalculateManager, CalculateState, CalculateEffect> {
-  const CalculatePage({super.key});
+class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateEffect> {
+  final double startValue;
+  final double endValue;
+  const CalculatePage({super.key, required this.startValue, required this.endValue});
 
   @override
   void init(BuildContext context, CalculateManager manager) {
+    manager.getProfile();
     super.init(context, manager);
   }
 
@@ -47,7 +52,7 @@ class CalculatePage
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -61,15 +66,12 @@ class CalculatePage
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Strings.yourProgramIsReady
-                            .text(16, 20, 500)
-                            .c(context.colors.textStrong),
+                        Strings.yourProgramIsReady.text(16, 20, 500).c(context.colors.textStrong),
                         SizedBox(height: 20),
                         _buildIconTextRow(
                           context,
                           icon: Assets.icons.vegetarianFood.svg(),
-                          count:
-                              '${state.dailyGoals[0].toDouble().asFixedTruncated(0)} ${Strings.kcal}',
+                          count: '${state.dailyGoals[0].toDouble().asFixedTruncated(0)} ${Strings.kcal}',
                           title: Strings.mealPlan,
                           subtitle: Strings.dailyGoal,
                         ),
@@ -96,12 +98,14 @@ class CalculatePage
                             color: context.colors.backgroundElevation,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Strings.beforeStartingAnyDiet
-                              .text(12, 14, 400)
-                              .c(context.colors.textStrong),
+                          child: Strings.beforeStartingAnyDiet.text(12, 14, 400).c(context.colors.textStrong),
                         ),
                       ],
                     ),
+                  ),
+                  WeightProgressChart(
+                    startValue: startValue,
+                    endValue: endValue,
                   ),
                   SizedBox(
                     width: double.infinity,

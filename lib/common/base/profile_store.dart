@@ -23,6 +23,12 @@ class ProfileStore extends BaseStore<ProfileRequest> {
         },
       );
 
+  Stream<ProfileRequest> stream() async* {
+    yield await call();
+
+    yield* watch();
+  }
+
   Future<void> setProfile(ProfileRequest profile) async {
     await set(profile);
   }
@@ -90,8 +96,7 @@ final profileStore = GetIt.I<ProfileStore>();
 enum Gender {
   Male,
   Female,
-  Unknown
-  ;
+  Unknown;
 
   bool get isMale => this == Gender.Male;
 

@@ -35,7 +35,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     manager.updateDay(DateTime.now());
     manager.refreshAll();
     context.read<DashboardManager>().initialize();
-    manager.requestPedometerPermissions();
+    manager.initStepsForeground();
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
     _tabsRouter!.addListener(() {

@@ -26,7 +26,7 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
       withType: (e) {
         switch (e.type) {
           case QuestionsEffectType.success:
-            pushProgressPage(context);
+            pushProgressPage(context, manager.state.answers!.weight ?? 0, manager.state.answers!.targetWeight ?? 0);
             break;
           case QuestionsEffectType.error:
             break;
@@ -113,7 +113,7 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
     );
   }
 
-  void pushProgressPage(BuildContext context) {
+  void pushProgressPage(BuildContext context, double startValue, double endValue) {
     context.router.push(
       // ProgressRoute(
       //   mode: 2,
@@ -123,7 +123,7 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
       ProgressRoute(
         mode: 2,
         fetchGoals: true,
-        nextRoute: const CalculateRoute(),
+        nextRoute: CalculateRoute(startValue: startValue, endValue: endValue),
         title: Strings.planningDailySchedule,
         analyzeItems: [
           ProgressAnalyzeItem(

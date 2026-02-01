@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -12,6 +13,7 @@ import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -37,6 +39,68 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   Timer? _metricsDebounce;
   bool _metricsInFlight = false;
+  bool _fgsStarted = false;
+  Future<void>? _fgsInitFuture;
+  Timer? _fakeDataTimer;
+  int _fakeSteps = 0;
+
+  Future<void> initStepsForeground() {
+    _fgsInitFuture ??= _initStepsForegroundInternal().whenComplete(() {});
+    return _fgsInitFuture!;
+  }
+
+  Future<void> _initStepsForegroundInternal() async {
+    if (_fgsStarted) return;
+
+    final statuses = await [
+      Permission.activityRecognition,
+      Permission.sensors,
+      Permission.locationWhenInUse,
+      Permission.notification, // Android 13+
+    ].request();
+
+    final arOk = statuses[Permission.activityRecognition]?.isGranted == true;
+    final notifOk = statuses[Permission.notification]?.isGranted == true;
+
+    if (!arOk || !notifOk) {
+      log('Native FGS permissions not granted: $statuses', name: 'HomeManager');
+      return;
+    }
+
+    final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
+    StepsForegroundService.instance.setGoalSteps(goalSteps);
+
+    final ok = await StepsForegroundService.instance.start(initialSteps: state.currentSteps);
+    _fgsStarted = ok;
+
+    log('Native FGS started=$_fgsStarted goal=$goalSteps', name: 'HomeManager');
+  }
+
+  Future<void> startFakeNativeNotif() async {
+    await initStepsForeground();
+    if (!_fgsStarted) return;
+
+    _fakeDataTimer?.cancel();
+    _fakeSteps = 0;
+
+    _fakeDataTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      _fakeSteps += 37;
+      updateTodaySteps(_fakeSteps);
+      await StepsForegroundService.instance.updateSteps(_fakeSteps);
+    });
+
+    log('Fake native notification started', name: 'HomeManager');
+  }
+
+  Future<void> stopFakeNativeNotif() async {
+    _fakeDataTimer?.cancel();
+    _fakeDataTimer = null;
+
+    await StepsForegroundService.instance.stop();
+    _fgsStarted = false;
+
+    log('Fake native notification stopped', name: 'HomeManager');
+  }
 
   Future<void> requestPedometerPermissions() async {
     await [
@@ -106,6 +170,9 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     final day = state.day ?? DateTime.now();
     if (_isToday(day)) {
       emit(state.copyWith(currentSteps: steps));
+      if (_fgsStarted) {
+        StepsForegroundService.instance.updateSteps(steps);
+      }
     }
   }
 
@@ -261,6 +328,15 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   @override
   Future<void> close() {
     _stopMetricsLiveSync();
+
+    _fakeDataTimer?.cancel();
+    _fakeDataTimer = null;
+
+    if (_fgsStarted) {
+      StepsForegroundService.instance.stop();
+      _fgsStarted = false;
+    }
+
     return super.close();
   }
 }
