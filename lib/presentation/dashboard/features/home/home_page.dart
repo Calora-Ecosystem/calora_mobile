@@ -11,6 +11,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/calendar/calendar_selector_widget.dart';
+import 'package:calora/common/widgets/confetti/confetti.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -40,7 +41,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     manager.updateDay(DateTime.now());
     manager.refreshAll();
     context.read<DashboardManager>().initialize();
-
     Future.microtask(() => manager.initStepsForeground());
 
     _tabsRouter = AutoTabsRouter.of(context);
