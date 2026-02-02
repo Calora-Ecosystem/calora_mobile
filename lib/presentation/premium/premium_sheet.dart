@@ -8,6 +8,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/app_lifecycle_observer_service.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/confetti/confetti.dart';
 import 'package:calora/common/widgets/containers/bottom_box.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/sheets/default_bottom_sheet.dart';
@@ -38,7 +39,8 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
       openPaymentUrlFailure: (error) => CustomSnackBar.show(context, error),
       deleteSubscriptionFailure: (error) => CustomSnackBar.show(context, error),
       invalidPromoCode: () => CustomSnackBar.show(context, Strings.invalidPromoCode),
-      subscriptionSuccess: () {
+      subscriptionSuccess: () async {
+        await PremiumConfettiOverlay.show(context);
         CustomSnackBar.showSuccess(context, Strings.subscriptionSuccess);
         context.read<DashboardManager>().sendTodayStepsToBackend();
         context.router.maybePop();
