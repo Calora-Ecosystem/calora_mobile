@@ -4,8 +4,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/course_questions/management/course_questions_manager.dart';
 import 'package:calora/widgets/questions/purposes_widget.dart';
-import 'package:calora/widgets/questions/questions_widget.dart'
-    show QuestionWidget;
+import 'package:calora/widgets/questions/questions_widget.dart' show QuestionWidget;
 import 'package:flutter/cupertino.dart';
 import 'package:management/management.dart';
 
@@ -13,8 +12,7 @@ class CourseQuestionsBodyWidget extends StatefulWidget {
   const CourseQuestionsBodyWidget({super.key});
 
   @override
-  State<CourseQuestionsBodyWidget> createState() =>
-      _CourseQuestionsBodyWidgetState();
+  State<CourseQuestionsBodyWidget> createState() => _CourseQuestionsBodyWidgetState();
 }
 
 class _CourseQuestionsBodyWidgetState extends State<CourseQuestionsBodyWidget> {
@@ -25,6 +23,9 @@ class _CourseQuestionsBodyWidgetState extends State<CourseQuestionsBodyWidget> {
     Strings.increaseActivity,
     Strings.highLevelActivity,
   ];
+
+  final FixedExtentScrollController _timeController = FixedExtentScrollController(initialItem: 20);
+
   List<String> conditions = [Strings.iAmFine, Strings.minimumLoad];
 
   @override
@@ -63,6 +64,7 @@ class _CourseQuestionsBodyWidgetState extends State<CourseQuestionsBodyWidget> {
             padding: const EdgeInsets.all(8),
             height: 200,
             child: CupertinoPicker(
+              scrollController: _timeController,
               itemExtent: 40,
               magnification: 1.2,
               squeeze: 1.2,

@@ -21,9 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class AccountDetailPage
-    extends
-        Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
+class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState, AccountDetailEffect> {
   AccountDetailPage({super.key});
 
   @override
@@ -63,8 +61,7 @@ class AccountDetailPage
             final detailsInfo = state.detailInfos![index];
             return DetailInfoItemBuilder(
               detailInfo: detailsInfo,
-              onClickItem: (data) =>
-                  _openInputManagePage(data, context, manager),
+              onClickItem: (data) => _openInputManagePage(data, context, manager),
             );
           },
         );
@@ -150,8 +147,13 @@ class AccountDetailPage
                 info.message,
               ).displayName,
               selection: Selection(type: SelectionType.goal),
-              onSave: (data) {
+              onSave: (data) async {
+                final apiGoal = PurposeEnum.fromDisplayName(data.name).toApi();
+
+                await profileStore.updateProfile(goal: apiGoal);
+
                 manager.updateProfileDetail(info, data.name);
+
                 _dismiss(context);
               },
             );
@@ -220,15 +222,9 @@ class AccountDetailPage
               onSave: (data) {
                 profileStore.updateProfile(
                   name: info.type == DetailInfoType.name ? data : null,
-                  weight: info.type == DetailInfoType.weight
-                      ? double.tryParse(data)
-                      : null,
-                  height: info.type == DetailInfoType.height
-                      ? double.tryParse(data)
-                      : null,
-                  targetWeight: info.type == DetailInfoType.targetWeight
-                      ? double.tryParse(data)
-                      : null,
+                  weight: info.type == DetailInfoType.weight ? double.tryParse(data) : null,
+                  height: info.type == DetailInfoType.height ? double.tryParse(data) : null,
+                  targetWeight: info.type == DetailInfoType.targetWeight ? double.tryParse(data) : null,
                 );
                 manager.updateProfileDetail(info, data);
                 _dismiss(context);

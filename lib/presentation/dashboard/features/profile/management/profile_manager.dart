@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 import 'package:injectable/injectable.dart';
@@ -9,6 +12,8 @@ class ProfileManager extends Manager<ProfileState, ProfileEffect> {
 
   Future<void> getProfile() async {
     final profile = await profileStore.getProfile();
-    emit(state.copyWith(profile: profile));
+    final bool showBmiProgress = (profile.goal ?? '').trim() != 'SaveCurrent';
+    log(profile.bmi.toString());
+    emit(state.copyWith(profile: profile, showBmiProgress: showBmiProgress));
   }
 }

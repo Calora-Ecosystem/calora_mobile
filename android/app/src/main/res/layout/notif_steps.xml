@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="@drawable/bg_notif_card">
+
+    <!-- TOP ROW: left group expands, right group stays at end -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- LEFT GROUP (weight=1) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_steps"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tv_steps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#202020" />
+        </LinearLayout>
+
+        <!-- RIGHT GROUP -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_kcal"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tv_kcal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#202020" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- PROGRESS -->
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:layout_marginTop="8dp"
+        android:max="100"
+        android:progress="0"
+        android:progressDrawable="@drawable/progress_steps" />
+</LinearLayout>
