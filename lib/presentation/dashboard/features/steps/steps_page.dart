@@ -72,17 +72,12 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       body: DefaultRefreshIndicator(
         notificationPredicate: (notification) => notification.depth == 1,
         edgeOffset: context.topPadding + kToolbarHeight,
-        onRefresh: () async => manager.fetchDataForPeriod(
-          state.period,
-          manager.currentOffset,
-          showLoading: true,
-        ),
+        onRefresh: () async => manager.fetchDataForPeriod(state.period, manager.currentOffset, showLoading: true),
         child: DefaultTabController(
           length: 3,
           child: Builder(
             builder: (context) {
               final controller = DefaultTabController.of(context);
-
               if (_tabController != controller || !_tabListenerAttached) {
                 _tabController = controller;
                 _tabListenerAttached = true;
@@ -94,35 +89,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                   if (newPeriod == 0) offset = manager.state.dailyOffset;
                   if (newPeriod == 1) offset = manager.state.weeklyOffset;
                   if (newPeriod == 2) offset = manager.state.monthlyOffset;
-                  if (offset == 0) {
-                    manager.fetchDataForPeriod(newPeriod, offset);
-                  }
+                  if (offset == 0) manager.fetchDataForPeriod(newPeriod, offset);
                 });
               }
 
               return Stack(
                 children: [
-                  Positioned.fill(
-                    child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill),
-                  ),
+                  Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
                   SafeArea(
                     child: Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 42, left: 20, right: 20),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Strings.steps.text(32, 36, 700),
-                          ),
+                          child: Align(alignment: Alignment.centerLeft, child: Strings.steps.text(32, 36, 700)),
                         ),
                         const SizedBox(height: 12),
                         Container(
                           height: 40,
                           margin: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
                           child: TabBar(
                             indicatorPadding: const EdgeInsets.all(2),
                             indicatorSize: TabBarIndicatorSize.tab,
@@ -373,10 +358,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       child: Column(
         children: [
           Screenshot(controller: screenshotController, child: fitnessTrackWidget),
-          LeaderboardSection(
-            allUserStatsForPeriod: allUserStatsForPeriod,
-            isGettingStats: isGettingStats,
-          ),
+          LeaderboardSection(allUserStatsForPeriod: allUserStatsForPeriod, isGettingStats: isGettingStats),
         ],
       ),
     );
