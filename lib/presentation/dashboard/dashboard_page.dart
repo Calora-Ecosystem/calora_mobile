@@ -25,6 +25,12 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   }
 
   @override
+  void init(BuildContext context, DashboardManager manager) {
+    manager.initialize();
+    super.init(context, manager);
+  }
+
+  @override
   Widget builder(context, manager, state) {
     showuserid();
     return AutoTabsScaffold(

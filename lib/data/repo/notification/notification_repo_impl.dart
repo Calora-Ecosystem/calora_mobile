@@ -33,9 +33,8 @@ class NotificationRepoImpl extends NotificationRepo {
     await notificationApi.deleteReminder(id);
   }
 
+  @override
   PagingController<int, model.Notification> getNotifications() {
-    const int _keepLast = 10;
-
     final controller = PagingController<int, model.Notification>(
       firstPageKey: 0,
     );
@@ -46,24 +45,16 @@ class NotificationRepoImpl extends NotificationRepo {
           skip: pageKey,
           take: _pageSize,
         );
-
         final data = response.data as Map<String, dynamic>;
         final List<dynamic> content = data['content'] ?? [];
         final notifications = content.map((e) => model.Notification.fromJson(e as Map<String, dynamic>)).toList();
 
         final isLastPage = notifications.length < _pageSize;
-
         if (isLastPage) {
           controller.appendLastPage(notifications);
         } else {
           final nextPageKey = pageKey + notifications.length;
           controller.appendPage(notifications, nextPageKey);
-        }
-
-        final list = controller.itemList ?? <model.Notification>[];
-        if (list.length > _keepLast) {
-          controller.itemList = list.sublist(list.length - _keepLast);
-          controller.notifyListeners();
         }
       } catch (error) {
         controller.error = error;

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
@@ -20,6 +22,7 @@ import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
 import 'package:calora/widgets/plan/daily_plan_widget.dart';
 import 'package:calora/widgets/steps/step_card_widget.dart';
 import 'package:calora/widgets/water/water_intake_selector.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -53,7 +56,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   @override
   Widget builder(BuildContext context, HomeManager manager, HomeState state) {
     final pedometerService = getIt<PedometerService>();
-
     return StreamBuilder<ProfileRequest>(
       stream: profileStore.watch(),
       builder: (context, snapshot) {
@@ -160,13 +162,11 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                       (state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0),
                                   loading: state.isSummaryLoading,
                                 ),
-
                                 _buildStepCardWithStream(
                                   pedometerService: pedometerService,
                                   state: state,
                                   manager: manager,
                                 ),
-
                                 WaterIntakeSelector(
                                   loading: state.isWaterLoading,
                                   date: state.day ?? DateTime.now(),
@@ -263,7 +263,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     context.router.navigate(const CaloraAiRoute());
   }
 
-  void openInbox(BuildContext context) {
+  void openInbox(BuildContext context) async {
     context.router.navigate(const InboxRoute());
+    final token = await FirebaseMessaging.instance.getToken();
+    log('FCM TOKEN: $token');
   }
 }

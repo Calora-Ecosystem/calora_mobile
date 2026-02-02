@@ -15,35 +15,42 @@ class StepsForegroundService {
     _goalSteps = goal <= 0 ? 10000 : goal;
   }
 
-  Future<bool> start({int initialSteps = 0}) async {
+  Future<bool> start() async {
     if (!Platform.isAndroid) return false;
 
     try {
-      await _ch.invokeMethod('start', {
-        'steps': initialSteps,
-        'goal': _goalSteps,
-      });
-      _started = true;
-      log('Native FGS started', name: 'StepsForegroundService');
-      return true;
+      final res = await _ch.invokeMethod<bool>('start', {'goal': _goalSteps});
+      _started = res ?? true;
+      log('Native FGS started=$_started goal=$_goalSteps', name: 'StepsForegroundService');
+      return _started;
     } catch (e, s) {
-      log('Native FGS start error: $e', name: 'StepsForegroundService');
-      log('$s', name: 'StepsForegroundService');
+      _started = false;
+      log('Native FGS start error: $e', name: 'StepsForegroundService', stackTrace: s);
       return false;
     }
   }
 
-  Future<void> updateSteps(int steps) async {
+  Future<void> updateGoal(int goal) async {
+    if (!Platform.isAndroid) return;
+
+    _goalSteps = goal <= 0 ? 10000 : goal;
+    if (!_started) return;
+
+    try {
+      await _ch.invokeMethod('update_goal', {'goal': _goalSteps});
+    } catch (e, s) {
+      log('Native FGS update_goal error: $e', name: 'StepsForegroundService', stackTrace: s);
+    }
+  }
+
+  Future<void> syncSteps(int steps) async {
     if (!Platform.isAndroid) return;
     if (!_started) return;
 
     try {
-      await _ch.invokeMethod('update', {
-        'steps': steps,
-        'goal': _goalSteps,
-      });
-    } catch (e) {
-      log('Native FGS update error: $e', name: 'StepsForegroundService');
+      await _ch.invokeMethod('sync', {'steps': steps});
+    } catch (e, s) {
+      log('Native FGS sync error: $e', name: 'StepsForegroundService', stackTrace: s);
     }
   }
 
@@ -52,8 +59,8 @@ class StepsForegroundService {
 
     try {
       await _ch.invokeMethod('stop');
-    } catch (e) {
-      log('Native FGS stop error: $e', name: 'StepsForegroundService');
+    } catch (e, s) {
+      log('Native FGS stop error: $e', name: 'StepsForegroundService', stackTrace: s);
     } finally {
       _started = false;
     }

@@ -34,35 +34,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     this._metricsSync,
   ) : super(HomeState());
 
-  // ===== Metrics live sync =====
   StreamSubscription<int>? _metricsSyncSub;
   Timer? _metricsDebounce;
   bool _metricsInFlight = false;
 
-  // ===== Foreground service =====
   bool _fgsStarted = false;
   Future<void>? _fgsInitFuture;
 
-  // ===== Permission single-flight (FIX) =====
   Future<Map<Permission, PermissionStatus>>? _permFuture;
 
-  // ===== Fake notif (debug) =====
-  Timer? _fakeDataTimer;
-  int _fakeSteps = 0;
-
-  /// Public API: safe init (won't run twice).
   Future<void> initStepsForeground() {
-    // Agar allaqachon init ketayotgan bo‘lsa — o‘sha future qaytadi.
-    _fgsInitFuture ??= _initStepsForegroundInternal().whenComplete(() {
-      // init tugagach, _fgsInitFuture ni null qilmaymiz — chunki qayta-qayta
-      // init qilish shart emas. Faqat stop bo‘lsa qayta init bo‘ladi.
-    });
-
+    _fgsInitFuture ??= _initStepsForegroundInternal();
     return _fgsInitFuture!;
   }
 
-  /// Single-flight permission request.
-  /// Bir paytda bir nechta .request() bo‘lib ketmasin — asosiy fix shu.
   Future<Map<Permission, PermissionStatus>> _requestPermissionsOnce({
     required bool includeNotifications,
   }) {
@@ -70,13 +55,10 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
     final perms = <Permission>[
       Permission.activityRecognition,
-      Permission.sensors,
-      Permission.locationWhenInUse,
-      if (includeNotifications) Permission.notification, // Android 13+
+      if (includeNotifications) Permission.notification,
     ];
 
     _permFuture = perms.request().whenComplete(() {
-      // User settingsni o‘zgartirib qaytib kelsa, keyingi safar qayta so‘rashi mumkin.
       _permFuture = null;
     });
 
@@ -89,69 +71,28 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     final statuses = await _requestPermissionsOnce(includeNotifications: true);
 
     final arOk = statuses[Permission.activityRecognition]?.isGranted == true;
-    final notifOk = statuses[Permission.notification]?.isGranted == true;
 
-    if (!arOk || !notifOk) {
-      log('Native FGS permissions not granted: $statuses', name: 'HomeManager');
+    final notifStatus = statuses[Permission.notification];
+    final notifOk = notifStatus == null ? true : notifStatus.isGranted;
+
+    if (!arOk) {
+      log('Native notif FGS: ACTIVITY_RECOGNITION not granted: $statuses', name: 'HomeManager');
       return;
     }
 
     final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
+
     StepsForegroundService.instance.setGoalSteps(goalSteps);
 
-    final ok = await StepsForegroundService.instance.start(
-      initialSteps: state.currentSteps,
-    );
+    final ok = await StepsForegroundService.instance.start();
 
     _fgsStarted = ok;
-    log('Native FGS started=$_fgsStarted goal=$goalSteps', name: 'HomeManager');
+    log('Native notif FGS started=$_fgsStarted goal=$goalSteps notifOk=$notifOk', name: 'HomeManager');
   }
 
-  // Optional: agar siz faqat permission so‘rashni alohida chaqirsangiz ham conflict bo‘lmaydi.
   Future<void> requestPedometerPermissions() async {
     await _requestPermissionsOnce(includeNotifications: false);
   }
-
-  // Debug helper
-  Future<void> startFakeNativeNotif() async {
-    await initStepsForeground();
-    if (!_fgsStarted) return;
-
-    _fakeDataTimer?.cancel();
-    _fakeSteps = 0;
-
-    _fakeDataTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
-      _fakeSteps += 37;
-      updateTodaySteps(_fakeSteps);
-
-      try {
-        await StepsForegroundService.instance.updateSteps(_fakeSteps);
-      } catch (e, s) {
-        log('updateSteps error: $e', name: 'HomeManager', stackTrace: s);
-      }
-    });
-
-    log('Fake native notification started', name: 'HomeManager');
-  }
-
-  Future<void> stopFakeNativeNotif() async {
-    _fakeDataTimer?.cancel();
-    _fakeDataTimer = null;
-
-    try {
-      await StepsForegroundService.instance.stop();
-    } catch (e, s) {
-      log('stop FGS error: $e', name: 'HomeManager', stackTrace: s);
-    }
-
-    _fgsStarted = false;
-    // Stop bo‘lgach qayta init kerak bo‘lishi mumkin:
-    _fgsInitFuture = null;
-
-    log('Fake native notification stopped', name: 'HomeManager');
-  }
-
-  // ===== Profile / daily flow =====
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
     onStart: () => emit(state.copyWith(isLoading: true)),
@@ -176,11 +117,13 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     }
   }
 
+  // ===== Metrics live sync =====
+
   void _startMetricsLiveSync() {
     _metricsSyncSub?.cancel();
 
     _metricsSyncSub = _metricsSync.stream.listen((steps) {
-      log('📣 HomeManager received sync notification: steps=$steps', name: 'HomeManager');
+      log('📣 HomeManager received metrics sync: steps=$steps', name: 'HomeManager');
       _scheduleMetricsRefresh();
     });
 
@@ -210,24 +153,15 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     });
   }
 
+  // ===== Steps & Water =====
+
   void updateTodaySteps(int steps) {
     final day = state.day ?? DateTime.now();
     if (!_isToday(day)) return;
 
+    if (steps == state.currentSteps) return;
+
     emit(state.copyWith(currentSteps: steps));
-
-    if (_fgsStarted) {
-      // fire-and-forget; exception bo‘lsa crash qilmasin
-      unawaited(_safeUpdateFgsSteps(steps));
-    }
-  }
-
-  Future<void> _safeUpdateFgsSteps(int steps) async {
-    try {
-      await StepsForegroundService.instance.updateSteps(steps);
-    } catch (e, s) {
-      log('FGS updateSteps error: $e', name: 'HomeManager', stackTrace: s);
-    }
   }
 
   void updateWaterIntake(double liters) {
@@ -319,7 +253,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   void getStepNorm() {
     _stepRepo.getNorms().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) {
+      onData: (data) async {
         final stepValue = data
             .firstWhere(
               (e) => e.metric == 'Step',
@@ -341,15 +275,24 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
             )
             .value;
 
+        final newTargetSteps = stepValue.toInt();
+
         emit(
           state.copyWith(
             norms: data,
             isLoading: false,
-            targetSteps: stepValue.toInt(),
+            targetSteps: newTargetSteps,
             targetLiters: waterValue,
             targetKcal: kcalValue,
           ),
         );
+
+        if (newTargetSteps > 0) {
+          StepsForegroundService.instance.setGoalSteps(newTargetSteps);
+          if (_fgsStarted) {
+            unawaited(StepsForegroundService.instance.updateGoal(newTargetSteps));
+          }
+        }
       },
       onError: (_) => emit(state.copyWith(isLoading: false)),
     );
@@ -412,14 +355,11 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   Future<void> close() async {
     _stopMetricsLiveSync();
 
-    _fakeDataTimer?.cancel();
-    _fakeDataTimer = null;
-
     if (_fgsStarted) {
       try {
         await StepsForegroundService.instance.stop();
       } catch (e, s) {
-        log('close stop FGS error: $e', name: 'HomeManager', stackTrace: s);
+        log('close stop native FGS error: $e', name: 'HomeManager', stackTrace: s);
       }
       _fgsStarted = false;
       _fgsInitFuture = null;
