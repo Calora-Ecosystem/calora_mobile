@@ -11,18 +11,12 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
 class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardEffect> {
   const DashboardPage({super.key});
-
-  showuserid() async {
-    final userid = await profileStore.getUserId();
-    log(userid.toString());
-  }
 
   @override
   void init(BuildContext context, DashboardManager manager) {
@@ -32,7 +26,6 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
 
   @override
   Widget builder(context, manager, state) {
-    showuserid();
     return AutoTabsScaffold(
       routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
       bottomNavigationBuilder: (context, tabRouter) {

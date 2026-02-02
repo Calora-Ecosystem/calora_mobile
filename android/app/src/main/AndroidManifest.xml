@@ -44,7 +44,7 @@
         android:name="${applicationName}"
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:label="Calora">
 
         <activity
