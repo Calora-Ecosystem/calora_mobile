@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -22,6 +21,7 @@ import 'package:calora/presentation/dashboard/features/steps/widgets/daily_fitne
 import 'package:calora/presentation/dashboard/features/steps/widgets/leaderboard_section.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/monthly_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/weekly_fitness_track_widget.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -53,7 +53,8 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.fetchDataForPeriod(2, 0);
     manager.startLiveSyncIfNeeded();
 
-    context.read<DashboardManager>().initialize();
+    // ⚠️ DashboardManager initialize ni bu yerda chaqirmang (DashboardPage/HomePage’da allaqachon bo‘ladi)
+    // context.read<DashboardManager>().initialize();
   }
 
   @override
@@ -129,7 +130,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                         Expanded(
                           child: TabBarView(
                             children: [
-                              _buildDailyTabWithStream(
+                              _buildDailyTabWithDashboardSteps(
                                 context: context,
                                 pedometerService: pedometerService,
                                 manager: manager,
@@ -185,7 +186,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     );
   }
 
-  Widget _buildDailyTabWithStream({
+  Widget _buildDailyTabWithDashboardSteps({
     required BuildContext context,
     required PedometerService pedometerService,
     required StepsManager manager,
@@ -193,28 +194,62 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     required double stepValue,
   }) {
     final isToday = state.period == 0 && state.dailyOffset == 0;
-
-    final currentSteps = isToday ? state.stepCount : state.dailyDisplayStepCount;
-
     final shouldShowTodayInitialShimmer = isToday && !state.hasLoadedTodayInitial && state.isDailyLoading;
 
-    return _buildTabContent(
-      screenshotController: _screenshotControllers[0],
-      fitnessTrackWidget: DailyFitnessTrackWidget(
-        key: dailyShareAnchorKey,
-        goal: stepValue.toInt(),
-        metrics: state.dailyMetrics,
-        stepCount: currentSteps,
-        offset: state.dailyOffset,
-        loading: isToday ? shouldShowTodayInitialShimmer : state.isDailyLoading,
-        onClickBackward: () => manager.changeOffset(-1),
-        onClickForward: () => manager.changeOffset(1),
-        onClickMoreVert: () => _showActionsSheet(context, manager),
-        onClickPause: () {},
-        onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
-      ),
-      allUserStatsForPeriod: state.dailyUserStates,
-      isGettingStats: state.isDailyLoading,
+    if (!isToday) {
+      final currentSteps = state.dailyDisplayStepCount;
+
+      return _buildTabContent(
+        screenshotController: _screenshotControllers[0],
+        fitnessTrackWidget: DailyFitnessTrackWidget(
+          key: dailyShareAnchorKey,
+          goal: stepValue.toInt(),
+          metrics: state.dailyMetrics,
+          stepCount: currentSteps,
+          offset: state.dailyOffset,
+          loading: state.isDailyLoading,
+          onClickBackward: () => manager.changeOffset(-1),
+          onClickForward: () => manager.changeOffset(1),
+          onClickMoreVert: () => _showActionsSheet(context, manager),
+          onClickPause: () {},
+          onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+        ),
+        allUserStatsForPeriod: state.dailyUserStates,
+        isGettingStats: state.isDailyLoading,
+      );
+    }
+
+    return ManagerBuilder<DashboardState, DashboardEffect>(
+      manager: context.read<DashboardManager>(),
+      properties: (s) => [s.todaySteps],
+      builder: (context, dashState) {
+        final currentSteps = dashState.todaySteps;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (currentSteps != state.stepCount) {
+            manager.updateTodaySteps(currentSteps);
+          }
+        });
+
+        return _buildTabContent(
+          screenshotController: _screenshotControllers[0],
+          fitnessTrackWidget: DailyFitnessTrackWidget(
+            key: dailyShareAnchorKey,
+            goal: stepValue.toInt(),
+            metrics: state.dailyMetrics,
+            stepCount: currentSteps,
+            offset: state.dailyOffset,
+            loading: shouldShowTodayInitialShimmer,
+            onClickBackward: () => manager.changeOffset(-1),
+            onClickForward: () => manager.changeOffset(1),
+            onClickMoreVert: () => _showActionsSheet(context, manager),
+            onClickPause: () {},
+            onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
+          ),
+          allUserStatsForPeriod: state.dailyUserStates,
+          isGettingStats: state.isDailyLoading,
+        );
+      },
     );
   }
 
@@ -256,9 +291,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       backgroundColor: Colors.transparent,
       builder: (_) => EditStepGoalPage(
         initialValue: stepValue.toInt(),
-        onSave: (value) => manager.updateNorm(
-          NormsRequest(metric: 'Step', value: value.toDouble()),
-        ),
+        onSave: (value) => manager.updateNorm(NormsRequest(metric: 'Step', value: value.toDouble())),
       ),
     );
   }
