@@ -101,6 +101,8 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       emit(state.copyWith(profile: profile, isLoading: false));
       profileStore.clear();
       profileStore.set(profile);
+      final w = (profile.weight ?? 0).toDouble();
+      if (w > 0) StepsForegroundService.instance.setUserWeight(w);
     },
   );
 
@@ -355,15 +357,15 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   Future<void> close() async {
     _stopMetricsLiveSync();
 
-    if (_fgsStarted) {
-      try {
-        await StepsForegroundService.instance.stop();
-      } catch (e, s) {
-        log('close stop native FGS error: $e', name: 'HomeManager', stackTrace: s);
-      }
-      _fgsStarted = false;
-      _fgsInitFuture = null;
-    }
+    // if (_fgsStarted) {
+    //   try {
+    //     await StepsForegroundService.instance.stop();
+    //   } catch (e, s) {
+    //     log('close stop native FGS error: $e', name: 'HomeManager', stackTrace: s);
+    //   }
+    //   _fgsStarted = false;
+    //   _fgsInitFuture = null;
+    // }
 
     await super.close();
   }

@@ -37,9 +37,13 @@ class StepsFgService : Service(), SensorEventListener {
 
         const val EXTRA_GOAL = "goal"
         const val EXTRA_STEPS = "steps"
+        const val EXTRA_WEIGHT_KG = "weight_kg"
     }
 
     private var goal: Int = 8000
+
+    // ✅ weight (kcal uchun)
+    private var weightKg: Float = 70f
 
     private lateinit var sensorManager: SensorManager
     private var stepCounterSensor: Sensor? = null
@@ -63,6 +67,7 @@ class StepsFgService : Service(), SensorEventListener {
     private val KEY_DAY = "day_yyyymmdd"
     private val KEY_SYNC_BASE_SENSOR = "sync_base_sensor"
     private val KEY_SYNC_BASE_STEPS = "sync_base_steps"
+    private val KEY_WEIGHT = "weight_kg"
 
     override fun onCreate() {
         super.onCreate()
@@ -72,13 +77,16 @@ class StepsFgService : Service(), SensorEventListener {
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
         restoreSyncIfSameDay()
+
+        // ✅ restore weight
+        weightKg = prefs.getFloat(KEY_WEIGHT, 70f).coerceAtLeast(30f)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> handleStart(intent)
             ACTION_UPDATE_GOAL -> handleUpdateGoal(intent)
-            ACTION_SYNC -> handleSync(intent) // ✅
+            ACTION_SYNC -> handleSync(intent)
             ACTION_STOP -> handleStop()
             else -> Log.w("StepsService", "Unknown action: ${intent?.action}")
         }
@@ -88,12 +96,17 @@ class StepsFgService : Service(), SensorEventListener {
     private fun handleStart(intent: Intent) {
         goal = intent.getIntExtra(EXTRA_GOAL, 8000).coerceAtLeast(1)
 
+        // ✅ weight update
+        val w = intent.getFloatExtra(EXTRA_WEIGHT_KG, weightKg).coerceAtLeast(30f)
+        weightKg = w
+        prefs.edit().putFloat(KEY_WEIGHT, weightKg).apply()
+
         // startda eski qiymatni ko'rsatamiz (agar sync bo'lgan bo'lsa)
         shownSteps = computeDisplayedSteps() ?: 0
         previousShownSteps = shownSteps
 
         startForeground(NOTIF_ID, buildNotification(shownSteps))
-        Log.i("StepsService", "Started. goal=$goal shown=$shownSteps")
+        Log.i("StepsService", "Started. goal=$goal shown=$shownSteps weightKg=$weightKg")
 
         if (!hasActivityPermission()) {
             Log.w("StepsService", "ACTIVITY_RECOGNITION permission yo'q")
@@ -118,6 +131,13 @@ class StepsFgService : Service(), SensorEventListener {
     private fun handleSync(intent: Intent) {
         val steps = intent.getIntExtra(EXTRA_STEPS, 0).coerceAtLeast(0)
 
+        // ✅ weight update (sync paytida ham)
+        val w = intent.getFloatExtra(EXTRA_WEIGHT_KG, weightKg).coerceAtLeast(30f)
+        if (w != weightKg) {
+            weightKg = w
+            prefs.edit().putFloat(KEY_WEIGHT, weightKg).apply()
+        }
+
         if (isNewDay()) {
             clearSync()
         }
@@ -130,7 +150,7 @@ class StepsFgService : Service(), SensorEventListener {
             previousShownSteps = steps
             saveDay()
             updateNotification(force = true)
-            Log.i("StepsService", "SYNC pending (no sensor yet). steps=$steps")
+            Log.i("StepsService", "SYNC pending (no sensor yet). steps=$steps weightKg=$weightKg")
             return
         }
 
@@ -144,7 +164,7 @@ class StepsFgService : Service(), SensorEventListener {
         previousShownSteps = steps
         updateNotification(force = true)
 
-        Log.i("StepsService", "SYNC applied. steps=$steps sensorBase=$sensorNow")
+        Log.i("StepsService", "SYNC applied. steps=$steps sensorBase=$sensorNow weightKg=$weightKg")
     }
 
     private fun handleStop() {
@@ -234,7 +254,12 @@ class StepsFgService : Service(), SensorEventListener {
         val rv = RemoteViews(packageName, R.layout.notif_steps)
 
         val safeGoal = if (goal <= 0) 1 else goal
-        val kcal = (steps * 0.04).roundToInt()
+
+        // ✅ kcal = steps * 0.04 * (weight/70)
+        // 70kg uchun 0.04 bazaviy. Vazn oshsa/ kamayса kcal ham moslashadi.
+        val kcalPerStep = 0.04f * (weightKg / 70f)
+        val kcal = (steps * kcalPerStep).roundToInt()
+
         val pct = ((steps.toFloat() / safeGoal) * 100f).coerceIn(0f, 100f).roundToInt()
 
         rv.setTextViewText(R.id.tv_steps, steps.toString())

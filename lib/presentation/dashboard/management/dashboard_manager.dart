@@ -51,7 +51,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
 
   Future<int> _fetchBackendTodaySteps() async {
     try {
-      final list = await _stepRepo.getSteps(0, isSortDate: true);
+      final list = await _stepRepo.getSteps(0);
       if (list.isEmpty) return 0;
 
       final v = list.first.value;
@@ -111,14 +111,12 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
     _stepsSub = _pedometerService.todayStepsStream.listen(
       (deviceSteps) {
         _latestDeviceSteps = deviceSteps;
-
         final total = _totalSteps;
         emit(state.copyWith(todaySteps: total));
-
+        _metricsSync.notifyUpdated(total);
         if (_shouldSendToBackend(total)) {
           unawaited(sendTodayStepsToBackend());
         }
-
         if (_shouldRefreshMetrics(total)) {
           unawaited(_refreshMetrics(total));
         }
