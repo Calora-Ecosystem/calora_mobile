@@ -51,3 +51,5 @@ app.*.map.json
 *.config.dart
 *.gen.dart
 *.module.dart
+
+.env
