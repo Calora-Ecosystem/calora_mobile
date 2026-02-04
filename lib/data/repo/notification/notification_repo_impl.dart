@@ -47,9 +47,7 @@ class NotificationRepoImpl extends NotificationRepo {
         );
         final data = response.data as Map<String, dynamic>;
         final List<dynamic> content = data['content'] ?? [];
-        final notifications = content
-            .map((e) => model.Notification.fromJson(e as Map<String, dynamic>))
-            .toList();
+        final notifications = content.map((e) => model.Notification.fromJson(e as Map<String, dynamic>)).toList();
 
         final isLastPage = notifications.length < _pageSize;
         if (isLastPage) {

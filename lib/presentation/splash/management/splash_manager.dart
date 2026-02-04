@@ -4,6 +4,7 @@ import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/token/token.dart';
 import 'package:calora/domain/repo/splash/splash_repo.dart';
 import 'package:calora/presentation/splash/management/splash_management.dart';
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -36,8 +37,7 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
     final bool isOnboardingCompleted = results[2] as bool;
     final bool isQuestionaryFinished = results[3] as bool;
 
-    if (token?.refreshTokenExpireAt != null &&
-        token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
+    if (token?.refreshTokenExpireAt != null && token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
       await _authStore.token.clear();
       await _profileStore.clear();
       token = null;
@@ -61,6 +61,13 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
     }
   }
 
-  Future<bool> getCurrentCountry() async =>
-      await _splashRepo.getCurrentCountry();
+  Future<bool> getCurrentCountry() async {
+    try {
+      return await _splashRepo.getCurrentCountry();
+    } on DioException catch (e, s) {
+      return true;
+    } catch (e, s) {
+      return true;
+    }
+  }
 }

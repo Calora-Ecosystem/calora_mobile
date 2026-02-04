@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -15,7 +17,6 @@ import 'package:calora/presentation/dashboard/features/home/management/home_mana
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:developer';
 
 @injectable
 class HomeManager extends Manager<HomeState, HomeEffect> {
@@ -34,16 +35,63 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   ) : super(HomeState());
 
   StreamSubscription<int>? _metricsSyncSub;
-
   Timer? _metricsDebounce;
   bool _metricsInFlight = false;
 
-  Future<void> requestPedometerPermissions() async {
-    await [
+  bool _fgsStarted = false;
+  Future<void>? _fgsInitFuture;
+
+  Future<Map<Permission, PermissionStatus>>? _permFuture;
+
+  Future<void> initStepsForeground() {
+    _fgsInitFuture ??= _initStepsForegroundInternal();
+    return _fgsInitFuture!;
+  }
+
+  Future<Map<Permission, PermissionStatus>> _requestPermissionsOnce({
+    required bool includeNotifications,
+  }) {
+    if (_permFuture != null) return _permFuture!;
+
+    final perms = <Permission>[
       Permission.activityRecognition,
-      Permission.sensors,
-      Permission.locationWhenInUse,
-    ].request();
+      if (includeNotifications) Permission.notification,
+    ];
+
+    _permFuture = perms.request().whenComplete(() {
+      _permFuture = null;
+    });
+
+    return _permFuture!;
+  }
+
+  Future<void> _initStepsForegroundInternal() async {
+    if (_fgsStarted) return;
+
+    final statuses = await _requestPermissionsOnce(includeNotifications: true);
+
+    final arOk = statuses[Permission.activityRecognition]?.isGranted == true;
+
+    final notifStatus = statuses[Permission.notification];
+    final notifOk = notifStatus == null ? true : notifStatus.isGranted;
+
+    if (!arOk) {
+      log('Native notif FGS: ACTIVITY_RECOGNITION not granted: $statuses', name: 'HomeManager');
+      return;
+    }
+
+    final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
+
+    StepsForegroundService.instance.setGoalSteps(goalSteps);
+
+    final ok = await StepsForegroundService.instance.start();
+
+    _fgsStarted = ok;
+    log('Native notif FGS started=$_fgsStarted goal=$goalSteps notifOk=$notifOk', name: 'HomeManager');
+  }
+
+  Future<void> requestPedometerPermissions() async {
+    await _requestPermissionsOnce(includeNotifications: false);
   }
 
   Future<void> getUserInfo() async => await _profileRepo.getProfile().handle(
@@ -69,11 +117,13 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     }
   }
 
+  // ===== Metrics live sync =====
+
   void _startMetricsLiveSync() {
     _metricsSyncSub?.cancel();
 
     _metricsSyncSub = _metricsSync.stream.listen((steps) {
-      log('📣 HomeManager received sync notification: steps=$steps', name: 'HomeManager');
+      log('📣 HomeManager received metrics sync: steps=$steps', name: 'HomeManager');
       _scheduleMetricsRefresh();
     });
 
@@ -97,16 +147,21 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       getMetrics(showLoading: false);
       return;
     }
+
     _metricsDebounce = Timer(const Duration(milliseconds: 800), () {
       getMetrics(showLoading: false);
     });
   }
 
+  // ===== Steps & Water =====
+
   void updateTodaySteps(int steps) {
     final day = state.day ?? DateTime.now();
-    if (_isToday(day)) {
-      emit(state.copyWith(currentSteps: steps));
-    }
+    if (!_isToday(day)) return;
+
+    if (steps == state.currentSteps) return;
+
+    emit(state.copyWith(currentSteps: steps));
   }
 
   void updateWaterIntake(double liters) {
@@ -149,7 +204,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         .getDailiesWater(state.day ?? DateTime.now())
         .handle(
           onStart: () => emit(state.copyWith(isWaterLoading: true)),
-          onData: (data) => emit(state.copyWith(waterIntake: data.value, isWaterLoading: false)),
+          onData: (data) => emit(
+            state.copyWith(
+              waterIntake: data.value,
+              isWaterLoading: false,
+            ),
+          ),
           onError: (_) => emit(state.copyWith(isWaterLoading: false)),
         );
   }
@@ -193,26 +253,46 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   void getStepNorm() {
     _stepRepo.getNorms().handle(
       onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (data) {
+      onData: (data) async {
         final stepValue = data
-            .firstWhere((e) => e.metric == 'Step', orElse: () => NormsRequest(metric: 'Step', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Step',
+              orElse: () => NormsRequest(metric: 'Step', value: 0),
+            )
             .value;
+
         final waterValue = data
-            .firstWhere((e) => e.metric == 'Water', orElse: () => NormsRequest(metric: 'Water', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Water',
+              orElse: () => NormsRequest(metric: 'Water', value: 0),
+            )
             .value;
+
         final kcalValue = data
-            .firstWhere((e) => e.metric == 'Kcal', orElse: () => NormsRequest(metric: 'Kcal', value: 0))
+            .firstWhere(
+              (e) => e.metric == 'Kcal',
+              orElse: () => NormsRequest(metric: 'Kcal', value: 0),
+            )
             .value;
+
+        final newTargetSteps = stepValue.toInt();
 
         emit(
           state.copyWith(
             norms: data,
             isLoading: false,
-            targetSteps: stepValue.toInt(),
+            targetSteps: newTargetSteps,
             targetLiters: waterValue,
             targetKcal: kcalValue,
           ),
         );
+
+        if (newTargetSteps > 0) {
+          StepsForegroundService.instance.setGoalSteps(newTargetSteps);
+          if (_fgsStarted) {
+            unawaited(StepsForegroundService.instance.updateGoal(newTargetSteps));
+          }
+        }
       },
       onError: (_) => emit(state.copyWith(isLoading: false)),
     );
@@ -220,13 +300,24 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   void updateNutrientsPercent(SummaryRequest summary) {
     final proteinNorm = state.norms
-        .firstWhere((e) => e.metric == 'Protein', orElse: () => NormsRequest(metric: 'Protein', value: 1))
+        .firstWhere(
+          (e) => e.metric == 'Protein',
+          orElse: () => NormsRequest(metric: 'Protein', value: 1),
+        )
         .value;
+
     final fatNorm = state.norms
-        .firstWhere((e) => e.metric == 'Fat', orElse: () => NormsRequest(metric: 'Fat', value: 1))
+        .firstWhere(
+          (e) => e.metric == 'Fat',
+          orElse: () => NormsRequest(metric: 'Fat', value: 1),
+        )
         .value;
+
     final carbNorm = state.norms
-        .firstWhere((e) => e.metric == 'Carb', orElse: () => NormsRequest(metric: 'Carb', value: 1))
+        .firstWhere(
+          (e) => e.metric == 'Carb',
+          orElse: () => NormsRequest(metric: 'Carb', value: 1),
+        )
         .value;
 
     emit(
@@ -258,10 +349,23 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     });
   }
 
+  // ===== Lifecycle =====
+
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _stopMetricsLiveSync();
-    return super.close();
+
+    if (_fgsStarted) {
+      try {
+        await StepsForegroundService.instance.stop();
+      } catch (e, s) {
+        log('close stop native FGS error: $e', name: 'HomeManager', stackTrace: s);
+      }
+      _fgsStarted = false;
+      _fgsInitFuture = null;
+    }
+
+    await super.close();
   }
 }
 

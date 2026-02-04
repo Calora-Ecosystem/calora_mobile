@@ -11,9 +11,11 @@ class BmiCard extends StatelessWidget {
   final double targetWeight;
   final double height;
   final double entryWeight;
+  final bool showProgress;
 
   const BmiCard({
     super.key,
+    this.showProgress = true,
     required this.entryWeight,
     required this.weight,
     required this.targetWeight,
@@ -33,9 +35,7 @@ class BmiCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Strings.bodyMassIndex
-                .text(16, 20, 500)
-                .c(context.colors.textStrong),
+            Strings.bodyMassIndex.text(16, 20, 500).c(context.colors.textStrong),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -55,59 +55,55 @@ class BmiCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ColorIndicatorBar(bmi: bmi),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _infoBox(
-                  'Progress',
-                  '${(entryWeight - weight).abs()}',
-                  context,
-                ),
-                SizedBox(width: 16),
-                _infoBox(
-                  Strings.remained,
-                  '${(weight - targetWeight).abs()} kg',
-                  context,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: LinearPercentIndicator(
-                    animation: true,
-                    lineHeight: 16,
-                    percent: calculateWeightProgress(
-                      entryWeight,
-                      weight,
-                      targetWeight,
-                    ),
-                    backgroundColor: context.colors.backgroundElevation,
-                    progressColor: context.colors.accentSub,
-                    barRadius: Radius.circular(12),
-                    padding: EdgeInsets.all(0),
+            if (showProgress) ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _infoBox(
+                    'Progress',
+                    '${(entryWeight - weight).abs()}',
+                    context,
                   ),
-                ),
-                SizedBox(width: 4),
-                Assets.icons.flag.svg(),
-              ],
-            ),
-            SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                entryWeight
-                    .toString()
-                    .text(12, 14, 400)
-                    .c(context.colors.neutral900Primary),
-                targetWeight
-                    .toString()
-                    .text(12, 14, 400)
-                    .c(context.colors.neutral900Primary),
-              ],
-            ),
+                  SizedBox(width: 16),
+                  _infoBox(
+                    Strings.remained,
+                    '${(weight - targetWeight).abs()} kg',
+                    context,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: LinearPercentIndicator(
+                      animation: true,
+                      lineHeight: 16,
+                      percent: calculateWeightProgress(
+                        entryWeight,
+                        weight,
+                        targetWeight,
+                      ),
+                      backgroundColor: context.colors.backgroundElevation,
+                      progressColor: context.colors.accentSub,
+                      barRadius: Radius.circular(12),
+                      padding: EdgeInsets.all(0),
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Assets.icons.flag.svg(),
+                ],
+              ),
+              SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  entryWeight.toString().text(12, 14, 400).c(context.colors.neutral900Primary),
+                  targetWeight.toString().text(12, 14, 400).c(context.colors.neutral900Primary),
+                ],
+              ),
+            ],
           ],
         ),
       ),

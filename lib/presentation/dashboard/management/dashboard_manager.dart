@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
@@ -51,11 +52,9 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   Future<int> _fetchBackendTodaySteps() async {
     try {
       final list = await _stepRepo.getSteps(0, isSortDate: true);
-
       if (list.isEmpty) return 0;
 
       final v = list.first.value;
-
       if (v.isNaN || v.isInfinite) return 0;
 
       return v.floor();
@@ -77,19 +76,24 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
 
       _latestDeviceSteps = _pedometerService.dailySteps;
 
-      _backendBaseSteps = await _fetchBackendTodaySteps();
+      final backendToday = await _fetchBackendTodaySteps();
+
+      _backendBaseSteps = backendToday < _latestDeviceSteps ? _latestDeviceSteps : backendToday;
 
       _deviceStartSteps = _latestDeviceSteps;
 
-      emit(state.copyWith(todaySteps: _totalSteps));
-
+      final total = _totalSteps;
+      emit(state.copyWith(todaySteps: total));
+      if (StepsForegroundService.instance.isRunning) {
+        unawaited(StepsForegroundService.instance.syncSteps(_totalSteps));
+      }
       await sendTodayStepsToBackend(force: true);
 
       _listenToStepUpdates();
       _startPeriodicSync();
 
       log(
-        'Bootstrap done: backendBase=$_backendBaseSteps, deviceStart=$_deviceStartSteps, total=${_totalSteps}',
+        'Bootstrap done: backendToday=$backendToday, base=$_backendBaseSteps, deviceStart=$_deviceStartSteps, total=$total',
         name: 'DashboardManager',
       );
     } catch (e, s) {
@@ -112,11 +116,11 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
         emit(state.copyWith(todaySteps: total));
 
         if (_shouldSendToBackend(total)) {
-          sendTodayStepsToBackend();
+          unawaited(sendTodayStepsToBackend());
         }
 
         if (_shouldRefreshMetrics(total)) {
-          _refreshMetrics(total);
+          unawaited(_refreshMetrics(total));
         }
       },
       onError: (e) {
@@ -146,9 +150,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
       return;
     }
 
-    if (_lastSentTotalSteps >= 0 && total <= _lastSentTotalSteps) {
-      return;
-    }
+    if (_lastSentTotalSteps >= 0 && total <= _lastSentTotalSteps) return;
 
     if (!force) {
       if (_lastSentTotalSteps >= 0) {
@@ -161,12 +163,11 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
       await _stepRepo.sendDailyData(metric: 'Step', value: total);
 
       _lastSentTotalSteps = total;
-
       log('TOTAL qadamlar backendga yuborildi: $total (force: $force)', name: 'DashboardManager');
 
       await _refreshMetrics(total);
-    } catch (e) {
-      log('Qadam yuborish xatosi: $e', name: 'DashboardManager');
+    } catch (e, s) {
+      log('Qadam yuborish xatosi: $e', name: 'DashboardManager', stackTrace: s);
     }
   }
 
@@ -177,10 +178,9 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
       _lastMetricsRefreshedAtTotalSteps = total;
 
       _metricsSync.notifyUpdated(total);
-
       log('Metrikalar yangilandi — TOTAL qadamlar: $total', name: 'DashboardManager');
-    } catch (e) {
-      log('Metrikalarni yangilashda xato: $e', name: 'DashboardManager');
+    } catch (e, s) {
+      log('Metrikalarni yangilashda xato: $e', name: 'DashboardManager', stackTrace: s);
     }
   }
 
@@ -188,10 +188,8 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
     _syncTimer?.cancel();
 
     _syncTimer = Timer.periodic(PERIODIC_SYNC_INTERVAL, (_) {
-      sendTodayStepsToBackend(force: true);
+      unawaited(sendTodayStepsToBackend(force: true));
     });
-
-    sendTodayStepsToBackend(force: true);
   }
 
   @override

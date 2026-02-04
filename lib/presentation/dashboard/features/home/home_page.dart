@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
@@ -9,6 +11,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/calendar/calendar_selector_widget.dart';
+import 'package:calora/common/widgets/confetti/confetti.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -20,6 +23,7 @@ import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
 import 'package:calora/widgets/plan/daily_plan_widget.dart';
 import 'package:calora/widgets/steps/step_card_widget.dart';
 import 'package:calora/widgets/water/water_intake_selector.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -30,14 +34,18 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   TabsRouter? _tabsRouter;
   int _lastIndex = 0;
 
+  final ValueNotifier<bool> _isScrolled = ValueNotifier(false);
+
   @override
-  void init(context, manager) {
+  void init(BuildContext context, HomeManager manager) {
     manager.updateDay(DateTime.now());
     manager.refreshAll();
     context.read<DashboardManager>().initialize();
-    manager.requestPedometerPermissions();
+    Future.microtask(() => manager.initStepsForeground());
+
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
+
     _tabsRouter!.addListener(() {
       final idx = _tabsRouter!.activeIndex;
       if (_lastIndex != 0 && idx == 0) manager.refreshAll();
@@ -46,22 +54,22 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   }
 
   @override
-  Widget builder(context, manager, state) {
+  Widget builder(BuildContext context, HomeManager manager, HomeState state) {
     final pedometerService = getIt<PedometerService>();
-
     return StreamBuilder<ProfileRequest>(
       stream: profileStore.watch(),
       builder: (context, snapshot) {
-        final ValueNotifier<bool> isScrolled = ValueNotifier(false);
         return Scaffold(
           body: Stack(
             children: [
-              Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+              Positioned.fill(
+                child: Assets.icons.background.image(fit: BoxFit.fill),
+              ),
               Positioned.fill(
                 child: Column(
                   children: [
                     ValueListenableBuilder<bool>(
-                      valueListenable: isScrolled,
+                      valueListenable: _isScrolled,
                       builder: (context, scrolled, _) {
                         return HomeAppBar(
                           isScrolled: scrolled,
@@ -74,7 +82,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                     Expanded(
                       child: NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
-                          isScrolled.value = notification.metrics.pixels > 10;
+                          _isScrolled.value = notification.metrics.pixels > 10;
                           return false;
                         },
                         child: DefaultRefreshIndicator(
@@ -93,14 +101,12 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   onBackward: () {
                                     final newDay = (state.day ?? DateTime.now()).subtract(const Duration(days: 1));
                                     manager.updateDay(newDay);
-
                                     manager.getSummary();
                                     manager.getWater();
                                   },
                                   onForward: () {
                                     final newDay = (state.day ?? DateTime.now()).add(const Duration(days: 1));
                                     manager.updateDay(newDay);
-
                                     manager.getSummary();
                                     manager.getWater();
                                   },
@@ -109,6 +115,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   water: '${state.targetLiters} ${Strings.liter}',
                                   steps: state.targetSteps.toString(),
                                 ),
+
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
                                   child: Container(
@@ -135,11 +142,16 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                             ],
                                           ),
                                         ),
-                                        SizedBox(height: 100, width: 100, child: Assets.images.ai.image()),
+                                        SizedBox(
+                                          height: 100,
+                                          width: 100,
+                                          child: Assets.images.ai.image(),
+                                        ),
                                       ],
                                     ),
                                   ),
                                 ),
+
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
                                   normCalories: (state.summary?.kcalNorm.value ?? 0).asFixedTruncated(0).toString(),
@@ -236,7 +248,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         initialDate: manager.state.day ?? DateTime.now(),
         onDaySelected: (date) {
           manager.updateDay(date);
-
           manager.getSummary();
           manager.getWater();
         },
@@ -252,7 +263,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     context.router.navigate(const CaloraAiRoute());
   }
 
-  void openInbox(BuildContext context) {
+  void openInbox(BuildContext context) async {
     context.router.navigate(const InboxRoute());
+    final token = await FirebaseMessaging.instance.getToken();
+    log('FCM TOKEN: $token');
   }
 }

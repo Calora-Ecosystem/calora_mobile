@@ -8,6 +8,7 @@ abstract class ProfileState with _$ProfileState {
   const factory ProfileState({
     ProfileRequest? profile,
     @Default(false) bool isLoading,
+    @Default(true) bool showBmiProgress,
   }) = _ProfileState;
 }
 

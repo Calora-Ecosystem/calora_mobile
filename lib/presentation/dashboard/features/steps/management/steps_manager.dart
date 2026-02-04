@@ -24,11 +24,8 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   Timer? _metricsSafetyTimer;
   Timer? _metricsDebounce;
 
-  StepsManager(
-    this.stepRepo,
-    this.pedometerService,
-    this._metricsSync,
-  ) : super(
+  StepsManager(this.stepRepo, this.pedometerService, this._metricsSync)
+    : super(
         StepsState(
           dailyFrom: DateTime.now().toIso8601String(),
           dailyTo: DateTime.now().toIso8601String(),
@@ -136,16 +133,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   void updateTodaySteps(int steps) {
     emit(state.copyWith(stepCount: steps));
 
-    if (_isTodayDailyView) {
-      emit(state.copyWith(dailyDisplayStepCount: steps));
-    }
+    if (_isTodayDailyView) emit(state.copyWith(dailyDisplayStepCount: steps));
   }
 
-  Future<void> getSteps({
-    required int period,
-    required int offset,
-    required DateTime now,
-  }) async {
+  Future<void> getSteps({required int period, required int offset, required DateTime now}) async {
     await stepRepo
         .getSteps(period, offset: offset)
         .handle(
@@ -154,22 +145,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
             if (period == 0) {
               final displayStepCount = offset == 0 ? state.stepCount : _buildDailySteps(data, offset, now);
 
-              emit(
-                state.copyWith(
-                  dailySteps: data,
-                  dailyDisplayStepCount: displayStepCount,
-                  isGettingSteps: false,
-                ),
-              );
+              emit(state.copyWith(dailySteps: data, dailyDisplayStepCount: displayStepCount, isGettingSteps: false));
             } else if (period == 1) {
               final primaryValues = _buildWeeklySteps(data, offset, now);
-              emit(
-                state.copyWith(
-                  weeklySteps: data,
-                  weeklyPrimaryValues: primaryValues,
-                  isGettingSteps: false,
-                ),
-              );
+              emit(state.copyWith(weeklySteps: data, weeklyPrimaryValues: primaryValues, isGettingSteps: false));
             } else if (period == 2) {
               final primaryValues = _buildMonthlySteps(data, offset, now);
               emit(
@@ -186,11 +165,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         );
   }
 
-  Future<void> getStats({
-    required int period,
-    required int offset,
-    required DateTime now,
-  }) async {
+  Future<void> getStats({required int period, required int offset, required DateTime now}) async {
     await stepRepo
         .getStats(period, offset: offset)
         .handle(
@@ -247,9 +222,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         .handle(
           onStart: () {
             final isTodayDaily = (period == 0 && offset == 0);
-            if (showLoading && !isTodayDaily) {
-              emit(state.copyWith(isGettingUserMetrics: true));
-            }
+            if (showLoading && !isTodayDaily) emit(state.copyWith(isGettingUserMetrics: true));
           },
           onData: (data) {
             if (period == 0) {
@@ -451,9 +424,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   }
 
   int _buildDailySteps(List<StepsWithMetricsRequest> data, int offset, DateTime now) {
-    if (data.isEmpty) {
-      return offset == 0 ? state.stepCount : 0;
-    }
+    if (data.isEmpty) return offset == 0 ? state.stepCount : 0;
 
     final targetDate = DateTime(now.year, now.month, now.day).add(Duration(days: offset));
     final item = data.firstWhere(
@@ -496,9 +467,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     for (final step in data) {
       if (step.date.year == targetMonth.year && step.date.month == targetMonth.month) {
         final dayIndex = step.date.day - 1;
-        if (dayIndex >= 0 && dayIndex < daysInMonth) {
-          month[dayIndex] = step.value;
-        }
+        if (dayIndex >= 0 && dayIndex < daysInMonth) month[dayIndex] = step.value;
       }
     }
 
