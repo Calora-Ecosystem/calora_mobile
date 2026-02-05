@@ -50,8 +50,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.fetchDataForPeriod(1, 0, showLoading: true);
     manager.fetchDataForPeriod(2, 0, showLoading: true);
     manager.startLiveSyncIfNeeded();
-
-      }
+  }
 
   @override
   void listener(BuildContext context, StepsManager manager, StepsEffect effect) {
