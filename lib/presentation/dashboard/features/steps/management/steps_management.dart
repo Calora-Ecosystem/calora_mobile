@@ -28,16 +28,12 @@ abstract class StepsState with _$StepsState {
     @Default('') String weeklyTo,
     @Default('') String monthlyTo,
     @Default([]) List<NormsRequest> norms,
-    @Default([]) List<UserStatRequest> dailyUserStates,
-    @Default([]) List<UserStatRequest> weeklyUserStates,
-    @Default([]) List<UserStatRequest> monthlyUserStates,
     @Default(0) int stepCount,
     @Default(0) int period,
     @Default(0) int dailyOffset,
     @Default(0) int weeklyOffset,
     @Default(0) int monthlyOffset,
     @Default(false) bool isGettingSteps,
-    @Default(false) bool isGettingStats,
     @Default(false) bool isGettingUserMetrics,
     @Default(false) bool isUpdatingNorm,
     @Default(false) bool isGettingNorms,
@@ -50,26 +46,6 @@ abstract class StepsState with _$StepsState {
   }) = _StepsState;
 
   const StepsState._();
-
-  List<UserStatRequest> getUserStates() {
-    List<UserStatRequest> currentPeriodUserStates;
-    switch (period) {
-      case 0:
-        currentPeriodUserStates = dailyUserStates;
-        break;
-      case 1:
-        currentPeriodUserStates = weeklyUserStates;
-        break;
-      case 2:
-        currentPeriodUserStates = monthlyUserStates;
-        break;
-      default:
-        currentPeriodUserStates = [];
-        break;
-    }
-    if (currentPeriodUserStates.length <= 3) return [];
-    return currentPeriodUserStates.sublist(3);
-  }
 
   bool get canGoForward {
     switch (period) {
@@ -101,4 +77,5 @@ abstract class StepsState with _$StepsState {
 @freezed
 class StepsEffect with _$StepsEffect {
   const factory StepsEffect() = _StepsEffect;
+  const factory StepsEffect.refreshPagination({required int period}) = _RefreshPagination;
 }

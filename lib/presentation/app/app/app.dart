@@ -5,6 +5,7 @@ import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/router/custom_navigator_observer.dart';
 import 'package:calora/common/widgets/display/display_widget.dart';
 import 'package:calora/common/widgets/system_ui/remove_status_bar_background.dart';
@@ -23,22 +24,8 @@ class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
   @override
-  void init(BuildContext context, AppManager manager) {
-    super.init(context, manager);
-  }
-
-  @override
-  void onFocusGained(BuildContext context, AppManager manager) {
-    super.onFocusGained(context, manager);
-    manager.startPeriodicDataSync();
-    log('App gained focus');
-  }
-
-  @override
-  void onFocusLost(BuildContext context, AppManager manager) {
-    super.onFocusLost(context, manager);
-    manager.stopPeriodicDataSync();
-    log('App lost focus');
+  void listener(BuildContext context, AppManager manager, AppEffect effect) {
+    super.listener(context, manager, effect);
   }
 
   @override
