@@ -47,8 +47,6 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   @override
   Future<void> init(context, manager) async {
     await manager.fetchDataForPeriod(0, 0, showLoading: true);
-    manager.fetchDataForPeriod(1, 0, showLoading: true);
-    manager.fetchDataForPeriod(2, 0, showLoading: true);
     manager.startLiveSyncIfNeeded();
   }
 
@@ -260,6 +258,7 @@ class _TabBarWrapper extends StatefulWidget {
 
 class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _isTransitioning = false; // NEW: Local state for transition loading
 
   @override
   void initState() {
@@ -283,15 +282,6 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
     if (newPeriod == widget.manager.state.period) return;
 
     widget.manager.changePeriod(newPeriod);
-
-    final offset = switch (newPeriod) {
-      0 => widget.manager.state.dailyOffset,
-      1 => widget.manager.state.weeklyOffset,
-      2 => widget.manager.state.monthlyOffset,
-      _ => 0,
-    };
-
-    widget.manager.fetchDataForPeriod(newPeriod, offset);
   }
 
   @override
@@ -372,7 +362,8 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
   }
 
   Widget _buildWeeklyTab() {
-    final weeklyLoading = widget.state.isWeeklyLoading;
+    final weeklyLoading =
+        widget.state.isWeeklyLoading || (widget.state.period == 1 && widget.state.weeklySteps.isEmpty);
 
     return _KeepAliveTabContent(
       fitnessTrackWidget: Screenshot(
@@ -396,7 +387,8 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
   }
 
   Widget _buildMonthlyTab() {
-    final monthlyLoading = widget.state.isMonthlyLoading;
+    final monthlyLoading =
+        widget.state.isMonthlyLoading || (widget.state.period == 2 && widget.state.monthlySteps.isEmpty);
 
     return _KeepAliveTabContent(
       fitnessTrackWidget: Screenshot(
