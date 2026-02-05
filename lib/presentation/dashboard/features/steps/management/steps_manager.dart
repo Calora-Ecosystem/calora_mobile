@@ -256,7 +256,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     try {
       final List<Future<void>> tasks = [];
 
-      if (state.norms.isEmpty || showLoading) {
+      if (state.norms.isEmpty && !state.isGettingNorms) {
         tasks.add(_safeTrigger(() => getNorms(showLoading: showLoading), 'getNorms'));
       }
 
@@ -313,6 +313,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   }
 
   Future<void> getNorms({bool showLoading = true}) async {
+    emit(state.copyWith(isGettingNorms: true));
     await stepRepo.getNorms().handle(
       onStart: () {},
       onData: (data) => emit(state.copyWith(norms: data, isGettingNorms: false)),
@@ -351,7 +352,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
             dailyTo: toDate.toIso8601String(),
           ),
         );
-
+        fetchDataForPeriod(0, currentOffset);
         break;
       case 1:
         targetOffset = state.weeklyOffset;
@@ -367,6 +368,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
             weeklyTo: toDate.toIso8601String(),
           ),
         );
+        fetchDataForPeriod(1, currentOffset);
         break;
       case 2:
         targetOffset = state.monthlyOffset;
@@ -381,6 +383,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
             monthlyTo: toDate.toIso8601String(),
           ),
         );
+        fetchDataForPeriod(2, currentOffset);
         break;
       default:
         return;
