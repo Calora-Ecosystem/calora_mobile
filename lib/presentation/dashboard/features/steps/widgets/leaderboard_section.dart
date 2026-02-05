@@ -53,10 +53,7 @@ class LeaderboardSection extends StatelessWidget {
           pagingController: paginationService.pagingController,
           builderDelegate: PagedChildBuilderDelegate<UserStatRequest>(
             itemBuilder: (context, user, index) {
-              log('PagedSliverList: Building item at index $index', name: 'LeaderboardSection');
-
               if (index < 3) return const SizedBox.shrink();
-
               return Container(
                 decoration: BoxDecoration(
                   color: context.colors.white,
