@@ -299,7 +299,7 @@ class PedometerService {
               log('✅ Stream initialized with $_dailySteps daily steps', name: 'PedometerService');
               return;
             } catch (e, s) {
-              log('⚠️ Error getting initial daily steps, using 0: $e', name: 'PedometerService');
+              log('⚠️ Error getting initial daily steps, using 0: $e\n$s', name: 'PedometerService');
               _dailySteps = 0;
               lastStepCount = steps;
               isStreamInitialized = true;
@@ -320,7 +320,7 @@ class PedometerService {
               lastStepCount = steps;
               log('🔄 Large delta detected, refreshed: $_dailySteps', name: 'PedometerService');
             } catch (e, s) {
-              log('⚠️ Error refreshing daily steps: $e', name: 'PedometerService');
+              log('⚠️ Error refreshing daily steps: $e\n$s', name: 'PedometerService');
             }
           } else if (delta < 0) {
             try {
@@ -328,7 +328,7 @@ class PedometerService {
               lastStepCount = steps;
               log('🔄 Counter reset detected, refreshed: $_dailySteps', name: 'PedometerService');
             } catch (e, s) {
-              log('⚠️ Error handling counter reset: $e', name: 'PedometerService');
+              log('⚠️ Error handling counter reset: $e\n$s', name: 'PedometerService');
             }
           }
 
@@ -373,7 +373,7 @@ class PedometerService {
       final steps = await Pedometer().getStepCount(from: from, to: to);
       return steps;
     } catch (e, s) {
-      log('❌ Get steps error for range ${from.toString()} to ${to.toString()}: $e', name: 'PedometerService');
+      log('❌ Get steps error for range ${from.toString()} to ${to.toString()}: $e\n$s', name: 'PedometerService');
       rethrow;
     }
   }
