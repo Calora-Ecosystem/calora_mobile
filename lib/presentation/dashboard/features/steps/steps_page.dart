@@ -46,7 +46,12 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   @override
   Future<void> init(context, manager) async {
-    await manager.fetchDataForPeriod(0, 0, showLoading: true);
+    final dailyFuture = manager.fetchDataForPeriod(0, 0, showLoading: true);
+    final weeklyFuture = manager.fetchDataForPeriod(1, 0, showLoading: true);
+    final monthlyFuture = manager.fetchDataForPeriod(2, 0, showLoading: true);
+    await dailyFuture;
+    await weeklyFuture;
+    await monthlyFuture;
     manager.startLiveSyncIfNeeded();
   }
 
@@ -258,7 +263,6 @@ class _TabBarWrapper extends StatefulWidget {
 
 class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isTransitioning = false; // NEW: Local state for transition loading
 
   @override
   void initState() {

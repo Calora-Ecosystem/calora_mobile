@@ -33,6 +33,8 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   Timer? _metricsSafetyTimer;
   Timer? _metricsDebounce;
 
+  Future<void>? _normsLoadingFuture;
+
   StepsManager(this.stepRepo, this.pedometerService, this._metricsSync)
     : super(StepsState(dailyFrom: DateTime.now().toIso8601String(), dailyTo: DateTime.now().toIso8601String())) {
     _initializePaginationServices();
@@ -256,8 +258,13 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     try {
       final List<Future<void>> tasks = [];
 
-      if (state.norms.isEmpty && !state.isGettingNorms) {
-        tasks.add(_safeTrigger(() => getNorms(showLoading: showLoading), 'getNorms'));
+      if (state.norms.isEmpty) {
+        if (_normsLoadingFuture != null) {
+          await _normsLoadingFuture;
+        } else if (!state.isGettingNorms) {
+          _normsLoadingFuture = _safeTrigger(() => getNorms(showLoading: showLoading), 'getNorms');
+          tasks.add(_normsLoadingFuture!);
+        }
       }
 
       bool areStepsPresent = false;
