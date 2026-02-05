@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
@@ -17,6 +18,7 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_manager.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:calora/widgets/app_bar/home_app_bar.dart' show HomeAppBar;
 import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
@@ -163,6 +165,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   loading: state.isSummaryLoading,
                                 ),
                                 _buildStepCardWithStream(
+                                  context: context,
                                   pedometerService: pedometerService,
                                   state: state,
                                   manager: manager,
@@ -195,6 +198,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   }
 
   Widget _buildStepCardWithStream({
+    required BuildContext context,
     required PedometerService pedometerService,
     required HomeState state,
     required HomeManager manager,
@@ -212,12 +216,11 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         caloriesBurned: state.metrics?.kcal ?? 0,
       );
     }
-
-    return StreamBuilder<int>(
-      stream: pedometerService.todayStepsStream,
-      initialData: pedometerService.dailySteps,
-      builder: (context, snapshot) {
-        final currentSteps = snapshot.data ?? state.currentSteps;
+    return ManagerBuilder<DashboardState, DashboardEffect>(
+      manager: context.read<DashboardManager>(),
+      properties: (s) => [s.todaySteps],
+      builder: (context, dashState) {
+        final currentSteps = dashState.todaySteps;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (currentSteps != state.currentSteps) {

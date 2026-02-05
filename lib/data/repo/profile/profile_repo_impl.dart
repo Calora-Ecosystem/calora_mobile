@@ -46,9 +46,7 @@ class ProfileRepoImpl extends ProfileRepo {
   @override
   Future<void> updateProfile(ProfileRequest request) async {
     double? calculatedBmi;
-    if (request.weight != null &&
-        request.height != null &&
-        request.height! > 0) {
+    if (request.weight != null && request.height != null && request.height! > 0) {
       final heightInMeters = request.height! / 100;
       calculatedBmi = request.weight! / (heightInMeters * heightInMeters);
       calculatedBmi = double.parse(calculatedBmi.toStringAsFixed(2));
@@ -68,5 +66,10 @@ class ProfileRepoImpl extends ProfileRepo {
   @override
   Future<void> updateSingleNorm(NormsRequest request) async {
     await _api.updateSingleNorm(request);
+  }
+
+  @override
+  Future<void> logOut() async {
+    await _api.logout();
   }
 }

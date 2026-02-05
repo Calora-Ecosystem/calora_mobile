@@ -35,8 +35,14 @@ class ProfileDetailManager extends Manager<ProfileDetailState, ProfileDetailEffe
   }
 
   void logOut() {
-    profileStore.clear();
-    authStore.token.set(null);
-    _commonStore.isQuestionaryFinished.set(false);
+    _repo.logOut().handle(
+      onStart: () {},
+      onDone: () {
+        profileStore.clear();
+        authStore.token.set(null);
+        _commonStore.isQuestionaryFinished.set(false);
+      },
+      onError: (e) {},
+    );
   }
 }

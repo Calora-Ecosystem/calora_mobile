@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -23,6 +22,7 @@ import 'package:calora/presentation/dashboard/features/steps/widgets/daily_fitne
 import 'package:calora/presentation/dashboard/features/steps/widgets/leaderboard_section.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/monthly_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/weekly_fitness_track_widget.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -51,8 +51,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     manager.fetchDataForPeriod(2, 0, showLoading: true);
     manager.startLiveSyncIfNeeded();
 
-    context.read<DashboardManager>().initialize();
-  }
+      }
 
   @override
   void listener(BuildContext context, StepsManager manager, StepsEffect effect) {
@@ -142,9 +141,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       backgroundColor: Colors.transparent,
       builder: (_) => EditStepGoalPage(
         initialValue: stepValue.toInt(),
-        onSave: (value) => manager.updateNorm(
-          NormsRequest(metric: 'Step', value: value.toDouble()),
-        ),
+        onSave: (value) => manager.updateNorm(NormsRequest(metric: 'Step', value: value.toDouble())),
       ),
     );
   }

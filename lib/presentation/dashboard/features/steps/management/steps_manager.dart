@@ -29,7 +29,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   StreamSubscription<int>? _stepsSub;
   StreamSubscription? _syncSubscription;
-  StreamSubscription<int>? _metricsSyncSub;
 
   Timer? _metricsSafetyTimer;
   Timer? _metricsDebounce;
@@ -99,11 +98,14 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
     _syncSubscription = _metricsSync.stream.listen((updatedSteps) {
       if (!_isTodayDailyView) return;
-      log('StepsManager ← Dashboard sync bildirish: $updatedSteps qadam', name: 'StepsManager');
+
+      updateTodaySteps(updatedSteps);
+
+      log('StepsManager ← Dashboard steps: $updatedSteps', name: 'StepsManager');
+
       _metricsDebounce?.cancel();
       _metricsDebounce = Timer(const Duration(milliseconds: 800), () {
         if (_isTodayDailyView) {
-          log('StepsManager: today metrics silent refresh (sync tufayli)', name: 'StepsManager');
           getUserMetrics(period: 0, offset: 0, now: DateTime.now(), showLoading: false);
         }
       });
@@ -112,7 +114,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   void startLiveSyncIfNeeded() {
     if (_isTodayDailyView) {
-      _startStepsListener();
       _listenToMetricsSyncFromDashboard();
       _startMetricsSafetyRefresh();
       _refreshTodayMetricsNow();
@@ -135,34 +136,14 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   }
 
   void stopLiveSync() {
-    _stepsSub?.cancel();
-    _stepsSub = null;
-
     _syncSubscription?.cancel();
     _syncSubscription = null;
-
-    _metricsSyncSub?.cancel();
-    _metricsSyncSub = null;
 
     _metricsDebounce?.cancel();
     _metricsDebounce = null;
 
     _metricsSafetyTimer?.cancel();
     _metricsSafetyTimer = null;
-  }
-
-  void _startStepsListener() {
-    _stepsSub?.cancel();
-
-    _stepsSub = pedometerService.todayStepsStream.listen(
-      (steps) {
-        if (!_isTodayDailyView) return;
-        updateTodaySteps(steps);
-      },
-      onError: (e) => log('❌ Steps stream xatosi: $e', name: 'StepsManager'),
-    );
-
-    if (_isTodayDailyView) updateTodaySteps(pedometerService.dailySteps);
   }
 
   void _startMetricsSafetyRefresh() {
@@ -181,7 +162,6 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   void updateTodaySteps(int steps) {
     emit(state.copyWith(stepCount: steps));
-
     if (_isTodayDailyView) emit(state.copyWith(dailyDisplayStepCount: steps));
   }
 
