@@ -255,8 +255,6 @@ class StepsFgService : Service(), SensorEventListener {
 
         val safeGoal = if (goal <= 0) 1 else goal
 
-        // ✅ kcal = steps * 0.04 * (weight/70)
-        // 70kg uchun 0.04 bazaviy. Vazn oshsa/ kamayса kcal ham moslashadi.
         val kcalPerStep = 0.04f * (weightKg / 70f)
         val kcal = (steps * kcalPerStep).roundToInt()
 
