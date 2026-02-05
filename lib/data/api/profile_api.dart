@@ -72,6 +72,6 @@ class ProfileApi {
   }
 
   Future<void> logout() async {
-    print('Log out');
+    await _dio.get('/auth/logout');
   }
 }

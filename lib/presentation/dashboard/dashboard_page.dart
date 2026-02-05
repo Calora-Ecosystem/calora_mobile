@@ -25,6 +25,14 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   }
 
   @override
+  void listener(BuildContext context, DashboardManager manager, DashboardEffect effect) {
+    super.listener(context, manager, effect);
+    effect.when(
+      forceLogout: () => context.router.replaceAll([AuthRoute()]),
+    );
+  }
+
+  @override
   Widget builder(context, manager, state) {
     return AutoTabsScaffold(
       routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],

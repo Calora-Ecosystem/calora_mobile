@@ -136,12 +136,8 @@ class TokenInterceptor extends Interceptor {
         return false;
       }
 
-      final refreshTokenPreview = refreshToken.length >= 10
-          ? refreshToken.substring(0, 10)
-          : refreshToken;
-      final accessTokenPreview = oldAccessToken.length >= 20
-          ? oldAccessToken.substring(0, 20)
-          : oldAccessToken;
+      final refreshTokenPreview = refreshToken.length >= 10 ? refreshToken.substring(0, 10) : refreshToken;
+      final accessTokenPreview = oldAccessToken.length >= 20 ? oldAccessToken.substring(0, 20) : oldAccessToken;
 
       _log.d('Refresh token: $refreshTokenPreview...');
       _log.d('Old access token: $accessTokenPreview...');
@@ -237,12 +233,8 @@ class TokenInterceptor extends Interceptor {
 
       await _storage.token.set(newTokens);
 
-      final newAccessPreview = newAccessToken.length >= 20
-          ? newAccessToken.substring(0, 20)
-          : newAccessToken;
-      final newRefreshPreview = newRefreshToken.length >= 10
-          ? newRefreshToken.substring(0, 10)
-          : newRefreshToken;
+      final newAccessPreview = newAccessToken.length >= 20 ? newAccessToken.substring(0, 20) : newAccessToken;
+      final newRefreshPreview = newRefreshToken.length >= 10 ? newRefreshToken.substring(0, 10) : newRefreshToken;
 
       _log.i('✅ Token refresh successful!');
       _log.d('New access token: $newAccessPreview...');
@@ -337,6 +329,7 @@ class TokenInterceptor extends Interceptor {
   Future<void> _clearTokens() async {
     _log.w('🗑️ Clearing all tokens');
     await _storage.token.set(null);
+    _storage.forceLogout();
   }
 
   bool isUserPremium(String token) {

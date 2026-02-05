@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
+import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:injectable/injectable.dart';
@@ -14,6 +15,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   final StepRepo _stepRepo;
   final PedometerService _pedometerService;
   final MetricsSyncService _metricsSync;
+  final AuthStore _authStore;
 
   StreamSubscription<int>? _stepsSub;
   Timer? _syncTimer;
@@ -26,6 +28,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
 
   int _lastSentTotalSteps = -1;
   int _lastMetricsRefreshedAtTotalSteps = -1;
+  StreamSubscription<void>? _forceLogoutSub;
 
   static const int MIN_DELTA_STEPS_TO_SEND = 20;
   static const int MIN_DELTA_STEPS_TO_REFRESH_METRICS = 20;
@@ -35,6 +38,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
     this._stepRepo,
     this._pedometerService,
     this._metricsSync,
+    this._authStore,
   ) : super(const DashboardState());
 
   int get _totalSteps {
@@ -46,6 +50,13 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   @override
   void initialize() async {
     super.initialize();
+    _forceLogoutSub?.cancel();
+    _forceLogoutSub = _authStore.onForceLogout.listen((_) async {
+      _syncTimer?.cancel();
+      await _stepsSub?.cancel();
+
+      publish(const DashboardEffect.forceLogout());
+    });
     await _startPedometer();
   }
 

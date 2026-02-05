@@ -94,8 +94,6 @@ class ProfilePage extends StatelessWidget {
 
   void _openAccountDetailPage(BuildContext context) async {
     await context.router.push(AccountDetailRoute());
-    // ✅ hech narsa shart emas, agar AccountDetail ichida profileStore.updateProfile(...) bo‘lsa
-    // stream avtomatik update qiladi
   }
 
   void _openProfileDetailPage(BuildContext context, String userId) {
