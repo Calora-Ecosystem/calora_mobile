@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:calora/domain/model/pagination/pagination_query.dart';
 import 'package:calora/domain/model/pagination/paginated_response.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -16,15 +18,14 @@ class PaginationService<T> {
     PagingController<int, T>? controller,
   }) : _currentQuery = initialQuery ?? const PaginationQuery(),
        pagingController = controller ?? PagingController<int, T>(firstPageKey: 0) {
-    _initialize();
+    pagingController.addPageRequestListener(_fetchPage);
   }
 
-  void _initialize() => pagingController.addPageRequestListener(_fetchPage);
-
   Future<void> _fetchPage(int pageKey) async {
+    log('PaginationService → fetch page: $pageKey', name: 'PaginationService');
+
     try {
       final query = _buildQuery(pageKey);
-
       final response = await fetchData(query);
 
       if (response.error != null) {
@@ -35,16 +36,22 @@ class PaginationService<T> {
       final items = response.content ?? [];
       final total = response.total ?? 0;
 
-      final isLastPage = (pageKey + items.length) >= total;
+      final isLastPage = pageKey + items.length >= total;
+      log('PaginationService: isLastPage calculation: $pageKey + ${items.length} >= $total => $isLastPage', name: 'PaginationService');
 
       if (isLastPage) {
         pagingController.appendLastPage(items);
       } else {
-        final nextPageKey = pageKey + items.length;
-        pagingController.appendPage(items, nextPageKey);
+        pagingController.appendPage(items, pageKey + items.length);
       }
-    } catch (error) {
-      pagingController.error = error;
+    } catch (e, s) {
+      pagingController.error = e;
+      log(
+        'PaginationService error: $e',
+        name: 'PaginationService',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
@@ -56,6 +63,11 @@ class PaginationService<T> {
       sortPropName: _currentQuery.sortPropName,
       sortDirection: _currentQuery.sortDirection,
     );
+  }
+
+  void refresh() {
+    log('PaginationService → refresh()', name: 'PaginationService');
+    pagingController.refresh();
   }
 
   void updateQuery(PaginationQuery query) {
@@ -88,11 +100,9 @@ class PaginationService<T> {
 
   PaginationQuery get currentQuery => _currentQuery;
 
-  void refresh() => pagingController.refresh();
-
-  void dispose() => pagingController.dispose();
+  bool get hasFilters => _currentQuery.filteringExpression?.isNotEmpty == true || _currentQuery.sortPropName != null;
 
   void retryLastFailedRequest() => pagingController.retryLastFailedRequest();
 
-  bool get hasFilters => _currentQuery.filteringExpression?.isNotEmpty == true || _currentQuery.sortPropName != null;
+  void dispose() => pagingController.dispose();
 }

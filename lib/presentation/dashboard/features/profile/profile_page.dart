@@ -48,10 +48,7 @@ class ProfilePage extends StatelessWidget {
                           surname: profile.name ?? '',
                           name: profile.name ?? '',
                           email: profile.email ?? '',
-                          onEdit: () => _openProfileDetailPage(
-                            context,
-                            profile.userId?.toString() ?? '',
-                          ),
+                          onEdit: () => _openProfileDetailPage(context, profile.userId?.toString() ?? ''),
                         ),
                         const SizedBox(height: 16),
                         BmiCard(

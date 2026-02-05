@@ -1,13 +1,19 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
+import 'package:calora/domain/model/pagination/paginated_response.dart';
+import 'package:calora/domain/model/pagination/pagination_query.dart';
+import 'package:calora/domain/model/step/metrics_request.dart';
+import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -17,29 +23,75 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   final PedometerService pedometerService;
   final MetricsSyncService _metricsSync;
 
+  late final PaginationService<UserStatRequest> _dailyPaginationService;
+  late final PaginationService<UserStatRequest> _weeklyPaginationService;
+  late final PaginationService<UserStatRequest> _monthlyPaginationService;
+
+  StreamSubscription<int>? _stepsSub;
   StreamSubscription? _syncSubscription;
 
   Timer? _metricsSafetyTimer;
   Timer? _metricsDebounce;
 
   StepsManager(this.stepRepo, this.pedometerService, this._metricsSync)
-    : super(
-        StepsState(
-          dailyFrom: DateTime.now().toIso8601String(),
-          dailyTo: DateTime.now().toIso8601String(),
-          dailyUserStates: [],
-          weeklyUserStates: [],
-          monthlyUserStates: [],
-        ),
-      );
+    : super(StepsState(dailyFrom: DateTime.now().toIso8601String(), dailyTo: DateTime.now().toIso8601String())) {
+    _initializePaginationServices();
+    _listenToMetricsSyncFromDashboard();
+  }
 
   bool get _isTodayDailyView => state.period == 0 && state.dailyOffset == 0;
 
-  @override
-  void initialize() {
-    super.initialize();
-    _listenToMetricsSyncFromDashboard();
+  void _initializePaginationServices() {
+    _dailyPaginationService = PaginationService<UserStatRequest>(
+      fetchData: (query) => _fetchStatsForPeriod(0, state.dailyOffset, query),
+    );
+    _weeklyPaginationService = PaginationService<UserStatRequest>(
+      fetchData: (query) => _fetchStatsForPeriod(1, state.weeklyOffset, query),
+    );
+    _monthlyPaginationService = PaginationService<UserStatRequest>(
+      fetchData: (query) => _fetchStatsForPeriod(2, state.monthlyOffset, query),
+    );
   }
+
+  Future<PaginatedResponse<UserStatRequest>> _fetchStatsForPeriod(
+    int period,
+    int currentQueryOffset,
+    PaginationQuery query,
+  ) async {
+    final effectiveOffset = period == 0
+        ? state.dailyOffset
+        : period == 1
+        ? state.weeklyOffset
+        : state.monthlyOffset;
+
+    log(
+      'PaginationService: _fetchStatsForPeriod called for period $period with effectiveOffset: $effectiveOffset, query skip: ${query.skip}',
+      name: 'PaginationService',
+    );
+
+    return await stepRepo.getStats(period, offset: effectiveOffset, skip: query.skip ?? 0, take: query.take ?? 20);
+  }
+
+  PaginationService<UserStatRequest> get currentPaginationService {
+    switch (state.period) {
+      case 0:
+        return _dailyPaginationService;
+      case 1:
+        return _weeklyPaginationService;
+      case 2:
+        return _monthlyPaginationService;
+      default:
+        return _dailyPaginationService;
+    }
+  }
+
+  PaginationService<UserStatRequest> get dailyPaginationService => _dailyPaginationService;
+  PaginationService<UserStatRequest> get weeklyPaginationService => _weeklyPaginationService;
+  PaginationService<UserStatRequest> get monthlyPaginationService => _monthlyPaginationService;
+  PagingController<int, UserStatRequest> get currentPagingController => currentPaginationService.pagingController;
+
+  void refreshPagination() => currentPaginationService.refresh();
+  void clearPaginationFilters() => currentPaginationService.clearFilters();
 
   void _listenToMetricsSyncFromDashboard() {
     _syncSubscription?.cancel();
@@ -105,7 +157,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   }
 
   Future<void> _refreshTodayMetricsNow() async {
-    await _safeTrigger(() => getUserMetrics(period: 0, offset: 0, now: DateTime.now()));
+    await _safeTrigger(() => getUserMetrics(period: 0, offset: 0, now: DateTime.now()), '_refreshTodayMetricsNow');
   }
 
   void updateTodaySteps(int steps) {
@@ -113,56 +165,30 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     if (_isTodayDailyView) emit(state.copyWith(dailyDisplayStepCount: steps));
   }
 
-  Future<void> getSteps({required int period, required int offset, required DateTime now}) async {
+  Future<void> getSteps({
+    required int period,
+    required int offset,
+    required DateTime now,
+    bool showLoading = true,
+  }) async {
     await stepRepo
         .getSteps(period, offset: offset)
         .handle(
-          onStart: () => emit(state.copyWith(isGettingSteps: true)),
+          onStart: () {},
           onData: (data) {
             if (period == 0) {
               final displayStepCount = offset == 0 ? state.stepCount : _buildDailySteps(data, offset, now);
-              emit(
-                state.copyWith(
-                  dailySteps: data,
-                  dailyDisplayStepCount: displayStepCount,
-                  isGettingSteps: false,
-                ),
-              );
+              emit(state.copyWith(dailySteps: data, dailyDisplayStepCount: displayStepCount, isGettingSteps: false));
             } else if (period == 1) {
               final primaryValues = _buildWeeklySteps(data, offset, now);
               emit(state.copyWith(weeklySteps: data, weeklyPrimaryValues: primaryValues, isGettingSteps: false));
             } else if (period == 2) {
               final primaryValues = _buildMonthlySteps(data, offset, now);
-              emit(
-                state.copyWith(
-                  monthlySteps: data,
-                  monthlyPrimaryValues: primaryValues,
-                  isGettingSteps: false,
-                ),
-              );
+              emit(state.copyWith(monthlySteps: data, monthlyPrimaryValues: primaryValues, isGettingSteps: false));
             }
           },
           onDone: () => emit(state.copyWith(isGettingSteps: false)),
           onError: (_) => emit(state.copyWith(isGettingSteps: false)),
-        );
-  }
-
-  Future<void> getStats({required int period, required int offset, required DateTime now}) async {
-    await stepRepo
-        .getStats(period, offset: offset)
-        .handle(
-          onStart: () => emit(state.copyWith(isGettingStats: true)),
-          onData: (data) {
-            if (period == 0) {
-              emit(state.copyWith(dailyUserStates: data, isGettingStats: false));
-            } else if (period == 1) {
-              emit(state.copyWith(weeklyUserStates: data, isGettingStats: false));
-            } else if (period == 2) {
-              emit(state.copyWith(monthlyUserStates: data, isGettingStats: false));
-            }
-          },
-          onDone: () => emit(state.copyWith(isGettingStats: false)),
-          onError: (_) => emit(state.copyWith(isGettingStats: false)),
         );
   }
 
@@ -172,6 +198,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     required DateTime now,
     bool showLoading = true,
   }) async {
+    final isTodayDaily = (period == 0 && offset == 0);
     DateTime fromDate;
     DateTime toDate;
 
@@ -201,10 +228,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     await stepRepo
         .getUserMetrics(from: fromDate.toIso8601String(), to: toDate.toIso8601String())
         .handle(
-          onStart: () {
-            final isTodayDaily = (period == 0 && offset == 0);
-            if (showLoading && !isTodayDaily) emit(state.copyWith(isGettingUserMetrics: true));
-          },
+          onStart: () {},
           onData: (data) {
             if (period == 0) {
               emit(state.copyWith(dailyMetrics: data, isGettingUserMetrics: false));
@@ -223,43 +247,74 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     final now = DateTime.now();
     final isTodayDaily = (period == 0 && offset == 0);
 
-    final shouldShowShimmer = showLoading && (!isTodayDaily || (isTodayDaily && !state.hasLoadedTodayInitial));
-
-    if (shouldShowShimmer) {
+    if (showLoading || (isTodayDaily && !state.hasLoadedTodayInitial)) {
       if (period == 0) emit(state.copyWith(isDailyLoading: true));
       if (period == 1) emit(state.copyWith(isWeeklyLoading: true));
       if (period == 2) emit(state.copyWith(isMonthlyLoading: true));
     }
 
-    await Future.wait([
-      _safeTrigger(getNorms),
-      _safeTrigger(() => getSteps(period: period, offset: offset, now: now)),
-      _safeTrigger(() => getStats(period: period, offset: offset, now: now)),
-      _safeTrigger(() => getUserMetrics(period: period, offset: offset, now: now)),
-    ]);
+    try {
+      final List<Future<void>> tasks = [];
 
-    if (period == 0) emit(state.copyWith(isDailyLoading: false));
-    if (period == 1) emit(state.copyWith(isWeeklyLoading: false));
-    if (period == 2) emit(state.copyWith(isMonthlyLoading: false));
+      if (state.norms.isEmpty || showLoading) {
+        tasks.add(_safeTrigger(() => getNorms(showLoading: showLoading), 'getNorms'));
+      }
 
-    if (isTodayDaily && !state.hasLoadedTodayInitial) {
-      emit(state.copyWith(hasLoadedTodayInitial: true));
+      bool areStepsPresent = false;
+      switch (period) {
+        case 0:
+          areStepsPresent = state.dailySteps.isNotEmpty && state.dailyOffset == offset;
+          break;
+        case 1:
+          areStepsPresent = state.weeklySteps.isNotEmpty && state.weeklyOffset == offset;
+          break;
+        case 2:
+          areStepsPresent = state.monthlySteps.isNotEmpty && state.monthlyOffset == offset;
+          break;
+      }
+      if (!areStepsPresent || showLoading) {
+        tasks.add(
+          _safeTrigger(() => getSteps(period: period, offset: offset, now: now, showLoading: showLoading), 'getSteps'),
+        );
+      }
+
+      tasks.add(
+        _safeTrigger(
+          () => getUserMetrics(period: period, offset: offset, now: now, showLoading: false),
+          'getUserMetrics',
+        ),
+      );
+      if (showLoading) {
+        log('StepsManager: Refreshing pagination for period $period', name: 'StepsManager');
+        currentPaginationService.refresh();
+      }
+      await Future.wait(tasks);
+    } finally {
+      if (period == 0) emit(state.copyWith(isDailyLoading: false));
+      if (period == 1) emit(state.copyWith(isWeeklyLoading: false));
+      if (period == 2) emit(state.copyWith(isMonthlyLoading: false));
+      if (isTodayDaily && !state.hasLoadedTodayInitial) emit(state.copyWith(hasLoadedTodayInitial: true));
     }
 
     startLiveSyncIfNeeded();
   }
 
-  Future<void> _safeTrigger(Future<void> Function() task) async {
+  Future<void> _safeTrigger(Future<void> Function() task, String identifier) async {
     try {
       await task();
     } catch (e, s) {
-      log('Safe trigger xatosi: $e\n$s', name: 'StepsManager');
+      log(
+        'StepsManager: Safe trigger xatosi for task $identifier: $e\n$s',
+        name: 'StepsManager',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
-  Future<void> getNorms() async {
+  Future<void> getNorms({bool showLoading = true}) async {
     await stepRepo.getNorms().handle(
-      onStart: () => emit(state.copyWith(isGettingNorms: true)),
+      onStart: () {},
       onData: (data) => emit(state.copyWith(norms: data, isGettingNorms: false)),
       onDone: () => emit(state.copyWith(isGettingNorms: false)),
       onError: (_) => emit(state.copyWith(isGettingNorms: false)),
@@ -290,8 +345,13 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         fromDate = DateTime(targetDay.year, targetDay.month, targetDay.day);
         toDate = DateTime(targetDay.year, targetDay.month, targetDay.day, 23, 59, 59);
         emit(
-          state.copyWith(period: newPeriod, dailyFrom: fromDate.toIso8601String(), dailyTo: toDate.toIso8601String()),
+          state.copyWith(
+            period: newPeriod,
+            dailyFrom: fromDate.toIso8601String(),
+            dailyTo: toDate.toIso8601String(),
+          ),
         );
+
         break;
       case 1:
         targetOffset = state.weeklyOffset;
@@ -301,7 +361,11 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
         final endOfTargetWeek = startOfTargetWeek.add(const Duration(days: 6));
         toDate = DateTime(endOfTargetWeek.year, endOfTargetWeek.month, endOfTargetWeek.day, 23, 59, 59);
         emit(
-          state.copyWith(period: newPeriod, weeklyFrom: fromDate.toIso8601String(), weeklyTo: toDate.toIso8601String()),
+          state.copyWith(
+            period: newPeriod,
+            weeklyFrom: fromDate.toIso8601String(),
+            weeklyTo: toDate.toIso8601String(),
+          ),
         );
         break;
       case 2:
@@ -403,6 +467,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     startLiveSyncIfNeeded();
   }
 
+  bool _isMetricsRequestEmpty(MetricsRequest metrics) {
+    return metrics.foots == 0 && metrics.distance == 0.0 && metrics.kcal == 0 && metrics.duration == 0;
+  }
+
   int _buildDailySteps(List<StepsWithMetricsRequest> data, int offset, DateTime now) {
     if (data.isEmpty) return offset == 0 ? state.stepCount : 0;
 
@@ -457,6 +525,9 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   @override
   Future<void> close() {
     stopLiveSync();
+    _dailyPaginationService.dispose();
+    _weeklyPaginationService.dispose();
+    _monthlyPaginationService.dispose();
     return super.close();
   }
 }
