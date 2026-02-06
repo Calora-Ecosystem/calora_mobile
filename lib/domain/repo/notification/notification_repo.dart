@@ -8,5 +8,6 @@ abstract class NotificationRepo {
   Future<void> deleteReminder(int id);
   PagingController<int, model.Notification> getNotifications();
   Stream<int> getUnread();
+  Future<List<model.Notification>> fetchNotifications({required int skip, required int take});
   Future<void> markAsRead(int notificationId);
 }
