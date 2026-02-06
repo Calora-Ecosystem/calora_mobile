@@ -1,4 +1,6 @@
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/flavor/flavor_config.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/token/token.dart';
@@ -7,6 +9,7 @@ import 'package:calora/presentation/splash/management/splash_management.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 
 @injectable
 class SplashManager extends Manager<SplashState, SplashEffect> {
@@ -20,10 +23,13 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
     this._profileStore,
     this._splashRepo,
   ) : super(const SplashState()) {
-    checkAuth();
+    initializeAndCheckAuth();
   }
 
-  void checkAuth() async {
+  void initializeAndCheckAuth() async {
+    final sharedPreferences = await getIt<SharedPreferences>();
+    await FlavorConfig.initialize(sharedPreferences);
+
     final results = await Future.wait([
       _authStore.token(),
       _commonStore.isLanguageSelected(),

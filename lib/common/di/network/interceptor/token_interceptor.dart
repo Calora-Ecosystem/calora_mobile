@@ -31,10 +31,7 @@ class TokenInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
       final language = await _commonStore.language();
       options.headers['Accept-Language'] = language?.code ?? 'UZ';

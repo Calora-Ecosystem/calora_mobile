@@ -14,4 +14,5 @@ abstract class AppState with _$AppState {
 @freezed
 class AppEffect with _$AppEffect {
   const factory AppEffect() = _AppEffect;
+  const factory AppEffect.reLoginRequired() = _ReLoginRequired;
 }

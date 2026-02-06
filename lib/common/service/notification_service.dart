@@ -1,4 +1,6 @@
 import 'dart:developer';
+import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -15,30 +17,23 @@ class NotificationService {
     importance: Importance.high,
   );
 
-  Future<void> init() async {
+  Future<void> initForForeground() async {
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings();
 
     await _local.initialize(
       const InitializationSettings(android: androidInit, iOS: iosInit),
-      onDidReceiveNotificationResponse: (response) {
-        log('Notification tapped: ${response.payload}');
-      },
+      onDidReceiveNotificationResponse: (response) => log('Notification tapped: ${response.payload}'),
     );
 
     final androidPlugin = _local.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     await androidPlugin?.createNotificationChannel(_channel);
 
-    // iOS permissions
     await FirebaseMessaging.instance.requestPermission();
 
-    FirebaseMessaging.onMessage.listen((message) async {
-      await _showFromRemote(message);
-    });
+    FirebaseMessaging.onMessage.listen((message) async => await showNotificationFromRemote(message));
 
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      log('Opened from notification: ${message.data}');
-    });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) => log('Opened from notification: ${message.data}'));
 
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
@@ -47,10 +42,21 @@ class NotificationService {
     );
   }
 
-  Future<void> _showFromRemote(RemoteMessage message) async {
-    final n = message.notification;
-    final title = n?.title ?? message.data['title'];
-    final body = n?.body ?? message.data['body'];
+  Future<void> initForBackground() async {
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosInit = DarwinInitializationSettings();
+
+    await _local.initialize(const InitializationSettings(android: androidInit, iOS: iosInit));
+
+    final androidPlugin = _local.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.createNotificationChannel(_channel);
+  }
+
+  Future<void> showNotificationFromRemote(RemoteMessage message) async {
+    final notification = message.notification;
+
+    final title = notification?.title ?? message.data['title']?.toString();
+    final body = notification?.body ?? message.data['body']?.toString();
 
     if (title == null && body == null) return;
 

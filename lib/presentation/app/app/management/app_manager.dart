@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
+import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/app/app/management/app_management.dart';
+
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -12,10 +15,17 @@ import 'package:management/management.dart';
 class AppManager extends Manager<AppState, AppEffect> {
   final CommonStore _commonStore;
   final StepRepo _stepRepo;
-  StreamSubscription<bool>? _premiumSub;
-  Timer? _periodicTimer;
+  final TokenInterceptor _tokenInterceptor;
+  final AuthStore _authStore;
 
-  AppManager(this._commonStore, this._stepRepo) : super(const AppState()) {
+  StreamSubscription<bool>? _premiumSub;
+
+  AppManager(
+    this._commonStore,
+    this._stepRepo,
+    this._tokenInterceptor,
+    this._authStore,
+  ) : super(const AppState()) {
     _init();
   }
 
@@ -27,17 +37,10 @@ class AppManager extends Manager<AppState, AppEffect> {
     });
   }
 
-  void startPeriodicDataSync() {
-    _periodicTimer?.cancel();
-    _periodicTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      log('⏰ Periodic sync timer triggered');
-    });
-  }
-
-  void stopPeriodicDataSync() {
-    _periodicTimer?.cancel();
-    _periodicTimer = null;
-    log('Stopped periodic data sync from AppManager.');
+  Future<void> _handleReLoginRequired() async {
+    await _authStore.token.set(null);
+    await _commonStore.isQuestionaryFinished.set(false);
+    publish(const AppEffect.reLoginRequired());
   }
 
   void select(Language language) => emit(state.copyWith(language: language));
@@ -45,7 +48,6 @@ class AppManager extends Manager<AppState, AppEffect> {
   @override
   Future<void> close() {
     _premiumSub?.cancel();
-    stopPeriodicDataSync();
     return super.close();
   }
 }
