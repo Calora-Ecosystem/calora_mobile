@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.util.Log
 
 class MainActivity : FlutterActivity() {
 
@@ -18,6 +19,7 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "start" -> {
+                        Log.d("MainActivity", "Method 'start' called from Flutter")
                         val goal = call.argument<Int>("goal") ?: 10000
                         val weight = (call.argument<Double>("weight_kg") ?: 70.0).toFloat()
 

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/base/profile_store.dart';
@@ -40,19 +38,36 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   @override
   void init(BuildContext context, HomeManager manager) {
+    
+
     manager.updateDay(DateTime.now());
     manager.refreshAll();
-    context.read<DashboardManager>().initialize();
-    Future.microtask(() => manager.initStepsForeground());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      
+      final dashManager = context.read<DashboardManager>();
+      dashManager.initialize();
+      
+    });
+
+    Future.microtask(() {
+      
+      manager.initStepsForeground();
+    });
 
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
 
     _tabsRouter!.addListener(() {
       final idx = _tabsRouter!.activeIndex;
-      if (_lastIndex != 0 && idx == 0) manager.refreshAll();
+      if (_lastIndex != 0 && idx == 0) {
+        
+        manager.refreshAll();
+      }
       _lastIndex = idx;
     });
+
+    
   }
 
   @override
@@ -216,21 +231,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
         caloriesBurned: state.metrics?.kcal ?? 0,
       );
     }
+
     return ManagerBuilder<DashboardState, DashboardEffect>(
       manager: context.read<DashboardManager>(),
       properties: (s) => [s.todaySteps],
       builder: (context, dashState) {
-        final currentSteps = dashState.todaySteps;
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (currentSteps != state.currentSteps) {
-            manager.updateTodaySteps(currentSteps);
-          }
-        });
-
         return StepCardWidget(
           loading: false,
-          currentSteps: currentSteps,
+          currentSteps: dashState.todaySteps,
           targetSteps: state.targetSteps,
           timeInSeconds: state.metrics?.duration ?? 0,
           distanceInKm: state.metrics?.distance ?? 0,
@@ -269,6 +277,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void openInbox(BuildContext context) async {
     context.router.navigate(const InboxRoute());
     final token = await FirebaseMessaging.instance.getToken();
-    log('FCM TOKEN: $token');
+    
   }
 }
+
