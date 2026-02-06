@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
@@ -20,19 +19,20 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   StreamSubscription<int>? _stepsSub;
   Timer? _syncTimer;
 
-  int _latestDeviceSteps = 0;
+  StreamSubscription<void>? _forceLogoutSub;
 
   int _backendBaseSteps = 0;
-
-  int _deviceStartSteps = 0;
-
+  int? _sensorBaseSteps;
+  int _latestSensorSteps = 0;
   int _lastSentTotalSteps = -1;
   int _lastMetricsRefreshedAtTotalSteps = -1;
-  StreamSubscription<void>? _forceLogoutSub;
 
   static const int MIN_DELTA_STEPS_TO_SEND = 20;
   static const int MIN_DELTA_STEPS_TO_REFRESH_METRICS = 20;
   static const Duration PERIODIC_SYNC_INTERVAL = Duration(minutes: 2);
+
+  bool _initialized = false;
+  Future<void>? _initFuture;
 
   DashboardManager(
     this._stepRepo,
@@ -42,89 +42,94 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   ) : super(const DashboardState());
 
   int get _totalSteps {
-    final delta = _latestDeviceSteps - _deviceStartSteps;
+    if (_sensorBaseSteps == null) {
+      return _backendBaseSteps;
+    }
+    final delta = _latestSensorSteps - _sensorBaseSteps!;
     final safeDelta = delta < 0 ? 0 : delta;
-    return _backendBaseSteps + safeDelta;
+    final total = _backendBaseSteps + safeDelta;
+    return total < 0 ? 0 : total;
   }
 
   @override
-  void initialize() async {
+  void initialize() {
     super.initialize();
-    _forceLogoutSub?.cancel();
-    _forceLogoutSub = _authStore.onForceLogout.listen((_) async {
-      _syncTimer?.cancel();
-      await _stepsSub?.cancel();
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _initFuture ??= _initializeInternal();
+  }
 
-      publish(const DashboardEffect.forceLogout());
-    });
-    await _startPedometer();
+  Future<void> _initializeInternal() async {
+    try {
+      _forceLogoutSub?.cancel();
+      _forceLogoutSub = _authStore.onForceLogout.listen((_) async {
+        _syncTimer?.cancel();
+        await _stepsSub?.cancel();
+        publish(const DashboardEffect.forceLogout());
+      });
+
+      await _startPedometerBootstrap();
+    } catch (e, s) {}
   }
 
   Future<int> _fetchBackendTodaySteps() async {
     try {
       final list = await _stepRepo.getSteps(0);
-      if (list.isEmpty) return 0;
-
+      if (list.isEmpty) {
+        return 0;
+      }
       final v = list.first.value;
-      if (v.isNaN || v.isInfinite) return 0;
-
-      return v.floor();
-    } catch (e) {
-      log('Backend today steps (getSteps) olish xatosi: $e', name: 'DashboardManager');
+      if (v.isNaN || v.isInfinite) {
+        return 0;
+      }
+      final steps = v.floor();
+      return steps;
+    } catch (e, s) {
       return 0;
     }
   }
 
-  Future<void> _startPedometer() async {
+  Future<void> _startPedometerBootstrap() async {
     try {
-      final hasPermission = await _pedometerService.ensurePermissionGranted();
-      if (!hasPermission) {
-        log('Pedometer ruxsati rad etildi', name: 'DashboardManager');
+      await _pedometerService.initialize();
+
+      if (!_pedometerService.isInitialized) {
         return;
       }
-
-      await _pedometerService.initializePedometer();
-
-      _latestDeviceSteps = _pedometerService.dailySteps;
-
       final backendToday = await _fetchBackendTodaySteps();
+      _backendBaseSteps = backendToday;
 
-      _backendBaseSteps = backendToday < _latestDeviceSteps ? _latestDeviceSteps : backendToday;
-
-      _deviceStartSteps = _latestDeviceSteps;
-
-      final total = _totalSteps;
-      emit(state.copyWith(todaySteps: total));
+      emit(state.copyWith(todaySteps: _totalSteps));
+      _metricsSync.notifyUpdated(_totalSteps);
       if (StepsForegroundService.instance.isRunning) {
         unawaited(StepsForegroundService.instance.syncSteps(_totalSteps));
       }
       await sendTodayStepsToBackend(force: true);
-
       _listenToStepUpdates();
-      _startPeriodicSync();
 
-      log(
-        'Bootstrap done: backendToday=$backendToday, base=$_backendBaseSteps, deviceStart=$_deviceStartSteps, total=$total',
-        name: 'DashboardManager',
-      );
-    } catch (e, s) {
-      log(
-        'Pedometer ishga tushmadi: $e',
-        name: 'DashboardManager',
-        error: e,
-        stackTrace: s,
-      );
-    }
+      _startPeriodicSync();
+    } catch (e, s) {}
   }
 
   void _listenToStepUpdates() {
     _stepsSub?.cancel();
-    _stepsSub = _pedometerService.todayStepsStream.listen(
-      (deviceSteps) {
-        _latestDeviceSteps = deviceSteps;
+
+    _stepsSub = _pedometerService.stepCountStream.listen(
+      (sensorSteps) {
+        if (_sensorBaseSteps == null) {
+          _sensorBaseSteps = sensorSteps;
+        }
+
+        _latestSensorSteps = sensorSteps;
         final total = _totalSteps;
+
         emit(state.copyWith(todaySteps: total));
         _metricsSync.notifyUpdated(total);
+        if (StepsForegroundService.instance.isRunning) {
+          unawaited(StepsForegroundService.instance.syncSteps(total));
+        }
         if (_shouldSendToBackend(total)) {
           unawaited(sendTodayStepsToBackend());
         }
@@ -132,9 +137,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
           unawaited(_refreshMetrics(total));
         }
       },
-      onError: (e) {
-        log('Steps stream xatosi: $e', name: 'DashboardManager');
-      },
+      onError: (e) {},
     );
   }
 
@@ -153,49 +156,31 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
 
   Future<void> sendTodayStepsToBackend({bool force = false}) async {
     final total = _totalSteps;
-
-    if (total <= 0) {
-      log('Skip sending steps: total=$total (force: $force)', name: 'DashboardManager');
+    if (!force && !_shouldSendToBackend(total)) {
       return;
     }
-
-    if (_lastSentTotalSteps >= 0 && total <= _lastSentTotalSteps) return;
-
-    if (!force) {
-      if (_lastSentTotalSteps >= 0) {
-        final delta = total - _lastSentTotalSteps;
-        if (delta < MIN_DELTA_STEPS_TO_SEND) return;
-      }
+    if (total <= _lastSentTotalSteps && !force) {
+      return;
     }
-
     try {
       await _stepRepo.sendDailyData(metric: 'Step', value: total);
-
       _lastSentTotalSteps = total;
-      log('TOTAL qadamlar backendga yuborildi: $total (force: $force)', name: 'DashboardManager');
-
       await _refreshMetrics(total);
-    } catch (e, s) {
-      log('Qadam yuborish xatosi: $e', name: 'DashboardManager', stackTrace: s);
-    }
+    } catch (e, s) {}
   }
 
   Future<void> _refreshMetrics(int total) async {
-    if (_lastMetricsRefreshedAtTotalSteps >= 0 && total <= _lastMetricsRefreshedAtTotalSteps) return;
-
+    if (_lastMetricsRefreshedAtTotalSteps >= 0 && total <= _lastMetricsRefreshedAtTotalSteps) {
+      return;
+    }
     try {
       _lastMetricsRefreshedAtTotalSteps = total;
-
       _metricsSync.notifyUpdated(total);
-      log('Metrikalar yangilandi — TOTAL qadamlar: $total', name: 'DashboardManager');
-    } catch (e, s) {
-      log('Metrikalarni yangilashda xato: $e', name: 'DashboardManager', stackTrace: s);
-    }
+    } catch (e, s) {}
   }
 
   void _startPeriodicSync() {
     _syncTimer?.cancel();
-
     _syncTimer = Timer.periodic(PERIODIC_SYNC_INTERVAL, (_) {
       unawaited(sendTodayStepsToBackend(force: true));
     });
@@ -205,6 +190,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   Future<void> close() {
     _syncTimer?.cancel();
     _stepsSub?.cancel();
+    _forceLogoutSub?.cancel();
     return super.close();
   }
 }

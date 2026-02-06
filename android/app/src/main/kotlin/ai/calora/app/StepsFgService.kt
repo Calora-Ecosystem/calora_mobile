@@ -42,7 +42,6 @@ class StepsFgService : Service(), SensorEventListener {
 
     private var goal: Int = 8000
 
-    // ✅ weight (kcal uchun)
     private var weightKg: Float = 70f
 
     private lateinit var sensorManager: SensorManager
@@ -50,9 +49,9 @@ class StepsFgService : Service(), SensorEventListener {
 
     private var lastSensorValue: Float? = null
 
-    private var syncBaseSensorValue: Float? = null     // sensor qiymati sync paytidagi
-    private var syncBaseSteps: Int = 0                 // flutter steps sync paytidagi
-    private var pendingSyncSteps: Int? = null          // agar sensor hali kelmagan bo'lsa
+    private var syncBaseSensorValue: Float? = null
+    private var syncBaseSteps: Int = 0
+    private var pendingSyncSteps: Int? = null
 
     private var shownSteps: Int = 0
     private var previousShownSteps: Int = -1
@@ -71,6 +70,7 @@ class StepsFgService : Service(), SensorEventListener {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d("StepsFgService", "onCreate")
         ensureChannel()
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -83,6 +83,7 @@ class StepsFgService : Service(), SensorEventListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("StepsFgService", "onStartCommand, action: ${intent?.action}")
         when (intent?.action) {
             ACTION_START -> handleStart(intent)
             ACTION_UPDATE_GOAL -> handleUpdateGoal(intent)
@@ -101,12 +102,16 @@ class StepsFgService : Service(), SensorEventListener {
         weightKg = w
         prefs.edit().putFloat(KEY_WEIGHT, weightKg).apply()
 
-        // startda eski qiymatni ko'rsatamiz (agar sync bo'lgan bo'lsa)
         shownSteps = computeDisplayedSteps() ?: 0
         previousShownSteps = shownSteps
 
-        startForeground(NOTIF_ID, buildNotification(shownSteps))
-        Log.i("StepsService", "Started. goal=$goal shown=$shownSteps weightKg=$weightKg")
+        try {
+            Log.d("StepsFgService", "Attempting to call startForeground...")
+            startForeground(NOTIF_ID, buildNotification(shownSteps))
+            Log.i("StepsFgService", "startForeground successfully called. goal=$goal shown=$shownSteps weightKg=$weightKg")
+        } catch (e: Exception) {
+            Log.e("StepsFgService", "!!! FAILED to call startForeground !!!", e)
+        }
 
         if (!hasActivityPermission()) {
             Log.w("StepsService", "ACTIVITY_RECOGNITION permission yo'q")
@@ -131,7 +136,6 @@ class StepsFgService : Service(), SensorEventListener {
     private fun handleSync(intent: Intent) {
         val steps = intent.getIntExtra(EXTRA_STEPS, 0).coerceAtLeast(0)
 
-        // ✅ weight update (sync paytida ham)
         val w = intent.getFloatExtra(EXTRA_WEIGHT_KG, weightKg).coerceAtLeast(30f)
         if (w != weightKg) {
             weightKg = w
@@ -154,7 +158,6 @@ class StepsFgService : Service(), SensorEventListener {
             return
         }
 
-        // sync base set
         syncBaseSensorValue = sensorNow
         syncBaseSteps = steps
         pendingSyncSteps = null
@@ -274,7 +277,7 @@ class StepsFgService : Service(), SensorEventListener {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setCustomContentView(rv)
             .setCustomBigContentView(rv)
             .setContentIntent(contentPI)

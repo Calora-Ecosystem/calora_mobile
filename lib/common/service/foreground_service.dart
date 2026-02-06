@@ -30,11 +30,9 @@ class StepsForegroundService {
         'weight_kg': _weightKg,
       });
       _started = res ?? true;
-      log('Native FGS started=$_started goal=$_goalSteps weight=$_weightKg', name: 'StepsForegroundService');
       return _started;
     } catch (e, s) {
       _started = false;
-      log('Native FGS start error: $e', name: 'StepsForegroundService', stackTrace: s);
       return false;
     }
   }
