@@ -1,15 +1,14 @@
 import 'package:calora/common/flavor/flavor_values.dart';
-import 'package:rx_shared_preferences/rx_shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Keep SharedPreferences import
 
 class FlavorConfig {
   static late FlavorValues _flavorValues;
 
   static var _initialized = false;
 
-  static Future<void> initialize() async {
+  static Future<void> initialize(SharedPreferences sharedPreferences) async { // Modified to accept SharedPreferences
     if (!_initialized) {
-      final sharedPreferences = await SharedPreferences.getInstance();
-      _flavorValues = await FlavorValues.fromEnvironment(sharedPreferences);
+      _flavorValues = await FlavorValues.fromEnvironment(sharedPreferences); // Use injected instance
       _initialized = true;
     }
   }

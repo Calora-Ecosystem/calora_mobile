@@ -1,6 +1,7 @@
 import 'package:alice/alice.dart';
 import 'package:alice/model/alice_configuration.dart';
 import 'package:alice_dio/alice_dio_adapter.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/router/app_router.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -25,9 +26,12 @@ abstract class AppModule {
     return alice;
   }
 
+  @preResolve
   @lazySingleton
-  RxSharedPreferences get preferences =>
-      RxSharedPreferences(SharedPreferences.getInstance());
+  Future<SharedPreferences> get sharedPreferences => SharedPreferences.getInstance();
+
+  @lazySingleton
+  RxSharedPreferences get preferences => RxSharedPreferences(getIt<SharedPreferences>());
 
   @lazySingleton
   AppRouter get appRouter => AppRouter();
