@@ -163,8 +163,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   }
 
   void updateTodaySteps(int steps) {
-    emit(state.copyWith(stepCount: steps));
-    if (_isTodayDailyView) emit(state.copyWith(dailyDisplayStepCount: steps));
+    if (!_isTodayDailyView) return;
+    if (steps <= 0 && state.stepCount > 0) return;
+    if (steps == state.stepCount) return;
+    emit(state.copyWith(stepCount: steps, dailyDisplayStepCount: steps));
   }
 
   Future<void> getSteps({

@@ -339,29 +339,69 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
 
   Widget _buildDailyTab() {
     final isToday = widget.state.period == 0 && widget.state.dailyOffset == 0;
-    final currentSteps = isToday ? widget.state.stepCount : widget.state.dailyDisplayStepCount;
+
     final shouldShowTodayInitialShimmer = isToday && !widget.state.hasLoadedTodayInitial && widget.state.isDailyLoading;
+
     final dailyLoading = isToday ? shouldShowTodayInitialShimmer : widget.state.isDailyLoading;
 
-    return _KeepAliveTabContent(
-      fitnessTrackWidget: Screenshot(
-        controller: widget.screenshotControllers[0],
-        child: DailyFitnessTrackWidget(
-          key: widget.dailyShareAnchorKey,
-          goal: widget.stepValue.toInt(),
-          metrics: widget.state.dailyMetrics,
-          stepCount: currentSteps,
-          offset: widget.state.dailyOffset,
-          loading: dailyLoading,
-          onClickBackward: () => widget.manager.changeOffset(-1),
-          onClickForward: () => widget.manager.changeOffset(1),
-          onClickMoreVert: widget.onShowActionsSheet,
-          onClickPause: () {},
-          onClickEditStepGoal: widget.onShowEditStepGoalSheet,
+    if (!isToday) {
+      final currentSteps = widget.state.dailyDisplayStepCount;
+
+      return _KeepAliveTabContent(
+        fitnessTrackWidget: Screenshot(
+          controller: widget.screenshotControllers[0],
+          child: DailyFitnessTrackWidget(
+            key: widget.dailyShareAnchorKey,
+            goal: widget.stepValue.toInt(),
+            metrics: widget.state.dailyMetrics,
+            stepCount: currentSteps,
+            offset: widget.state.dailyOffset,
+            loading: dailyLoading,
+            onClickBackward: () => widget.manager.changeOffset(-1),
+            onClickForward: () => widget.manager.changeOffset(1),
+            onClickMoreVert: widget.onShowActionsSheet,
+            onClickPause: () {},
+            onClickEditStepGoal: widget.onShowEditStepGoalSheet,
+          ),
         ),
-      ),
-      screenshotController: widget.screenshotControllers[0],
-      paginationService: widget.manager.dailyPaginationService,
+        screenshotController: widget.screenshotControllers[0],
+        paginationService: widget.manager.dailyPaginationService,
+      );
+    }
+
+    return ManagerBuilder<DashboardState, DashboardEffect>(
+      manager: context.read<DashboardManager>(),
+      properties: (s) => [s.todaySteps],
+      builder: (context, dashState) {
+        final currentSteps = dashState.todaySteps;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (currentSteps != widget.manager.state.stepCount) {
+            widget.manager.updateTodaySteps(currentSteps);
+          }
+        });
+
+        return _KeepAliveTabContent(
+          fitnessTrackWidget: Screenshot(
+            controller: widget.screenshotControllers[0],
+            child: DailyFitnessTrackWidget(
+              key: widget.dailyShareAnchorKey,
+              goal: widget.stepValue.toInt(),
+              metrics: widget.state.dailyMetrics,
+              stepCount: currentSteps, // ✅ mana shu joy
+              offset: widget.state.dailyOffset,
+              loading: dailyLoading,
+              onClickBackward: () => widget.manager.changeOffset(-1),
+              onClickForward: () => widget.manager.changeOffset(1),
+              onClickMoreVert: widget.onShowActionsSheet,
+              onClickPause: () {},
+              onClickEditStepGoal: widget.onShowEditStepGoalSheet,
+            ),
+          ),
+          screenshotController: widget.screenshotControllers[0],
+          paginationService: widget.manager.dailyPaginationService,
+        );
+      },
     );
   }
 
