@@ -32,5 +32,5 @@ abstract class HomeState with _$HomeState {
 
 @freezed
 class HomeEffect with _$HomeEffect {
-  const factory HomeEffect() = _HomeEffect;
+  const factory HomeEffect.forceUpdate() = _ForceUpdate;
 }

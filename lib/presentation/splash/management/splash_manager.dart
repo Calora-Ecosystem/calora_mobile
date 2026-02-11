@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/flavor/flavor_config.dart';
@@ -9,6 +11,7 @@ import 'package:calora/presentation/splash/management/splash_management.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 
 @injectable

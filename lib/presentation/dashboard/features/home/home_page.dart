@@ -38,36 +38,32 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   @override
   void init(BuildContext context, HomeManager manager) {
-    
-
     manager.updateDay(DateTime.now());
     manager.refreshAll();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      
       final dashManager = context.read<DashboardManager>();
       dashManager.initialize();
-      
     });
-
     Future.microtask(() {
-      
       manager.initStepsForeground();
     });
-
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
-
     _tabsRouter!.addListener(() {
       final idx = _tabsRouter!.activeIndex;
       if (_lastIndex != 0 && idx == 0) {
-        
         manager.refreshAll();
       }
       _lastIndex = idx;
     });
+  }
 
-    
+  @override
+  void listener(BuildContext context, HomeManager manager, HomeEffect effect) {
+    super.listener(context, manager, effect);
+    effect.when(
+      forceUpdate: () => context.router.replaceAll([const ForceUpdateRoute()]),
+    );
   }
 
   @override
@@ -277,7 +273,5 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void openInbox(BuildContext context) async {
     context.router.navigate(const InboxRoute());
     final token = await FirebaseMessaging.instance.getToken();
-    
   }
 }
-

@@ -44,4 +44,14 @@ class HomeApi {
 
     return MetricsRequest.fromJson(data);
   }
+
+  Future<String> getLatestVersionKey() async {
+    final res = await _dio.get('/versions/latest');
+    return res.data['content']['key']?.toString() ?? '';
+  }
+
+  Future<bool> isVersionActive(String version) async {
+    final res = await _dio.get('/versions/$version');
+    return (res.data['content']['isActive'] == true);
+  }
 }
