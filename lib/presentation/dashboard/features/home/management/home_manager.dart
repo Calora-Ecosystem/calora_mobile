@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -11,10 +12,12 @@ import 'package:calora/domain/model/summary/summary_request.dart';
 import 'package:calora/domain/repo/home/home_repo.dart';
 import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
+import 'package:calora/domain/repo/splash/splash_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
@@ -23,6 +26,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final ProfileRepo _profileRepo;
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
+
   final NotificationRepo _notificationRepo;
   final MetricsSyncService _metricsSync;
 
@@ -53,7 +57,6 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     required bool includeNotifications,
   }) {
     if (_globalPermFuture != null) {
-
       return _globalPermFuture!;
     }
 
@@ -69,11 +72,9 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       _globalPermFuture = perms
           .request()
           .then((result) {
-
             return result;
           })
           .catchError((e, s) {
-
             return <Permission, PermissionStatus>{};
           })
           .whenComplete(() {
@@ -94,7 +95,6 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   Future<void> _initStepsForegroundInternal() async {
     if (_fgsStarted) {
-
       return;
     }
 
@@ -111,16 +111,13 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       }
 
       if (!arOk) {
-
         return;
       }
 
       final notifStatus = statuses[Permission.notification];
       final notifOk = notifStatus?.isGranted == true;
 
-      if (!notifOk) {
-
-      }
+      if (!notifOk) {}
 
       final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
 
@@ -129,9 +126,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       final ok = await StepsForegroundService.instance.start();
 
       _fgsStarted = ok;
-
     } catch (e, s) {
-
       _fgsStarted = false;
     }
   }
@@ -169,7 +164,6 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     _metricsSyncSub?.cancel();
 
     _metricsSyncSub = _metricsSync.stream.listen((steps) {
-
       _scheduleMetricsRefresh();
     });
 
@@ -393,6 +387,11 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
 extension HomeManagerX on HomeManager {
   Future<void> refreshAll() async {
+    final mustUpdate = await _shouldForceUpdate();
+    if (mustUpdate) {
+      publish(const HomeEffect.forceUpdate());
+      return;
+    }
     getUserInfo();
     getStepNorm();
     getSummary();
@@ -408,5 +407,13 @@ extension HomeManagerX on HomeManager {
     }
     getMetrics();
   }
-}
 
+  Future<bool> _shouldForceUpdate() async {
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = info.version.split('+').first.trim();
+    log(currentVersion);
+
+    final active = await _homeRepo.isVersionActive(currentVersion);
+    return !active;
+  }
+}

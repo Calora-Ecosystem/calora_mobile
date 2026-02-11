@@ -45,5 +45,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: UniversalCameraRoute.page),
     AutoRoute(page: UniversalProgressRoute.page),
     AutoRoute(page: PremiumFeaturesRoute.page),
+    AutoRoute(page: ForceUpdateRoute.page),
   ];
 }

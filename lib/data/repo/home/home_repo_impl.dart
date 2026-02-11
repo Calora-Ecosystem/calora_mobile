@@ -38,4 +38,14 @@ class HomeRepoImpl implements HomeRepo {
   Future<MetricsRequest> getMetrics(DateTime date) async {
     return await _homeApi.getUserMetrics(date) ?? MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0);
   }
+
+  @override
+  Future<String> getLatestVersionKey() async {
+    return await _homeApi.getLatestVersionKey();
+  }
+
+  @override
+  Future<bool> isVersionActive(String version) async {
+    return await _homeApi.isVersionActive(version);
+  }
 }

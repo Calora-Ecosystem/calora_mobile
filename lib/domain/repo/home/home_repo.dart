@@ -12,4 +12,8 @@ abstract class HomeRepo {
   Future<MetricsRequest> getMetrics(DateTime date);
 
   Future<DailiesRequest> getDailiesSteps(DateTime date);
+
+  Future<String> getLatestVersionKey();
+
+  Future<bool> isVersionActive(String version);
 }

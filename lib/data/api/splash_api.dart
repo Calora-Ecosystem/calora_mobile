@@ -9,8 +9,7 @@ class SplashApi {
 
   Future<bool> getCurrentCountry() async {
     final response = await _dio.get('/');
-    final String countryCode =
-        (response.data as Map<String, dynamic>)['country'];
+    final String countryCode = (response.data as Map<String, dynamic>)['country'];
     return countryCode.toUpperCase() == 'UZ';
   }
 }
