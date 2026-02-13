@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer';
 
+import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
@@ -16,14 +18,12 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   final MetricsSyncService _metricsSync;
   final AuthStore _authStore;
 
+  final StepLedgerStore _ledger = StepLedgerStore();
+
   StreamSubscription<int>? _stepsSub;
   Timer? _syncTimer;
-
   StreamSubscription<void>? _forceLogoutSub;
 
-  int _backendBaseSteps = 0;
-  int? _sensorBaseSteps;
-  int _latestSensorSteps = 0;
   int _lastSentTotalSteps = -1;
   int _lastMetricsRefreshedAtTotalSteps = -1;
 
@@ -41,22 +41,15 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
     this._authStore,
   ) : super(const DashboardState());
 
-  int get _totalSteps {
-    if (_sensorBaseSteps == null) {
-      return _backendBaseSteps;
-    }
-    final delta = _latestSensorSteps - _sensorBaseSteps!;
-    final safeDelta = delta < 0 ? 0 : delta;
-    final total = _backendBaseSteps + safeDelta;
-    return total < 0 ? 0 : total;
+  int get _todayTotal {
+    final key = _ledger.dayKey(DateTime.now());
+    return _ledger.totalFor(key);
   }
 
   @override
   void initialize() {
     super.initialize();
-    if (_initialized) {
-      return;
-    }
+    if (_initialized) return;
     _initialized = true;
     _initFuture ??= _initializeInternal();
   }
@@ -69,24 +62,18 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
         await _stepsSub?.cancel();
         publish(const DashboardEffect.forceLogout());
       });
-
       await _startPedometerBootstrap();
-    } catch (e, s) {}
+    } catch (_) {}
   }
 
   Future<int> _fetchBackendTodaySteps() async {
     try {
       final list = await _stepRepo.getSteps(0);
-      if (list.isEmpty) {
-        return 0;
-      }
+      if (list.isEmpty) return 0;
       final v = list.first.value;
-      if (v.isNaN || v.isInfinite) {
-        return 0;
-      }
-      final steps = v.floor();
-      return steps;
-    } catch (e, s) {
+      if (v.isNaN || v.isInfinite) return 0;
+      return v.floor();
+    } catch (_) {
       return 0;
     }
   }
@@ -94,42 +81,46 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   Future<void> _startPedometerBootstrap() async {
     try {
       await _pedometerService.initialize();
+      if (!_pedometerService.isInitialized) return;
 
-      if (!_pedometerService.isInitialized) {
-        return;
-      }
       final backendToday = await _fetchBackendTodaySteps();
-      _backendBaseSteps = backendToday;
+      final todayKey = _ledger.dayKey(DateTime.now());
+      await _ledger.ensureDayAtLeast(todayKey, backendToday, minSynced: backendToday);
 
-      emit(state.copyWith(todaySteps: _totalSteps));
-      _metricsSync.notifyUpdated(_totalSteps);
+      final total = _ledger.totalFor(todayKey);
+      final synced = _ledger.syncedFor(todayKey);
+
+      emit(state.copyWith(todaySteps: total));
+      _metricsSync.notifyUpdated(total);
+
       if (StepsForegroundService.instance.isRunning) {
-        unawaited(StepsForegroundService.instance.syncSteps(_totalSteps));
+        unawaited(StepsForegroundService.instance.syncSteps(total));
       }
-      await sendTodayStepsToBackend(force: true);
       _listenToStepUpdates();
-
       _startPeriodicSync();
-    } catch (e, s) {}
+      if (total > synced) {
+        await sendTodayStepsToBackend(force: true);
+      } else if (total > 0) {
+        await sendTodayStepsToBackend(force: true);
+      }
+    } catch (e) {}
   }
 
   void _listenToStepUpdates() {
     _stepsSub?.cancel();
-
     _stepsSub = _pedometerService.stepCountStream.listen(
-      (sensorSteps) {
-        if (_sensorBaseSteps == null) {
-          _sensorBaseSteps = sensorSteps;
-        }
+      (sensorSteps) async {
+        await _ledger.onSensorTotal(sensorSteps, DateTime.now());
 
-        _latestSensorSteps = sensorSteps;
-        final total = _totalSteps;
+        final total = _todayTotal;
 
         emit(state.copyWith(todaySteps: total));
         _metricsSync.notifyUpdated(total);
+
         if (StepsForegroundService.instance.isRunning) {
           unawaited(StepsForegroundService.instance.syncSteps(total));
         }
+
         if (_shouldSendToBackend(total)) {
           unawaited(sendTodayStepsToBackend());
         }
@@ -137,7 +128,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
           unawaited(_refreshMetrics(total));
         }
       },
-      onError: (e) {},
+      onError: (_) {},
     );
   }
 
@@ -155,18 +146,18 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   }
 
   Future<void> sendTodayStepsToBackend({bool force = false}) async {
-    final total = _totalSteps;
-    if (!force && !_shouldSendToBackend(total)) {
-      return;
-    }
-    if (total <= _lastSentTotalSteps && !force) {
-      return;
-    }
-    try {
-      await _stepRepo.sendDailyData(metric: 'Step', value: total);
-      _lastSentTotalSteps = total;
-      await _refreshMetrics(total);
-    } catch (e, s) {}
+    final total = _todayTotal;
+
+    if (!force && !_shouldSendToBackend(total)) return;
+    if (total <= _lastSentTotalSteps && !force) return;
+
+    await _stepRepo.sendDailyData(metric: 'Step', value: total);
+    _lastSentTotalSteps = total;
+
+    final todayKey = _ledger.dayKey(DateTime.now());
+    await _ledger.setSynced(todayKey, total);
+
+    await _refreshMetrics(total);
   }
 
   Future<void> _refreshMetrics(int total) async {
@@ -176,7 +167,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
     try {
       _lastMetricsRefreshedAtTotalSteps = total;
       _metricsSync.notifyUpdated(total);
-    } catch (e, s) {}
+    } catch (_) {}
   }
 
   void _startPeriodicSync() {

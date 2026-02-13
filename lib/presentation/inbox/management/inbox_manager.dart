@@ -19,6 +19,11 @@ class InboxManager extends Manager<InboxState, InboxEffect> {
 
   void initializeNotifications() {}
 
+  Future<void> readAll() async {
+    await _notificationRepo.readAll().handle();
+    pagingController.refresh();
+  }
+
   @override
   Future<void> close() {
     pagingController.dispose();

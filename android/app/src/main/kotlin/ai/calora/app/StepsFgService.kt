@@ -360,5 +360,7 @@ class StepsFgService : Service(), SensorEventListener {
             .remove(KEY_SYNC_BASE_SENSOR)
             .remove(KEY_SYNC_BASE_STEPS)
             .apply()
+        shownSteps = 0
+        updateNotification(force = true)
     }
 }
