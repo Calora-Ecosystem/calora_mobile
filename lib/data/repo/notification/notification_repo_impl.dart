@@ -90,4 +90,9 @@ class NotificationRepoImpl extends NotificationRepo {
       _unreadCountSubject.add(_unreadCountSubject.value - 1);
     }
   }
+
+  @override
+  Future<void> readAll() async {
+    await notificationApi.readAll();
+  }
 }

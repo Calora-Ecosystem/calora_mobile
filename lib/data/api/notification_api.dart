@@ -54,4 +54,8 @@ class NotificationApi {
   Future<void> deleteReminder(int id) async {
     await _dio.delete('/reminder/$id');
   }
+
+  Future<void> readAll() async {
+    await _dio.put('notifications/mark-as-read/all');
+  }
 }

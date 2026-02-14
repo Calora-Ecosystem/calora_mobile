@@ -30,13 +30,13 @@ class InboxPage extends Managed<InboxManager, InboxState, InboxEffect> {
       backgroundColor: context.colors.white,
       appBar: CustomAppBar(
         title: Strings.notification,
-        // trailing: Padding(
-        //   padding: const EdgeInsets.only(right: 12),
-        //   child: GestureDetector(
-        //     onTap: () {},
-        //     child: Assets.icons.messageDone.svg(),
-        //   ),
-        // ),
+        trailing: Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: GestureDetector(
+            onTap: () => manager.readAll(),
+            child: Assets.icons.messageDone.svg(),
+          ),
+        ),
       ),
       body: PagedListView<int, model.Notification>(
         pagingController: manager.pagingController,

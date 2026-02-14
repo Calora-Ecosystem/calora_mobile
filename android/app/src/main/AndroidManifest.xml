@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Health Connect permissions -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
@@ -20,12 +21,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <!-- Android 14+ health foreground service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+
+    <!-- WorkManager -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!-- Audio -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -64,7 +66,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Health Connect permission intent filter -->
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
@@ -85,33 +86,25 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-
     </application>
 
-    <!-- Queries for Health Connect + share -->
     <queries>
-        <!-- Query for Health Connect app -->
         <package android:name="com.google.android.apps.healthdata" />
-        <!-- Alternative Health Connect package -->
         <package android:name="com.google.android.apps.healthdata.debug" />
 
-        <!-- Query for permission rationale -->
         <intent>
             <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
         </intent>
 
-        <!-- Query for Health Connect SDK permissions -->
         <intent>
             <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
         </intent>
 
-        <!-- Query for Health Connect activities -->
         <intent>
             <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
             <data android:scheme="package" />
         </intent>
 
-        <!-- Share intents -->
         <intent>
             <action android:name="android.intent.action.SEND" />
             <data android:mimeType="text/plain" />

@@ -10,4 +10,5 @@ abstract class NotificationRepo {
   Stream<int> getUnread();
   Future<List<model.Notification>> fetchNotifications({required int skip, required int take});
   Future<void> markAsRead(int notificationId);
+  Future<void> readAll();
 }

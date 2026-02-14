@@ -4,6 +4,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/common/animated_count.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
@@ -35,10 +36,9 @@ class StepCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerWrapper(
       loading: loading,
-      shimmerChild: ShimmerChild(height: 204, radius: 20),
+      shimmerChild: const ShimmerChild(height: 204, radius: 20),
       child: Container(
-        height: 204,
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -51,7 +51,10 @@ class StepCardWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Strings.yourStep.text(20, 24, 600),
-                '$currentSteps'.text(24, 30, 700),
+                AnimatedCount(
+                  count: currentSteps,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, fontFamily: 'Inter'),
+                ),
               ],
             ),
             Column(

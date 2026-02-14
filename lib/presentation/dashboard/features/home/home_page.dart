@@ -125,10 +125,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   },
                                   date: state.day ?? DateTime.now(),
                                   calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
-                                  water: '${state.targetLiters} ${Strings.liter}',
+                                  water: '${(state.targetLiters / 1000).asFixedTruncated(2)} ${Strings.liter}',
                                   steps: state.targetSteps.toString(),
                                 ),
-
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
                                   child: Container(
@@ -164,7 +163,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                     ),
                                   ),
                                 ),
-
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
                                   normCalories: (state.summary?.kcalNorm.value ?? 0).asFixedTruncated(0).toString(),
