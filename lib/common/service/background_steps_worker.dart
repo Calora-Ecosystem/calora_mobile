@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'package:calora/common/di/injection.dart';
@@ -21,6 +22,7 @@ class BackgroundStepsWorker {
 
       await Workmanager().initialize(
         callbackDispatcher,
+        isInDebugMode: false, // Set to true for debugging work manager calls
       );
 
       await Workmanager().registerPeriodicTask(
@@ -33,6 +35,7 @@ class BackgroundStepsWorker {
         backoffPolicyDelay: const Duration(minutes: 1),
       );
     } catch (e, s) {
+      log('Workmanager initialization failed', name: 'BackgroundStepsWorker', error: e, stackTrace: s);
       rethrow;
     }
   }
@@ -48,48 +51,79 @@ class BackgroundStepsWorker {
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      // Hive init (BG isolate)
+      // Initialize dependencies for the background isolate
       final dir = await getApplicationDocumentsDirectory();
       Hive.init(dir.path);
-      if (!Hive.isBoxOpen('steps_ledger')) await Hive.openBox('steps_ledger');
-      if (!Hive.isBoxOpen('steps_meta')) await Hive.openBox('steps_meta');
+      if (!Hive.isBoxOpen(StepLedgerStore.ledgerBoxName)) {
+        await Hive.openBox(StepLedgerStore.ledgerBoxName);
+      }
+      if (!Hive.isBoxOpen(StepLedgerStore.metaBoxName)) {
+        await Hive.openBox(StepLedgerStore.metaBoxName);
+      }
 
-      // DI init (GetIt)
-      configureDependencies();
-
+      // Using a flag to ensure DI is configured only once.
+      if (!GetIt.I.isRegistered<StepRepo>()) {
+        configureDependencies();
+      }
+      
       final ledger = StepLedgerStore();
-      final todayKey = ledger.dayKey(DateTime.now());
-      final total = ledger.totalFor(todayKey);
-      final synced = ledger.syncedFor(todayKey);
+      final pendingDays = ledger.getAllPendingDays();
 
-      log('BG task=$task total=$total synced=$synced', name: 'BackgroundStepsWorker');
+      log('BG task=$task running. Found ${pendingDays.length} pending days.', name: 'BackgroundStepsWorker');
 
-      if (total > synced && total > 0) {
-        final ok = await _sendSteps(total);
+      if (pendingDays.isNotEmpty) {
+        final ok = await _syncPendingSteps(pendingDays);
         return ok;
       }
 
-      return true;
+      return true; // Nothing to do
     } catch (e, s) {
       log('BG task failed: $e', name: 'BackgroundStepsWorker', error: e, stackTrace: s);
-      return false;
+      return false; // Reschedule task
     }
   });
 }
 
-Future<bool> _sendSteps(int total) async {
+Future<bool> _syncPendingSteps(List<String> pendingDays) async {
   try {
     final stepRepo = GetIt.instance<StepRepo>();
     final ledger = StepLedgerStore();
     final todayKey = ledger.dayKey(DateTime.now());
 
-    await stepRepo.sendDailyData(metric: 'Step', value: total);
-    await ledger.setSynced(todayKey, total);
+    final pastDaysToSync = pendingDays.where((key) => key != todayKey).toList();
+    final todayToSync = pendingDays.firstWhere((key) => key == todayKey, orElse: () => '');
 
-    log('Sent $total steps', name: 'BackgroundStepsWorker');
+    // Sync and then DELETE past days in a batch
+    if (pastDaysToSync.isNotEmpty) {
+      final payload = pastDaysToSync.map((key) {
+        return StepsWithMetricsRequest(
+          date: DateTime.parse(key),
+          value: ledger.totalFor(key).toDouble(),
+        );
+      }).toList();
+      
+      await stepRepo.sendStepDataDateRange(steps: payload);
+      
+      // On success, delete the days from Hive
+      for (final dayKey in pastDaysToSync) {
+        await ledger.deleteDay(dayKey);
+      }
+      log('Synced and cleared ${pastDaysToSync.length} past days in background.', name: 'BackgroundStepsWorker');
+    }
+
+    // Sync today but DO NOT delete
+    if (todayToSync.isNotEmpty) {
+      final total = ledger.totalFor(todayToSync);
+      if (total > 0) {
+        await stepRepo.sendDailyData(metric: 'Step', value: total);
+        await ledger.setSynced(todayToSync, total);
+        log('Synced $total steps for today in background.', name: 'BackgroundStepsWorker');
+      }
+    }
+    
     return true;
   } catch (e, s) {
-    log('Send steps failed: $e', name: 'BackgroundStepsWorker', error: e, stackTrace: s);
+    log('Syncing pending steps failed: $e', name: 'BackgroundStepsWorker', error: e, stackTrace: s);
     return false;
   }
 }

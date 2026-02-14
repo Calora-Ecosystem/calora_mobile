@@ -6,6 +6,7 @@ import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
+import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:injectable/injectable.dart';
@@ -24,12 +25,11 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
   Timer? _syncTimer;
   StreamSubscription<void>? _forceLogoutSub;
 
-  int _lastSentTotalSteps = -1;
-  int _lastMetricsRefreshedAtTotalSteps = -1;
+  int _lastSyncedTodaySteps = -1;
+  bool _isSyncingToday = false;
 
   static const int MIN_DELTA_STEPS_TO_SEND = 20;
-  static const int MIN_DELTA_STEPS_TO_REFRESH_METRICS = 20;
-  static const Duration PERIODIC_SYNC_INTERVAL = Duration(minutes: 2);
+  static const Duration PERIODIC_SYNC_INTERVAL = Duration(minutes: 15);
 
   bool _initialized = false;
   Future<void>? _initFuture;
@@ -63,117 +63,169 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> {
         publish(const DashboardEffect.forceLogout());
       });
       await _startPedometerBootstrap();
-    } catch (_) {}
-  }
-
-  Future<int> _fetchBackendTodaySteps() async {
-    try {
-      final list = await _stepRepo.getSteps(0);
-      if (list.isEmpty) return 0;
-      final v = list.first.value;
-      if (v.isNaN || v.isInfinite) return 0;
-      return v.floor();
-    } catch (_) {
-      return 0;
+    } catch (e, s) {
+      log('[STEPS] CRITICAL: Error during DashboardManager initialization', name: 'DashboardManager', error: e, stackTrace: s);
     }
   }
 
   Future<void> _startPedometerBootstrap() async {
     try {
+      log('[STEPS] Pedometer bootstrap started.', name: 'DashboardManager');
       await _pedometerService.initialize();
-      if (!_pedometerService.isInitialized) return;
+      if (!_pedometerService.isInitialized) {
+        log('[STEPS] Pedometer service not initialized, aborting bootstrap.', name: 'DashboardManager');
+        return;
+      }
 
-      final backendToday = await _fetchBackendTodaySteps();
+      // 1. Sync any data that was collected while the app was offline.
+      await syncOfflineSteps();
+
+      // 2. Get today's steps from the local ledger.
       final todayKey = _ledger.dayKey(DateTime.now());
-      await _ledger.ensureDayAtLeast(todayKey, backendToday, minSynced: backendToday);
-
       final total = _ledger.totalFor(todayKey);
-      final synced = _ledger.syncedFor(todayKey);
+      _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
+      log('[STEPS] Bootstrap: Initial today total=$total, synced=$_lastSyncedTodaySteps', name: 'DashboardManager');
 
+
+      // 3. Update UI and foreground service. The metrics will be updated AFTER sync.
       emit(state.copyWith(todaySteps: total));
-      _metricsSync.notifyUpdated(total);
-
+      // No metrics update here, it happens after successful sync in _syncTodaySteps
       if (StepsForegroundService.instance.isRunning) {
         unawaited(StepsForegroundService.instance.syncSteps(total));
       }
+
+      // 4. Start listening for live step updates and periodic syncs.
       _listenToStepUpdates();
       _startPeriodicSync();
-      if (total > synced) {
-        await sendTodayStepsToBackend(force: true);
-      } else if (total > 0) {
-        await sendTodayStepsToBackend(force: true);
-      }
-    } catch (e) {}
+      log('[STEPS] Pedometer bootstrap finished.', name: 'DashboardManager');
+    } catch (e, s) {
+      log('[STEPS] CRITICAL: Error during pedometer bootstrap', name: 'DashboardManager', error: e, stackTrace: s);
+    }
   }
 
   void _listenToStepUpdates() {
     _stepsSub?.cancel();
     _stepsSub = _pedometerService.stepCountStream.listen(
       (sensorSteps) async {
-        await _ledger.onSensorTotal(sensorSteps, DateTime.now());
+        final lastSensorTotal = _ledger.getLastSensorTotal();
+        await _ledger.setLastSensorTotal(sensorSteps);
 
-        final total = _todayTotal;
+        if (lastSensorTotal < 0) {
+          log('[STEPS] First sensor reading ($sensorSteps). No delta to calculate.', name: 'DashboardManager');
+          return;
+        }
 
-        emit(state.copyWith(todaySteps: total));
-        _metricsSync.notifyUpdated(total);
+        int delta;
+        if (sensorSteps < lastSensorTotal) {
+          delta = sensorSteps;
+          log('[STEPS] Reboot detected. Delta is new sensor value: $delta', name: 'DashboardManager');
+        } else {
+          delta = sensorSteps - lastSensorTotal;
+        }
+
+        if (delta <= 0) return;
+        
+        log('[STEPS] Delta calculated: $delta', name: 'DashboardManager');
+        final todayKey = _ledger.dayKey(DateTime.now());
+        await _ledger.addSteps(todayKey, delta);
+        
+        final newTotal = _ledger.totalFor(todayKey);
+        emit(state.copyWith(todaySteps: newTotal));
+        // Metrics update moved to _syncTodaySteps after successful backend sync
 
         if (StepsForegroundService.instance.isRunning) {
-          unawaited(StepsForegroundService.instance.syncSteps(total));
+          unawaited(StepsForegroundService.instance.syncSteps(newTotal));
         }
-
-        if (_shouldSendToBackend(total)) {
-          unawaited(sendTodayStepsToBackend());
-        }
-        if (_shouldRefreshMetrics(total)) {
-          unawaited(_refreshMetrics(total));
+      
+        if (_shouldSyncToday(newTotal)) {
+           log('[STEPS] Delta since last sync is >= $MIN_DELTA_STEPS_TO_SEND. Triggering sync.', name: 'DashboardManager');
+          unawaited(_syncTodaySteps());
+        } else {
+           final stepsSinceSync = newTotal - _lastSyncedTodaySteps;
+           log('[STEPS] Not syncing. Steps since last sync: $stepsSinceSync (threshold: $MIN_DELTA_STEPS_TO_SEND)', name: 'DashboardManager');
         }
       },
-      onError: (_) {},
+      onError: (e, s) {
+        log('[STEPS] CRITICAL: Error in step count stream', name: 'DashboardManager', error: e, stackTrace: s);
+      },
     );
   }
 
-  bool _shouldSendToBackend(int total) {
+  bool _shouldSyncToday(int total) {
     if (total <= 0) return false;
-    if (_lastSentTotalSteps < 0) return true;
-    final delta = total - _lastSentTotalSteps;
+    final delta = total - _lastSyncedTodaySteps;
     return delta >= MIN_DELTA_STEPS_TO_SEND;
   }
 
-  bool _shouldRefreshMetrics(int total) {
-    if (_lastMetricsRefreshedAtTotalSteps < 0) return true;
-    final delta = total - _lastMetricsRefreshedAtTotalSteps;
-    return delta >= MIN_DELTA_STEPS_TO_REFRESH_METRICS;
-  }
-
-  Future<void> sendTodayStepsToBackend({bool force = false}) async {
-    final total = _todayTotal;
-
-    if (!force && !_shouldSendToBackend(total)) return;
-    if (total <= _lastSentTotalSteps && !force) return;
-
-    await _stepRepo.sendDailyData(metric: 'Step', value: total);
-    _lastSentTotalSteps = total;
-
-    final todayKey = _ledger.dayKey(DateTime.now());
-    await _ledger.setSynced(todayKey, total);
-
-    await _refreshMetrics(total);
-  }
-
-  Future<void> _refreshMetrics(int total) async {
-    if (_lastMetricsRefreshedAtTotalSteps >= 0 && total <= _lastMetricsRefreshedAtTotalSteps) {
+  Future<void> _syncTodaySteps({bool force = false}) async {
+    if (_isSyncingToday) {
+      log('[STEPS] Aborting sync for today: another sync is already in progress.', name: 'DashboardManager');
       return;
     }
+
+    final total = _todayTotal;
+    if (total <= _lastSyncedTodaySteps && !force) {
+      log('[STEPS] Aborting sync for today: no new steps to send.', name: 'DashboardManager');
+      return;
+    }
+    
+    _isSyncingToday = true;
+    log('[STEPS] Starting sync for today. Total: $total, Last Synced: $_lastSyncedTodaySteps', name: 'DashboardManager');
+
     try {
-      _lastMetricsRefreshedAtTotalSteps = total;
-      _metricsSync.notifyUpdated(total);
-    } catch (_) {}
+      final todayKey = _ledger.dayKey(DateTime.now());
+      await _stepRepo.sendDailyData(metric: 'Step', value: total);
+      await _ledger.setSynced(todayKey, total);
+      _lastSyncedTodaySteps = total;
+      _metricsSync.notifyUpdated(total); // <-- Metrics updated AFTER successful backend sync
+      log('[STEPS] SUCCESS: Synced $total steps for today. Metrics updated.', name: 'DashboardManager');
+    } catch(e, s) {
+      log('[STEPS] FAILURE: Failed to sync today steps. Error: $e', name: 'DashboardManager', error: e, stackTrace: s);
+    } finally {
+      _isSyncingToday = false;
+      log('[STEPS] Finished sync for today.', name: 'DashboardManager');
+    }
+  }
+
+  Future<void> syncOfflineSteps() async {
+    log('[STEPS] Starting offline sync process.', name: 'DashboardManager');
+    final pendingDays = _ledger.getAllPendingDays();
+    final todayKey = _ledger.dayKey(DateTime.now());
+    
+    final pastDaysToSync = pendingDays.where((key) => key != todayKey).toList();
+
+    if (pastDaysToSync.isNotEmpty) {
+      log('[STEPS] Found ${pastDaysToSync.length} past days to sync.', name: 'DashboardManager');
+      try {
+        final payload = pastDaysToSync.map((key) {
+          return StepsWithMetricsRequest(
+            date: DateTime.parse(key),
+            value: _ledger.totalFor(key).toDouble(),
+          );
+        }).toList();
+
+        await _stepRepo.sendStepDataDateRange(steps: payload);
+
+        for (final dayKey in pastDaysToSync) {
+          await _ledger.deleteDay(dayKey);
+        }
+        log('[STEPS] SUCCESS: Synced and cleared ${pastDaysToSync.length} past days.', name: 'DashboardManager');
+      } catch (e, s) {
+        log('[STEPS] FAILURE: Failed to sync offline steps. Error: $e', name: 'DashboardManager', error: e, stackTrace: s);
+      }
+    } else {
+      log('[STEPS] No past days found to sync.', name: 'DashboardManager');
+    }
+    
+    log('[STEPS] Forcing a sync for today as part of offline process.', name: 'DashboardManager');
+    await _syncTodaySteps(force: true);
   }
 
   void _startPeriodicSync() {
     _syncTimer?.cancel();
     _syncTimer = Timer.periodic(PERIODIC_SYNC_INTERVAL, (_) {
-      unawaited(sendTodayStepsToBackend(force: true));
+      log('[STEPS] Periodic sync timer triggered.', name: 'DashboardManager');
+      unawaited(syncOfflineSteps());
     });
   }
 
