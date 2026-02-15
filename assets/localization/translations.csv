@@ -320,7 +320,7 @@ notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj
 should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
 yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
 please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
-your_data_has_been_saved,Your data has been successfully saved.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+your_data_has_been_saved,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
 no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
 liter,liter,litr,литр
@@ -386,3 +386,4 @@ configuring_smart_reminder_plan,Configuring Smart Reminder Plan...,Smart eslatma
 additional_information_being_analyzed,Additional information is being analyzed...,Qo’shimcha ma’lumotlar analiz qilinmoqda...,В настоящее время проводится анализ дополнительной информации...
 notificationFailed,Failed to load notifications,Bildirishnomalarni olishda xatolik,Не удалось загрузить уведомления
 noNotifications,No notifications,Bildirishnomalar yo'q,Уведомления отсутствуют
+installTheNewVersion,"To continue, install the new version of the app.",Davom etish uchun ilovaning yangi versiyasini o‘rnating.,Для продолжения установите новую версию приложения.

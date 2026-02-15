@@ -117,60 +117,62 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                           ),
                       ],
                     ),
-                    if (!state.isPaymentPending) ...[const SizedBox(height: 16), PromoCodeWidget()],
-                    const SizedBox(height: 16),
-                    if (state.isPaymentPending && state.selectedPaymentMethod != null)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Strings.chosenPaymentType.text(20, 24, 600).c(context.colors.textPrimary),
-                          const SizedBox(height: 8),
-                          _buildPaymentMethodCard(
-                            context,
-                            manager,
-                            state.selectedPaymentMethod!,
-                            true,
-                            state.isGettingOrders,
-                          ),
-                        ],
-                      )
-                    else
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Strings.choosePaymentMethod.text(20, 24, 600).c(context.colors.textPrimary),
-                          const SizedBox(height: 8),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisExtent: 60,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
+                    if (!state.isPaymentPending && state.isUzbekistan) ...[const SizedBox(height: 16), PromoCodeWidget()],
+                    if (state.isUzbekistan) ...[
+                      const SizedBox(height: 16),
+                      if (state.isPaymentPending && state.selectedPaymentMethod != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Strings.chosenPaymentType.text(20, 24, 600).c(context.colors.textPrimary),
+                            const SizedBox(height: 8),
+                            _buildPaymentMethodCard(
+                              context,
+                              manager,
+                              state.selectedPaymentMethod!,
+                              true,
+                              state.isGettingOrders,
                             ),
-                            itemCount: state.paymentMethods.length,
-                            itemBuilder: (context, index) {
-                              if (state.isGettingOrders) {
-                                return ShimmerWrapper(
-                                  loading: true,
-                                  type: ShimmerType.backgroundElevation,
-                                  shimmerChild: ShimmerChild(height: 60, radius: 12),
-                                  child: const SizedBox.shrink(),
+                          ],
+                        )
+                      else
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Strings.choosePaymentMethod.text(20, 24, 600).c(context.colors.textPrimary),
+                            const SizedBox(height: 8),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisExtent: 60,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                              ),
+                              itemCount: state.paymentMethods.length,
+                              itemBuilder: (context, index) {
+                                if (state.isGettingOrders) {
+                                  return ShimmerWrapper(
+                                    loading: true,
+                                    type: ShimmerType.backgroundElevation,
+                                    shimmerChild: ShimmerChild(height: 60, radius: 12),
+                                    child: const SizedBox.shrink(),
+                                  );
+                                }
+                                final method = state.paymentMethods[index];
+                                final isSelected = state.selectedPaymentMethod == method;
+                                return _buildPaymentMethodCard(
+                                  context,
+                                  manager,
+                                  method,
+                                  isSelected,
+                                  state.isGettingOrders,
                                 );
-                              }
-                              final method = state.paymentMethods[index];
-                              final isSelected = state.selectedPaymentMethod == method;
-                              return _buildPaymentMethodCard(
-                                context,
-                                manager,
-                                method,
-                                isSelected,
-                                state.isGettingOrders,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                              },
+                            ),
+                          ],
+                        ),
+                    ],
                     const SizedBox(height: 60),
                   ],
                 ),
@@ -199,7 +201,7 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
                   : Button(
                       height: 40,
                       text: Strings.purchase,
-                      enabled: (state.selectedPlan != null && state.selectedPaymentMethod != null),
+                      enabled: state.selectedPlan != null && (state.selectedPaymentMethod != null || !state.isUzbekistan),
                       loading: state.isOrderingSubscription,
                       onPressed: () => manager.orderSubscription(),
                     ),

@@ -13,9 +13,15 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   final PremiumRepo _premiumRepo;
 
   PremiumManager(this._premiumRepo) : super(const PremiumState()) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    final isUzbekistan = await _premiumRepo.isUzbekistan;
+    emit(state.copyWith(isUzbekistan: isUzbekistan));
     getPremiumPlans();
     getMyOrders();
-    _initializeMethods();
+    if (isUzbekistan) _initializeMethods();
   }
 
   void _initializeMethods() {

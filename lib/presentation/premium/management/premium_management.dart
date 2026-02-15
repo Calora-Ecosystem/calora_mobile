@@ -20,6 +20,7 @@ abstract class PremiumState with _$PremiumState {
     @Default(false) bool isGettingPremiumPlans,
     @Default(false) bool isGettingPromoCodeValue,
     @Default(false) bool isPaymentPending,
+    @Default(true) bool isUzbekistan,
     @Default(const []) List<MySubscriptionOrderModel> myOrders,
     @Default('') String paymentLink,
     PromoCodeModel? promoCodeValue,
