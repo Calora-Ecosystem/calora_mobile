@@ -2,8 +2,9 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:calora/common/di/injection.dart';
-import 'package:calora/common/service/notification_service.dart';
 import 'package:calora/common/service/background_steps_worker.dart';
+import 'package:calora/common/service/notification_service.dart';
+import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/firebase_options.dart';
 import 'package:calora/presentation/app/app/app.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -11,8 +12,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 @pragma('vm:entry-point')
@@ -50,7 +51,9 @@ Future<void> main() async {
       channelName: 'Steps tracking',
       channelDescription: 'Shows steps in a persistent notification',
     ),
-    iosNotificationOptions: const IOSNotificationOptions(showNotification: false),
+    iosNotificationOptions: const IOSNotificationOptions(
+      showNotification: false,
+    ),
     foregroundTaskOptions: ForegroundTaskOptions(
       eventAction: ForegroundTaskEventAction.repeat(5000),
     ),
@@ -68,6 +71,8 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  await getIt<RevenueCatService>().init();
 
   runApp(App());
 }

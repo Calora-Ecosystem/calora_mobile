@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/foreground_service.dart';
+import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -142,6 +144,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       emit(state.copyWith(profile: profile, isLoading: false));
       profileStore.clear();
       profileStore.set(profile);
+      getIt<RevenueCatService>().login(profile);
       final w = (profile.weight ?? 0).toDouble();
       if (w > 0) StepsForegroundService.instance.setUserWeight(w);
     },
