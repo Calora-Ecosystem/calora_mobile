@@ -1,6 +1,8 @@
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:collection/collection.dart';
@@ -21,7 +23,21 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
     emit(state.copyWith(isUzbekistan: isUzbekistan));
     getPremiumPlans();
     getMyOrders();
-    if (isUzbekistan) _initializeMethods();
+    if (isUzbekistan) {
+      _initializeMethods();
+    } else {
+      _initializeIapMethod();
+    }
+  }
+
+  void _initializeIapMethod() {
+    final iapMethod = PaymentMethod(icon: Assets.icons.payme, code: 'Iap');
+    emit(
+      state.copyWith(
+        paymentMethods: [iapMethod],
+        selectedPaymentMethod: iapMethod,
+      ),
+    );
   }
 
   void _initializeMethods() {
@@ -33,54 +49,68 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   }
 
   void selectPlan(PlanModel plan) => emit(state.copyWith(selectedPlan: plan));
-  void selectPaymentMethod(PaymentMethod method) => emit(state.copyWith(selectedPaymentMethod: method));
 
-  Future<void> getPremiumPlans() async => await _premiumRepo.getPremiumPlans().handle(
-    onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
-    onData: (data) {
-      final plans = data.map((e) {
-        if (e.duration == 1) {
-          return PlanModel(
-            title: Strings.monthlyPremium,
-            price: e.fee ?? 0,
-            packageMonth: e.duration ?? 0,
-            isMostPopular: e.isPopular ?? false,
+  void selectPaymentMethod(PaymentMethod method) =>
+      emit(state.copyWith(selectedPaymentMethod: method));
+
+  Future<void> getPremiumPlans() async =>
+      await _premiumRepo.getPremiumPlans().handle(
+        onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
+        onData: (data) {
+          final plans = data.map((e) {
+            if (e.duration == 1) {
+              return PlanModel(
+                title: Strings.monthlyPremium,
+                price: e.fee ?? 0,
+                packageMonth: e.duration ?? 0,
+                isMostPopular: e.isPopular ?? false,
+              );
+            }
+            return PlanModel(
+              title: Strings.nMothPremium(month: e.duration ?? 0),
+              price: e.fee ?? 0,
+              packageMonth: e.duration ?? 0,
+              isMostPopular: e.isPopular ?? false,
+            );
+          }).toList();
+
+          PlanModel? initialPlan;
+          try {
+            initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
+          } catch (e) {
+            initialPlan = plans.isNotEmpty ? plans.first : null;
+          }
+          emit(
+            state.copyWith(
+              isGettingPremiumPlans: false,
+              plans: plans,
+              selectedPlan: initialPlan,
+            ),
           );
-        }
-        return PlanModel(
-          title: Strings.nMothPremium(month: e.duration ?? 0),
-          price: e.fee ?? 0,
-          packageMonth: e.duration ?? 0,
-          isMostPopular: e.isPopular ?? false,
-        );
-      }).toList();
-
-      PlanModel? initialPlan;
-      try {
-        initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
-      } catch (e) {
-        initialPlan = plans.isNotEmpty ? plans.first : null;
-      }
-      emit(state.copyWith(isGettingPremiumPlans: false, plans: plans, selectedPlan: initialPlan));
-    },
-    onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
-  );
+        },
+        onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
+      );
 
   Future<void> getMyOrders() async => await _premiumRepo.getMyOrders().handle(
     onStart: () => emit(state.copyWith(isGettingOrders: true)),
     onData: (data) {
       final pendingOrder = data.isNotEmpty
-          ? data.firstWhere((e) => e.status?.trim().toLowerCase() == 'pending', orElse: () => data.first)
+          ? data.firstWhere(
+              (e) => e.status?.trim().toLowerCase() == 'pending',
+              orElse: () => data.first,
+            )
           : null;
       final selectedMethod = pendingOrder != null
-          ? state.paymentMethods.firstWhereOrNull((m) => m.code == pendingOrder.provider)
+          ? state.paymentMethods.firstWhereOrNull(
+              (m) => m.code == pendingOrder.provider,
+            )
           : null;
       emit(
         state.copyWith(
           isGettingOrders: false,
           myOrders: data,
           isPaymentPending: pendingOrder != null,
-          selectedPaymentMethod: selectedMethod,
+          selectedPaymentMethod: selectedMethod ?? state.selectedPaymentMethod,
         ),
       );
     },
@@ -124,7 +154,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
           onData: (data) {
             if (data.id != null && data.amount != null) {
               final discountedPlans = state.plans.map((plan) {
-                final discountedPrice = (plan.actualPrice ?? plan.price) - (data.amount ?? 0);
+                final discountedPrice =
+                    (plan.actualPrice ?? plan.price) - (data.amount ?? 0);
                 return PlanModel(
                   title: plan.title,
                   price: discountedPrice > 0 ? discountedPrice : 0,
@@ -136,9 +167,13 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
 
               PlanModel? newSelectedPlan;
               try {
-                newSelectedPlan = discountedPlans.firstWhere((plan) => plan.isMostPopular);
+                newSelectedPlan = discountedPlans.firstWhere(
+                  (plan) => plan.isMostPopular,
+                );
               } catch (e) {
-                newSelectedPlan = discountedPlans.isNotEmpty ? discountedPlans.first : null;
+                newSelectedPlan = discountedPlans.isNotEmpty
+                    ? discountedPlans.first
+                    : null;
               }
 
               emit(
@@ -168,9 +203,17 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       .handle(
         onStart: () => emit(state.copyWith(isOrderingSubscription: true)),
         onData: (link) {
-          emit(state.copyWith(isOrderingSubscription: false, paymentLink: link.paymentLink ?? ''));
+          emit(
+            state.copyWith(
+              isOrderingSubscription: false,
+              paymentLink: link.paymentLink ?? '',
+            ),
+          );
           if (link.paymentRequired ?? true) {
-            _openPaymentUrl(link.paymentLink ?? '');
+            if (state.selectedPaymentMethod?.code == 'Iap')
+              _openIap(state.selectedPlan!);
+            else
+              _openPaymentUrl(link.paymentLink ?? '');
           } else {
             publish(const PremiumEffect.subscriptionSuccess());
           }
@@ -182,7 +225,9 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       .deleteOrder(orderId: state.myOrders.first.id ?? -1)
       .handle(
         onStart: () => emit(state.copyWith(isDeletingOrder: true)),
-        onData: (_) => emit(state.copyWith(isDeletingOrder: false, isPaymentPending: false)),
+        onData: (_) => emit(
+          state.copyWith(isDeletingOrder: false, isPaymentPending: false),
+        ),
         onError: (_) => emit(state.copyWith(isDeletingOrder: false)),
       );
 
@@ -202,13 +247,26 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
         if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-          publish(PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl));
+          publish(
+            PremiumEffect.openPaymentUrlFailure(
+              Strings.couldNotLaunchPaymentUrl,
+            ),
+          );
         }
       } else {
-        publish(PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl));
+        publish(
+          PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl),
+        );
       }
     } catch (e) {
       publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
+    }
+  }
+
+  void _openIap(PlanModel plan) async {
+    final purchased = await getIt<RevenueCatService>().purchase(plan);
+    if (purchased) {
+      publish(PremiumEffect.subscriptionSuccess());
     }
   }
 }
