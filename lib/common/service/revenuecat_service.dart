@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
-import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/common/widgets/display/display.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
@@ -57,7 +56,7 @@ class RevenueCatService {
   }
 
   Future<bool> purchase(
-      PlanModel plan, [
+    PlanModel plan, [
     bool restore = false,
   ]) async {
     try {
@@ -69,7 +68,9 @@ class RevenueCatService {
         customerInfo = await Purchases.restorePurchases();
       } else {
         final packages = offering.availablePackages;
-        final package = packages.firstWhere((e) => e.identifier == 'product_${plan}');
+        final package = packages.firstWhere(
+          (e) => e.storeProduct.identifier == 'product_${plan.id}',
+        );
         final params = PurchaseParams.package(package);
         final result = await Purchases.purchase(params);
         customerInfo = result.customerInfo;
@@ -85,9 +86,7 @@ class RevenueCatService {
       return true;
     } on PlatformException catch (e, st) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
-      if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
-        getIt<Logger>().e(e.toString(), stackTrace: st);
-      }
+      getIt<Logger>().e(e.toString(), stackTrace: st);
       return false;
     }
   }

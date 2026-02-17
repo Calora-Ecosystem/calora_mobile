@@ -60,6 +60,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
           final plans = data.map((e) {
             if (e.duration == 1) {
               return PlanModel(
+                id: e.id ?? 0,
                 title: Strings.monthlyPremium,
                 price: e.fee ?? 0,
                 packageMonth: e.duration ?? 0,
@@ -67,6 +68,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
               );
             }
             return PlanModel(
+              id: e.id ?? 0,
               title: Strings.nMothPremium(month: e.duration ?? 0),
               price: e.fee ?? 0,
               packageMonth: e.duration ?? 0,
@@ -120,6 +122,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   void restoreOriginalPrices() {
     final restoredPlans = state.plans.map((plan) {
       return PlanModel(
+        id: plan.id,
         title: plan.title,
         price: plan.actualPrice ?? plan.price,
         packageMonth: plan.packageMonth,
@@ -157,6 +160,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
                 final discountedPrice =
                     (plan.actualPrice ?? plan.price) - (data.amount ?? 0);
                 return PlanModel(
+                  id: plan.id,
                   title: plan.title,
                   price: discountedPrice > 0 ? discountedPrice : 0,
                   actualPrice: plan.actualPrice ?? plan.price,
@@ -193,7 +197,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
         );
   }
 
-  Future<void> orderSubscription() async => await _premiumRepo
+  Future<void> orderSubscription({bool? restore}) async => await _premiumRepo
       .orderSubscription(
         provider: state.selectedPaymentMethod?.code ?? '',
         plan: SubscriptionPlanType.premium.toApi(),
@@ -211,7 +215,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
           );
           if (link.paymentRequired ?? true) {
             if (state.selectedPaymentMethod?.code == 'Iap')
-              _openIap(state.selectedPlan!);
+              _openIap(state.selectedPlan!, restore: restore ?? false);
             else
               _openPaymentUrl(link.paymentLink ?? '');
           } else {
@@ -263,8 +267,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
     }
   }
 
-  void _openIap(PlanModel plan) async {
-    final purchased = await getIt<RevenueCatService>().purchase(plan);
+  void _openIap(PlanModel plan, {bool restore = false}) async {
+    final purchased = await getIt<RevenueCatService>().purchase(plan, restore);
     if (purchased) {
       publish(PremiumEffect.subscriptionSuccess());
     }

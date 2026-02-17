@@ -1,6 +1,5 @@
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
-import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -29,14 +28,20 @@ abstract class PremiumState with _$PremiumState {
 
 @freezed
 sealed class PremiumEffect with _$PremiumEffect {
-  const factory PremiumEffect.openPaymentUrlFailure(String error) = _OpenPaymentUrlFailure;
-  const factory PremiumEffect.deleteSubscriptionFailure(String error) = _DeleteSubscriptionFailure;
+  const factory PremiumEffect.openPaymentUrlFailure(String error) =
+      _OpenPaymentUrlFailure;
+
+  const factory PremiumEffect.deleteSubscriptionFailure(String error) =
+      _DeleteSubscriptionFailure;
+
   const factory PremiumEffect.invalidPromoCode() = _InvalidPromoCode;
+
   const factory PremiumEffect.subscriptionSuccess() = _SubscriptionSuccess;
 }
 
 @immutable
 class PlanModel {
+  final int id;
   final String title;
   final int price;
   final int? actualPrice;
@@ -44,6 +49,7 @@ class PlanModel {
   final int packageMonth;
 
   const PlanModel({
+    required this.id,
     required this.title,
     required this.price,
     this.actualPrice,
@@ -56,6 +62,7 @@ class PlanModel {
       identical(this, other) ||
       other is PlanModel &&
           runtimeType == other.runtimeType &&
+          id == other.id &&
           title == other.title &&
           price == other.price &&
           actualPrice == other.actualPrice &&
@@ -64,7 +71,12 @@ class PlanModel {
 
   @override
   int get hashCode =>
-      title.hashCode ^ price.hashCode ^ actualPrice.hashCode ^ isMostPopular.hashCode ^ packageMonth.hashCode;
+      id.hashCode ^
+      title.hashCode ^
+      price.hashCode ^
+      actualPrice.hashCode ^
+      isMostPopular.hashCode ^
+      packageMonth.hashCode;
 }
 
 @immutable
@@ -73,7 +85,11 @@ class PaymentMethod {
   final String? displayName;
   final String code;
 
-  const PaymentMethod({required this.icon, this.displayName, required this.code});
+  const PaymentMethod({
+    required this.icon,
+    this.displayName,
+    required this.code,
+  });
 
   @override
   bool operator ==(Object other) =>

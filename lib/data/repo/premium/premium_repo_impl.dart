@@ -18,13 +18,16 @@ class PremiumRepoImpl implements PremiumRepo {
   Future<bool> get isUzbekistan async => await _authStore.isCountryUzbekistan();
 
   @override
-  Future<void> deleteOrder({required int orderId}) async => await _api.deleteOrder(orderId: orderId);
+  Future<void> deleteOrder({required int orderId}) async =>
+      await _api.deleteOrder(orderId: orderId);
 
   @override
-  Future<List<MySubscriptionOrderModel>> getMyOrders() async => await _api.getMyOrders();
+  Future<List<MySubscriptionOrderModel>> getMyOrders() async =>
+      await _api.getMyOrders();
 
   @override
-  Future<String> getPaymentLink({required int orderId}) async => await _api.getPaymentLink(orderId: orderId);
+  Future<String> getPaymentLink({required int orderId}) async =>
+      await _api.getPaymentLink(orderId: orderId);
 
   @override
   Future<SubscriptionResponseModel> orderSubscription({
@@ -32,11 +35,21 @@ class PremiumRepoImpl implements PremiumRepo {
     required String plan,
     required int orderMonth,
     int? couponId,
-  }) async => await _api.orderSubscription(provider: provider, plan: plan, orderMonth: orderMonth, couponId: couponId);
+  }) async {
+    return SubscriptionResponseModel();
+    await _api.orderSubscription(
+      provider: provider,
+      plan: plan,
+      orderMonth: orderMonth,
+      couponId: couponId,
+    );
+  }
 
   @override
-  Future<List<PremiumPlanModel>> getPremiumPlans() async => await _api.getPremiumPlans();
+  Future<List<PremiumPlanModel>> getPremiumPlans() async =>
+      await _api.getPremiumPlans();
 
   @override
-  Future<PromoCodeModel> getPromoCodeAmount({required String code}) async => await _api.getPromoCodeAmount(code: code);
+  Future<PromoCodeModel> getPromoCodeAmount({required String code}) async =>
+      await _api.getPromoCodeAmount(code: code);
 }

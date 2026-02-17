@@ -14,7 +14,7 @@ class AuthStore {
   );
 
   final isCountryUzbekistan = BaseStore<bool>(
-    'isCountryUzbekistan1',
+    'isCountryUzbekistan2',
     serialize: (value) => value.toString(),
     deserialize: (value) => value == 'true',
   );
