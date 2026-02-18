@@ -9,7 +9,7 @@ abstract class Notification with _$Notification {
     required int id,
     required int userId,
     required String title,
-    required String description,
+    String? description,
     required bool hasRead,
     required DateTime sentAt,
     String? image,

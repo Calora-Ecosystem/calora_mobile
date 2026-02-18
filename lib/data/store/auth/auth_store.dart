@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:calora/common/base/base_store.dart';
@@ -9,8 +10,7 @@ class AuthStore {
   final token = BaseStore<Token?>(
     'token',
     serialize: (value) => value == null ? null : jsonEncode(value.toJson()),
-    deserialize: (value) =>
-        value == null ? null : Token.fromJson(jsonDecode(value)),
+    deserialize: (value) => value == null ? null : Token.fromJson(jsonDecode(value)),
   );
 
   final isCountryUzbekistan = BaseStore<bool>(
@@ -18,4 +18,11 @@ class AuthStore {
     serialize: (value) => value.toString(),
     deserialize: (value) => value == 'true',
   );
+
+  final _forceLogoutController = StreamController<void>.broadcast();
+  Stream<void> get onForceLogout => _forceLogoutController.stream;
+
+  void forceLogout() {
+    _forceLogoutController.add(null);
+  }
 }

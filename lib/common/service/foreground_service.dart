@@ -9,23 +9,30 @@ class StepsForegroundService {
   static const MethodChannel _ch = MethodChannel('ai.calora.app/steps_native_fgs');
 
   int _goalSteps = 10000;
+  double _weightKg = 70;
   bool _started = false;
 
   void setGoalSteps(int goal) {
     _goalSteps = goal <= 0 ? 10000 : goal;
   }
 
+  void setUserWeight(double w) {
+    if (w <= 0) return;
+    _weightKg = w;
+  }
+
   Future<bool> start() async {
     if (!Platform.isAndroid) return false;
 
     try {
-      final res = await _ch.invokeMethod<bool>('start', {'goal': _goalSteps});
+      final res = await _ch.invokeMethod<bool>('start', {
+        'goal': _goalSteps,
+        'weight_kg': _weightKg,
+      });
       _started = res ?? true;
-      log('Native FGS started=$_started goal=$_goalSteps', name: 'StepsForegroundService');
       return _started;
     } catch (e, s) {
       _started = false;
-      log('Native FGS start error: $e', name: 'StepsForegroundService', stackTrace: s);
       return false;
     }
   }
@@ -48,7 +55,10 @@ class StepsForegroundService {
     if (!_started) return;
 
     try {
-      await _ch.invokeMethod('sync', {'steps': steps});
+      await _ch.invokeMethod('sync', {
+        'steps': steps,
+        'weight_kg': _weightKg,
+      });
     } catch (e, s) {
       log('Native FGS sync error: $e', name: 'StepsForegroundService', stackTrace: s);
     }

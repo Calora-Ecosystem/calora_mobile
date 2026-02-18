@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -8,6 +7,7 @@ import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -22,6 +22,7 @@ import 'package:calora/presentation/dashboard/features/steps/widgets/daily_fitne
 import 'package:calora/presentation/dashboard/features/steps/widgets/leaderboard_section.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/monthly_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/weekly_fitness_track_widget.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -43,17 +44,32 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   final GlobalKey weeklyShareAnchorKey = GlobalKey();
   final GlobalKey monthlyShareAnchorKey = GlobalKey();
 
-  TabController? _tabController;
-  bool _tabListenerAttached = false;
+  @override
+  Future<void> init(context, manager) async {
+    final dailyFuture = manager.fetchDataForPeriod(0, 0, showLoading: true);
+    final weeklyFuture = manager.fetchDataForPeriod(1, 0, showLoading: true);
+    final monthlyFuture = manager.fetchDataForPeriod(2, 0, showLoading: true);
+    await dailyFuture;
+    await weeklyFuture;
+    await monthlyFuture;
+    manager.startLiveSyncIfNeeded();
+  }
 
   @override
-  void init(context, manager) {
-    manager.fetchDataForPeriod(0, 0, showLoading: true);
-    manager.fetchDataForPeriod(1, 0);
-    manager.fetchDataForPeriod(2, 0);
-    manager.startLiveSyncIfNeeded();
-
-    context.read<DashboardManager>().initialize();
+  void listener(BuildContext context, StepsManager manager, StepsEffect effect) {
+    effect.whenOrNull(
+      () => {},
+      refreshPagination: (period) {
+        switch (period) {
+          case 0:
+            manager.dailyPaginationService.refresh();
+          case 1:
+            manager.weeklyPaginationService.refresh();
+          case 2:
+            manager.monthlyPaginationService.refresh();
+        }
+      },
+    );
   }
 
   @override
@@ -73,148 +89,19 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         notificationPredicate: (notification) => notification.depth == 1,
         edgeOffset: context.topPadding + kToolbarHeight,
         onRefresh: () async => manager.fetchDataForPeriod(state.period, manager.currentOffset, showLoading: true),
-        child: DefaultTabController(
-          length: 3,
-          child: Builder(
-            builder: (context) {
-              final controller = DefaultTabController.of(context);
-              if (_tabController != controller || !_tabListenerAttached) {
-                _tabController = controller;
-                _tabListenerAttached = true;
-                controller.addListener(() {
-                  if (controller.indexIsChanging) return;
-                  final newPeriod = controller.index;
-                  manager.changePeriod(newPeriod);
-                  int offset = 0;
-                  if (newPeriod == 0) offset = manager.state.dailyOffset;
-                  if (newPeriod == 1) offset = manager.state.weeklyOffset;
-                  if (newPeriod == 2) offset = manager.state.monthlyOffset;
-                  if (offset == 0) manager.fetchDataForPeriod(newPeriod, offset);
-                });
-              }
-
-              return Stack(
-                children: [
-                  Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
-                  SafeArea(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 42, left: 20, right: 20),
-                          child: Align(alignment: Alignment.centerLeft, child: Strings.steps.text(32, 36, 700)),
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          height: 40,
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-                          child: TabBar(
-                            indicatorPadding: const EdgeInsets.all(2),
-                            indicatorSize: TabBarIndicatorSize.tab,
-                            dividerColor: Colors.transparent,
-                            indicator: BoxDecoration(
-                              color: context.colors.backgroundElevation,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            labelColor: context.colors.neutralPrimary,
-                            unselectedLabelColor: context.colors.neutral600Secondary,
-                            tabs: [
-                              Tab(child: Strings.daily.text(14, 18, 500)),
-                              Tab(child: Strings.weekly.text(14, 18, 500)),
-                              Tab(child: Strings.monthly.text(14, 18, 500)),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: TabBarView(
-                            children: [
-                              _buildDailyTabWithStream(
-                                context: context,
-                                pedometerService: pedometerService,
-                                manager: manager,
-                                state: state,
-                                stepValue: stepValue,
-                              ),
-                              _buildTabContent(
-                                screenshotController: _screenshotControllers[1],
-                                fitnessTrackWidget: WeeklyFitnessTrackWidget(
-                                  key: weeklyShareAnchorKey,
-                                  primaryValues: state.weeklyPrimaryValues,
-                                  goal: stepValue.toInt(),
-                                  metrics: state.weeklyMetrics,
-                                  offset: state.weeklyOffset,
-                                  loading: state.isWeeklyLoading,
-                                  onClickBackward: () => manager.changeOffset(-1),
-                                  onClickForward: () => manager.changeOffset(1),
-                                  onClickMoreVert: () => _showActionsSheet(context, manager),
-                                  onClickPause: () {},
-                                ),
-                                allUserStatsForPeriod: state.weeklyUserStates,
-                                isGettingStats: state.isWeeklyLoading,
-                              ),
-                              _buildTabContent(
-                                screenshotController: _screenshotControllers[2],
-                                fitnessTrackWidget: MonthlyFitnessTrackWidget(
-                                  key: monthlyShareAnchorKey,
-                                  primaryValues: state.monthlyPrimaryValues,
-                                  goal: stepValue.toInt(),
-                                  metrics: state.monthlyMetrics,
-                                  offset: state.monthlyOffset,
-                                  loading: state.isMonthlyLoading,
-                                  onClickBackward: () => manager.changeOffset(-1),
-                                  onClickForward: () => manager.changeOffset(1),
-                                  onClickMoreVert: () => _showActionsSheet(context, manager),
-                                  onClickPause: () {},
-                                ),
-                                allUserStatsForPeriod: state.monthlyUserStates,
-                                isGettingStats: state.isMonthlyLoading,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+        child: _TabBarWrapper(
+          manager: manager,
+          state: state,
+          stepValue: stepValue,
+          pedometerService: pedometerService,
+          screenshotControllers: _screenshotControllers,
+          dailyShareAnchorKey: dailyShareAnchorKey,
+          weeklyShareAnchorKey: weeklyShareAnchorKey,
+          monthlyShareAnchorKey: monthlyShareAnchorKey,
+          onShowActionsSheet: () => _showActionsSheet(context, manager),
+          onShowEditStepGoalSheet: () => _showEditStepGoalSheet(context, manager),
         ),
       ),
-    );
-  }
-
-  Widget _buildDailyTabWithStream({
-    required BuildContext context,
-    required PedometerService pedometerService,
-    required StepsManager manager,
-    required StepsState state,
-    required double stepValue,
-  }) {
-    final isToday = state.period == 0 && state.dailyOffset == 0;
-
-    final currentSteps = isToday ? state.stepCount : state.dailyDisplayStepCount;
-
-    final shouldShowTodayInitialShimmer = isToday && !state.hasLoadedTodayInitial && state.isDailyLoading;
-
-    return _buildTabContent(
-      screenshotController: _screenshotControllers[0],
-      fitnessTrackWidget: DailyFitnessTrackWidget(
-        key: dailyShareAnchorKey,
-        goal: stepValue.toInt(),
-        metrics: state.dailyMetrics,
-        stepCount: currentSteps,
-        offset: state.dailyOffset,
-        loading: isToday ? shouldShowTodayInitialShimmer : state.isDailyLoading,
-        onClickBackward: () => manager.changeOffset(-1),
-        onClickForward: () => manager.changeOffset(1),
-        onClickMoreVert: () => _showActionsSheet(context, manager),
-        onClickPause: () {},
-        onClickEditStepGoal: () => _showEditStepGoalSheet(context, manager),
-      ),
-      allUserStatsForPeriod: state.dailyUserStates,
-      isGettingStats: state.isDailyLoading,
     );
   }
 
@@ -256,9 +143,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       backgroundColor: Colors.transparent,
       builder: (_) => EditStepGoalPage(
         initialValue: stepValue.toInt(),
-        onSave: (value) => manager.updateNorm(
-          NormsRequest(metric: 'Step', value: value.toDouble()),
-        ),
+        onSave: (value) => manager.updateNorm(NormsRequest(metric: 'Step', value: value.toDouble())),
       ),
     );
   }
@@ -345,22 +230,267 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
     return offset & size;
   }
+}
 
-  Widget _buildTabContent({
-    required Widget fitnessTrackWidget,
-    required ScreenshotController screenshotController,
-    required List<UserStatRequest> allUserStatsForPeriod,
-    required bool isGettingStats,
-  }) {
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          Screenshot(controller: screenshotController, child: fitnessTrackWidget),
-          LeaderboardSection(allUserStatsForPeriod: allUserStatsForPeriod, isGettingStats: isGettingStats),
-        ],
+class _TabBarWrapper extends StatefulWidget {
+  final StepsManager manager;
+  final StepsState state;
+  final double stepValue;
+  final PedometerService pedometerService;
+  final List<ScreenshotController> screenshotControllers;
+  final GlobalKey dailyShareAnchorKey;
+  final GlobalKey weeklyShareAnchorKey;
+  final GlobalKey monthlyShareAnchorKey;
+  final VoidCallback onShowActionsSheet;
+  final VoidCallback onShowEditStepGoalSheet;
+
+  const _TabBarWrapper({
+    required this.manager,
+    required this.state,
+    required this.stepValue,
+    required this.pedometerService,
+    required this.screenshotControllers,
+    required this.dailyShareAnchorKey,
+    required this.weeklyShareAnchorKey,
+    required this.monthlyShareAnchorKey,
+    required this.onShowActionsSheet,
+    required this.onShowEditStepGoalSheet,
+  });
+
+  @override
+  State<_TabBarWrapper> createState() => _TabBarWrapperState();
+}
+
+class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.state.period);
+    _tabController.addListener(_handleTabChange);
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_handleTabChange);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _handleTabChange() {
+    if (_tabController.indexIsChanging) return;
+
+    final newPeriod = _tabController.index;
+
+    if (newPeriod == widget.manager.state.period) return;
+
+    widget.manager.changePeriod(newPeriod);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
+        SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 42, left: 20, right: 20),
+                child: Align(alignment: Alignment.centerLeft, child: Strings.steps.text(32, 36, 700)),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                height: 40,
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                child: TabBar(
+                  controller: _tabController,
+                  indicatorPadding: const EdgeInsets.all(2),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  indicator: BoxDecoration(
+                    color: context.colors.backgroundElevation,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelColor: context.colors.neutralPrimary,
+                  unselectedLabelColor: context.colors.neutral600Secondary,
+                  tabs: [
+                    Tab(child: Strings.daily.text(14, 18, 500)),
+                    Tab(child: Strings.weekly.text(14, 18, 500)),
+                    Tab(child: Strings.monthly.text(14, 18, 500)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [_buildDailyTab(), _buildWeeklyTab(), _buildMonthlyTab()],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDailyTab() {
+    final isToday = widget.state.period == 0 && widget.state.dailyOffset == 0;
+
+    final shouldShowTodayInitialShimmer = isToday && !widget.state.hasLoadedTodayInitial && widget.state.isDailyLoading;
+
+    final dailyLoading = isToday ? shouldShowTodayInitialShimmer : widget.state.isDailyLoading;
+
+    if (!isToday) {
+      final currentSteps = widget.state.dailyDisplayStepCount;
+
+      return _KeepAliveTabContent(
+        fitnessTrackWidget: Screenshot(
+          controller: widget.screenshotControllers[0],
+          child: DailyFitnessTrackWidget(
+            key: widget.dailyShareAnchorKey,
+            goal: widget.stepValue.toInt(),
+            metrics: widget.state.dailyMetrics,
+            stepCount: currentSteps,
+            offset: widget.state.dailyOffset,
+            loading: dailyLoading,
+            onClickBackward: () => widget.manager.changeOffset(-1),
+            onClickForward: () => widget.manager.changeOffset(1),
+            onClickMoreVert: widget.onShowActionsSheet,
+            onClickPause: () {},
+            onClickEditStepGoal: widget.onShowEditStepGoalSheet,
+          ),
+        ),
+        screenshotController: widget.screenshotControllers[0],
+        paginationService: widget.manager.dailyPaginationService,
+      );
+    }
+
+    return ManagerBuilder<DashboardState, DashboardEffect>(
+      manager: context.read<DashboardManager>(),
+      properties: (s) => [s.todaySteps],
+      builder: (context, dashState) {
+        final currentSteps = dashState.todaySteps;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (currentSteps != widget.manager.state.stepCount) {
+            widget.manager.updateTodaySteps(currentSteps);
+          }
+        });
+
+        return _KeepAliveTabContent(
+          fitnessTrackWidget: Screenshot(
+            controller: widget.screenshotControllers[0],
+            child: DailyFitnessTrackWidget(
+              key: widget.dailyShareAnchorKey,
+              goal: widget.stepValue.toInt(),
+              metrics: widget.state.dailyMetrics,
+              stepCount: currentSteps, // ✅ mana shu joy
+              offset: widget.state.dailyOffset,
+              loading: dailyLoading,
+              onClickBackward: () => widget.manager.changeOffset(-1),
+              onClickForward: () => widget.manager.changeOffset(1),
+              onClickMoreVert: widget.onShowActionsSheet,
+              onClickPause: () {},
+              onClickEditStepGoal: widget.onShowEditStepGoalSheet,
+            ),
+          ),
+          screenshotController: widget.screenshotControllers[0],
+          paginationService: widget.manager.dailyPaginationService,
+        );
+      },
+    );
+  }
+
+  Widget _buildWeeklyTab() {
+    final weeklyLoading =
+        widget.state.isWeeklyLoading || (widget.state.period == 1 && widget.state.weeklySteps.isEmpty);
+
+    return _KeepAliveTabContent(
+      fitnessTrackWidget: Screenshot(
+        controller: widget.screenshotControllers[1],
+        child: WeeklyFitnessTrackWidget(
+          key: widget.weeklyShareAnchorKey,
+          primaryValues: widget.state.weeklyPrimaryValues,
+          goal: widget.stepValue.toInt(),
+          metrics: widget.state.weeklyMetrics,
+          offset: widget.state.weeklyOffset,
+          loading: weeklyLoading,
+          onClickBackward: () => widget.manager.changeOffset(-1),
+          onClickForward: () => widget.manager.changeOffset(1),
+          onClickMoreVert: widget.onShowActionsSheet,
+          onClickPause: () {},
+        ),
       ),
+      screenshotController: widget.screenshotControllers[1],
+      paginationService: widget.manager.weeklyPaginationService,
+    );
+  }
+
+  Widget _buildMonthlyTab() {
+    final monthlyLoading =
+        widget.state.isMonthlyLoading || (widget.state.period == 2 && widget.state.monthlySteps.isEmpty);
+
+    return _KeepAliveTabContent(
+      fitnessTrackWidget: Screenshot(
+        controller: widget.screenshotControllers[2],
+        child: MonthlyFitnessTrackWidget(
+          key: widget.monthlyShareAnchorKey,
+          primaryValues: widget.state.monthlyPrimaryValues,
+          goal: widget.stepValue.toInt(),
+          metrics: widget.state.monthlyMetrics,
+          offset: widget.state.monthlyOffset,
+          loading: monthlyLoading,
+          onClickBackward: () => widget.manager.changeOffset(-1),
+          onClickForward: () => widget.manager.changeOffset(1),
+          onClickMoreVert: widget.onShowActionsSheet,
+          onClickPause: () {},
+        ),
+      ),
+      screenshotController: widget.screenshotControllers[2],
+      paginationService: widget.manager.monthlyPaginationService,
+    );
+  }
+}
+
+class _KeepAliveTabContent extends StatefulWidget {
+  const _KeepAliveTabContent({
+    required this.fitnessTrackWidget,
+    required this.screenshotController,
+    required this.paginationService,
+  });
+
+  final Widget fitnessTrackWidget;
+  final ScreenshotController screenshotController;
+  final PaginationService<UserStatRequest> paginationService;
+
+  @override
+  State<_KeepAliveTabContent> createState() => _KeepAliveTabContentState();
+}
+
+class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverToBoxAdapter(child: widget.fitnessTrackWidget),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: LeaderboardSection(paginationService: widget.paginationService),
+        ),
+      ],
     );
   }
 }

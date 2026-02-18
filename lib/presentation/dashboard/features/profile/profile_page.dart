@@ -48,10 +48,7 @@ class ProfilePage extends StatelessWidget {
                           surname: profile.name ?? '',
                           name: profile.name ?? '',
                           email: profile.email ?? '',
-                          onEdit: () => _openProfileDetailPage(
-                            context,
-                            profile.userId?.toString() ?? '',
-                          ),
+                          onEdit: () => _openProfileDetailPage(context, profile.userId?.toString() ?? ''),
                         ),
                         const SizedBox(height: 16),
                         BmiCard(
@@ -94,8 +91,6 @@ class ProfilePage extends StatelessWidget {
 
   void _openAccountDetailPage(BuildContext context) async {
     await context.router.push(AccountDetailRoute());
-    // ✅ hech narsa shart emas, agar AccountDetail ichida profileStore.updateProfile(...) bo‘lsa
-    // stream avtomatik update qiladi
   }
 
   void _openProfileDetailPage(BuildContext context, String userId) {

@@ -10,4 +10,5 @@ abstract class ProfileRepo {
 
   Future<List<DetailInfo>> getProfileDetail();
   Future<void> updateSingleNorm(NormsRequest request);
+  Future<void> logOut();
 }

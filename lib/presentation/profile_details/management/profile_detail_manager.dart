@@ -1,5 +1,6 @@
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
+import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -7,12 +8,11 @@ import 'package:management/management.dart';
 import 'package:calora/presentation/profile_details/management/profile_detail_management.dart';
 
 @injectable
-class ProfileDetailManager
-    extends Manager<ProfileDetailState, ProfileDetailEffect> {
+class ProfileDetailManager extends Manager<ProfileDetailState, ProfileDetailEffect> {
   final ProfileRepo _repo;
   final AuthStore authStore;
-  ProfileDetailManager(this._repo, this.authStore)
-    : super(const ProfileDetailState());
+  final CommonStore _commonStore;
+  ProfileDetailManager(this._repo, this.authStore, this._commonStore) : super(const ProfileDetailState());
 
   void onAppleHealthTap() {
     emit(state.copyWith(isAppleHealthSelected: true));
@@ -35,7 +35,14 @@ class ProfileDetailManager
   }
 
   void logOut() {
-    profileStore.clear();
-    authStore.token.set(null);
+    _repo.logOut().handle(
+      onStart: () {},
+      onDone: () {
+        profileStore.clear();
+        authStore.token.set(null);
+        _commonStore.isQuestionaryFinished.set(false);
+      },
+      onError: (e) {},
+    );
   }
 }

@@ -2,7 +2,7 @@ name: calora
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.0+18
+version: 1.0.0+23
 
 environment:
   sdk: ^3.9.2
@@ -52,7 +52,6 @@ dependencies:
   flutter_widget_from_html: ^0.17.0
   fl_chart: ^1.1.0
   pedometer: ^4.1.1
-  pedometer_2: ^5.0.4
   cm_pedometer: ^1.2.0
   path_provider: ^2.1.5
   share_plus: ^11.1.0
@@ -83,7 +82,10 @@ dependencies:
   flutter_foreground_task: ^9.2.0
   flutter_overlay_window: ^0.5.0
   confetti: ^0.8.0
-
+  pedometer_2: ^5.0.4
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  workmanager: ^0.9.0+3
 
 dev_dependencies:
   flutter_test:

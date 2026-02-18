@@ -42,7 +42,6 @@ class PremiumSheet extends Managed<PremiumManager, PremiumState, PremiumEffect> 
       subscriptionSuccess: () async {
         await PremiumConfettiOverlay.show(context);
         CustomSnackBar.showSuccess(context, Strings.subscriptionSuccess);
-        context.read<DashboardManager>().sendTodayStepsToBackend();
         context.router.maybePop();
       },
     );

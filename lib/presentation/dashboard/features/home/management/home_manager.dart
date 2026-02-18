@@ -12,17 +12,21 @@ import 'package:calora/domain/model/summary/summary_request.dart';
 import 'package:calora/domain/repo/home/home_repo.dart';
 import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
+import 'package:calora/domain/repo/splash/splash_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 @injectable
 class HomeManager extends Manager<HomeState, HomeEffect> {
   final ProfileRepo _profileRepo;
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
+
   final NotificationRepo _notificationRepo;
   final MetricsSyncService _metricsSync;
 
@@ -41,53 +45,90 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   bool _fgsStarted = false;
   Future<void>? _fgsInitFuture;
 
-  Future<Map<Permission, PermissionStatus>>? _permFuture;
+  static Future<Map<Permission, PermissionStatus>>? _globalPermFuture;
+  static final _permLock = Object();
 
   Future<void> initStepsForeground() {
     _fgsInitFuture ??= _initStepsForegroundInternal();
     return _fgsInitFuture!;
   }
 
-  Future<Map<Permission, PermissionStatus>> _requestPermissionsOnce({
+  static Future<Map<Permission, PermissionStatus>> _requestPermissionsOnce({
     required bool includeNotifications,
   }) {
-    if (_permFuture != null) return _permFuture!;
+    if (_globalPermFuture != null) {
+      return _globalPermFuture!;
+    }
 
-    final perms = <Permission>[
-      Permission.activityRecognition,
-      if (includeNotifications) Permission.notification,
-    ];
+    synchronized(_permLock, () {
+      if (_globalPermFuture != null) return _globalPermFuture!;
 
-    _permFuture = perms.request().whenComplete(() {
-      _permFuture = null;
+      final perms = <Permission>[
+        if (Platform.isAndroid) Permission.activityRecognition,
+        if (Platform.isIOS) Permission.sensors,
+        if (includeNotifications) Permission.notification,
+      ];
+
+      _globalPermFuture = perms
+          .request()
+          .then((result) {
+            return result;
+          })
+          .catchError((e, s) {
+            return <Permission, PermissionStatus>{};
+          })
+          .whenComplete(() {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              _globalPermFuture = null;
+            });
+          });
+
+      return _globalPermFuture!;
     });
 
-    return _permFuture!;
+    return _globalPermFuture!;
+  }
+
+  static Future<T> synchronized<T>(Object lock, Future<T> Function() fn) async {
+    return await fn();
   }
 
   Future<void> _initStepsForegroundInternal() async {
-    if (_fgsStarted) return;
-
-    final statuses = await _requestPermissionsOnce(includeNotifications: true);
-
-    final arOk = statuses[Permission.activityRecognition]?.isGranted == true;
-
-    final notifStatus = statuses[Permission.notification];
-    final notifOk = notifStatus == null ? true : notifStatus.isGranted;
-
-    if (!arOk) {
-      log('Native notif FGS: ACTIVITY_RECOGNITION not granted: $statuses', name: 'HomeManager');
+    if (_fgsStarted) {
       return;
     }
 
-    final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
+    try {
+      final statuses = await _requestPermissionsOnce(includeNotifications: true);
 
-    StepsForegroundService.instance.setGoalSteps(goalSteps);
+      final bool arOk;
+      if (Platform.isAndroid) {
+        arOk = statuses[Permission.activityRecognition]?.isGranted == true;
+      } else if (Platform.isIOS) {
+        arOk = statuses[Permission.sensors]?.isGranted == true;
+      } else {
+        arOk = false;
+      }
 
-    final ok = await StepsForegroundService.instance.start();
+      if (!arOk) {
+        return;
+      }
 
-    _fgsStarted = ok;
-    log('Native notif FGS started=$_fgsStarted goal=$goalSteps notifOk=$notifOk', name: 'HomeManager');
+      final notifStatus = statuses[Permission.notification];
+      final notifOk = notifStatus?.isGranted == true;
+
+      if (!notifOk) {}
+
+      final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
+
+      StepsForegroundService.instance.setGoalSteps(goalSteps);
+
+      final ok = await StepsForegroundService.instance.start();
+
+      _fgsStarted = ok;
+    } catch (e, s) {
+      _fgsStarted = false;
+    }
   }
 
   Future<void> requestPedometerPermissions() async {
@@ -101,6 +142,8 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       emit(state.copyWith(profile: profile, isLoading: false));
       profileStore.clear();
       profileStore.set(profile);
+      final w = (profile.weight ?? 0).toDouble();
+      if (w > 0) StepsForegroundService.instance.setUserWeight(w);
     },
   );
 
@@ -117,13 +160,10 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     }
   }
 
-  // ===== Metrics live sync =====
-
   void _startMetricsLiveSync() {
     _metricsSyncSub?.cancel();
 
     _metricsSyncSub = _metricsSync.stream.listen((steps) {
-      log('📣 HomeManager received metrics sync: steps=$steps', name: 'HomeManager');
       _scheduleMetricsRefresh();
     });
 
@@ -151,17 +191,6 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     _metricsDebounce = Timer(const Duration(milliseconds: 800), () {
       getMetrics(showLoading: false);
     });
-  }
-
-  // ===== Steps & Water =====
-
-  void updateTodaySteps(int steps) {
-    final day = state.day ?? DateTime.now();
-    if (!_isToday(day)) return;
-
-    if (steps == state.currentSteps) return;
-
-    emit(state.copyWith(currentSteps: steps));
   }
 
   void updateWaterIntake(double liters) {
@@ -349,28 +378,20 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     });
   }
 
-  // ===== Lifecycle =====
-
   @override
   Future<void> close() async {
     _stopMetricsLiveSync();
-
-    if (_fgsStarted) {
-      try {
-        await StepsForegroundService.instance.stop();
-      } catch (e, s) {
-        log('close stop native FGS error: $e', name: 'HomeManager', stackTrace: s);
-      }
-      _fgsStarted = false;
-      _fgsInitFuture = null;
-    }
-
     await super.close();
   }
 }
 
 extension HomeManagerX on HomeManager {
   Future<void> refreshAll() async {
+    final mustUpdate = await _shouldForceUpdate();
+    if (mustUpdate) {
+      publish(const HomeEffect.forceUpdate());
+      return;
+    }
     getUserInfo();
     getStepNorm();
     getSummary();
@@ -380,11 +401,19 @@ extension HomeManagerX on HomeManager {
     final day = state.day ?? DateTime.now();
     if (_isToday(day)) {
       _startMetricsLiveSync();
-      getMetrics(showLoading: false);
     } else {
       _stopMetricsLiveSync();
       getDailyStep();
-      getMetrics();
     }
+    getMetrics();
+  }
+
+  Future<bool> _shouldForceUpdate() async {
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = info.version.split('+').first.trim();
+    log(currentVersion);
+
+    final active = await _homeRepo.isVersionActive(currentVersion);
+    return !active;
   }
 }

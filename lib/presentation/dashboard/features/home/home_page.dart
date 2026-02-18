@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
@@ -17,6 +16,7 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_manager.dart';
+import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:calora/widgets/app_bar/home_app_bar.dart' show HomeAppBar;
 import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
@@ -40,17 +40,30 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void init(BuildContext context, HomeManager manager) {
     manager.updateDay(DateTime.now());
     manager.refreshAll();
-    context.read<DashboardManager>().initialize();
-    Future.microtask(() => manager.initStepsForeground());
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final dashManager = context.read<DashboardManager>();
+      dashManager.initialize();
+    });
+    Future.microtask(() {
+      manager.initStepsForeground();
+    });
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
-
     _tabsRouter!.addListener(() {
       final idx = _tabsRouter!.activeIndex;
-      if (_lastIndex != 0 && idx == 0) manager.refreshAll();
+      if (_lastIndex != 0 && idx == 0) {
+        manager.refreshAll();
+      }
       _lastIndex = idx;
     });
+  }
+
+  @override
+  void listener(BuildContext context, HomeManager manager, HomeEffect effect) {
+    super.listener(context, manager, effect);
+    effect.when(
+      forceUpdate: () => context.router.replaceAll([const ForceUpdateRoute()]),
+    );
   }
 
   @override
@@ -112,10 +125,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   },
                                   date: state.day ?? DateTime.now(),
                                   calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
-                                  water: '${state.targetLiters} ${Strings.liter}',
+                                  water: '${(state.targetLiters / 1000).asFixedTruncated(2)} ${Strings.liter}',
                                   steps: state.targetSteps.toString(),
                                 ),
-
                                 GestureDetector(
                                   onTap: () => openCaloraAi(context),
                                   child: Container(
@@ -151,7 +163,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                     ),
                                   ),
                                 ),
-
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
                                   normCalories: (state.summary?.kcalNorm.value ?? 0).asFixedTruncated(0).toString(),
@@ -163,6 +174,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   loading: state.isSummaryLoading,
                                 ),
                                 _buildStepCardWithStream(
+                                  context: context,
                                   pedometerService: pedometerService,
                                   state: state,
                                   manager: manager,
@@ -195,6 +207,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   }
 
   Widget _buildStepCardWithStream({
+    required BuildContext context,
     required PedometerService pedometerService,
     required HomeState state,
     required HomeManager manager,
@@ -213,21 +226,13 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
       );
     }
 
-    return StreamBuilder<int>(
-      stream: pedometerService.todayStepsStream,
-      initialData: pedometerService.dailySteps,
-      builder: (context, snapshot) {
-        final currentSteps = snapshot.data ?? state.currentSteps;
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (currentSteps != state.currentSteps) {
-            manager.updateTodaySteps(currentSteps);
-          }
-        });
-
+    return ManagerBuilder<DashboardState, DashboardEffect>(
+      manager: context.read<DashboardManager>(),
+      properties: (s) => [s.todaySteps],
+      builder: (context, dashState) {
         return StepCardWidget(
           loading: false,
-          currentSteps: currentSteps,
+          currentSteps: dashState.todaySteps,
           targetSteps: state.targetSteps,
           timeInSeconds: state.metrics?.duration ?? 0,
           distanceInKm: state.metrics?.distance ?? 0,
@@ -266,6 +271,5 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void openInbox(BuildContext context) async {
     context.router.navigate(const InboxRoute());
     final token = await FirebaseMessaging.instance.getToken();
-    log('FCM TOKEN: $token');
   }
 }

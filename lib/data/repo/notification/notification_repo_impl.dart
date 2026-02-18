@@ -64,6 +64,13 @@ class NotificationRepoImpl extends NotificationRepo {
     return controller;
   }
 
+  Future<List<model.Notification>> fetchNotifications({required int skip, required int take}) async {
+    final response = await notificationApi.getNotifications(skip: skip, take: take);
+    final data = response.data as Map<String, dynamic>;
+    final List content = (data['content'] as List?) ?? const [];
+    return content.whereType<Map<String, dynamic>>().map(model.Notification.fromJson).toList();
+  }
+
   @override
   Stream<int> getUnread() {
     notificationApi
@@ -82,5 +89,10 @@ class NotificationRepoImpl extends NotificationRepo {
     if (_unreadCountSubject.value > 0) {
       _unreadCountSubject.add(_unreadCountSubject.value - 1);
     }
+  }
+
+  @override
+  Future<void> readAll() async {
+    await notificationApi.readAll();
   }
 }

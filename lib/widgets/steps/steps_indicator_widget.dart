@@ -2,6 +2,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/common/animated_count.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -36,7 +37,10 @@ class StepsIndicatorWidget extends StatelessWidget {
         children: [
           Assets.icons.stepsHuman.svg(),
           const SizedBox(height: 8),
-          current.toInt().toString().text(32, 40, 700).c(context.colors.textStrong),
+          AnimatedCount(
+            count: current.toInt(),
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: context.colors.textStrong, fontFamily: 'Inter'),
+          ),
           const SizedBox(height: 8),
           GestureDetector(
             onTap: onEditTap,

@@ -1,6 +1,8 @@
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
+import 'package:calora/domain/model/pagination/paginated_response.dart';
+import 'package:calora/domain/model/pagination/pagination_query.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:dio/dio.dart';
@@ -50,24 +52,19 @@ class StepsApi {
     }
   }
 
-  Future<List<UserStatRequest>> getStats(DateTime from, DateTime to) async {
+  Future<PaginatedResponse<UserStatRequest>> getStats(DateTime from, DateTime to, int skip, int take) async {
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
     final profile = await profileStore.getProfile();
-    final currentEmail = profile.email?.toLowerCase() ?? '';
     final currentUserId = profile.userId ?? 0;
     final response = await _dio.get(
       '/users/steps/stat',
-      queryParameters: {
-        'from': fromUtc.toIso8601String(),
-        'to': toUtc.toIso8601String(),
-      },
+      queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String(), 'Skip': skip, 'Take': take},
     );
-    final data = response.data;
-    final content = data['content'] as List<dynamic>;
-    return content.map((json) {
-      final user = json['user'];
-      final userEmail = (user['email'] ?? '').toString().toLowerCase();
+    final data = response.data as Map<String, dynamic>;
+    final content = (data['content'] as List<dynamic>).map((e) {
+      final json = e as Map<String, dynamic>;
+      final user = json['user'] as Map<String, dynamic>;
       final userId = user['id'] ?? 0;
       return UserStatRequest(
         firstName: user['name'] ?? '',
@@ -78,6 +75,14 @@ class StepsApi {
         isWinner: json['index'] == 1,
       );
     }).toList();
+
+    return PaginatedResponse<UserStatRequest>(
+      content: content,
+      total: data['total'],
+      query: data['query'] != null ? PaginationQuery.fromJson(data['query']) : null,
+      id: data['id'],
+      error: data['error'],
+    );
   }
 
   Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {
@@ -101,31 +106,19 @@ class StepsApi {
     await _dio.delete('/users/norms/$metric');
   }
 
-  Future<void> sendDailyData({
-    required String metric,
-    required int value,
-  }) async {
-    final body = {
-      'metric': metric,
-      'value': value,
-      'date': DateTime.now().toUtc().toIso8601String(),
-    };
+  Future<void> sendDailyData({required String metric, required int value}) async {
+    final body = {'metric': metric, 'value': value, 'date': DateTime.now().toUtc().toIso8601String()};
     await _dio.post('/users/dailies', data: body);
   }
 
-  Future<void> sendStepDataDateRange({
-    List<StepsWithMetricsRequest> steps = const [],
-  }) async {
+  Future<void> sendStepDataDateRange({List<StepsWithMetricsRequest> steps = const []}) async {
     final payload = steps.map((element) => element.toJson()).toList();
     await _dio.post('/users/dailies/batch', data: payload);
   }
 
   Future<bool> deleteUserDailyData({required String date}) async {
     try {
-      final response = await _dio.delete(
-        '/users/dailies/reset',
-        queryParameters: {'date': date},
-      );
+      final response = await _dio.delete('/users/dailies/reset', queryParameters: {'date': date});
       return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } on DioException {
       return false;
