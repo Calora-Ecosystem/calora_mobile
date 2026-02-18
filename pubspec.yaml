@@ -2,7 +2,7 @@ name: calora
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.0+17
+version: 1.0.0+18
 
 environment:
   sdk: ^3.9.2
@@ -91,8 +91,8 @@ dev_dependencies:
   injectable_generator: ^2.8.1
   auto_route_generator: ^10.2.6
   flutter_gen_runner: ^5.11.0
-  build_runner: ^2.7.0
-  freezed: ^3.2.0
+  build_runner: ^2.7.1
+  freezed: ^3.2.3
   json_serializable: ^6.11.0
 
 flutter:
