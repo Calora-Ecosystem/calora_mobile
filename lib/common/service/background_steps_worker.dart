@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -22,7 +23,6 @@ class BackgroundStepsWorker {
 
       await Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: false, // Set to true for debugging work manager calls
       );
 
       await Workmanager().registerPeriodicTask(
@@ -51,7 +51,6 @@ class BackgroundStepsWorker {
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      // Initialize dependencies for the background isolate
       final dir = await getApplicationDocumentsDirectory();
       Hive.init(dir.path);
       if (!Hive.isBoxOpen(StepLedgerStore.ledgerBoxName)) {
@@ -61,25 +60,61 @@ void callbackDispatcher() {
         await Hive.openBox(StepLedgerStore.metaBoxName);
       }
 
-      // Using a flag to ensure DI is configured only once.
       if (!GetIt.I.isRegistered<StepRepo>()) {
-        configureDependencies();
+        await configureDependencies(isBackground: true);
       }
       
       final ledger = StepLedgerStore();
+      final pedometer = GetIt.I<PedometerService>();
+
+      await pedometer.initialize();
+
+      try {
+        final currentSensorTotal = await pedometer.getCurrentSteps();
+        final lastSensorTotal = ledger.getLastSensorTotal();
+        
+        if (lastSensorTotal >= 0) {
+          int delta;
+          if (currentSensorTotal < lastSensorTotal) {
+            delta = currentSensorTotal;
+            log('BG Reboot detected. Sensor reset to $currentSensorTotal', name: 'BackgroundStepsWorker');
+          } else {
+            delta = currentSensorTotal - lastSensorTotal;
+          }
+
+          if (delta > 0) {
+            final todayKey = ledger.dayKey(DateTime.now());
+            await ledger.addSteps(todayKey, delta);
+            await ledger.setLastSensorTotal(currentSensorTotal);
+            await ledger.setLastSensorDate(todayKey);
+            log('BG captured $delta steps. New sensor total: $currentSensorTotal', name: 'BackgroundStepsWorker');
+          } else {
+             log('BG no new steps (delta: $delta)', name: 'BackgroundStepsWorker');
+          }
+        } else {
+          await ledger.setLastSensorTotal(currentSensorTotal);
+          await ledger.setLastSensorDate(ledger.dayKey(DateTime.now()));
+          log('BG initialized sensor total to $currentSensorTotal', name: 'BackgroundStepsWorker');
+        }
+      } catch (e) {
+        log('BG sensor read failed: $e', name: 'BackgroundStepsWorker');
+      }
+
       final pendingDays = ledger.getAllPendingDays();
 
       log('BG task=$task running. Found ${pendingDays.length} pending days.', name: 'BackgroundStepsWorker');
 
       if (pendingDays.isNotEmpty) {
         final ok = await _syncPendingSteps(pendingDays);
+        await Future.delayed(const Duration(milliseconds: 500));
         return ok;
       }
 
-      return true; // Nothing to do
+      await Future.delayed(const Duration(milliseconds: 500));
+      return true;
     } catch (e, s) {
       log('BG task failed: $e', name: 'BackgroundStepsWorker', error: e, stackTrace: s);
-      return false; // Reschedule task
+      return false;
     }
   });
 }
@@ -93,7 +128,6 @@ Future<bool> _syncPendingSteps(List<String> pendingDays) async {
     final pastDaysToSync = pendingDays.where((key) => key != todayKey).toList();
     final todayToSync = pendingDays.firstWhere((key) => key == todayKey, orElse: () => '');
 
-    // Sync and then DELETE past days in a batch
     if (pastDaysToSync.isNotEmpty) {
       final payload = pastDaysToSync.map((key) {
         return StepsWithMetricsRequest(
@@ -104,14 +138,12 @@ Future<bool> _syncPendingSteps(List<String> pendingDays) async {
       
       await stepRepo.sendStepDataDateRange(steps: payload);
       
-      // On success, delete the days from Hive
       for (final dayKey in pastDaysToSync) {
         await ledger.deleteDay(dayKey);
       }
       log('Synced and cleared ${pastDaysToSync.length} past days in background.', name: 'BackgroundStepsWorker');
     }
 
-    // Sync today but DO NOT delete
     if (todayToSync.isNotEmpty) {
       final total = ledger.totalFor(todayToSync);
       if (total > 0) {

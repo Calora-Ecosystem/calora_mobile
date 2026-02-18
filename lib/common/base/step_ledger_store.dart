@@ -73,6 +73,14 @@ class StepLedgerStore {
   int getLastSensorTotal() => (_meta.get('last_sensor_total') as int?) ?? -1;
   Future<void> setLastSensorTotal(int v) => _meta.put('last_sensor_total', v);
 
-  String? getLastSensorDate() => _meta.get('last_sensor_date') as String?;
+  String getLastSensorDate() {
+    final now = DateTime.now();
+    final today = dayKey(now);
+    return (_meta.get('last_sensor_date') as String?) ?? today;
+  }
+
   Future<void> setLastSensorDate(String date) => _meta.put('last_sensor_date', date);
+
+  int getLastSyncedBackendTotal(String key) => (_meta.get('backend_sync_$key') as int?) ?? -1;
+  Future<void> setLastSyncedBackendTotal(String key, int v) => _meta.put('backend_sync_$key', v);
 }

@@ -125,6 +125,34 @@ class PedometerService {
     }
   }
 
+  Future<int> getCurrentSteps() async {
+    final completer = Completer<int>();
+    StreamSubscription<int>? sub;
+    
+    sub = Pedometer().stepCountStream().listen(
+      (steps) {
+        if (!completer.isCompleted) {
+          completer.complete(steps);
+          sub?.cancel();
+        }
+      },
+      onError: (e) {
+        if (!completer.isCompleted) {
+          completer.completeError(e);
+          sub?.cancel();
+        }
+      },
+    );
+
+    return completer.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        sub?.cancel();
+        throw TimeoutException('Pedometer sensor did not respond in time');
+      },
+    );
+  }
+
   Future<int> getStepsForDateRange(DateTime from, DateTime to) async {
     try {
       return await Pedometer().getStepCount(from: from, to: to);
