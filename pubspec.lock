@@ -305,6 +305,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
+  cm_pedometer:
+    dependency: "direct main"
+    description:
+      name: cm_pedometer
+      sha256: e90aa23e3ac4acdd6f9e6d8e1d86170d2bebe5b081cf6217f9bc096e0393be9f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   code_assets:
     dependency: transitive
     description:
@@ -1446,6 +1454,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  pedometer:
+    dependency: "direct main"
+    description:
+      name: pedometer
+      sha256: "71e2608ad472d1fc3bcfce14a151e5c8229c5edd9e2a8a0f1ec416e3ceb00e1a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.1"
   pedometer_2:
     dependency: "direct main"
     description:

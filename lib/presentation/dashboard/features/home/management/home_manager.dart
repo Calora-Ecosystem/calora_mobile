@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/foreground_service.dart';
+import 'package:calora/common/service/healthy_sync_service.dart';
 import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
 import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -26,6 +27,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final ProfileRepo _profileRepo;
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
+  final HealthSyncService _healthSyncService;
 
   final NotificationRepo _notificationRepo;
   final MetricsSyncService _metricsSync;
@@ -36,6 +38,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     this._homeRepo,
     this._notificationRepo,
     this._metricsSync,
+    this._healthSyncService,
   ) : super(HomeState());
 
   StreamSubscription<int>? _metricsSyncSub;
@@ -126,7 +129,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       final ok = await StepsForegroundService.instance.start();
 
       _fgsStarted = ok;
-    } catch (e, s) {
+    } catch (e) {
       _fgsStarted = false;
     }
   }
@@ -147,15 +150,26 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     },
   );
 
-  void updateDay(DateTime day) {
-    emit(state.copyWith(day: day));
+  void updateDay(DateTime day) async {
+    emit(state.copyWith(day: day, isMetricsLoading: true));
 
     if (_isToday(day)) {
       _startMetricsLiveSync();
       getMetrics(showLoading: false);
     } else {
       _stopMetricsLiveSync();
-      getDailyStep();
+
+      await _healthSyncService.init();
+      final bool hasPermission = await _healthSyncService.requestPermission();
+
+      if (hasPermission) {
+        final steps = await _healthSyncService.getStepsForDay(day);
+
+        emit(state.copyWith(currentSteps: steps, isMetricsLoading: false));
+      } else {
+        getDailyStep();
+      }
+
       getMetrics();
     }
   }
@@ -392,6 +406,7 @@ extension HomeManagerX on HomeManager {
       publish(const HomeEffect.forceUpdate());
       return;
     }
+
     getUserInfo();
     getStepNorm();
     getSummary();
@@ -399,12 +414,23 @@ extension HomeManagerX on HomeManager {
     getUnreadCount();
 
     final day = state.day ?? DateTime.now();
+
     if (_isToday(day)) {
       _startMetricsLiveSync();
     } else {
       _stopMetricsLiveSync();
-      getDailyStep();
+
+      await _healthSyncService.init();
+      final hasPerm = await _healthSyncService.requestPermission();
+
+      if (hasPerm) {
+        final stepsFromHealth = await _healthSyncService.getStepsForDay(day);
+        emit(state.copyWith(currentSteps: stepsFromHealth));
+      } else {
+        getDailyStep();
+      }
     }
+
     getMetrics();
   }
 
