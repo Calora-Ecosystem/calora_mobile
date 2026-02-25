@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:calora/data/api/steps_api.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
@@ -7,7 +8,9 @@ import 'package:calora/domain/model/pagination/paginated_response.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
+import 'package:collection/collection.dart';
 import 'package:injectable/injectable.dart';
+import 'package:health/health.dart';
 
 @Injectable(as: StepRepo)
 class StepRepoImpl extends StepRepo {
@@ -24,8 +27,8 @@ class StepRepoImpl extends StepRepo {
     final take = period == 0
         ? 1
         : period == 1
-        ? 7
-        : 30;
+            ? 7
+            : 30;
     final skip = offset * take;
 
     final Map<String, DateTime> datePeriod = getDatePeriods(period, offset);
@@ -69,8 +72,70 @@ class StepRepoImpl extends StepRepo {
       _stepsApi.sendDailyData(metric: metric, value: value);
 
   @override
-  Future<void> sendStepDataDateRange({required List<StepsWithMetricsRequest> steps}) =>
-      _stepsApi.sendStepDataDateRange(steps: steps);
+  Future<void> sendStepDataDateRange({
+    required List<StepsWithMetricsRequest> steps,
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    if (steps.isNotEmpty) {
+      await _stepsApi.sendStepDataDateRange(steps: steps);
+    }
+
+    if (from != null && to != null) {
+      await sendHealthData(from: from, to: to);
+    }
+  }
+
+  @override
+  Future<void> sendHealthData({required DateTime from, required DateTime to}) async {
+    try {
+      final health = Health();
+      final types = [HealthDataType.STEPS];
+      final permissions = [HealthDataAccess.READ];
+      await health.requestAuthorization(types, permissions: permissions);
+      final healthData = await health.getHealthDataFromTypes(startTime: from, endTime: to, types: types);
+
+      if (healthData.isNotEmpty) {
+        // Group by date and sum up the steps
+        final groupedByDate = groupBy(healthData, (HealthDataPoint p) => DateTime(p.dateFrom.year, p.dateFrom.month, p.dateFrom.day));
+
+        final healthSteps = groupedByDate.entries.map((entry) {
+          final date = entry.key;
+          final totalSteps = entry.value.fold<int>(0, (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toInt());
+          return StepsWithMetricsRequest(
+            date: date,
+            value: totalSteps.toDouble(),
+          );
+        }).toList();
+
+        await _stepsApi.sendStepDataDateRange(steps: healthSteps);
+      }
+    } catch (e) {
+      log('Error sending health data: $e');
+    }
+  }
+
+  @override
+  Future<int> getTodayHealthSteps() async {
+    try {
+      final health = Health();
+      final types = [HealthDataType.STEPS];
+      final permissions = [HealthDataAccess.READ];
+      await health.requestAuthorization(types, permissions: permissions);
+
+      final now = DateTime.now();
+      final midnight = DateTime(now.year, now.month, now.day);
+
+      final healthData = await health.getHealthDataFromTypes(startTime: midnight, endTime: now, types: types);
+
+      if (healthData.isNotEmpty) {
+        return healthData.fold<int>(0, (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toInt());
+      }
+    } catch (e) {
+      log('Error getting today health steps: $e');
+    }
+    return 0;
+  }
 
   @override
   Future<void> deleteNorm(String metric) => _stepsApi.deleteNorm(metric);

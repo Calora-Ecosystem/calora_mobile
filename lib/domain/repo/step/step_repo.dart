@@ -21,7 +21,13 @@ abstract class StepRepo {
 
   Future<void> sendStepDataDateRange({
     required List<StepsWithMetricsRequest> steps,
+    DateTime? from,
+    DateTime? to,
   });
+
+  Future<void> sendHealthData({required DateTime from, required DateTime to});
+
+  Future<int> getTodayHealthSteps();
 
   Future<bool> deleteUserDailyData({required String date});
 }
