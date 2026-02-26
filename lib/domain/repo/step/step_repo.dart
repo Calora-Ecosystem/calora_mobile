@@ -29,5 +29,7 @@ abstract class StepRepo {
 
   Future<int> getTodayHealthSteps();
 
+  Future<bool> isHealthDataAvailable();
+
   Future<bool> deleteUserDailyData({required String date});
 }

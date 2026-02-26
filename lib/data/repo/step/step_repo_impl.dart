@@ -9,6 +9,7 @@ import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:health/health.dart';
 
@@ -90,18 +91,30 @@ class StepRepoImpl extends StepRepo {
   Future<void> sendHealthData({required DateTime from, required DateTime to}) async {
     try {
       final health = Health();
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final status = await health.getHealthConnectSdkStatus();
+        log('[Health] Health Connect status: $status');
+        if (status == HealthConnectSdkStatus.sdkUnavailable) {
+          log('[Health] Health Connect is not available on this device.');
+          return;
+        }
+      }
+
       final types = [HealthDataType.STEPS];
       final permissions = [HealthDataAccess.READ];
-      await health.requestAuthorization(types, permissions: permissions);
+      final requested = await health.requestAuthorization(types, permissions: permissions);
+      log('[Health] Authorization requested: $requested');
+
       final healthData = await health.getHealthDataFromTypes(startTime: from, endTime: to, types: types);
+      log('[Health] Fetched ${healthData.length} health data points from $from to $to');
 
       if (healthData.isNotEmpty) {
-        // Group by date and sum up the steps
         final groupedByDate = groupBy(healthData, (HealthDataPoint p) => DateTime(p.dateFrom.year, p.dateFrom.month, p.dateFrom.day));
 
         final healthSteps = groupedByDate.entries.map((entry) {
           final date = entry.key;
           final totalSteps = entry.value.fold<int>(0, (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toInt());
+          log('[Health] Date: $date, Total Steps: $totalSteps');
           return StepsWithMetricsRequest(
             date: date,
             value: totalSteps.toDouble(),
@@ -109,6 +122,7 @@ class StepRepoImpl extends StepRepo {
         }).toList();
 
         await _stepsApi.sendStepDataDateRange(steps: healthSteps);
+        log('[Health] Successfully sent ${healthSteps.length} aggregated health data points.');
       }
     } catch (e) {
       log('Error sending health data: $e');
@@ -119,22 +133,46 @@ class StepRepoImpl extends StepRepo {
   Future<int> getTodayHealthSteps() async {
     try {
       final health = Health();
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final status = await health.getHealthConnectSdkStatus();
+        log('[Health] Health Connect status: $status');
+        if (status == HealthConnectSdkStatus.sdkUnavailable) {
+          log('[Health] Health Connect is not available on this device.');
+          return 0;
+        }
+      }
+
       final types = [HealthDataType.STEPS];
       final permissions = [HealthDataAccess.READ];
-      await health.requestAuthorization(types, permissions: permissions);
+      final requested = await health.requestAuthorization(types, permissions: permissions);
+      log('[Health] Authorization requested: $requested');
 
       final now = DateTime.now();
       final midnight = DateTime(now.year, now.month, now.day);
 
       final healthData = await health.getHealthDataFromTypes(startTime: midnight, endTime: now, types: types);
+      log('[Health] Fetched ${healthData.length} health data points for today.');
 
       if (healthData.isNotEmpty) {
-        return healthData.fold<int>(0, (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toInt());
+        final totalSteps = healthData.fold<int>(0, (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toInt());
+        log('[Health] Today\'s total steps: $totalSteps');
+        return totalSteps;
       }
     } catch (e) {
       log('Error getting today health steps: $e');
     }
     return 0;
+  }
+
+  @override
+  Future<bool> isHealthDataAvailable() async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final status = await Health().getHealthConnectSdkStatus();
+      return status != HealthConnectSdkStatus.sdkUnavailable;
+    } else {
+      // For iOS and other platforms, we assume health data is available
+      return true;
+    }
   }
 
   @override
