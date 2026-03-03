@@ -79,6 +79,7 @@ class AuthRepoImpl extends AuthRepo {
   Future<_DevicePayload> _getDevicePayload() async {
     final installationId = await FirebaseInstallations.instance.getId();
 
+    print('object: $installationId');
     final String deviceName;
     final deviceInfo = DeviceInfoPlugin();
 
@@ -108,7 +109,8 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   bool _saveAuthAndReturnHasNewUser(dynamic responseData) {
-    final Map<String, dynamic> content = (responseData as Map<String, dynamic>)['content'] as Map<String, dynamic>;
+    final Map<String, dynamic> content =
+        (responseData as Map<String, dynamic>)['content'] as Map<String, dynamic>;
 
     final token = Token.fromJson(content);
 

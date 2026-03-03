@@ -39,7 +39,10 @@ class DailyPlanWidget extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.colors.accentSub,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(
         children: [
           Padding(
@@ -49,7 +52,10 @@ class DailyPlanWidget extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: onBackward,
-                  child: Padding(padding: const EdgeInsets.only(left: 16), child: Assets.icons.icBackward.svg()),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Assets.icons.icBackward.svg(),
+                  ),
                 ),
                 GestureDetector(
                   onTap: onDateTap,
@@ -72,19 +78,24 @@ class DailyPlanWidget extends StatelessWidget {
                     ? const SizedBox(width: 40)
                     : InkWell(
                         onTap: onForward,
-                        child: Padding(padding: const EdgeInsets.only(right: 16), child: Assets.icons.icForward.svg()),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: Assets.icons.icForward.svg(),
+                        ),
                       ),
               ],
             ),
           ),
           Container(
-            width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: context.colors.white, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(
+              color: context.colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Strings.planForToday.text(20, 24, 600),
+                Strings.planForToday.text(18, 24, 600),
                 const SizedBox(height: 12),
                 loading
                     ? Row(
@@ -123,18 +134,25 @@ class DailyPlanWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCaloriesInfo({required BuildContext context, required String item, required Widget icon}) {
+  Widget _buildCaloriesInfo({
+    required BuildContext context,
+    required String item,
+    required Widget icon,
+  }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: context.colors.backgroundElevation, borderRadius: BorderRadius.circular(6)),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: context.colors.backgroundElevation,
+          borderRadius: BorderRadius.circular(6),
+        ),
         child: Row(
           children: [
             SizedBox(height: 20, width: 20, child: icon),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             Expanded(
               child: item
-                  .text(14, 16, 400)
+                  .text(12, 16, 400)
                   .c(context.colors.textStrong)
                   .copyWith(overflow: TextOverflow.ellipsis, maxLines: 1),
             ),

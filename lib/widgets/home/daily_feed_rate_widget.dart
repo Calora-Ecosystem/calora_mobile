@@ -46,7 +46,7 @@ class DailyFeedRateWidget extends StatelessWidget {
           spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Strings.dailyFeedRate.text(20, 24, 600),
+            Strings.dailyFeedRate.text(18, 24, 600),
             SizedBox(
               height: 100,
               child: Stack(

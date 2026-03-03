@@ -9,7 +9,6 @@ import 'package:management/management.dart';
 @injectable
 class LessonsManager extends Manager<LessonsState, LessonsEffect> {
   final CourseRepo _courseRepo;
-
   final QuestionsRepo _questionsRepo;
 
   LessonsManager(this._courseRepo, this._questionsRepo) : super(const LessonsState());

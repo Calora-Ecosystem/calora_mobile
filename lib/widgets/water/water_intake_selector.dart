@@ -96,11 +96,11 @@ class _WaterIntakeSelectorState extends State<WaterIntakeSelector> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Strings.yourWaterIntake
-                    .text(20, 24, 600)
+                    .text(18, 24, 600)
                     .c(context.colors.textStrong),
                 Expanded(
                   child: '${widget.targetLiters / 1000} L'
-                      .text(20, 24, 600)
+                      .text(18, 24, 600)
                       .c(context.colors.textSub)
                       .copyWith(
                         overflow: TextOverflow.ellipsis,

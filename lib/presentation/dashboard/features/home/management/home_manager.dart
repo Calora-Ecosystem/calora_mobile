@@ -126,7 +126,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       final ok = await StepsForegroundService.instance.start();
 
       _fgsStarted = ok;
-    } catch (e, s) {
+    } catch (e) {
       _fgsStarted = false;
     }
   }

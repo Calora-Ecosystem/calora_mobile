@@ -29,6 +29,16 @@ class _CourseQuestionsBodyWidgetState extends State<CourseQuestionsBodyWidget> {
   List<String> conditions = [Strings.iAmFine, Strings.minimumLoad];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final manager = context.read<CourseQuestionsManager>();
+      final initialTime = '${_timeController.initialItem.toString().padLeft(2, '0')}:00';
+      manager.setAnswer(trainingTime: initialTime);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final manager = context.read<CourseQuestionsManager>();
     return IndexedStack(

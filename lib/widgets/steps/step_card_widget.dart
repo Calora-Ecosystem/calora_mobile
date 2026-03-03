@@ -50,7 +50,7 @@ class StepCardWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Strings.yourStep.text(20, 24, 600),
+                Strings.yourStep.text(18, 24, 600),
                 AnimatedCount(
                   count: currentSteps,
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, fontFamily: 'Inter'),

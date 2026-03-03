@@ -22,7 +22,8 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCourseBodyState, VideoCourseBodyEffect> {
+class VideoCourseBodyWidgetPage
+    extends Managed<VideoCourseBodyManager, VideoCourseBodyState, VideoCourseBodyEffect> {
   final CourseRequest course;
   final bool isPurchased;
 
@@ -50,7 +51,8 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
     effect.when(
       openInfoSheet: (description) => _openInfoSheet(context, description),
       openVideo: (lesson, index) => _openVideo(context, lesson, index, manager),
-      showNeedFinishPrevious: () => CustomSnackBar.showInfo(context, Strings.watchThisVideoPreviousVideo),
+      showNeedFinishPrevious: () =>
+          CustomSnackBar.showInfo(context, Strings.watchThisVideoPreviousVideo),
     );
   }
 
@@ -90,7 +92,10 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                           children: [
                             Expanded(child: course.title.text(24, 32, 700)),
                             const SizedBox(width: 8),
-                            if (!isUserPremium) Assets.icons.lock.svg() else Assets.icons.money.svg(),
+                            if (!isUserPremium)
+                              Assets.icons.lock.svg()
+                            else
+                              Assets.icons.money.svg(),
                           ],
                         ),
                         parameters: [
@@ -164,15 +169,11 @@ class VideoCourseBodyWidgetPage extends Managed<VideoCourseBodyManager, VideoCou
                                         children: [
                                           lesson.title
                                               .text(16, 20, 500)
-                                              .c(
-                                                context.colors.neutral900Primary,
-                                              ),
+                                              .c(context.colors.neutral900Primary),
                                           const SizedBox(height: 8),
                                           lesson.duration
                                               .text(14, 18, 500)
-                                              .c(
-                                                context.colors.neutral600Secondary,
-                                              ),
+                                              .c(context.colors.neutral600Secondary),
                                         ],
                                       ),
                                     ),

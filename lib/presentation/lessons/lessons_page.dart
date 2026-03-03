@@ -39,19 +39,13 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
 
   @override
   void init(BuildContext context, LessonsManager manager) {
-    manager.getWorkout(
-      courseId,
-    );
+    manager.getWorkout(courseId);
     manager.loadActivityLevel();
     super.init(context, manager);
   }
 
   @override
-  Widget builder(
-    BuildContext context,
-    LessonsManager manager,
-    LessonsState state,
-  ) {
+  Widget builder(BuildContext context, LessonsManager manager, LessonsState state) {
     final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
     return Scaffold(
       backgroundColor: context.colors.accentDisabled,
@@ -69,9 +63,7 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
           ),
           DefaultRefreshIndicator(
             onRefresh: () async {
-              manager.getWorkout(
-                courseId,
-              );
+              manager.getWorkout(courseId);
               manager.loadActivityLevel();
             },
             child: Column(

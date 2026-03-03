@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
   NotificationService._();
+
   static final instance = NotificationService._();
 
   final _local = FlutterLocalNotificationsPlugin();
@@ -23,21 +24,22 @@ class NotificationService {
 
     await _local.initialize(
       const InitializationSettings(android: androidInit, iOS: iosInit),
-      onDidReceiveNotificationResponse: (response) => log('Notification tapped: ${response.payload}'),
+      onDidReceiveNotificationResponse: (response) =>
+          log('Notification tapped: ${response.payload}'),
     );
 
-    final androidPlugin = _local.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = _local
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     await androidPlugin?.createNotificationChannel(_channel);
 
     await FirebaseMessaging.instance.requestPermission();
 
-    FirebaseMessaging.onMessage.listen((message) async => await showNotificationFromRemote(message));
-
-    FirebaseMessaging.onMessageOpenedApp.listen((message) => log('Opened from notification: ${message.data}'));
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) => log('Opened from notification: ${message.data}'),
+    );
 
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
-      badge: true,
       sound: true,
     );
   }
@@ -48,7 +50,8 @@ class NotificationService {
 
     await _local.initialize(const InitializationSettings(android: androidInit, iOS: iosInit));
 
-    final androidPlugin = _local.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = _local
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     await androidPlugin?.createNotificationChannel(_channel);
   }
 
@@ -59,6 +62,19 @@ class NotificationService {
     final body = notification?.body ?? message.data['body']?.toString();
 
     if (title == null && body == null) return;
+
+    int? badgeCount;
+    final badge = message.data['badge'] ?? message.data['badge_count'];
+    if (badge != null) {
+      try {
+        badgeCount = int.parse(badge.toString());
+        if (badgeCount > 9) {
+          badgeCount = 9;
+        }
+      } catch (e) {
+        log('Could not parse badge count: $e');
+      }
+    }
 
     await _local.show(
       message.hashCode,
@@ -71,8 +87,9 @@ class NotificationService {
           channelDescription: _channel.description,
           importance: Importance.high,
           priority: Priority.high,
+          number: badgeCount,
         ),
-        iOS: const DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(badgeNumber: badgeCount),
       ),
       payload: message.data.isNotEmpty ? message.data.toString() : null,
     );
