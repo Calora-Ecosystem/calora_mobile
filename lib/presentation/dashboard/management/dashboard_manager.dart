@@ -24,13 +24,16 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
 
   StreamSubscription<int>? _stepsSub;
   Timer? _syncTimer;
+  Timer? _pollingTimer;
   StreamSubscription<void>? _forceLogoutSub;
 
   int _lastSyncedTodaySteps = -1;
   bool _isSyncingToday = false;
+  bool _isProcessingSteps = false;
 
   static const int MIN_DELTA_STEPS_TO_SEND = 20;
   static const Duration PERIODIC_SYNC_INTERVAL = Duration(minutes: 15);
+  static const Duration LIVE_POLLING_INTERVAL = Duration(seconds: 2);
 
   bool _initialized = false;
   Future<void>? _initFuture;
@@ -59,14 +62,37 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
-      log('[STEPS] App backgrounded/detached. Stopping live stream.', name: 'DashboardManager');
-      _stepsSub?.cancel();
-      _stepsSub = null;
+      log('[STEPS] App backgrounded/detached. Stopping live stream and polling.', name: 'DashboardManager');
+      _stopLiveUpdates();
     } else if (state == AppLifecycleState.resumed) {
-      log('[STEPS] App resumed. Restarting live stream.', name: 'DashboardManager');
-      _listenToStepUpdates();
-      unawaited(_startPedometerBootstrap()); // Re-sync with backend on return
+      log('[STEPS] App resumed. Restarting live stream and polling.', name: 'DashboardManager');
+      _startLiveUpdates();
+      unawaited(_startPedometerBootstrap());
     }
+  }
+
+  void _startLiveUpdates() {
+    _listenToStepUpdates();
+    _startLivePolling();
+  }
+
+  void _stopLiveUpdates() {
+    _stepsSub?.cancel();
+    _stepsSub = null;
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  void _startLivePolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(LIVE_POLLING_INTERVAL, (_) async {
+      try {
+        final sensorSteps = await _pedometerService.getCurrentSteps();
+        await _handleSensorUpdate(sensorSteps);
+      } catch (e) {
+        // Silently ignore polling errors
+      }
+    });
   }
 
   Future<void> _initializeInternal() async {
@@ -74,7 +100,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
       _forceLogoutSub?.cancel();
       _forceLogoutSub = _authStore.onForceLogout.listen((_) async {
         _syncTimer?.cancel();
-        await _stepsSub?.cancel();
+        _stopLiveUpdates();
         publish(const DashboardEffect.forceLogout());
       });
       await _startPedometerBootstrap();
@@ -117,15 +143,18 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
         log('[STEPS] Failed to fetch today\'s steps from backend for reconciliation.', name: 'DashboardManager', error: e, stackTrace: s);
       }
 
-      // 2. Sync any data that was collected while the app was offline.
+      // 2. Catch up with the sensor immediately to capture steps taken while app was closed.
+      await _reconcileStepsWithSensor();
+
+      // 3. Sync any data that was collected while the app was offline (includes current day sync).
       await syncOfflineSteps();
 
-      // 3. Get today's steps from the local ledger.
+      // 4. Get today's steps from the local ledger.
       final currentTotal = _ledger.totalFor(todayKey);
       _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
       log('[STEPS] Bootstrap: Final today total=$currentTotal, synced=$_lastSyncedTodaySteps', name: 'DashboardManager');
 
-      // 4. Update UI and notify metrics system immediately
+      // 5. Update UI and notify metrics system immediately
       emit(state.copyWith(todaySteps: currentTotal));
       _metricsSync.notifyUpdated(currentTotal); 
       
@@ -133,8 +162,8 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
         unawaited(StepsForegroundService.instance.syncSteps(currentTotal));
       }
 
-      // 5. Start listening for live step updates and periodic syncs.
-      _listenToStepUpdates();
+      // 6. Start listening for live step updates and periodic syncs.
+      _startLiveUpdates();
       _startPeriodicSync();
       log('[STEPS] Pedometer bootstrap finished.', name: 'DashboardManager');
     } catch (e, s) {
@@ -142,80 +171,105 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
     }
   }
 
+  Future<void> _reconcileStepsWithSensor() async {
+    try {
+      log('[STEPS] Reconciling steps with sensor...', name: 'DashboardManager');
+      final sensorSteps = await _pedometerService.getCurrentSteps();
+      await _handleSensorUpdate(sensorSteps, isCatchUp: true);
+    } catch (e) {
+      log('[STEPS] Catch-up failed: $e', name: 'DashboardManager');
+    }
+  }
+
   void _listenToStepUpdates() {
     _stepsSub?.cancel();
     _stepsSub = _pedometerService.stepCountStream.listen(
       (sensorSteps) async {
-        final now = DateTime.now();
-        final todayKey = _ledger.dayKey(now);
-        final lastSavedDate = _ledger.getLastSensorDate();
-        final lastSensorTotal = _ledger.getLastSensorTotal();
-
-        // 1. Detect Day Change
-        if (lastSavedDate != todayKey) {
-          log('[STEPS] Day change detected in stream: $lastSavedDate -> $todayKey', name: 'DashboardManager');
-          
-          // Save remaining delta to the OLD day before switching
-          if (lastSensorTotal >= 0 && sensorSteps > lastSensorTotal) {
-            final finalDelta = sensorSteps - lastSensorTotal;
-            await _ledger.addSteps(lastSavedDate, finalDelta);
-            log('[STEPS] Final delta $finalDelta added to old day $lastSavedDate', name: 'DashboardManager');
-          }
-
-          // Reset for the new day
-          await _ledger.setLastSensorDate(todayKey);
-          await _ledger.setLastSensorTotal(sensorSteps);
-          _lastSyncedTodaySteps = 0;
-          
-          // Trigger sync for the finished day(s)
-          unawaited(syncOfflineSteps());
-
-          // Update UI for the new day
-          emit(state.copyWith(todaySteps: 0));
-          _metricsSync.notifyUpdated(0);
-          if (StepsForegroundService.instance.isRunning) {
-            unawaited(StepsForegroundService.instance.syncSteps(0));
-          }
-          return;
-        }
-
-        // 2. Normal live update (same day)
-        await _ledger.setLastSensorTotal(sensorSteps);
-
-        if (lastSensorTotal < 0) {
-          log('[STEPS] First sensor reading ($sensorSteps). Initializing ledger.', name: 'DashboardManager');
-          return;
-        }
-
-        int delta;
-        if (sensorSteps < lastSensorTotal) {
-          delta = sensorSteps; // Phone rebooted
-          log('[STEPS] Reboot detected. Sensor reset to $sensorSteps', name: 'DashboardManager');
-        } else {
-          delta = sensorSteps - lastSensorTotal;
-        }
-
-        if (delta <= 0) return;
-
-        log('[STEPS] Delta captured: $delta. Adding to $todayKey', name: 'DashboardManager');
-        await _ledger.addSteps(todayKey, delta);
-        
-        final newTotal = _ledger.totalFor(todayKey);
-        emit(state.copyWith(todaySteps: newTotal));
-
-        if (StepsForegroundService.instance.isRunning) {
-          unawaited(StepsForegroundService.instance.syncSteps(newTotal));
-        }
-      
-        if (_shouldSyncToday(newTotal)) {
-           log('[STEPS] Sync threshold met ($newTotal). Triggering backend sync.', name: 'DashboardManager');
-           unawaited(_syncTodaySteps());
-        }
+        await _handleSensorUpdate(sensorSteps);
       },
       onError: (e, s) {
         log('[STEPS] CRITICAL: Error in step count stream', name: 'DashboardManager', error: e, stackTrace: s);
       },
     );
+  }
+
+  Future<void> _handleSensorUpdate(int sensorSteps, {bool isCatchUp = false}) async {
+    if (_isProcessingSteps && !isCatchUp) return;
+    _isProcessingSteps = true;
+
+    try {
+      final now = DateTime.now();
+      final todayKey = _ledger.dayKey(now);
+      final lastSavedDate = _ledger.getLastSensorDate();
+      final lastSensorTotal = _ledger.getLastSensorTotal();
+
+      // 1. Detect Day Change
+      if (lastSavedDate != todayKey) {
+        log('[STEPS] Day change detected: $lastSavedDate -> $todayKey', name: 'DashboardManager');
+        
+        // Save remaining delta to the OLD day before switching
+        if (lastSensorTotal >= 0 && sensorSteps > lastSensorTotal) {
+          final finalDelta = sensorSteps - lastSensorTotal;
+          await _ledger.addSteps(lastSavedDate, finalDelta);
+          log('[STEPS] Final delta $finalDelta added to old day $lastSavedDate', name: 'DashboardManager');
+        }
+
+        // Reset for the new day
+        await _ledger.setLastSensorDate(todayKey);
+        await _ledger.setLastSensorTotal(sensorSteps);
+        _lastSyncedTodaySteps = 0;
+        
+        // Trigger sync for the finished day(s)
+        unawaited(syncOfflineSteps());
+
+        // Update UI for the new day
+        emit(state.copyWith(todaySteps: 0));
+        _metricsSync.notifyUpdated(0);
+        if (StepsForegroundService.instance.isRunning) {
+          unawaited(StepsForegroundService.instance.syncSteps(0));
+        }
+        return;
+      }
+
+      // 2. Normal live update (same day)
+      if (lastSensorTotal < 0) {
+        log('[STEPS] First sensor reading ever ($sensorSteps). Initializing ledger.', name: 'DashboardManager');
+        await _ledger.setLastSensorTotal(sensorSteps);
+        await _ledger.setLastSensorDate(todayKey);
+        return;
+      }
+
+      int delta;
+      if (sensorSteps < lastSensorTotal) {
+        delta = sensorSteps; // Phone rebooted
+        log('[STEPS] Reboot detected. Sensor reset to $sensorSteps', name: 'DashboardManager');
+      } else {
+        delta = sensorSteps - lastSensorTotal;
+      }
+
+      if (delta <= 0) return;
+
+      log('[STEPS] Delta captured: $delta. Adding to $todayKey', name: 'DashboardManager');
+      await _ledger.addSteps(todayKey, delta);
+      await _ledger.setLastSensorTotal(sensorSteps);
+      
+      final newTotal = _ledger.totalFor(todayKey);
+      emit(state.copyWith(todaySteps: newTotal));
+      _metricsSync.notifyUpdated(newTotal); // Notify UI components immediately
+
+      if (StepsForegroundService.instance.isRunning) {
+        unawaited(StepsForegroundService.instance.syncSteps(newTotal));
+      }
+    
+      if (_shouldSyncToday(newTotal)) {
+         log('[STEPS] Sync threshold met ($newTotal). Triggering backend sync.', name: 'DashboardManager');
+         unawaited(_syncTodaySteps());
+      }
+    } catch (e, s) {
+      log('[STEPS] Error processing sensor update', name: 'DashboardManager', error: e, stackTrace: s);
+    } finally {
+      _isProcessingSteps = false;
+    }
   }
 
   bool _shouldSyncToday(int total) {
@@ -300,7 +354,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
   Future<void> close() {
     WidgetsBinding.instance.removeObserver(this);
     _syncTimer?.cancel();
-    _stepsSub?.cancel();
+    _stopLiveUpdates();
     _forceLogoutSub?.cancel();
     return super.close();
   }
