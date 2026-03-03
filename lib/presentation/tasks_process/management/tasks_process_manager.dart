@@ -66,7 +66,7 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
 
   void next() {
     _timer?.cancel();
-    _goNextIndex();
+    onExerciseFinished();
   }
 
   void _goNextIndex() {
@@ -77,11 +77,12 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
       _startForCurrent();
       return;
     }
-    final finishedAll = state.completedTaskCount == state.exercises.length;
+
     final id = _workoutId;
-    if (finishedAll && id != null) {
+    if (id != null) {
       unawaited(_courseRepo.finishWorkout(id));
     }
+
     publish(
       TasksProcessEffect.navigateFinish(
         calories: 500,

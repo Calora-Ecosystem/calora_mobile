@@ -7,6 +7,7 @@ import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/lessons/management/lessons_manager.dart';
 import 'package:calora/widgets/lessons/lesson_card.dart' show LessonCard;
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -64,7 +65,11 @@ class LessonsCards extends StatelessWidget {
               }
               context.router.push(
                 TasksRoute(level: level, workout: workout),
-              );
+              ).then((_) {
+                if (context.mounted) {
+                  context.read<LessonsManager>().getWorkout(workout.courseId);
+                }
+              });
             },
             child: LessonCard(
               isLocked: visualLocked,
@@ -80,7 +85,7 @@ class LessonsCards extends StatelessWidget {
   }
 
   int nextPlayableIndex(List<WorkoutRequest> workouts) {
-    final i = workouts.indexWhere((w) => !w.isDone);
+    final i = workouts.indexWhere((w) => !w.isDone && w.doneItems < w.totalItems);
     return i == -1 ? workouts.length - 1 : i;
   }
 
