@@ -7,13 +7,22 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.util.Log
+import io.flutter.plugins.GeneratedPluginRegistrant
+import io.flutter.embedding.android.FlutterFragmentActivity // Import the correct class
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
 
     private val CHANNEL = "ai.calora.app/steps_native_fgs"
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        flutterEngine?.activityControlSurface?.onNewIntent(intent)
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        GeneratedPluginRegistrant.registerWith(flutterEngine)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->

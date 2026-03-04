@@ -293,9 +293,8 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
 
     if (_useHealthService) {
       log('[STEPS] Syncing last 30 days from health.', name: 'DashboardManager');
-      final to = DateTime.now();
-      final from = to.subtract(const Duration(days: 30));
-      await _stepRepo.sendHealthData(from: from, to: to);
+      final datePeriod = _stepRepo.getDatePeriods(2, 0);
+      await _stepRepo.sendHealthData(from: datePeriod['from']!, to: datePeriod['to']!);
     }
 
     log('[STEPS] Forcing a sync for today as part of offline process.', name: 'DashboardManager');

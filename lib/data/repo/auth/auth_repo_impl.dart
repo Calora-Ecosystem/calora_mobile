@@ -98,7 +98,11 @@ class AuthRepoImpl extends AuthRepo {
 
     String? fcmToken;
     if (apnsAvailable) {
-      fcmToken = await FirebaseMessaging.instance.getToken();
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      } catch (e) {
+        fcmToken = '';
+      }
     }
 
     return _DevicePayload(

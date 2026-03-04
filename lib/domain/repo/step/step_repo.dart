@@ -32,4 +32,6 @@ abstract class StepRepo {
   Future<bool> isHealthDataAvailable();
 
   Future<bool> deleteUserDailyData({required String date});
+
+  Map<String, DateTime> getDatePeriods(int period, int offset, {DateTime? now});
 }

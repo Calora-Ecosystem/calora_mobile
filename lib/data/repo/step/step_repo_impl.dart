@@ -16,6 +16,7 @@ import 'package:health/health.dart';
 @Injectable(as: StepRepo)
 class StepRepoImpl extends StepRepo {
   final StepsApi _stepsApi;
+  static bool _authorizationRequested = false;
 
   StepRepoImpl(this._stepsApi);
 
@@ -87,6 +88,17 @@ class StepRepoImpl extends StepRepo {
     }
   }
 
+  Future<void> _requestAuthorization() async {
+    if (_authorizationRequested) return;
+
+    final health = Health();
+    final types = [HealthDataType.STEPS];
+    final permissions = [HealthDataAccess.READ];
+    final requested = await health.requestAuthorization(types, permissions: permissions);
+    log('[Health] Authorization requested: $requested');
+    _authorizationRequested = true;
+  }
+
   @override
   Future<void> sendHealthData({required DateTime from, required DateTime to}) async {
     try {
@@ -98,13 +110,10 @@ class StepRepoImpl extends StepRepo {
           log('[Health] Health Connect is not available on this device.');
           return;
         }
+        await _requestAuthorization();
       }
 
       final types = [HealthDataType.STEPS];
-      final permissions = [HealthDataAccess.READ];
-      final requested = await health.requestAuthorization(types, permissions: permissions);
-      log('[Health] Authorization requested: $requested');
-
       final healthData = await health.getHealthDataFromTypes(startTime: from, endTime: to, types: types);
       log('[Health] Fetched ${healthData.length} health data points from $from to $to');
 
@@ -140,13 +149,10 @@ class StepRepoImpl extends StepRepo {
           log('[Health] Health Connect is not available on this device.');
           return 0;
         }
+        await _requestAuthorization();
       }
 
       final types = [HealthDataType.STEPS];
-      final permissions = [HealthDataAccess.READ];
-      final requested = await health.requestAuthorization(types, permissions: permissions);
-      log('[Health] Authorization requested: $requested');
-
       final now = DateTime.now();
       final midnight = DateTime(now.year, now.month, now.day);
 
@@ -181,7 +187,7 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<List<NormsRequest>> getNorms() async => await _stepsApi.getNorms();
 
-  Map<String, DateTime> getDatePeriods(int period, int offset) {
+  Map<String, DateTime> getDatePeriods(int period, int offset, {DateTime? now}) {
     final now = DateTime.now();
 
     late DateTime from;

@@ -54,8 +54,7 @@
             android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:launchMode="singleTop"
-            android:taskAffinity=""
+            android:launchMode="standard"
             android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize">
 
@@ -72,6 +71,16 @@
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
+
+        <activity-alias
+            android:name=".HealthPermissionActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            tools:node="merge">
+            <intent-filter>
+                <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- Foreground task service (flutter_foreground_task) -->
         <service
