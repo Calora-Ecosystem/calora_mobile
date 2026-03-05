@@ -102,6 +102,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                         Button(
                           type: ButtonType.secondary,
                           onPressed: () => manager.loginWithApple(),
+                          loading: state.loading,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -115,6 +116,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                         Button(
                           type: ButtonType.secondary,
                           onPressed: () => manager.loginWithGoogle(),
+                          loading: state.loading,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

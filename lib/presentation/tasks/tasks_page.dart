@@ -25,11 +25,23 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
   @override
   void init(BuildContext context, TasksManager manager) {
     super.init(context, manager);
+    manager.setLevel(level.index);
+    manager.initWorkout(workout);
     manager.getExercises(workout.id);
   }
 
   @override
+  void listener(BuildContext context, TasksManager manager, TasksEffect effect) {
+    // No pop for level change, we refresh data instead
+  }
+
+  @override
   Widget builder(BuildContext context, TasksManager manager, TasksState state) {
+    final currentWorkout = state.workout ?? workout;
+    final total = state.exercises.length;
+    final done = state.exercises.where((e) => e.isDone).length;
+    final progress = total == 0 ? safePercent(done: currentWorkout.doneItems, total: currentWorkout.totalItems) : done / total;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: context.colors.accentDisabled,
@@ -46,16 +58,16 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
             ),
           ),
           DefaultRefreshIndicator(
-            onRefresh: () async => manager.getExercises(workout.id),
+            onRefresh: () async => manager.getExercises(currentWorkout.id),
             child: Column(
               children: [
                 LessonAppBar(
-                  percent: safePercent(done: workout.doneItems, total: workout.totalItems),
-                  title: workout.title,
-                  level: level,
+                  percent: progress,
+                  title: currentWorkout.title,
+                  level: Level.values[state.levelIndex],
                   showSettings: false,
-                  showIndicator: !workout.hasRest,
-                  onLevelChanged: (value) {},
+                  showIndicator: !currentWorkout.hasRest,
+                  onLevelChanged: (value) => manager.changeActivityLevel(currentWorkout.courseId, value, currentWorkout.order),
                 ),
                 const SizedBox(height: 50),
                 Expanded(
@@ -65,15 +77,16 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
                       color: context.colors.white,
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                     ),
-                    child: workout.hasRest
+                    child: currentWorkout.hasRest
                         ? const OffDayWidget()
                         : SingleChildScrollView(
                             physics: AlwaysScrollableScrollPhysics(),
                             child: TasksCards(
-                              level: level,
+                              level: Level.values[state.levelIndex],
                               loading: state.isLoading,
                               exercises: state.exercises,
-                              workout: workout,
+                              workout: currentWorkout,
+                              onLevelChanged: (value) => manager.changeActivityLevel(currentWorkout.courseId, value, currentWorkout.order),
                             ),
                           ),
                   ),
@@ -83,14 +96,14 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
           ),
         ],
       ),
-      bottomNavigationBar: workout.hasRest
+      bottomNavigationBar: currentWorkout.hasRest
           ? null
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: SimpleButton(
                   text: Strings.start,
-                  onPressed: () => context.router.push(TasksProcessRoute(exercises: state.exercises, workout: workout)),
+                  onPressed: () => context.router.push(TasksProcessRoute(exercises: state.exercises, workout: currentWorkout)),
                   color: context.colors.accentSub,
                   textColor: context.colors.textWhite,
                 ),

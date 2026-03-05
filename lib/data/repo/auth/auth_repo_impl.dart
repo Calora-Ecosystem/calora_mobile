@@ -45,7 +45,7 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken: device.fcmToken,
     );
 
-    return _saveAuthAndReturnHasNewUser(response.data);
+    return await _saveAuthAndReturnHasNewUser(response.data);
   }
 
   @override
@@ -59,7 +59,7 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken: device.fcmToken,
     );
 
-    return _saveAuthAndReturnHasNewUser(response.data);
+    return await _saveAuthAndReturnHasNewUser(response.data);
   }
 
   @override
@@ -73,13 +73,20 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken: device.fcmToken,
     );
 
-    return _saveAuthAndReturnHasNewUser(response.data);
+    return await _saveAuthAndReturnHasNewUser(response.data);
   }
 
   Future<_DevicePayload> _getDevicePayload() async {
-    final installationId = await FirebaseInstallations.instance.getId();
+    String installationId = '';
+    try {
+      installationId = await FirebaseInstallations.instance.getId().timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => '',
+          );
+    } catch (e) {
+      installationId = '';
+    }
 
-    print('object: $installationId');
     final String deviceName;
     final deviceInfo = DeviceInfoPlugin();
 
@@ -99,7 +106,10 @@ class AuthRepoImpl extends AuthRepo {
     String? fcmToken;
     if (apnsAvailable) {
       try {
-        fcmToken = await FirebaseMessaging.instance.getToken();
+        fcmToken = await FirebaseMessaging.instance.getToken().timeout(
+              const Duration(seconds: 5),
+              onTimeout: () => '',
+            );
       } catch (e) {
         fcmToken = '';
       }
@@ -112,16 +122,16 @@ class AuthRepoImpl extends AuthRepo {
     );
   }
 
-  bool _saveAuthAndReturnHasNewUser(dynamic responseData) {
+  Future<bool> _saveAuthAndReturnHasNewUser(dynamic responseData) async {
     final Map<String, dynamic> content =
         (responseData as Map<String, dynamic>)['content'] as Map<String, dynamic>;
 
     final token = Token.fromJson(content);
 
-    _store.token.set(token);
+    await _store.token.set(token);
 
     final bool hasNewUser = content['hasNewUser'] as bool;
-    _commonStore.isQuestionaryFinished.set(!hasNewUser);
+    await _commonStore.isQuestionaryFinished.set(!hasNewUser);
 
     return hasNewUser;
   }

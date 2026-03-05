@@ -150,7 +150,13 @@ class VideoCourseBodyWidgetPage
                               loading: state.isLoading,
                               child: GestureDetector(
                                 behavior: HitTestBehavior.opaque,
-                                onTap: () => showLock ? null : manager.onVideoTapped(lesson, index),
+                                onTap: () {
+                                  if (showLock) {
+                                    context.router.push(const PremiumFeaturesRoute());
+                                    return;
+                                  }
+                                  manager.onVideoTapped(lesson, index);
+                                },
                                 child: Row(
                                   children: [
                                     Container(

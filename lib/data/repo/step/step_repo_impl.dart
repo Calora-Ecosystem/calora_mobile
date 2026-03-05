@@ -92,8 +92,11 @@ class StepRepoImpl extends StepRepo {
     if (_authorizationRequested) return;
 
     final health = Health();
-    final types = [HealthDataType.STEPS];
-    final permissions = [HealthDataAccess.READ];
+    final types = [HealthDataType.STEPS,HealthDataType.WEIGHT,
+      HealthDataType.HEART_RATE,];
+    final permissions = [ HealthDataAccess.READ,
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,];
     final requested = await health.requestAuthorization(types, permissions: permissions);
     log('[Health] Authorization requested: $requested');
     _authorizationRequested = true;
@@ -155,9 +158,11 @@ class StepRepoImpl extends StepRepo {
       final types = [HealthDataType.STEPS];
       final now = DateTime.now();
       final midnight = DateTime(now.year, now.month, now.day);
+      final start = midnight.toLocal();
+      final end = now.toLocal();
 
-      final healthData = await health.getHealthDataFromTypes(startTime: midnight, endTime: now, types: types);
-      log('[Health] Fetched ${healthData.length} health data points for today.');
+      final healthData = await health.getHealthDataFromTypes(startTime: start, endTime: end, types: types);
+      log('[Health] Fetched ${healthData.length} health data points for today.$start');
 
       if (healthData.isNotEmpty) {
         final totalSteps = healthData.fold<int>(0, (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toInt());

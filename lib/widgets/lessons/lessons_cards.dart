@@ -57,6 +57,7 @@ class LessonsCards extends StatelessWidget {
           child: GestureDetector(
             onTap: () {
               if (lockedByPremium) {
+                context.router.push(const PremiumFeaturesRoute());
                 return;
               }
               if (lockedByProgress) {

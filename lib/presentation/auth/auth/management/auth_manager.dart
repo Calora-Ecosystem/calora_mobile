@@ -104,13 +104,19 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       }
 
       emit(state.copyWith(loading: true));
+      debugPrint('GOOGLE_DEBUG: Initializing...');
       await _googleInitFuture;
 
+      debugPrint('GOOGLE_DEBUG: Authenticating...');
       final account = await _googleSignIn.authenticate(
         scopeHint: const ['email'],
       );
 
-      final idToken = account.authentication.idToken;
+      debugPrint('GOOGLE_DEBUG: Account found: ${account.email}');
+      final authentication = await account.authentication;
+      final idToken = authentication.idToken;
+
+      debugPrint('GOOGLE_DEBUG: idToken: ${idToken != null ? "found" : "null"}');
 
       if (idToken == null || idToken.isEmpty) {
         publish(AuthEffect.showError('Google idToken topilmadi'));
@@ -118,15 +124,19 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       }
 
       final hasNewUser = await _repo.signInGoogle(idToken);
+      debugPrint('GOOGLE_DEBUG: signInGoogle finished, hasNewUser: $hasNewUser');
+
       if (hasNewUser) {
         publish(AuthEffect.openQuestions(account.email));
         return;
       }
       publish(AuthEffect.openDashboard());
     } on GoogleSignInException catch (e, st) {
+      debugPrint('GOOGLE_DEBUG: Exception code: ${e.code}, message: ${e.description}');
       if (e.code == GoogleSignInExceptionCode.canceled) return;
       publish(AuthEffect.showError('${e.code}: ${e.description ?? ''}'.trim()));
     } catch (e, st) {
+      debugPrint('GOOGLE_DEBUG: Unknown error: $e');
       publish(AuthEffect.showError(e.toString()));
     } finally {
       emit(state.copyWith(loading: false));

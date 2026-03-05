@@ -1,4 +1,5 @@
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/repo/course/course_repo.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
@@ -15,6 +16,23 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
 
   void setLevel(int index) {
     emit(state.copyWith(levelIndex: index));
+  }
+
+  Future<void> changeActivityLevel(int courseId, int index) async {
+    final levelText = _levelTextFromIndex(index);
+    emit(state.copyWith(levelIndex: index, isLoading: true));
+
+    // Update profile local store
+    await profileStore.updateActivityLevel(levelText);
+
+    // Refresh activity level on server
+    await refreshActivityLevel(index);
+
+    // Fetch workouts for the new level
+    _courseRepo.getWorkout(courseId, levelText).handle(
+          onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
+          onError: (error) => emit(state.copyWith(isLoading: false)),
+        );
   }
 
   void getWorkout(int id) {
@@ -36,17 +54,26 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
 
   Future<void> refreshActivityLevel(int levelIndex) async {
     final profile = await profileStore.getProfile();
+    final levelText = _levelTextFromIndex(levelIndex);
+
+    // Purpose mappingni onboarding bilan bir xil qilamiz
+    String? purposeApi = profile.goal;
+    if (purposeApi == '0' || purposeApi == 'WeightLoss') purposeApi = 'WeightLoss';
+    else if (purposeApi == '1' || purposeApi == 'SaveCurrent') purposeApi = 'SaveCurrent';
+    else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') purposeApi = 'MuscleDevelopment';
+
     final request = QuestionsRequest(
       name: profile.name,
       gender: profile.gender,
-      purpose: profile.goal,
+      purpose: purposeApi,
       birthDate: profile.birthDay != null ? DateTime.tryParse(profile.birthDay!) : null,
       height: profile.height,
       weight: profile.weight,
       targetWeight: profile.targetWeight,
       bmi: profile.bmi,
-      activityLevel: _levelTextFromIndex(levelIndex),
+      activityLevel: levelText,
       language: 'Uzbek',
+      physicalActivity: profile.physicalActivity ?? 'Healthy',
     );
     await _questionsRepo.sendAnswers(request);
   }

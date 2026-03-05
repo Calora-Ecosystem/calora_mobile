@@ -47,6 +47,11 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
   @override
   Widget builder(BuildContext context, LessonsManager manager, LessonsState state) {
     final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
+
+    final totalItems = state.workouts.fold(0, (sum, w) => sum + w.totalItems);
+    final doneItems = state.workouts.fold(0, (sum, w) => sum + w.doneItems);
+    final progressPercent = safePercent(done: doneItems, total: totalItems);
+
     return Scaffold(
       backgroundColor: context.colors.accentDisabled,
       body: Stack(
@@ -69,17 +74,10 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
             child: Column(
               children: [
                 LessonAppBar(
-                  percent: 0.2,
+                  percent: progressPercent,
                   title: Strings.changeWithin30Days,
                   level: _mapIntToLevel(state.levelIndex),
-                  onLevelChanged: (value) async {
-                    manager.setLevel(value);
-                    manager.getWorkout(courseId);
-                    final newLevelText = levelTextFromIndex(value);
-                    await profileStore.updateActivityLevel(newLevelText);
-                    final profile = await profileStore.getProfile();
-                    await manager.refreshActivityLevel(value);
-                  },
+                  onLevelChanged: (value) => manager.changeActivityLevel(courseId, value),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -113,31 +111,20 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
     );
   }
 
-  int levelIndexFromText(String text) {
-    const levels = [
-      'Minimal',
-      'Less',
-      'Medium',
-      'High',
-      'Maximal',
-    ];
+  double safePercent({
+    required num done,
+    required num total,
+    double min = 0.0,
+    double max = 1.0,
+  }) {
+    if (total <= 0) return min;
 
-    return levels.indexOf(text);
+    final value = done / total;
+
+    if (!value.isFinite || value.isNaN) return min;
+
+    return value.clamp(min, max).toDouble();
   }
 
-  String levelTextFromIndex(int index) {
-    const levels = [
-      'Minimal',
-      'Less',
-      'Medium',
-      'High',
-      'Maximal',
-    ];
 
-    if (index < 0 || index >= levels.length) {
-      return '';
-    }
-
-    return levels[index];
-  }
 }

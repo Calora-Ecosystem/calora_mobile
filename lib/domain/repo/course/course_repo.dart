@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/course/course_request.dart';
 import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/domain/model/lesson/lesson_request.dart';
