@@ -58,7 +58,7 @@ class StepsApi {
     final profile = await profileStore.getProfile();
     final currentUserId = profile.userId ?? 0;
     final response = await _dio.get(
-      '/users/steps/stat',
+      'users/steps/stat',
       queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String(), 'Skip': skip, 'Take': take},
     );
     final data = response.data as Map<String, dynamic>;
@@ -93,32 +93,32 @@ class StepsApi {
   }
 
   Future<List<NormsRequest>> getNorms() async {
-    final response = await _dio.get('/users/norms');
+    final response = await _dio.get('users/norms');
     final List<dynamic> content = response.data['content'];
     return content.map((e) => NormsRequest.fromJson(e)).toList();
   }
 
   Future<void> updateNorm(NormsRequest norm) async {
-    await _dio.post('/users/norms', data: norm.toJson());
+    await _dio.post('users/norms', data: norm.toJson());
   }
 
   Future<void> deleteNorm(String metric) async {
-    await _dio.delete('/users/norms/$metric');
+    await _dio.delete('users/norms/$metric');
   }
 
   Future<void> sendDailyData({required String metric, required int value}) async {
     final body = {'metric': metric, 'value': value, 'date': DateTime.now().toUtc().toIso8601String()};
-    await _dio.post('/users/dailies', data: body);
+    await _dio.post('users/dailies', data: body);
   }
 
   Future<void> sendStepDataDateRange({List<StepsWithMetricsRequest> steps = const []}) async {
     final payload = steps.map((element) => element.toJson()).toList();
-    await _dio.post('/users/dailies/batch', data: payload);
+    await _dio.post('users/dailies/batch', data: payload);
   }
 
   Future<bool> deleteUserDailyData({required String date}) async {
     try {
-      final response = await _dio.delete('/users/dailies/reset', queryParameters: {'date': date});
+      final response = await _dio.delete('users/dailies/reset', queryParameters: {'date': date});
       return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } on DioException {
       return false;

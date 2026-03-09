@@ -59,10 +59,7 @@ class CourseRepoImpl implements CourseRepo {
 
   @override
   Future<void> refreshActivityLevel(QuestionsRequest answer) async {
-    final data = answer.toJson();
-    data.removeWhere((key, value) => value == null);
-    data.remove('email');
-    await _questionsApi.sendAnswers(data);
+    await _questionsApi.sendAnswers(answer);
   }
 
   @override

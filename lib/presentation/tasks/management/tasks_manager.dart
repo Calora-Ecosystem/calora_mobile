@@ -52,11 +52,12 @@ class TasksManager extends Manager<TasksState, TasksEffect> {
     final profile = await profileStore.getProfile();
     final levelText = _levelTextFromIndex(levelIndex);
 
-    // Purpose mappingni onboarding bilan bir xil qilamiz
     String? purposeApi = profile.goal;
     if (purposeApi == '0' || purposeApi == 'WeightLoss') purposeApi = 'WeightLoss';
     else if (purposeApi == '1' || purposeApi == 'SaveCurrent') purposeApi = 'SaveCurrent';
     else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') purposeApi = 'MuscleDevelopment';
+
+    final tWeight = (profile.targetWeight ?? 0) == 0 ? profile.weight : profile.targetWeight;
 
     final request = QuestionsRequest(
       name: profile.name,
@@ -65,11 +66,11 @@ class TasksManager extends Manager<TasksState, TasksEffect> {
       birthDate: profile.birthDay != null ? DateTime.tryParse(profile.birthDay!) : null,
       height: profile.height,
       weight: profile.weight,
-      targetWeight: profile.targetWeight,
+      targetWeight: tWeight,
       bmi: profile.bmi,
       activityLevel: levelText,
       language: 'Uzbek',
-      physicalActivity: profile.physicalActivity ?? 'Healthy',
+      physicalActivity: profile.physicalActivity,
     );
     await _questionsRepo.sendAnswers(request);
   }

@@ -25,8 +25,12 @@ abstract class NetworkModule {
   @lazySingleton
   @Named('refresh')
   Dio refreshDio() {
+    String baseUrl = kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl;
+    if (baseUrl.isNotEmpty && !baseUrl.endsWith('/')) {
+      baseUrl += '/';
+    }
     final options = BaseOptions(
-      baseUrl: kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl,
+      baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 50),
       receiveTimeout: const Duration(seconds: 50),
       sendTimeout: const Duration(seconds: 50),
@@ -53,13 +57,19 @@ abstract class NetworkModule {
   }
 
   @lazySingleton
-  BaseOptions baseOptions() => BaseOptions(
-    baseUrl: kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl,
-    connectTimeout: const Duration(seconds: 50),
-    receiveTimeout: const Duration(seconds: 50),
-    sendTimeout: const Duration(seconds: 50),
-    headers: {'Connection': 'close', 'Content-Type': 'application/json'},
-  );
+  BaseOptions baseOptions() {
+    String baseUrl = kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl;
+    if (baseUrl.isNotEmpty && !baseUrl.endsWith('/')) {
+      baseUrl += '/';
+    }
+    return BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 50),
+      receiveTimeout: const Duration(seconds: 50),
+      sendTimeout: const Duration(seconds: 50),
+      headers: {'Connection': 'close', 'Content-Type': 'application/json'},
+    );
+  }
 
   @lazySingleton
   PrettyDioLogger get logger =>

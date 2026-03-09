@@ -50,11 +50,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       return _repo
           .sendOtpToPhone(fullPhoneNumber)
           .handle(
-        onStart: () => emit(state.copyWith(loading: true)),
-        onData: (verification) => publish(AuthEffect.verify(verification)),
-        onError: (error) => emit(state.copyWith(loading: false)),
-        onDone: () => emit(state.copyWith(loading: false)),
-      );
+            onStart: () => emit(state.copyWith(loading: true)),
+            onData: (verification) => publish(AuthEffect.verify(verification)),
+            onError: (error) => emit(state.copyWith(loading: false)),
+            onDone: () => emit(state.copyWith(loading: false)),
+          );
     } else {
       final email = controller.text.trim();
       if (email.isEmpty) {
@@ -69,11 +69,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       return _repo
           .sendOtp(email)
           .handle(
-        onStart: () => emit(state.copyWith(loading: true)),
-        onData: (verification) => publish(AuthEffect.verify(verification)),
-        onError: (error) => emit(state.copyWith(loading: false)),
-        onDone: () => emit(state.copyWith(loading: false)),
-      );
+            onStart: () => emit(state.copyWith(loading: true)),
+            onData: (verification) => publish(AuthEffect.verify(verification)),
+            onError: (error) => emit(state.copyWith(loading: false)),
+            onDone: () => emit(state.copyWith(loading: false)),
+          );
     }
   }
 
@@ -94,7 +94,8 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
 
   late final Future<void> _googleInitFuture;
 
-  static const String _serverClientId = '638398407864-e2qthkeciq05a3conbgd4tujlrn146lq.apps.googleusercontent.com';
+  static const String _serverClientId =
+      '638398407864-e2qthkeciq05a3conbgd4tujlrn146lq.apps.googleusercontent.com';
 
   Future<void> loginWithGoogle() async {
     try {
@@ -104,19 +105,14 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       }
 
       emit(state.copyWith(loading: true));
-      debugPrint('GOOGLE_DEBUG: Initializing...');
       await _googleInitFuture;
 
-      debugPrint('GOOGLE_DEBUG: Authenticating...');
       final account = await _googleSignIn.authenticate(
         scopeHint: const ['email'],
       );
 
-      debugPrint('GOOGLE_DEBUG: Account found: ${account.email}');
       final authentication = await account.authentication;
       final idToken = authentication.idToken;
-
-      debugPrint('GOOGLE_DEBUG: idToken: ${idToken != null ? "found" : "null"}');
 
       if (idToken == null || idToken.isEmpty) {
         publish(AuthEffect.showError('Google idToken topilmadi'));
@@ -124,7 +120,6 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       }
 
       final hasNewUser = await _repo.signInGoogle(idToken);
-      debugPrint('GOOGLE_DEBUG: signInGoogle finished, hasNewUser: $hasNewUser');
 
       if (hasNewUser) {
         publish(AuthEffect.openQuestions(account.email));
@@ -132,11 +127,9 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       }
       publish(AuthEffect.openDashboard());
     } on GoogleSignInException catch (e, st) {
-      debugPrint('GOOGLE_DEBUG: Exception code: ${e.code}, message: ${e.description}');
       if (e.code == GoogleSignInExceptionCode.canceled) return;
       publish(AuthEffect.showError('${e.code}: ${e.description ?? ''}'.trim()));
     } catch (e, st) {
-      debugPrint('GOOGLE_DEBUG: Unknown error: $e');
       publish(AuthEffect.showError(e.toString()));
     } finally {
       emit(state.copyWith(loading: false));

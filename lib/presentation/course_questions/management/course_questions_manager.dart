@@ -84,6 +84,8 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
     else if (purposeApi == '1' || purposeApi == 'SaveCurrent') purposeApi = 'SaveCurrent';
     else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') purposeApi = 'MuscleDevelopment';
 
+    final tWeight = (saved.targetWeight ?? 0) == 0 ? saved.weight : saved.targetWeight;
+
     final request = QuestionsRequest(
       name: saved.name,
       gender: saved.gender, // Swagger kutgan "Male"/"Female" formatida bo'lishi kerak
@@ -91,11 +93,11 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
       birthDate: DateTime.tryParse(saved.birthDay ?? ''),
       height: saved.height,
       weight: saved.weight,
-      targetWeight: saved.targetWeight,
+      targetWeight: tWeight,
       bmi: bmi,
       activityLevel: activityLevelApi ?? saved.activityLevel,
       language: 'Uzbek',
-      physicalActivity: physicalActivity ?? 'Healthy',
+      physicalActivity: physicalActivity,
     );
 
     print('DEBUG: Sending full profile update with activityLevel: ${request.activityLevel}');

@@ -14,55 +14,55 @@ class CaloriesApi {
 
   Future<Response> getSummary(DateTime date) {
     return _dio.get(
-      '/food/summary',
+      'food/summary',
       queryParameters: {'date': date.toIso8601String()},
     );
   }
 
   Future<Response> getFoodCategory() {
-    return _dio.get('/food/categories');
+    return _dio.get('food/categories');
   }
 
   Future<Response> fetchFoods(bool latest) {
-    return _dio.get('/food', queryParameters: {'Latest': latest});
+    return _dio.get('food', queryParameters: {'Latest': latest});
   }
 
   Future<Response> fetchUserFoods() {
-    return _dio.get('/food', queryParameters: {'IsUserFood': true});
+    return _dio.get('food', queryParameters: {'IsUserFood': true});
   }
 
   Future<Response> fetchSearchFood(String name) {
     return _dio.get(
-      '/food',
+      'food',
       queryParameters: {'FilteringExpression': 'name\$\$${name}'},
     );
   }
 
   Future<Response> addFood(FoodRequest food) {
-    return _dio.post('/food', data: food.toJson());
+    return _dio.post('food', data: food.toJson());
   }
 
   Future<Response> fetchFoodById(int id) {
-    return _dio.get('/food/$id');
+    return _dio.get('food/$id');
   }
 
   Future<Response> fetchMenuItem(DateTime date, String menu) {
     return _dio.get(
-      '/food/menu',
+      'food/menu',
       queryParameters: {'date': date.toIso8601String(), 'menu': menu},
     );
   }
 
   Future<void> saveMenuItem(MenuInfo item) {
-    return _dio.post('/food/menu', data: item.toJson());
+    return _dio.post('food/menu', data: item.toJson());
   }
 
   Future<void> addFavourite(int id) {
-    return _dio.post('/food/favourites/toggle/$id');
+    return _dio.post('food/favourites/toggle/$id');
   }
 
   Future<Response> getFavouriteFoods() {
-    return _dio.get('/food/favourites');
+    return _dio.get('food/favourites');
   }
 
   Future<List<ScannerFood>> getScannerFood(String filePath) async {
@@ -73,7 +73,7 @@ class CaloriesApi {
       ),
     });
 
-    final response = await _dio.post('/food/recognization', data: formData);
+    final response = await _dio.post('food/recognization', data: formData);
 
     final List content = response.data['content'] ?? [];
 
@@ -89,7 +89,7 @@ class CaloriesApi {
       ),
     });
 
-    final response = await _dio.post('/food/recognization', data: formData);
+    final response = await _dio.post('food/recognization', data: formData);
 
     final List content = response.data['content'] ?? [];
 

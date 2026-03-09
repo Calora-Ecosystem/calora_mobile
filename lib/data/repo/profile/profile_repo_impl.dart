@@ -20,12 +20,20 @@ class ProfileRepoImpl extends ProfileRepo {
     final targetWeight = await _api.getTargetWeight();
 
     final meData = meResponse.data['content'];
-    final extrasData = extrasResponse.data['content'];
-    final target = targetWeight.data['content'][0];
-    final profile = ProfileRequest.fromJson(extrasData);
+    var extrasData = extrasResponse.data['content'];
+
+    // If extrasData is a List, take the first element
+    if (extrasData is List && extrasData.isNotEmpty) {
+      extrasData = extrasData[0];
+    } else if (extrasData is List && extrasData.isEmpty) {
+      extrasData = <String, dynamic>{};
+    }
+
+    final target = (targetWeight.data['content'] as List).isNotEmpty ? targetWeight.data['content'][0] : {'value': 0.0};
+    final profile = ProfileRequest.fromJson(extrasData as Map<String, dynamic>);
     final updated = profile.copyWith(
       email: meData['email'],
-      targetWeight: target['value'].toDouble(),
+      targetWeight: (target['value'] ?? 0.0).toDouble(),
     );
     return updated;
   }

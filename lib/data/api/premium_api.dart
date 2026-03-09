@@ -18,22 +18,22 @@ class PremiumApi {
     int? couponId,
   }) async {
     final data = {'provider': provider, 'plan': plan, 'planExtraId': orderMonth, 'couponId': couponId};
-    final response = await _dio.post('/billing/orders/subscription', data: data);
+    final response = await _dio.post('billing/orders/subscription', data: data);
     final json = (response.data as Map<String, dynamic>)['content'];
     return SubscriptionResponseModel.fromJson(json);
   }
 
   Future<void> deleteOrder({required int orderId}) async {
-    await _dio.delete('/billing/orders/$orderId');
+    await _dio.delete('billing/orders/$orderId');
   }
 
   Future<String> getPaymentLink({required int orderId}) async {
-    final response = await _dio.get('/billing/orders/$orderId/payment-link');
+    final response = await _dio.get('billing/orders/$orderId/payment-link');
     return (response.data as Map<String, dynamic>)['content'] as String;
   }
 
   Future<List<MySubscriptionOrderModel>> getMyOrders() async {
-    final response = await _dio.get('/billing/orders/my');
+    final response = await _dio.get('billing/orders/my');
     final data = response.data as Map<String, dynamic>;
     final content = data['content'] as List<dynamic>?;
     if (content == null) return [];
@@ -41,7 +41,7 @@ class PremiumApi {
   }
 
   Future<List<PremiumPlanModel>> getPremiumPlans() async {
-    final response = await _dio.get('/billing/orders/subscription/plans/Premium');
+    final response = await _dio.get('billing/orders/subscription/plans/Premium');
     final data = response.data as Map<String, dynamic>;
     final content = data['content'] as List<dynamic>?;
     if (content == null) return [];
@@ -50,7 +50,7 @@ class PremiumApi {
 
   Future<PromoCodeModel> getPromoCodeAmount({required String code}) async {
     try {
-      final response = await _dio.get('/billing/coupons/check', queryParameters: {'code': code});
+      final response = await _dio.get('billing/coupons/check', queryParameters: {'code': code});
       final data = response.data as Map<String, dynamic>;
       final content = data['content'] as Map<String, dynamic>?;
       if (content == null) return PromoCodeModel();

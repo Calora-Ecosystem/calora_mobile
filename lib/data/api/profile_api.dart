@@ -26,7 +26,7 @@ class ProfileApi {
   }
 
   Future<DailyNormsInfo> getDailyNorms() async {
-    final response = await _dio.get('/users/norms');
+    final response = await _dio.get('users/norms');
 
     final data = response.data;
     final List content = data['content'];
@@ -64,14 +64,21 @@ class ProfileApi {
       }
     }
 
-    return DailyNormsInfo(calories: calories, protein: protein, fat: fat, carbs: carbs, water: water, steps: steps);
+    return DailyNormsInfo(
+      calories: calories,
+      protein: protein,
+      fat: fat,
+      carbs: carbs,
+      water: water,
+      steps: steps,
+    );
   }
 
   Future<Response> updateSingleNorm(NormsRequest request) async {
-    return _dio.post('/users/norms', data: request.toJson());
+    return _dio.post('users/norms', data: request.toJson());
   }
 
   Future<void> logout() async {
-    await _dio.get('/auth/logout');
+    await _dio.get('auth/logout');
   }
 }
