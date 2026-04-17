@@ -10,6 +10,7 @@ import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
+import 'package:calora/widgets/health/health_sync_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
@@ -29,6 +30,7 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
     super.listener(context, manager, effect);
     effect.when(
       forceLogout: () => context.router.replaceAll([AuthRoute()]),
+      showHealthSyncBottomSheet: () => HealthSyncBottomSheet.show(context),
     );
   }
 

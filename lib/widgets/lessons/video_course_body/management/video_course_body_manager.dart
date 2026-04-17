@@ -16,7 +16,10 @@ class VideoCourseBodyManager extends Manager<VideoCourseBodyState, VideoCourseBo
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (data) => emit(state.copyWith(lessons: data, isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            publish(VideoCourseBodyEffect.showError(error.toString()));
+          },
         );
   }
 
@@ -32,18 +35,21 @@ class VideoCourseBodyManager extends Manager<VideoCourseBodyState, VideoCourseBo
             }).toList();
             emit(state.copyWith(lessons: updated));
           },
-          onError: (e) {},
+          onError: (error) {
+            publish(VideoCourseBodyEffect.showError(error.toString()));
+          },
         );
   }
 
   void onVideoTapped(LessonRequest lesson, int index) {
     if (index > 0) {
-      final prev = state.lessons.length > index - 1 ? state.lessons[index - 1] : null;
-      if (prev != null && prev.isFinished != true) {
+      final prev = state.lessons[index - 1];
+      if (prev.isFinished != true) {
         publish(const VideoCourseBodyEffect.showNeedFinishPrevious());
         return;
       }
     }
+
     if (lesson.isFree || state.isPurchased) {
       publish(VideoCourseBodyEffect.openVideo(lesson, index));
     }

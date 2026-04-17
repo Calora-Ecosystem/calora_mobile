@@ -69,52 +69,55 @@ class ConfirmPage extends StatelessWidget {
                 .c(titleColor ?? colors.textStrong)
                 .copyWith(textAlign: TextAlign.center),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onCancel,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 4,
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: onCancel,
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cancelBackgroundColor ?? colors.errorLighter,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: loading
+                            ? const CupertinoActivityIndicator()
+                            : cancelText
+                                  .text(16, 20, 500)
+                                  .c(cancelTextColor ?? colors.errorBase)
+                                  .copyWith(textAlign: TextAlign.center),
                       ),
-                      decoration: BoxDecoration(
-                        color: cancelBackgroundColor ?? colors.errorLighter,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: loading
-                          ? const CupertinoActivityIndicator()
-                          : cancelText
-                                .text(16, 20, 500)
-                                .c(cancelTextColor ?? colors.errorBase)
-                                .copyWith(textAlign: TextAlign.center),
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onConfirm,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 4,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: onConfirm,
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: confirmBackgroundColor ?? colors.backgroundElevation,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: confirmText
+                            .text(16, 20, 500)
+                            .c(confirmTextColor ?? colors.textStrong)
+                            .copyWith(textAlign: TextAlign.center),
                       ),
-                      decoration: BoxDecoration(
-                        color:
-                            confirmBackgroundColor ??
-                            colors.backgroundElevation,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: confirmText
-                          .text(16, 20, 500)
-                          .c(confirmTextColor ?? colors.textStrong)
-                          .copyWith(textAlign: TextAlign.center),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

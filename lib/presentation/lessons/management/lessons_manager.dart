@@ -1,5 +1,4 @@
 import 'package:calora/common/base/profile_store.dart';
-import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/repo/course/course_repo.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
@@ -22,16 +21,18 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
     final levelText = _levelTextFromIndex(index);
     emit(state.copyWith(levelIndex: index, isLoading: true));
 
-    // Update profile local store
     await profileStore.updateActivityLevel(levelText);
 
-    // Refresh activity level on server
     await refreshActivityLevel(index);
 
-    // Fetch workouts for the new level
-    _courseRepo.getWorkout(courseId, levelText).handle(
+    _courseRepo
+        .getWorkout(courseId, levelText)
+        .handle(
           onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            publish(LessonsEffect.showError(error.toString()));
+          },
         );
   }
 
@@ -41,7 +42,10 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            publish(LessonsEffect.showError(error.toString()));
+          },
         );
   }
 
@@ -57,9 +61,13 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
     final levelText = _levelTextFromIndex(levelIndex);
 
     String? purposeApi = profile.goal;
-    if (purposeApi == '0' || purposeApi == 'WeightLoss') purposeApi = 'WeightLoss';
-    else if (purposeApi == '1' || purposeApi == 'SaveCurrent') purposeApi = 'SaveCurrent';
-    else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') purposeApi = 'MuscleDevelopment';
+    if (purposeApi == '0' || purposeApi == 'WeightLoss') {
+      purposeApi = 'WeightLoss';
+    } else if (purposeApi == '1' || purposeApi == 'SaveCurrent') {
+      purposeApi = 'SaveCurrent';
+    } else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') {
+      purposeApi = 'MuscleDevelopment';
+    }
 
     final tWeight = (profile.targetWeight ?? 0) == 0 ? profile.weight : profile.targetWeight;
 

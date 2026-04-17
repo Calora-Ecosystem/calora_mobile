@@ -17,5 +17,7 @@ abstract class LessonsState with _$LessonsState {
 
 @freezed
 class LessonsEffect with _$LessonsEffect {
-  const factory LessonsEffect() = _LessonsEffect;
+  const factory LessonsEffect.empty() = _Empty;
+
+  const factory LessonsEffect.showError(String message) = _ShowError;
 }

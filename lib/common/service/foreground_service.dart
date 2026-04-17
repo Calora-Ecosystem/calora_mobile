@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 class StepsForegroundService {
   StepsForegroundService._();
+
   static final instance = StepsForegroundService._();
 
   static const MethodChannel _ch = MethodChannel('ai.calora.app/steps_native_fgs');
@@ -31,7 +32,7 @@ class StepsForegroundService {
       });
       _started = res ?? true;
       return _started;
-    } catch (e, s) {
+    } catch (e) {
       _started = false;
       return false;
     }

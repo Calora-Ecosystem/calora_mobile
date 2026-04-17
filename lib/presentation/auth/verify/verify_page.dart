@@ -4,6 +4,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/auth/verify/management/verify_management.dart';
@@ -14,25 +15,28 @@ import 'package:management/management.dart';
 
 @RoutePage()
 class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
+  const VerifyPage({super.key, required this.verification, this.onVerified});
+
   final Verification verification;
   final Future<void> Function()? onVerified;
 
-  const VerifyPage({
-    super.key,
-    required this.verification,
-    this.onVerified,
-  });
-
   @override
   void init(context, manager) {
-    manager.setVerification(verification);
+    manager.setInitialVerification(verification);
   }
 
   @override
   void listener(context, manager, effect) {
     effect.when(
-      openQuestions: (email) => context.router.replaceAll([QuestionsRoute()]),
-      openDashboard: () => context.router.replaceAll([DashboardRoute()]),
+      openQuestions: (email) {
+        context.router.replaceAll([QuestionsRoute()]);
+      },
+      openDashboard: () {
+        context.router.replaceAll([const DashboardRoute()]);
+      },
+      showError: (message) {
+        CustomSnackBar.show(context, message);
+      },
     );
   }
 
@@ -41,27 +45,26 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Assets.icons.background.image(fit: BoxFit.fill),
-          ),
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
           SafeArea(
             child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Assets.icons.iconCalora.svg(),
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
                     VerifyCodeWidget(
+                      controller: manager.controller,
                       resend: manager.resend,
                       resultCode: (data) {
-                        manager.setVerificationCode(data);
+                        if (data.length == 6) {
+                          manager.verify();
+                        }
                       },
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: Button(

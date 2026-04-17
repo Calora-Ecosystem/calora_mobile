@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/service/foreground_service.dart';
@@ -14,7 +15,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class DashboardManager extends Manager<DashboardState, DashboardEffect> with WidgetsBindingObserver {
+class DashboardManager extends Manager<DashboardState, DashboardEffect>
+    with WidgetsBindingObserver {
   final StepRepo _stepRepo;
   final PedometerService _pedometerService;
   final MetricsSyncService _metricsSync;
@@ -60,12 +62,10 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
-      log('[STEPS] App backgrounded/detached. Stopping live stream.', name: 'DashboardManager');
       _stepsSub?.cancel();
       _stepsSub = null;
       _syncTimer?.cancel();
     } else if (state == AppLifecycleState.resumed) {
-      log('[STEPS] App resumed. Restarting live stream.', name: 'DashboardManager');
       if (_useHealthService) {
         _startHealthSync();
       } else {
@@ -81,80 +81,88 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
       _forceLogoutSub = _authStore.onForceLogout.listen((_) async {
         _syncTimer?.cancel();
         await _stepsSub?.cancel();
+
+        // 🌟 QO'SHILDI: Foydalanuvchi tizimdan chiqqanda bildirishnomani o'chirish
+        await StepsForegroundService.instance.stop();
+
         publish(const DashboardEffect.forceLogout());
       });
       await _startStepCounter();
-    } catch (e, s) {
-      log('[STEPS] CRITICAL: Error during DashboardManager initialization', name: 'DashboardManager', error: e, stackTrace: s);
+    } catch (e) {
+      log('DashboardManager _initializeInternal xatosi: $e');
     }
   }
 
   Future<void> _startStepCounter() async {
     try {
-      _useHealthService = await _stepRepo.isHealthDataAvailable();
-      log('[STEPS] Health service available: $_useHealthService', name: 'DashboardManager');
+      final bool isHealthAvailable = await _stepRepo.isHealthDataAvailable();
 
-      if (_useHealthService) {
-        log('[STEPS] Using Health Service for step counting.', name: 'DashboardManager');
+      if (isHealthAvailable) {
+        final int initialHealthSteps = await _stepRepo.getTodayHealthSteps();
+        if (initialHealthSteps == 0) {
+          _useHealthService = false;
+        } else {
+          _useHealthService = true;
+        }
       } else {
-        log('[STEPS] Using Pedometer for step counting.', name: 'DashboardManager');
+        _useHealthService = false;
+      }
+
+      if (!_useHealthService) {
         await _pedometerService.initialize();
         if (!_pedometerService.isInitialized) {
-          log('[STEPS] Pedometer service not initialized, aborting.', name: 'DashboardManager');
           return;
         }
       }
 
-      // 1. Fetch today's steps from backend to reconcile with local ledger.
       final todayKey = _ledger.dayKey(DateTime.now());
       try {
-        log('[STEPS] Fetching today\'s steps from backend for reconciliation...', name: 'DashboardManager');
-        final backendSteps = await _stepRepo.getSteps(0, offset: 0);
+        final backendSteps = await _stepRepo.getSteps(0);
         int backendTotal = 0;
         if (backendSteps.isNotEmpty) {
           backendTotal = backendSteps.first.value.toInt();
         }
-        
+
         final localTotal = _ledger.totalFor(todayKey);
-        
+
         if (backendTotal > localTotal) {
-          log('[STEPS] Backend has more steps ($backendTotal) than local ($localTotal). Updating local ledger.', name: 'DashboardManager');
           await _ledger.ensureDayAtLeast(todayKey, backendTotal, minSynced: backendTotal);
           _lastSyncedTodaySteps = backendTotal;
-        } else if (localTotal == 0 && backendTotal == 0) {
-          log('[STEPS] Both backend and local are 0 for today.', name: 'DashboardManager');
-        } else {
-          log('[STEPS] Local ledger ($localTotal) is ahead of or equal to backend ($backendTotal).', name: 'DashboardManager');
         }
-      } catch (e, s) {
-        log('[STEPS] Failed to fetch today\'s steps from backend for reconciliation.', name: 'DashboardManager', error: e, stackTrace: s);
+      } catch (e) {
+        // xato ushlagich
       }
 
-      // 2. Sync any data that was collected while the app was offline.
       await syncOfflineSteps();
 
-      // 3. Get today's steps from the local ledger.
       final currentTotal = _todayTotal;
       _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
-      log('[STEPS] Bootstrap: Final today total=$currentTotal, synced=$_lastSyncedTodaySteps', name: 'DashboardManager');
 
-      // 4. Update UI and notify metrics system immediately
       emit(state.copyWith(todaySteps: currentTotal));
-      _metricsSync.notifyUpdated(currentTotal); 
-      
+      _metricsSync.notifyUpdated(currentTotal);
+
+      // 🌟 QO'SHILDI: Foreground Service ni ishga tushirish
+      if (!StepsForegroundService.instance.isRunning) {
+        // TODO: Agar _authStore ichida foydalanuvchi maqsadi va vazni bo'lsa, shu yerdan oling:
+        // Masalan: final userWeight = _authStore.user?.weight ?? 70.0;
+        StepsForegroundService.instance.setGoalSteps(10000);
+        StepsForegroundService.instance.setUserWeight(70.0);
+
+        await StepsForegroundService.instance.start();
+      }
+
+      // Xizmat ishlayotgan bo'lsa darhol unga joriy qadamlarni jo'natamiz (bildirishnoma 0 bo'lib qolmasligi uchun)
       if (StepsForegroundService.instance.isRunning) {
         unawaited(StepsForegroundService.instance.syncSteps(currentTotal));
       }
 
-      // 5. Start listening for live step updates.
       if (_useHealthService) {
         _startHealthSync();
       } else {
         _listenToStepUpdates();
       }
-      log('[STEPS] Step counter started.', name: 'DashboardManager');
-    } catch (e, s) {
-      log('[STEPS] CRITICAL: Error during step counter startup', name: 'DashboardManager', error: e, stackTrace: s);
+    } catch (e) {
+      log('DashboardManager _startStepCounter xatosi: $e');
     }
   }
 
@@ -178,6 +186,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
           unawaited(syncOfflineSteps());
           emit(state.copyWith(todaySteps: 0));
           _metricsSync.notifyUpdated(0);
+
           if (StepsForegroundService.instance.isRunning) {
             unawaited(StepsForegroundService.instance.syncSteps(0));
           }
@@ -205,11 +214,11 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
         }
 
         if (_shouldSyncToday(newTotal)) {
-           unawaited(_syncTodaySteps(force: true));
+          unawaited(_syncTodaySteps(force: true));
         }
       },
-      onError: (e, s) {
-        log('[STEPS] CRITICAL: Error in step count stream', name: 'DashboardManager', error: e, stackTrace: s);
+      onError: (e) {
+        log('Pedometer stream xatosi: $e');
       },
     );
   }
@@ -231,7 +240,6 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
     if (_isSyncingToday && !force) return;
 
     _isSyncingToday = true;
-    log('[STEPS] Starting sync for today.', name: 'DashboardManager');
 
     try {
       int currentSteps;
@@ -248,28 +256,25 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
         _lastSyncedTodaySteps = currentSteps;
         emit(state.copyWith(todaySteps: currentSteps));
         _metricsSync.notifyUpdated(currentSteps);
+
         if (StepsForegroundService.instance.isRunning) {
           unawaited(StepsForegroundService.instance.syncSteps(currentSteps));
         }
-        log('[STEPS] SUCCESS: Synced $currentSteps steps for today.', name: 'DashboardManager');
       }
-    } catch(e, s) {
-      log('[STEPS] FAILURE: Failed to sync today steps. Error: $e', name: 'DashboardManager', error: e, stackTrace: s);
+    } catch (e) {
+      //
     } finally {
       _isSyncingToday = false;
-      log('[STEPS] Finished sync for today.', name: 'DashboardManager');
     }
   }
 
   Future<void> syncOfflineSteps() async {
-    log('[STEPS] Starting offline sync process.', name: 'DashboardManager');
     final pendingDays = _ledger.getAllPendingDays();
     final todayKey = _ledger.dayKey(DateTime.now());
 
     final pastDaysToSync = pendingDays.where((key) => key != todayKey).toList();
 
     if (pastDaysToSync.isNotEmpty) {
-      log('[STEPS] Found ${pastDaysToSync.length} past days to sync.', name: 'DashboardManager');
       try {
         final payload = pastDaysToSync.map((key) {
           return StepsWithMetricsRequest(
@@ -283,21 +288,16 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect> with Wid
         for (final dayKey in pastDaysToSync) {
           await _ledger.deleteDay(dayKey);
         }
-        log('[STEPS] SUCCESS: Synced and cleared ${pastDaysToSync.length} past days.', name: 'DashboardManager');
-      } catch (e, s) {
-        log('[STEPS] FAILURE: Failed to sync offline steps. Error: $e', name: 'DashboardManager', error: e, stackTrace: s);
+      } catch (e) {
+        //
       }
-    } else {
-      log('[STEPS] No past days found to sync.', name: 'DashboardManager');
     }
 
     if (_useHealthService) {
-      log('[STEPS] Syncing last 30 days from health.', name: 'DashboardManager');
       final datePeriod = _stepRepo.getDatePeriods(2, 0);
       await _stepRepo.sendHealthData(from: datePeriod['from']!, to: datePeriod['to']!);
     }
 
-    log('[STEPS] Forcing a sync for today as part of offline process.', name: 'DashboardManager');
     await _syncTodaySteps(force: true);
   }
 

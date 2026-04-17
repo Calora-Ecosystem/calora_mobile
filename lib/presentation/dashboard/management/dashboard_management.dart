@@ -12,4 +12,6 @@ abstract class DashboardState with _$DashboardState {
 @freezed
 class DashboardEffect with _$DashboardEffect {
   const factory DashboardEffect.forceLogout() = _ForceLogout;
+
+  const factory DashboardEffect.showHealthSyncBottomSheet() = _ShowHealthSyncBottomSheet;
 }

@@ -263,7 +263,7 @@ from_kcal,from kcal,kkaldan,из ккал
 to_remind_you_of_meal_times,To remind you of meal times,Ovqat vaqtlarini eslatish uchun,Чтобы напомнить вам о времени приема пищи
 add_food,Add food,Ovqatni qo’shish,Добавить еду
 meals_are_not_available,Meals are not available.,Ovqatlar mavjud emas,Питание не предоставляется.
-add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь вы можете указать свои последние приемы пищи.
+add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь укажите ваши последние приемы пищи.
 search_for_food_or_product,Search for food or product,Ovqat yoki maxsulotni qidirish,Поиск продуктов питания или товаров
 creation,Creation,Yaratish,Творение
 scanning,Scanning,Skanerlash,Сканирование
@@ -320,7 +320,7 @@ notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj
 should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
 yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
 please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
-your_data_has_been_saved,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+your_data_has_been_saved,Your data has been successfully saved.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
 no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
 liter,liter,litr,литр
@@ -387,3 +387,7 @@ additional_information_being_analyzed,Additional information is being analyzed..
 notificationFailed,Failed to load notifications,Bildirishnomalarni olishda xatolik,Не удалось загрузить уведомления
 noNotifications,No notifications,Bildirishnomalar yo'q,Уведомления отсутствуют
 installTheNewVersion,"To continue, install the new version of the app.",Davom etish uchun ilovaning yangi versiyasini o‘rnating.,Для продолжения установите новую версию приложения.
+step_synchronization,Step synchronization,Qadamlar sinxronizatsiyasi,Синхронизация шагов
+step_sync_description,"To count your steps correctly, you need to connect the Google Fit app to Health Connect. Please go to settings and check permissions.","Qadamlaringiz to'g'ri hisoblanishi uchun Google Fit ilovasini Health Connect tizimiga ulashingiz kerak. Iltimos, sozlamalarga kirib ruxsatlarni tekshiring.","Чтобы ваши шаги считались правильно, вам нужно подключить приложение Google Fit к Health Connect. Пожалуйста, зайдите в настройки и проверьте разрешения."
+go_to_settings,Go to settings,Sozlamalarga o'tish,Перейти в настройки
+later,Later,Keyinroq,Позже

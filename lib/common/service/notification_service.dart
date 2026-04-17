@@ -12,10 +12,10 @@ class NotificationService {
   final _local = FlutterLocalNotificationsPlugin();
 
   static const _channel = AndroidNotificationChannel(
-    'default_channel',
-    'Default notifications',
-    description: 'General notifications',
-    importance: Importance.high,
+    'high_importance_channel',
+    'High Importance Notifications',
+    description: 'This channel is used for important messages.',
+    importance: Importance.max,
   );
 
   Future<void> initForForeground() async {
@@ -34,13 +34,22 @@ class NotificationService {
 
     await FirebaseMessaging.instance.requestPermission();
 
-    FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) => log('Opened from notification: ${message.data}'),
-    );
-
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
+      badge: true,
       sound: true,
+    );
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      log('Foreground message received: ${message.messageId}');
+
+      if (Platform.isAndroid) {
+        showForegroundNotification(message);
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) => log('Opened from notification: ${message.data}'),
     );
   }
 
@@ -55,11 +64,33 @@ class NotificationService {
     await androidPlugin?.createNotificationChannel(_channel);
   }
 
-  Future<void> showNotificationFromRemote(RemoteMessage message) async {
+  Future<void> showForegroundNotification(RemoteMessage message) async {
     final notification = message.notification;
 
-    final title = notification?.title ?? message.data['title']?.toString();
-    final body = notification?.body ?? message.data['body']?.toString();
+    if (notification != null) {
+      await _local.show(
+        3107,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channel.id,
+            _channel.name,
+            channelDescription: _channel.description,
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+          iOS: const DarwinNotificationDetails(),
+        ),
+        payload: message.data.isNotEmpty ? message.data.toString() : null,
+      );
+    }
+  }
+
+  Future<void> showBackgroundDataNotification(RemoteMessage message) async {
+    final title = message.data['title']?.toString();
+    final body = message.data['body']?.toString();
 
     if (title == null && body == null) return;
 
@@ -68,16 +99,14 @@ class NotificationService {
     if (badge != null) {
       try {
         badgeCount = int.parse(badge.toString());
-        if (badgeCount > 9) {
-          badgeCount = 9;
-        }
+        if (badgeCount > 9) badgeCount = 9;
       } catch (e) {
         log('Could not parse badge count: $e');
       }
     }
 
     await _local.show(
-      message.hashCode,
+      3107,
       title,
       body,
       NotificationDetails(
@@ -89,7 +118,6 @@ class NotificationService {
           priority: Priority.high,
           number: badgeCount,
         ),
-        iOS: DarwinNotificationDetails(badgeNumber: badgeCount),
       ),
       payload: message.data.isNotEmpty ? message.data.toString() : null,
     );

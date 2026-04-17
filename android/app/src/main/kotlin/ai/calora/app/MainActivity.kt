@@ -1,18 +1,19 @@
 package ai.calora.app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.util.Log
 import io.flutter.plugins.GeneratedPluginRegistrant
-import io.flutter.embedding.android.FlutterFragmentActivity // Import the correct class
 
 class MainActivity : FlutterFragmentActivity() {
 
     private val CHANNEL = "ai.calora.app/steps_native_fgs"
+    private val HEALTH_CONNECT_PACKAGE = "com.google.android.apps.healthdata"
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -77,8 +78,46 @@ class MainActivity : FlutterFragmentActivity() {
                         result.success(null)
                     }
 
+                    "openHealthConnectSettings" -> {
+                        openHealthConnectSettings(result)
+                    }
+
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    private fun openHealthConnectSettings(result: MethodChannel.Result) {
+        try {
+            // Try opening Health Connect settings
+            val intent = Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+                result.success(true)
+            } else {
+                // Try specific package intent if action fails
+                val launchIntent = packageManager.getLaunchIntentForPackage(HEALTH_CONNECT_PACKAGE)
+                if (launchIntent != null) {
+                    startActivity(launchIntent)
+                    result.success(true)
+                } else {
+                    // Fallback: Open Play Store
+                    openPlayStore(HEALTH_CONNECT_PACKAGE)
+                    result.success(false)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error opening Health Connect", e)
+            openPlayStore(HEALTH_CONNECT_PACKAGE)
+            result.error("UNAVAILABLE", "Could not open Health Connect settings", e.message)
+        }
+    }
+
+    private fun openPlayStore(packageName: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
+        } catch (e: Exception) {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
+        }
     }
 }

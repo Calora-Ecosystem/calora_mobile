@@ -48,7 +48,7 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
             ),
           ),
           Positioned(
-            top: 24,
+            top: MediaQuery.of(context).padding.top,
             right: 16,
             child: Container(
               decoration: BoxDecoration(

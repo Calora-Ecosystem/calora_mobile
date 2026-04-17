@@ -53,6 +53,7 @@ class VideoCourseBodyWidgetPage
       openVideo: (lesson, index) => _openVideo(context, lesson, index, manager),
       showNeedFinishPrevious: () =>
           CustomSnackBar.showInfo(context, Strings.watchThisVideoPreviousVideo),
+      showError: (message) => CustomSnackBar.show(context, message),
     );
   }
 
@@ -62,8 +63,6 @@ class VideoCourseBodyWidgetPage
     VideoCourseBodyManager manager,
     VideoCourseBodyState state,
   ) {
-    final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -92,7 +91,7 @@ class VideoCourseBodyWidgetPage
                           children: [
                             Expanded(child: course.title.text(24, 32, 700)),
                             const SizedBox(width: 8),
-                            if (!isUserPremium)
+                            if (!state.isPurchased)
                               Assets.icons.lock.svg()
                             else
                               Assets.icons.money.svg(),
@@ -128,9 +127,8 @@ class VideoCourseBodyWidgetPage
                             ),
                           ),
                           itemBuilder: (context, index) {
-                            final showLock = index >= 1 && !isUserPremium;
                             final lesson = state.isLoading
-                                ? LessonRequest(
+                                ? const LessonRequest(
                                     id: 0,
                                     courseId: 0,
                                     duration: '0',
@@ -142,6 +140,9 @@ class VideoCourseBodyWidgetPage
                                     assets: [],
                                   )
                                 : state.lessons[index];
+
+                            final showLock = !lesson.isFree && !state.isPurchased;
+
                             return ShimmerWrapper(
                               shimmerChild: ShimmerChild(
                                 height: 48,
@@ -183,8 +184,10 @@ class VideoCourseBodyWidgetPage
                                         ],
                                       ),
                                     ),
-                                    if (lesson.isFinished) Assets.icons.done.svg(),
-                                    if (showLock) Assets.icons.lock.svg(),
+                                    if (showLock)
+                                      Assets.icons.lock.svg()
+                                    else if (lesson.isFinished)
+                                      Assets.icons.done.svg(),
                                   ],
                                 ),
                               ),
@@ -200,11 +203,11 @@ class VideoCourseBodyWidgetPage
           ),
         ],
       ),
-      bottomNavigationBar: !isUserPremium
+      bottomNavigationBar: !state.isPurchased
           ? SafeArea(
               child: Button(
                 onPressed: () => context.router.push(const PremiumFeaturesRoute()),
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 text: Strings.purchase,
               ),
             )
@@ -247,12 +250,13 @@ class VideoCourseBodyWidgetPage
         final m = int.tryParse(parts[1]) ?? 0;
         final s = int.tryParse(parts[2]) ?? 0;
         return sum + (h * 3600 + m * 60 + s);
-      }
-
-      if (parts.length == 2) {
+      } else if (parts.length == 2) {
         final h = int.tryParse(parts[0]) ?? 0;
         final m = int.tryParse(parts[1]) ?? 0;
         return sum + (h * 3600 + m * 60);
+      } else if (parts.length == 1) {
+        final s = int.tryParse(parts[0]) ?? 0;
+        return sum + s;
       }
 
       return sum;

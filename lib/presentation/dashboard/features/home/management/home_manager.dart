@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -12,23 +12,22 @@ import 'package:calora/domain/model/summary/summary_request.dart';
 import 'package:calora/domain/repo/home/home_repo.dart';
 import 'package:calora/domain/repo/notification/notification_repo.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
-import 'package:calora/domain/repo/splash/splash_repo.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/features/home/management/home_management.dart';
+import 'package:health/health.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:io';
 
 @injectable
 class HomeManager extends Manager<HomeState, HomeEffect> {
   final ProfileRepo _profileRepo;
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
-
   final NotificationRepo _notificationRepo;
   final MetricsSyncService _metricsSync;
+  final Health _health = Health();
 
   HomeManager(
     this._profileRepo,
@@ -71,12 +70,8 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
       _globalPermFuture = perms
           .request()
-          .then((result) {
-            return result;
-          })
-          .catchError((e, s) {
-            return <Permission, PermissionStatus>{};
-          })
+          .then((result) => result)
+          .catchError((e, s) => <Permission, PermissionStatus>{})
           .whenComplete(() {
             Future.delayed(const Duration(milliseconds: 500), () {
               _globalPermFuture = null;
@@ -94,9 +89,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   }
 
   Future<void> _initStepsForegroundInternal() async {
-    if (_fgsStarted) {
-      return;
-    }
+    if (_fgsStarted) return;
 
     try {
       final statuses = await _requestPermissionsOnce(includeNotifications: true);
@@ -110,25 +103,45 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         arOk = false;
       }
 
-      if (!arOk) {
-        return;
-      }
+      if (!arOk) return;
 
-      final notifStatus = statuses[Permission.notification];
-      final notifOk = notifStatus?.isGranted == true;
-
-      if (!notifOk) {}
+      await _requestHealthPermissions();
 
       final goalSteps = state.targetSteps > 0 ? state.targetSteps : 10000;
-
       StepsForegroundService.instance.setGoalSteps(goalSteps);
 
       final ok = await StepsForegroundService.instance.start();
-
       _fgsStarted = ok;
     } catch (e) {
       _fgsStarted = false;
     }
+  }
+
+  Future<void> _requestHealthPermissions() async {
+    try {
+      await _health.configure();
+
+      if (Platform.isAndroid) {
+        final status = await _health.getHealthConnectSdkStatus();
+        if (status == HealthConnectSdkStatus.sdkUnavailable ||
+            status == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+          return;
+        }
+      }
+
+      final types = [HealthDataType.STEPS];
+      final bool? hasPermissions = await _health.hasPermissions(
+        types,
+        permissions: [HealthDataAccess.READ],
+      );
+
+      if (hasPermissions != true) {
+        await _health.requestAuthorization(
+          types,
+          permissions: [HealthDataAccess.READ],
+        );
+      }
+    } catch (e) {}
   }
 
   Future<void> requestPedometerPermissions() async {
@@ -409,11 +422,14 @@ extension HomeManagerX on HomeManager {
   }
 
   Future<bool> _shouldForceUpdate() async {
-    final info = await PackageInfo.fromPlatform();
-    final currentVersion = info.version.split('+').first.trim();
-    log(currentVersion);
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final currentVersion = info.version.split('+').first.trim();
 
-    final active = await _homeRepo.isVersionActive(currentVersion);
-    return !active;
+      final active = await _homeRepo.isVersionActive(currentVersion);
+      return !active;
+    } catch (e) {
+      return false;
+    }
   }
 }

@@ -22,4 +22,6 @@ abstract class VideoCourseBodyEffect with _$VideoCourseBodyEffect {
   ) = _OpenVideo;
 
   const factory VideoCourseBodyEffect.showNeedFinishPrevious() = _ShowNeedFinishPrevious;
+
+  const factory VideoCourseBodyEffect.showError(String message) = _ShowError;
 }

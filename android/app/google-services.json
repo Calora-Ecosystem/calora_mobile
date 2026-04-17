@@ -14,11 +14,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "638398407864-qouqc9d899tc7360rumou06kc867g7rs.apps.googleusercontent.com",
+          "client_id": "638398407864-neep98rdvf95m0tf6i567vgo62f8ef05.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "ai.calora.app",
-            "certificate_hash": "37f30460c724ff1a6c664058743f71c5d4792d37"
+            "certificate_hash": "ff4bbfedd2dd03b70d3ff54ffd039099c3031640"
+          }
+        },
+        {
+          "client_id": "638398407864-o6v6m2l2purjgndu8omfkpphjdrq0eev.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ai.calora.app",
+            "certificate_hash": "26a0083ec07dfdb742b52f33908078ccdffdc0db"
           }
         },
         {

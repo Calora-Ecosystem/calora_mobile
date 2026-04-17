@@ -125,6 +125,4 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
 
     return value.clamp(min, max).toDouble();
   }
-
-
 }

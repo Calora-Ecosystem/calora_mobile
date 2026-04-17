@@ -17,37 +17,44 @@ class LessonsCards extends StatelessWidget {
   final Level level;
   final bool isLoading;
 
-  const LessonsCards({super.key, required this.level, required this.workouts, required this.isLoading});
+  const LessonsCards({
+    super.key,
+    required this.level,
+    required this.workouts,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
     final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
+
+    final int itemCount = isLoading && workouts.isEmpty ? 5 : workouts.length;
+
     return ListView.separated(
       shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      itemCount: workouts.isEmpty ? 0 : workouts.length,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: itemCount,
       itemBuilder: (context, index) {
-        final int playableIndex = nextPlayableIndex(workouts);
-
+        final int playableIndex = workouts.isNotEmpty ? nextPlayableIndex(workouts) : 0;
         final bool lockedByPremium = !isUserPremium && index >= 3;
-
-        final bool lockedByProgress = index > playableIndex;
-
+        final bool lockedByProgress = workouts.isNotEmpty && index > playableIndex;
         final bool visualLocked = lockedByPremium;
-        final WorkoutRequest workout = workouts.isEmpty
-            ? WorkoutRequest(
-                id: 1,
-                courseId: 1,
-                title: 'title',
-                hasRest: true,
+
+        final WorkoutRequest workout = isLoading && workouts.isEmpty
+            ? const WorkoutRequest(
+                id: 0,
+                courseId: 0,
+                title: 'Loading...',
+                hasRest: false,
                 totalItems: 1,
-                doneItems: 1,
-                isDone: true,
-                totalDurationInMin: 12,
+                doneItems: 0,
+                isDone: false,
+                totalDurationInMin: 0,
                 totalMetrics: [],
-                order: 2,
+                order: 0,
               )
             : workouts[index];
+
         return ShimmerWrapper(
           loading: isLoading,
           shimmerChild: ShimmerChild(
@@ -56,6 +63,7 @@ class LessonsCards extends StatelessWidget {
           ),
           child: GestureDetector(
             onTap: () {
+              if (isLoading) return;
               if (lockedByPremium) {
                 context.router.push(const PremiumFeaturesRoute());
                 return;
@@ -64,13 +72,15 @@ class LessonsCards extends StatelessWidget {
                 _showNeedFinishPrevSnack(context);
                 return;
               }
-              context.router.push(
-                TasksRoute(level: level, workout: workout),
-              ).then((_) {
-                if (context.mounted) {
-                  context.read<LessonsManager>().getWorkout(workout.courseId);
-                }
-              });
+              context.router
+                  .push(
+                    TasksRoute(level: level, workout: workout),
+                  )
+                  .then((_) {
+                    if (context.mounted) {
+                      context.read<LessonsManager>().getWorkout(workout.courseId);
+                    }
+                  });
             },
             child: LessonCard(
               isLocked: visualLocked,
@@ -80,7 +90,7 @@ class LessonsCards extends StatelessWidget {
         );
       },
       separatorBuilder: (BuildContext context, int index) {
-        return SizedBox(height: 16);
+        return const SizedBox(height: 16);
       },
     );
   }
