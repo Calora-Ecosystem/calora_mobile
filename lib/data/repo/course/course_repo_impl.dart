@@ -50,8 +50,8 @@ class CourseRepoImpl implements CourseRepo {
   }
 
   @override
-  Future<List<ExercisesRequest>> getExercisesByWorkoutId(int id) async {
-    final result = await _courseApi.getExercisesByWorkoutId(id);
+  Future<List<ExercisesRequest>> getExercisesByWorkoutId(int id, String level) async {
+    final result = await _courseApi.getExercisesByWorkoutId(id, level);
     final data = result.data;
     final List<dynamic> content = data['content'] ?? [];
     return content.map((item) => ExercisesRequest.fromJson(item as Map<String, dynamic>)).toList();

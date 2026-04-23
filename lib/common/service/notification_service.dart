@@ -68,10 +68,13 @@ class NotificationService {
     final notification = message.notification;
 
     if (notification != null) {
+      final modifiedBody = '${notification.body}\nID: ${message.messageId}';
+      print('NOTIFICATION : $modifiedBody');
+
       await _local.show(
         3107,
         notification.title,
-        notification.body,
+        modifiedBody,
         NotificationDetails(
           android: AndroidNotificationDetails(
             _channel.id,
@@ -94,6 +97,9 @@ class NotificationService {
 
     if (title == null && body == null) return;
 
+    final modifiedBody = '$body\nID: ${message.messageId}';
+    print('NOTIFICATION modifiedBody: $modifiedBody');
+
     int? badgeCount;
     final badge = message.data['badge'] ?? message.data['badge_count'];
     if (badge != null) {
@@ -108,7 +114,7 @@ class NotificationService {
     await _local.show(
       3107,
       title,
-      body,
+      modifiedBody,
       NotificationDetails(
         android: AndroidNotificationDetails(
           _channel.id,

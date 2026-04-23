@@ -24,7 +24,11 @@ class TasksManager extends Manager<TasksState, TasksEffect> {
   }
 
   void getExercises(int id) {
-    _courseRepo.getExercisesByWorkoutId(id).handle(
+    final levelText = _levelTextFromIndex(state.levelIndex);
+
+    _courseRepo
+        .getExercisesByWorkoutId(id, levelText)
+        .handle(
           onStart: () => emit(
             state.copyWith(isLoading: true),
           ),
@@ -38,9 +42,14 @@ class TasksManager extends Manager<TasksState, TasksEffect> {
     emit(state.copyWith(levelIndex: index, isLoading: true));
     await profileStore.updateActivityLevel(levelText);
     await refreshActivityLevel(index);
-    _courseRepo.getWorkout(courseId, levelText).handle(
+    _courseRepo
+        .getWorkout(courseId, levelText)
+        .handle(
           onData: (workouts) {
-            final workout = workouts.firstWhere((w) => w.order == currentOrder, orElse: () => workouts.first);
+            final workout = workouts.firstWhere(
+              (w) => w.order == currentOrder,
+              orElse: () => workouts.first,
+            );
             emit(state.copyWith(workout: workout));
             getExercises(workout.id);
           },
@@ -53,9 +62,12 @@ class TasksManager extends Manager<TasksState, TasksEffect> {
     final levelText = _levelTextFromIndex(levelIndex);
 
     String? purposeApi = profile.goal;
-    if (purposeApi == '0' || purposeApi == 'WeightLoss') purposeApi = 'WeightLoss';
-    else if (purposeApi == '1' || purposeApi == 'SaveCurrent') purposeApi = 'SaveCurrent';
-    else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') purposeApi = 'MuscleDevelopment';
+    if (purposeApi == '0' || purposeApi == 'WeightLoss')
+      purposeApi = 'WeightLoss';
+    else if (purposeApi == '1' || purposeApi == 'SaveCurrent')
+      purposeApi = 'SaveCurrent';
+    else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment')
+      purposeApi = 'MuscleDevelopment';
 
     final tWeight = (profile.targetWeight ?? 0) == 0 ? profile.weight : profile.targetWeight;
 

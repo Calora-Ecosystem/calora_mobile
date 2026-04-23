@@ -60,7 +60,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       resend: manager.resend,
                       resultCode: (data) {
                         if (data.length == 6) {
-                          manager.verify();
+                          // manager.verify();
                         }
                       },
                     ),

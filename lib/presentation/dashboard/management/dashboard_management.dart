@@ -13,5 +13,8 @@ abstract class DashboardState with _$DashboardState {
 class DashboardEffect with _$DashboardEffect {
   const factory DashboardEffect.forceLogout() = _ForceLogout;
 
-  const factory DashboardEffect.showHealthSyncBottomSheet() = _ShowHealthSyncBottomSheet;
+  const factory DashboardEffect.healthPermissionRequired() = _HealthPermissionRequired;
+
+  const factory DashboardEffect.suggestConnectHealthApp({required String detectedApp}) =
+      _SuggestConnectHealthApp;
 }

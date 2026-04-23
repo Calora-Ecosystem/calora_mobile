@@ -16,7 +16,10 @@ import 'package:injectable/injectable.dart';
 class StepRepoImpl extends StepRepo {
   final StepsApi _stepsApi;
   final Health _health = Health();
-  static bool _authorizationRequested = false;
+
+  bool _stepsAuthorized = false;
+
+  bool _extendedAuthorized = false;
 
   StepRepoImpl(this._stepsApi) {
     _initHealth();
@@ -101,29 +104,54 @@ class StepRepoImpl extends StepRepo {
     }
   }
 
-  Future<bool> _requestAuthorization() async {
-    if (_authorizationRequested) return true;
+  @override
+  Future<bool> ensureHealthAuthorized() async {
+    if (_stepsAuthorized) return true;
 
     try {
-      final types = [
-        HealthDataType.STEPS,
-        HealthDataType.WEIGHT,
-        HealthDataType.HEART_RATE,
-      ];
-      final permissions = types.map((e) => HealthDataAccess.READ).toList();
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final status = await _health.getHealthConnectSdkStatus();
+        if (status != HealthConnectSdkStatus.sdkAvailable) {
+          log('[Health] Health Connect unavailable: $status');
+          return false;
+        }
+      }
 
-      final bool? hasPermissions = await _health.hasPermissions(types, permissions: permissions);
+      const types = [HealthDataType.STEPS];
+      const permissions = [HealthDataAccess.READ];
 
-      if (hasPermissions == true) {
-        _authorizationRequested = true;
+      final already = await _health.hasPermissions(types, permissions: permissions);
+      if (already == true) {
+        _stepsAuthorized = true;
         return true;
       }
 
-      final requested = await _health.requestAuthorization(types, permissions: permissions);
-      _authorizationRequested = requested;
-      return requested;
+      final granted = await _health.requestAuthorization(types, permissions: permissions);
+      _stepsAuthorized = granted;
+      return granted;
     } catch (e) {
-      log('[Health] Error requesting authorization: $e');
+      log('[Health] ensureHealthAuthorized error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _ensureExtendedAuthorized() async {
+    if (_extendedAuthorized) return true;
+    try {
+      const types = [HealthDataType.WEIGHT, HealthDataType.HEART_RATE];
+      final permissions = types.map((_) => HealthDataAccess.READ).toList();
+
+      final already = await _health.hasPermissions(types, permissions: permissions);
+      if (already == true) {
+        _extendedAuthorized = true;
+        return true;
+      }
+
+      final granted = await _health.requestAuthorization(types, permissions: permissions);
+      _extendedAuthorized = granted;
+      return granted;
+    } catch (e) {
+      log('[Health] _ensureExtendedAuthorized error: $e');
       return false;
     }
   }
@@ -131,49 +159,44 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<void> sendHealthData({required DateTime from, required DateTime to}) async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        final status = await _health.getHealthConnectSdkStatus();
-        if (status == HealthConnectSdkStatus.sdkUnavailable) return;
-      }
-
-      final authorized = await _requestAuthorization();
+      final authorized = await ensureHealthAuthorized();
       if (!authorized) return;
 
-      final types = [HealthDataType.STEPS];
+      const types = [HealthDataType.STEPS];
       final healthData = await _health.getHealthDataFromTypes(
         startTime: from.toLocal(),
         endTime: to.toLocal(),
         types: types,
       );
 
-      if (healthData.isNotEmpty) {
-        final groupedByDate = groupBy(healthData, (HealthDataPoint p) {
-          final date = p.dateFrom;
-          return DateTime(date.year, date.month, date.day);
-        });
+      if (healthData.isEmpty) return;
 
-        final List<StepsWithMetricsRequest> healthSteps = groupedByDate.entries
-            .map((entry) {
-              final date = entry.key;
-              final totalSteps = entry.value.fold<int>(0, (sum, p) {
-                final val = p.value;
-                if (val is NumericHealthValue) {
-                  return sum + val.numericValue.toInt();
-                }
-                return sum;
-              });
-              return StepsWithMetricsRequest(
-                date: date,
-                value: totalSteps.toDouble(),
-              );
-            })
-            .where((element) => element.value > 0)
-            .toList();
+      final groupedByDate = groupBy(healthData, (HealthDataPoint p) {
+        final date = p.dateFrom;
+        return DateTime(date.year, date.month, date.day);
+      });
 
-        if (healthSteps.isNotEmpty) {
-          await _stepsApi.sendStepDataDateRange(steps: healthSteps);
-          log('[Health] Successfully synced ${healthSteps.length} days of history.');
-        }
+      final List<StepsWithMetricsRequest> healthSteps = groupedByDate.entries
+          .map((entry) {
+            final date = entry.key;
+            final totalSteps = entry.value.fold<int>(0, (sum, p) {
+              final val = p.value;
+              if (val is NumericHealthValue) {
+                return sum + val.numericValue.toInt();
+              }
+              return sum;
+            });
+            return StepsWithMetricsRequest(
+              date: date,
+              value: totalSteps.toDouble(),
+            );
+          })
+          .where((e) => e.value > 0)
+          .toList();
+
+      if (healthSteps.isNotEmpty) {
+        await _stepsApi.sendStepDataDateRange(steps: healthSteps);
+        log('[Health] Synced ${healthSteps.length} days of history.');
       }
     } catch (e) {
       log('Error sending health data: $e');
@@ -183,34 +206,33 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<int> getTodayHealthSteps() async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        final status = await _health.getHealthConnectSdkStatus();
-        if (status == HealthConnectSdkStatus.sdkUnavailable) return 0;
-      }
-
-      final authorized = await _requestAuthorization();
+      final authorized = await ensureHealthAuthorized();
       if (!authorized) return 0;
 
       final now = DateTime.now();
       final midnight = DateTime(now.year, now.month, now.day).toLocal();
 
       final steps = await _health.getTotalStepsInInterval(midnight, now.toLocal());
-      log('[Health] Today\'s total steps (aggregated): $steps');
+      log('[Health] Today\'s steps: $steps');
 
       return steps ?? 0;
     } catch (e) {
       log('Error getting today health steps: $e');
+      return 0;
     }
-    return 0;
   }
 
   @override
   Future<bool> isHealthDataAvailable() async {
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      final status = await _health.getHealthConnectSdkStatus();
-      return status != HealthConnectSdkStatus.sdkUnavailable;
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final status = await _health.getHealthConnectSdkStatus();
+        return status == HealthConnectSdkStatus.sdkAvailable;
+      }
+      return defaultTargetPlatform == TargetPlatform.iOS;
+    } catch (e) {
+      return false;
     }
-    return true;
   }
 
   @override

@@ -14,7 +14,7 @@ abstract class CourseRepo {
 
   Future<void> updateVideoCourseFinished(int id);
 
-  Future<List<ExercisesRequest>> getExercisesByWorkoutId(int id);
+  Future<List<ExercisesRequest>> getExercisesByWorkoutId(int id, String level);
 
   Future<void> refreshActivityLevel(QuestionsRequest answer);
 
