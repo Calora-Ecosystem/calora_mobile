@@ -1,18 +1,13 @@
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
-import 'package:calora/common/service/foreground_service.dart';
-import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:calora/presentation/dashboard/widgets/health_connect_hint_dialog.dart';
-import 'package:calora/widgets/health/health_sync_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
@@ -31,28 +26,12 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   void listener(BuildContext context, DashboardManager manager, DashboardEffect effect) {
     effect.when(
       forceLogout: () => context.router.replaceAll([AuthRoute()]),
-      healthPermissionRequired: () {
-        // iOS HealthKit ruxsati yo'q (alohida dialog)
-      },
-      suggestConnectHealthApp: (detectedApp) {
+      requestHealthPermission: (detectedApp) {
         HealthConnectHintDialog.show(
           context: context,
           detectedApp: detectedApp,
-          onOpenPressed: () async {
-            await manager.onUserOpenedHealthApp();
-            // App ochish
-            switch (detectedApp) {
-              case 'samsung_health':
-                await InstalledHealthAppsService.openSamsungHealthSettings();
-                break;
-              case 'mi_fitness':
-                await InstalledHealthAppsService.openMiFitnessSettings();
-                break;
-              default:
-                await InstalledHealthAppsService.openHealthConnectSettings();
-            }
-          },
-          onDismiss: () => manager.onUserDismissedHealthHint(),
+          onAccept: () => manager.onUserAcceptedHealthPermission(),
+          onDecline: () => manager.onUserDeclinedHealthPermission(),
         );
       },
     );

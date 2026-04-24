@@ -18,16 +18,13 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 enum StepMode {
-  /// Faqat Health (iOS default yoki Android + Samsung Health ulangan)
+  /// Health Connect (Android) / HealthKit (iOS) is the source of truth.
   healthOnly,
 
-  /// Faqat pedometer (Android + Health Connect yo'q/ruxsatsiz)
+  /// Local pedometer sensor is the source of truth.
   pedometerOnly,
 
-  /// Android: Health va pedometer birga, max() ko'rsatiladi
-  hybrid,
-
-  /// Hech qanday manba ishlamaydi (iOS + HealthKit ruxsatsiz)
+  /// Neither source is usable.
   none,
 }
 
@@ -44,11 +41,15 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   StreamSubscription<int>? _stepsSub;
   StreamSubscription<void>? _forceLogoutSub;
   Timer? _syncTimer;
-  Timer? _hintTimer;
+  Timer? _safetyNetTimer;
 
   StepMode _mode = StepMode.none;
   int _pedometerSteps = 0;
   int _healthSteps = 0;
+
+  /// Tracks whether the silent pedometer safety-net has taken over the
+  /// display because Health is reporting ~0 while the sensor is counting.
+  bool _safetyNetEngaged = false;
 
   int _lastSyncedTodaySteps = -1;
   bool _isSyncingToday = false;
@@ -59,11 +60,10 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
 
   static const Duration HEALTH_POLL_INTERVAL = Duration(seconds: 5);
   static const Duration BACKEND_SYNC_INTERVAL = Duration(seconds: 30);
-  static const Duration HINT_DELAY = Duration(hours: 1);
+  static const Duration SAFETY_NET_CHECK_DELAY = Duration(minutes: 10);
   static const int MIN_DELTA_STEPS_TO_SEND = 20;
-  static const int HINT_TRIGGER_PEDOMETER_MIN = 500;
-  static const int HINT_TRIGGER_HEALTH_MAX = 100;
-  static const int HEALTH_SWITCH_THRESHOLD = 500;
+  static const int SAFETY_NET_PEDOMETER_MIN = 500;
+  static const int SAFETY_NET_HEALTH_MAX = 100;
 
   DashboardManager(
     this._stepRepo,
@@ -76,12 +76,15 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   // Derived state
   // ─────────────────────────────────────────────────────────────────────
 
-  /// Ekranga ko'rsatiladigan qadam — rejimga bog'liq
   int get _displayedSteps {
     switch (_mode) {
-      case StepMode.hybrid:
-        return _healthSteps > _pedometerSteps ? _healthSteps : _pedometerSteps;
       case StepMode.healthOnly:
+        // Safety net: if Health is suspiciously empty while the sensor is
+        // counting, show the pedometer number instead. Still "healthOnly"
+        // mode — we don't nag the user, we just don't let them see 0.
+        if (_safetyNetEngaged && _pedometerSteps > _healthSteps) {
+          return _pedometerSteps;
+        }
         return _healthSteps;
       case StepMode.pedometerOnly:
         return _pedometerSteps;
@@ -113,7 +116,8 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     }
 
     if (state == AppLifecycleState.resumed) {
-      // Agar foydalanuvchi Health app'iga ketib qaytgan bo'lsa — qayta tekshiramiz
+      // If the user came back from opening the device Health settings,
+      // re-check whether permission is now granted.
       if (_ledger.didUserOpenHealthApp()) {
         unawaited(_recheckAfterUserReturn());
       } else {
@@ -124,13 +128,15 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   }
 
   void _resumeLiveTracking() {
-    if (_mode == StepMode.hybrid || _mode == StepMode.healthOnly) {
+    if (_mode == StepMode.healthOnly) {
       _startHealthPolling();
-    }
-    if (_mode == StepMode.hybrid || _mode == StepMode.pedometerOnly) {
-      if (_pedometerService.isInitialized) {
+      // If we had engaged the safety net, keep the pedometer stream alive too.
+      if (_safetyNetEngaged && _pedometerService.isInitialized) {
         _listenToStepUpdates();
       }
+    }
+    if (_mode == StepMode.pedometerOnly && _pedometerService.isInitialized) {
+      _listenToStepUpdates();
     }
   }
 
@@ -139,7 +145,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
       _forceLogoutSub?.cancel();
       _forceLogoutSub = _authStore.onForceLogout.listen((_) async {
         _syncTimer?.cancel();
-        _hintTimer?.cancel();
+        _safetyNetTimer?.cancel();
         await _stepsSub?.cancel();
         await StepsForegroundService.instance.stop();
         publish(const DashboardEffect.forceLogout());
@@ -151,180 +157,230 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // Entry point — rejimni aniqlash
+  // Entry point — linear flow per user spec
+  //   1. Is the Health repo available? → no: pedometer.
+  //   2. Have permission? → yes: fetch from Health.
+  //   3. No permission → emit rationale dialog effect. UI decides
+  //      onUserAcceptedHealthPermission / onUserDeclinedHealthPermission.
   // ─────────────────────────────────────────────────────────────────────
 
   Future<void> _startStepCounter() async {
     try {
       final healthAvailable = await _stepRepo.isHealthDataAvailable();
-      final healthAuthorized = healthAvailable ? await _stepRepo.ensureHealthAuthorized() : false;
 
-      if (Platform.isIOS) {
-        await _runIosFlow(healthAuthorized);
-      } else if (Platform.isAndroid) {
-        await _runAndroidFlow(healthAuthorized);
+      if (!healthAvailable) {
+        log('Health repo unavailable → PEDOMETER_ONLY', name: 'DashboardManager');
+        await _switchToPedometer();
+        return;
       }
+
+      // Android reports read-permission status accurately — use it as the
+      // fast path. iOS HealthKit never reports READ status back to the app
+      // (Apple privacy model), so `hasHealthPermission()` returns false
+      // there on every launch even when access is granted.
+      if (await _stepRepo.hasHealthPermission()) {
+        log('Health permission already granted → HEALTH_ONLY', name: 'DashboardManager');
+        await _switchToHealth();
+        return;
+      }
+
+      // Respect a previously-remembered rationale choice so we never
+      // re-prompt on every cold start (the original bug on iOS).
+      if (_ledger.isHealthHintDismissed()) {
+        log('User previously declined health rationale → PEDOMETER_ONLY',
+            name: 'DashboardManager');
+        await _switchToPedometer();
+        return;
+      }
+      if (_ledger.isHealthHintShown()) {
+        log('User previously accepted health rationale → HEALTH_ONLY',
+            name: 'DashboardManager');
+        // iOS: harmless no-op if already resolved; on Android this is
+        // only reached if the permission was revoked after acceptance,
+        // in which case the OS will re-prompt.
+        unawaited(_stepRepo.requestHealthPermission());
+        await _switchToHealth();
+        return;
+      }
+
+      // First launch — show the rationale dialog and wait for the user.
+      final detectedApp = Platform.isAndroid
+          ? (await InstalledHealthAppsService.detectPrimaryHealthApp() ?? 'unknown')
+          : 'ios';
+
+      log('No health permission → prompting dialog', name: 'DashboardManager');
+      publish(DashboardEffect.requestHealthPermission(detectedApp: detectedApp));
     } catch (e, s) {
       log('_startStepCounter error: $e', stackTrace: s);
     }
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // iOS flow — sodda
+  // UI callbacks (driven from DashboardPage)
   // ─────────────────────────────────────────────────────────────────────
 
-  Future<void> _runIosFlow(bool healthAuthorized) async {
-    if (!healthAuthorized) {
-      _mode = StepMode.none;
-      log('iOS: HealthKit permission denied', name: 'DashboardManager');
-      emit(state.copyWith(todaySteps: 0));
-      publish(const DashboardEffect.healthPermissionRequired());
+  /// User tapped "Yes" on the rationale dialog.
+  Future<void> onUserAcceptedHealthPermission() async {
+    // Remember the rationale choice so we never re-prompt on next launch.
+    // Critical on iOS, since HealthKit won't report READ status back to us.
+    await _ledger.setHealthHintShown();
+
+    final granted = await _stepRepo.requestHealthPermission();
+    if (granted) {
+      log('System permission granted → HEALTH_ONLY', name: 'DashboardManager');
+      await _switchToHealth();
       return;
     }
 
-    _mode = StepMode.healthOnly;
-    log('iOS: HEALTH_ONLY mode', name: 'DashboardManager');
-    await _runHealthOnlyFlow();
+    // iOS: `requestAuthorization` can return false even after grant. Trust
+    // the user's dialog acceptance and activate Health anyway.
+    if (Platform.isIOS) {
+      log('iOS — activating Health (hasPermissions unreliable)',
+          name: 'DashboardManager');
+      await _switchToHealth();
+      return;
+    }
+
+    // Android: system prompt was denied. Send the user to the device
+    // settings so they can grant it manually.
+    log('System permission denied — opening device health settings',
+        name: 'DashboardManager');
+    await _ledger.setUserOpenedHealthApp(true);
+    await _stepRepo.openHealthSettings();
+  }
+
+  /// User tapped "No" on the rationale dialog.
+  Future<void> onUserDeclinedHealthPermission() async {
+    await _ledger.setHealthHintDismissed();
+    log('User declined health permission → PEDOMETER_ONLY', name: 'DashboardManager');
+    await _switchToPedometer();
+  }
+
+  /// Called when the user returns to the app after we sent them to the
+  /// device health settings. Re-checks permission and either switches to
+  /// Health or falls back to the pedometer.
+  Future<void> _recheckAfterUserReturn() async {
+    await _ledger.setUserOpenedHealthApp(false);
+    // Give Health Connect a moment to propagate the new grant.
+    await Future.delayed(const Duration(seconds: 2));
+
+    // iOS HealthKit never reports READ status back, so on iOS we assume
+    // the user granted from the settings screen they just visited.
+    if (Platform.isIOS) {
+      await _switchToHealth();
+      return;
+    }
+
+    final granted = await _stepRepo.hasHealthPermission();
+    if (granted) {
+      log('Permission granted after settings return → HEALTH_ONLY', name: 'DashboardManager');
+      await _switchToHealth();
+    } else {
+      log('Permission still denied after settings return → PEDOMETER_ONLY', name: 'DashboardManager');
+      await _switchToPedometer();
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // Android flow — sekvensial mantiq
+  // Mode switching
   // ─────────────────────────────────────────────────────────────────────
 
-  Future<void> _runAndroidFlow(bool healthAuthorized) async {
-    // 1. Health Connect yo'q yoki ruxsat berilmagan → pedometer
-    if (!healthAuthorized) {
-      _mode = StepMode.pedometerOnly;
-      log('Android: PEDOMETER_ONLY (Health unavailable/denied)', name: 'DashboardManager');
-      await _runPedometerFlow();
-      return;
-    }
+  Future<void> _switchToHealth() async {
+    _mode = StepMode.healthOnly;
+    _safetyNetEngaged = false;
 
-    // 2. Health'dan boshlang'ich qiymatni olamiz
     _healthSteps = await _stepRepo.getTodayHealthSteps();
-    log('Android: initial Health steps = $_healthSteps', name: 'DashboardManager');
 
-    // 3. Foydalanuvchi oldin "Keyinroq" bosganmi? → gibrid rejimga
-    if (_ledger.isHealthHintDismissed()) {
-      _mode = StepMode.hybrid;
-      log('Android: HYBRID (hint was dismissed previously)', name: 'DashboardManager');
-      await _runHybridFlow();
+    int backendTotal = await _fetchBackendTotal();
+    await syncOfflineSteps();
+
+    int currentTotal = _displayedSteps;
+    if (backendTotal > currentTotal) currentTotal = backendTotal;
+
+    final todayKey = _ledger.dayKey(DateTime.now());
+    _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
+
+    emit(state.copyWith(todaySteps: currentTotal));
+    _metricsSync.notifyUpdated(currentTotal);
+
+    _startHealthPolling();
+    _scheduleSafetyNetCheck();
+  }
+
+  Future<void> _switchToPedometer() async {
+    _mode = StepMode.pedometerOnly;
+    _safetyNetEngaged = false;
+    _safetyNetTimer?.cancel();
+    _syncTimer?.cancel();
+
+    await _pedometerService.initialize();
+    if (!_pedometerService.isInitialized) {
+      log('Pedometer init failed — mode=none', name: 'DashboardManager');
+      _mode = StepMode.none;
+      emit(state.copyWith(todaySteps: 0));
       return;
     }
 
-    // 4. Foydalanuvchi Health app'ni ochib qaytib kelgan — qayta tekshiramiz
-    if (_ledger.didUserOpenHealthApp()) {
-      await _ledger.setUserOpenedHealthApp(false);
-      await Future.delayed(const Duration(seconds: 5));
-      _healthSteps = await _stepRepo.getTodayHealthSteps();
-      log('Android: after user returned, Health = $_healthSteps', name: 'DashboardManager');
+    final todayKey = _ledger.dayKey(DateTime.now());
+    _pedometerSteps = _ledger.totalFor(todayKey);
 
-      if (_healthSteps >= HEALTH_SWITCH_THRESHOLD) {
-        _mode = StepMode.healthOnly;
-        log('Android: HEALTH_ONLY (connection worked)', name: 'DashboardManager');
-        await _runHealthOnlyFlow();
+    int backendTotal = await _fetchBackendTotal();
+    await syncOfflineSteps();
+
+    int currentTotal = _displayedSteps;
+    if (backendTotal > currentTotal) currentTotal = backendTotal;
+
+    _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
+
+    emit(state.copyWith(todaySteps: currentTotal));
+    _metricsSync.notifyUpdated(currentTotal);
+
+    await _startForegroundServiceIfNeeded(currentTotal);
+    _listenToStepUpdates();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Silent pedometer safety net
+  //
+  // If Health permission is granted but Health is still reporting ~0 after
+  // a grace period (e.g. user hasn't linked Samsung Health / Google Fit to
+  // Health Connect), silently spin up the pedometer and show the larger of
+  // the two values. Never nags the user.
+  // ─────────────────────────────────────────────────────────────────────
+
+  void _scheduleSafetyNetCheck() {
+    _safetyNetTimer?.cancel();
+    _safetyNetTimer = Timer(SAFETY_NET_CHECK_DELAY, () async {
+      if (_mode != StepMode.healthOnly) return;
+      if (_safetyNetEngaged) return;
+
+      try {
+        _healthSteps = await _stepRepo.getTodayHealthSteps();
+      } catch (_) {}
+
+      if (_healthSteps >= SAFETY_NET_HEALTH_MAX) {
+        // Health is working fine — nothing to do.
         return;
       }
 
-      // Hali ham yo'q — gibridga tushamiz va dismissed deb belgilaymiz
-      await _ledger.setHealthHintDismissed();
-      _mode = StepMode.hybrid;
-      await _runHybridFlow();
-      return;
-    }
-
-    // 5. Health'da ma'lumot bor — faqat Health rejimida ishlaymiz
-    if (_healthSteps > 0) {
-      _mode = StepMode.healthOnly;
-      log('Android: HEALTH_ONLY (data available)', name: 'DashboardManager');
-      await _runHealthOnlyFlow();
-      return;
-    }
-
-    // 6. Health 0 qaytardi — gibrid rejimni yoqib, 1 soat kutib hint ko'rsatamiz
-    _mode = StepMode.hybrid;
-    log('Android: HYBRID (waiting 1h before hint)', name: 'DashboardManager');
-    await _runHybridFlow();
-    _scheduleHintCheck();
+      log('Safety net: Health=$_healthSteps — engaging silent pedometer',
+          name: 'DashboardManager');
+      await _engagePedometerSafetyNet();
+    });
   }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // Rejim implementatsiyalari
-  // ─────────────────────────────────────────────────────────────────────
-
-  Future<void> _runHealthOnlyFlow() async {
-    _healthSteps = await _stepRepo.getTodayHealthSteps();
-
-    int backendTotal = await _fetchBackendTotal();
-    await syncOfflineSteps();
-
-    int currentTotal = _displayedSteps;
-    if (backendTotal > currentTotal) currentTotal = backendTotal;
-
-    final todayKey = _ledger.dayKey(DateTime.now());
-    _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
-
-    emit(state.copyWith(todaySteps: currentTotal));
-    _metricsSync.notifyUpdated(currentTotal);
-
-    _startHealthPolling();
-  }
-
-  Future<void> _runPedometerFlow() async {
+  Future<void> _engagePedometerSafetyNet() async {
     await _pedometerService.initialize();
-    if (!_pedometerService.isInitialized) {
-      log('Pedometer init failed', name: 'DashboardManager');
-      return;
-    }
+    if (!_pedometerService.isInitialized) return;
+
+    _safetyNetEngaged = true;
 
     final todayKey = _ledger.dayKey(DateTime.now());
     _pedometerSteps = _ledger.totalFor(todayKey);
 
-    int backendTotal = await _fetchBackendTotal();
-    await syncOfflineSteps();
-
-    int currentTotal = _displayedSteps;
-    if (backendTotal > currentTotal) currentTotal = backendTotal;
-
-    _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
-
-    emit(state.copyWith(todaySteps: currentTotal));
-    _metricsSync.notifyUpdated(currentTotal);
-
-    await _startForegroundServiceIfNeeded(currentTotal);
+    await _startForegroundServiceIfNeeded(_displayedSteps);
     _listenToStepUpdates();
-  }
-
-  Future<void> _runHybridFlow() async {
-    await _pedometerService.initialize();
-    if (!_pedometerService.isInitialized) {
-      log(
-        'Pedometer init failed in hybrid — falling back to HEALTH_ONLY',
-        name: 'DashboardManager',
-      );
-      _mode = StepMode.healthOnly;
-      await _runHealthOnlyFlow();
-      return;
-    }
-
-    final todayKey = _ledger.dayKey(DateTime.now());
-    _pedometerSteps = _ledger.totalFor(todayKey);
-    _healthSteps = await _stepRepo.getTodayHealthSteps();
-
-    int backendTotal = await _fetchBackendTotal();
-    await syncOfflineSteps();
-
-    int currentTotal = _displayedSteps;
-    if (backendTotal > currentTotal) currentTotal = backendTotal;
-
-    _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
-
-    emit(state.copyWith(todaySteps: currentTotal));
-    _metricsSync.notifyUpdated(currentTotal);
-
-    await _startForegroundServiceIfNeeded(currentTotal);
-    _listenToStepUpdates();
-    _startHealthPolling();
+    _emitCurrentSteps();
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -336,6 +392,18 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     _syncTimer = Timer.periodic(HEALTH_POLL_INTERVAL, (_) async {
       try {
         _healthSteps = await _stepRepo.getTodayHealthSteps();
+
+        // If Health catches up and reports real data, we can drop the
+        // safety net again.
+        if (_safetyNetEngaged && _healthSteps >= SAFETY_NET_HEALTH_MAX) {
+          log('Safety net: Health recovered ($_healthSteps) — disengaging',
+              name: 'DashboardManager');
+          _safetyNetEngaged = false;
+          _stepsSub?.cancel();
+          _stepsSub = null;
+          await StepsForegroundService.instance.stop();
+        }
+
         _emitCurrentSteps();
 
         final now = DateTime.now();
@@ -364,7 +432,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
         final lastSavedDate = _ledger.getLastSensorDate();
         final lastSensorTotal = _ledger.getLastSensorTotal();
 
-        // Yangi kun boshlandi
+        // New day rollover
         if (lastSavedDate != todayKey) {
           if (lastSensorTotal >= 0 && sensorSteps > lastSensorTotal) {
             final finalDelta = sensorSteps - lastSensorTotal;
@@ -379,16 +447,15 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
           return;
         }
 
-        // Birinchi o'qish — baseline o'rnatamiz
+        // First read — establish the baseline.
         if (lastSensorTotal < 0) {
           await _ledger.setLastSensorTotal(sensorSteps);
           return;
         }
 
-        // Delta hisoblash
         int delta;
         if (sensorSteps < lastSensorTotal) {
-          // Reboot: sensor 0'dan boshlandi
+          // Device reboot: sensor counter restarted from 0.
           delta = sensorSteps;
         } else {
           delta = sensorSteps - lastSensorTotal;
@@ -399,6 +466,19 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
 
         await _ledger.addSteps(todayKey, delta);
         _pedometerSteps = _ledger.totalFor(todayKey);
+
+        // If we're in healthOnly mode and the pedometer has raced ahead
+        // of a stalled Health reading, engage the safety net so the UI
+        // doesn't show stale zeros.
+        if (_mode == StepMode.healthOnly &&
+            !_safetyNetEngaged &&
+            _pedometerSteps >= SAFETY_NET_PEDOMETER_MIN &&
+            _healthSteps < SAFETY_NET_HEALTH_MAX) {
+          _safetyNetEngaged = true;
+          log('Safety net engaged via stream (ped=$_pedometerSteps, health=$_healthSteps)',
+              name: 'DashboardManager');
+        }
+
         _emitCurrentSteps();
 
         if (_shouldSyncToday(_displayedSteps)) {
@@ -410,7 +490,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // UI yangilash
+  // UI update
   // ─────────────────────────────────────────────────────────────────────
 
   void _emitCurrentSteps() {
@@ -423,77 +503,6 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     if (StepsForegroundService.instance.isRunning) {
       unawaited(StepsForegroundService.instance.syncSteps(total));
     }
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Samsung Health hint mantiqi
-  // ─────────────────────────────────────────────────────────────────────
-
-  void _scheduleHintCheck() {
-    if (_ledger.isHealthHintShown()) return;
-
-    _hintTimer?.cancel();
-    _hintTimer = Timer(HINT_DELAY, () async {
-      if (_ledger.isHealthHintShown()) return;
-      if (_mode != StepMode.hybrid) return;
-
-      _healthSteps = await _stepRepo.getTodayHealthSteps();
-      log('Hint check: pedometer=$_pedometerSteps, health=$_healthSteps', name: 'DashboardManager');
-
-      // Pedometer ko'p qadam sanagan, lekin Health hali 0 —
-      // demak Samsung Health ulanmagan
-      if (_pedometerSteps >= HINT_TRIGGER_PEDOMETER_MIN && _healthSteps < HINT_TRIGGER_HEALTH_MAX) {
-        await _ledger.setHealthHintShown();
-        final detectedApp = await InstalledHealthAppsService.detectPrimaryHealthApp();
-        publish(
-          DashboardEffect.suggestConnectHealthApp(
-            detectedApp: detectedApp ?? 'unknown',
-          ),
-        );
-      }
-    });
-  }
-
-  /// UI'dan chaqiriladi: foydalanuvchi "Ochish" bosdi
-  Future<void> onUserOpenedHealthApp() async {
-    await _ledger.setUserOpenedHealthApp(true);
-    log('User chose to open Health app', name: 'DashboardManager');
-  }
-
-  /// UI'dan chaqiriladi: foydalanuvchi "Keyinroq" bosdi
-  Future<void> onUserDismissedHealthHint() async {
-    await _ledger.setHealthHintDismissed();
-    log('User dismissed health hint — staying in hybrid mode', name: 'DashboardManager');
-  }
-
-  /// Foydalanuvchi Health app'dan qaytib kelganda chaqiriladi
-  Future<void> _recheckAfterUserReturn() async {
-    log('User returned from Health app — rechecking', name: 'DashboardManager');
-    await _ledger.setUserOpenedHealthApp(false);
-
-    // Samsung Health sync uchun vaqt beramiz
-    await Future.delayed(const Duration(seconds: 5));
-    _healthSteps = await _stepRepo.getTodayHealthSteps();
-
-    if (_healthSteps >= HEALTH_SWITCH_THRESHOLD) {
-      // Muvaffaqiyat — Health-only rejimga o'tamiz
-      log(
-        'Health now has data ($_healthSteps) — switching to HEALTH_ONLY',
-        name: 'DashboardManager',
-      );
-      _mode = StepMode.healthOnly;
-      _stepsSub?.cancel();
-      _stepsSub = null;
-      await StepsForegroundService.instance.stop();
-      _startHealthPolling();
-    } else {
-      // Hali ham yo'q — gibridda qolamiz va boshqa hint ko'rsatmaymiz
-      log('Health still empty — staying in hybrid', name: 'DashboardManager');
-      await _ledger.setHealthHintDismissed();
-      _resumeLiveTracking();
-    }
-
-    _emitCurrentSteps();
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -525,7 +534,10 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     try {
       final currentSteps = _displayedSteps;
 
-      if (currentSteps > _lastSyncedTodaySteps) {
+      // Guard: never overwrite the backend with 0 — on cold start, Health
+      // Connect can briefly return 0 before Samsung Health / Google Fit
+      // finishes propagating today's data, and that 0 would wipe a real value.
+      if (currentSteps > 0 && currentSteps > _lastSyncedTodaySteps) {
         final todayKey = _ledger.dayKey(DateTime.now());
         await _stepRepo.sendDailyData(metric: 'Step', value: currentSteps);
         await _ledger.setSynced(todayKey, currentSteps);
@@ -563,8 +575,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
       }
     }
 
-    // Health rejimlarida tarixni ham sync qilamiz
-    if (_mode == StepMode.healthOnly || _mode == StepMode.hybrid) {
+    if (_mode == StepMode.healthOnly) {
       try {
         final datePeriod = (_stepRepo as dynamic).getDatePeriods(2, 0) as Map<String, DateTime>;
         await _stepRepo.sendHealthData(
@@ -608,7 +619,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   Future<void> close() {
     WidgetsBinding.instance.removeObserver(this);
     _syncTimer?.cancel();
-    _hintTimer?.cancel();
+    _safetyNetTimer?.cancel();
     _stepsSub?.cancel();
     _forceLogoutSub?.cancel();
     return super.close();

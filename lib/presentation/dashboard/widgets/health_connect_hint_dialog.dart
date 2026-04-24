@@ -1,56 +1,60 @@
 // lib/presentation/dashboard/widgets/health_connect_hint_dialog.dart
 
-import 'package:calora/common/service/installed_health_apps_service.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
+/// Pre-permission rationale dialog shown before we call the system
+/// Health Connect (Android) / HealthKit (iOS) permission prompt.
+///
+/// The user is told why we want access to the Health repository — they can
+/// accept (triggering the OS prompt, and falling back to device settings if
+/// the prompt is suppressed) or decline (falling back to the pedometer
+/// sensor).
 class HealthConnectHintDialog extends StatelessWidget {
   final String detectedApp;
-  final VoidCallback onOpenPressed;
-  final VoidCallback onDismiss;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
 
   const HealthConnectHintDialog({
     super.key,
     required this.detectedApp,
-    required this.onOpenPressed,
-    required this.onDismiss,
+    required this.onAccept,
+    required this.onDecline,
   });
 
   static Future<void> show({
     required BuildContext context,
     required String detectedApp,
-    required VoidCallback onOpenPressed,
-    required VoidCallback onDismiss,
+    required VoidCallback onAccept,
+    required VoidCallback onDecline,
   }) {
     return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => HealthConnectHintDialog(
         detectedApp: detectedApp,
-        onOpenPressed: onOpenPressed,
-        onDismiss: onDismiss,
+        onAccept: onAccept,
+        onDecline: onDecline,
       ),
     );
   }
 
-  String get _appName {
+  String get _repoName {
+    if (Platform.isIOS) return 'Apple Health';
+    return 'Health Connect';
+  }
+
+  String get _sourceAppName {
     switch (detectedApp) {
       case 'samsung_health':
         return 'Samsung Health';
       case 'mi_fitness':
         return 'Mi Fitness';
+      case 'ios':
+        return 'Apple Health';
       default:
-        return 'sog\'liq';
-    }
-  }
-
-  String get _instructions {
-    switch (detectedApp) {
-      case 'samsung_health':
-        return 'Samsung Health → Sozlamalar → Health Connect → Ulash → "Qadamlar"ni yoqing';
-      case 'mi_fitness':
-        return 'Mi Fitness → Profil → Sozlamalar → Health Connect → "Qadamlar"ni yoqing';
-      default:
-        return 'Sog\'liq app\'ingiz sozlamalarida Health Connect bo\'limini toping va "Qadamlar"ni yoqing';
+        return 'sog\'liq app\'ingiz';
     }
   }
 
@@ -73,7 +77,7 @@ class HealthConnectHintDialog extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Qadamlaringizni aniqroq hisoblaymizmi?',
+            'Qadamlaringizni aniq hisoblashga ruxsat bering',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
@@ -81,8 +85,8 @@ class HealthConnectHintDialog extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Telefoningizda $_appName app\'i bor, lekin u bizning app\'imizga '
-            'ulanmagan. Ulansangiz:',
+            '$_repoName orqali $_sourceAppName\'dagi qadam ma\'lumotlaringizni '
+            'o\'qishimizga ruxsat bersangiz:',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -97,15 +101,16 @@ class HealthConnectHintDialog extends StatelessWidget {
               color: Colors.blue.shade50,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.info_outline, size: 18, color: Colors.blue),
-                const SizedBox(width: 8),
+                Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    _instructions,
-                    style: const TextStyle(fontSize: 12, height: 1.4),
+                    'Ruxsat bermasangiz, telefon sensorida qadamlar sanalib '
+                    'turadi — lekin aniqligi pastroq bo\'lishi mumkin.',
+                    style: TextStyle(fontSize: 12, height: 1.4),
                   ),
                 ),
               ],
@@ -118,9 +123,9 @@ class HealthConnectHintDialog extends StatelessWidget {
                 child: TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    onDismiss();
+                    onDecline();
                   },
-                  child: const Text('Keyinroq'),
+                  child: const Text('Yo\'q'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -128,9 +133,9 @@ class HealthConnectHintDialog extends StatelessWidget {
                 child: FilledButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    onOpenPressed();
+                    onAccept();
                   },
-                  child: const Text('Ochish'),
+                  child: const Text('Ha'),
                 ),
               ),
             ],

@@ -48,7 +48,8 @@ class ProfilePage extends StatelessWidget {
                           surname: profile.name ?? '',
                           name: profile.name ?? '',
                           email: profile.email ?? '',
-                          onEdit: () => _openProfileDetailPage(context, profile.userId?.toString() ?? ''),
+                          onEdit: () =>
+                              _openProfileDetailPage(context, profile.userId?.toString() ?? ''),
                         ),
                         const SizedBox(height: 16),
                         BmiCard(
@@ -68,7 +69,7 @@ class ProfilePage extends StatelessWidget {
                             SharePlus.instance.share(
                               ShareParams(
                                 text:
-                                    "Men Calora ilovasidan foydalanayapman.\nSiz ham sog'lom hayot uchun yuklab oling!",
+                                    "Men Calora ilovasidan foydalanayapman.\nSiz ham sog'lom hayot uchun yuklab oling!\n\nIlovani yuklab olish: https://calora.uz",
                               ),
                             );
                           },

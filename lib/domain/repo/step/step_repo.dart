@@ -45,4 +45,10 @@ abstract class StepRepo {
   Map<String, DateTime> getDatePeriods(int period, int offset, {DateTime? now});
 
   Future<bool> ensureHealthAuthorized();
+
+  Future<bool> hasHealthPermission();
+
+  Future<bool> requestHealthPermission();
+
+  Future<void> openHealthSettings();
 }

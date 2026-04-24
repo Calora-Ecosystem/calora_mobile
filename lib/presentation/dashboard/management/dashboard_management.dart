@@ -13,8 +13,11 @@ abstract class DashboardState with _$DashboardState {
 class DashboardEffect with _$DashboardEffect {
   const factory DashboardEffect.forceLogout() = _ForceLogout;
 
-  const factory DashboardEffect.healthPermissionRequired() = _HealthPermissionRequired;
-
-  const factory DashboardEffect.suggestConnectHealthApp({required String detectedApp}) =
-      _SuggestConnectHealthApp;
+  /// Pre-permission rationale dialog.
+  /// Shown before we call the system Health Connect/HealthKit permission prompt.
+  /// [detectedApp] is one of: 'samsung_health', 'mi_fitness', 'unknown' (Android)
+  /// or 'ios' on iOS.
+  const factory DashboardEffect.requestHealthPermission({
+    required String detectedApp,
+  }) = _RequestHealthPermission;
 }

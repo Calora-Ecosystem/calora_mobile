@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/data/api/steps_api.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -7,10 +8,10 @@ import 'package:calora/domain/model/pagination/paginated_response.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import 'package:injectable/injectable.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 @Injectable(as: StepRepo)
 class StepRepoImpl extends StepRepo {
@@ -106,6 +107,12 @@ class StepRepoImpl extends StepRepo {
 
   @override
   Future<bool> ensureHealthAuthorized() async {
+    if (await hasHealthPermission()) return true;
+    return requestHealthPermission();
+  }
+
+  @override
+  Future<bool> hasHealthPermission() async {
     if (_stepsAuthorized) return true;
 
     try {
@@ -125,13 +132,46 @@ class StepRepoImpl extends StepRepo {
         _stepsAuthorized = true;
         return true;
       }
+      return false;
+    } catch (e) {
+      log('[Health] hasHealthPermission error: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> requestHealthPermission() async {
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final status = await _health.getHealthConnectSdkStatus();
+        if (status != HealthConnectSdkStatus.sdkAvailable) {
+          log('[Health] Health Connect unavailable on request: $status');
+          return false;
+        }
+      }
+
+      const types = [HealthDataType.STEPS];
+      const permissions = [HealthDataAccess.READ];
 
       final granted = await _health.requestAuthorization(types, permissions: permissions);
       _stepsAuthorized = granted;
       return granted;
     } catch (e) {
-      log('[Health] ensureHealthAuthorized error: $e');
+      log('[Health] requestHealthPermission error: $e');
       return false;
+    }
+  }
+
+  @override
+  Future<void> openHealthSettings() async {
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        await InstalledHealthAppsService.openHealthConnectSettings();
+      } else {
+        await openAppSettings();
+      }
+    } catch (e) {
+      log('[Health] openHealthSettings error: $e');
     }
   }
 
@@ -159,44 +199,52 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<void> sendHealthData({required DateTime from, required DateTime to}) async {
     try {
-      final authorized = await ensureHealthAuthorized();
-      if (!authorized) return;
+      if (!await hasHealthPermission()) return;
 
-      const types = [HealthDataType.STEPS];
-      final healthData = await _health.getHealthDataFromTypes(
-        startTime: from.toLocal(),
-        endTime: to.toLocal(),
-        types: types,
-      );
+      final now = DateTime.now();
+      // Never query the future — cap upper bound at "now".
+      final cappedTo = to.isAfter(now) ? now : to;
 
-      if (healthData.isEmpty) return;
+      final startDay = DateTime(from.year, from.month, from.day);
+      final endDay = DateTime(cappedTo.year, cappedTo.month, cappedTo.day);
+      if (endDay.isBefore(startDay)) return;
 
-      final groupedByDate = groupBy(healthData, (HealthDataPoint p) {
-        final date = p.dateFrom;
-        return DateTime(date.year, date.month, date.day);
-      });
+      final List<StepsWithMetricsRequest> dailyTotals = [];
 
-      final List<StepsWithMetricsRequest> healthSteps = groupedByDate.entries
-          .map((entry) {
-            final date = entry.key;
-            final totalSteps = entry.value.fold<int>(0, (sum, p) {
-              final val = p.value;
-              if (val is NumericHealthValue) {
-                return sum + val.numericValue.toInt();
-              }
-              return sum;
-            });
-            return StepsWithMetricsRequest(
-              date: date,
-              value: totalSteps.toDouble(),
+      DateTime cursor = startDay;
+      while (!cursor.isAfter(endDay)) {
+        final dayStart = DateTime(cursor.year, cursor.month, cursor.day);
+        final isToday = dayStart.year == now.year &&
+            dayStart.month == now.month &&
+            dayStart.day == now.day;
+        // For today, use "now" as upper bound. For past days, use end-of-day.
+        final dayEnd = isToday
+            ? now
+            : DateTime(cursor.year, cursor.month, cursor.day, 23, 59, 59, 999);
+
+        try {
+          final steps = await _health.getTotalStepsInInterval(dayStart, dayEnd);
+          final value = steps ?? 0;
+          if (value > 0) {
+            dailyTotals.add(
+              StepsWithMetricsRequest(
+                date: dayStart,
+                value: value.toDouble(),
+              ),
             );
-          })
-          .where((e) => e.value > 0)
-          .toList();
+          }
+        } catch (e) {
+          log('[Health] Aggregation failed for $dayStart: $e');
+        }
 
-      if (healthSteps.isNotEmpty) {
-        await _stepsApi.sendStepDataDateRange(steps: healthSteps);
-        log('[Health] Synced ${healthSteps.length} days of history.');
+        cursor = cursor.add(const Duration(days: 1));
+      }
+
+      if (dailyTotals.isNotEmpty) {
+        await _stepsApi.sendStepDataDateRange(steps: dailyTotals);
+        log('[Health] Synced ${dailyTotals.length} days of history '
+            '(${dailyTotals.first.date.toIso8601String()} → '
+            '${dailyTotals.last.date.toIso8601String()}).');
       }
     } catch (e) {
       log('Error sending health data: $e');

@@ -75,10 +75,11 @@ void callbackDispatcher() {
       // Oldingi kunlarning pending sync'ini bajarish (har ikki rejimda ham)
       await _syncPendingDays(stepRepo, ledger);
 
-      // 1. Health rejimini urinib ko'ramiz
+      // 1. Health rejimini urinib ko'ramiz (faqat ruxsat allaqachon
+      //    berilgan bo'lsa — background isolate'da UI yo'q, prompt qila olmaymiz)
       final healthAvailable = await stepRepo.isHealthDataAvailable();
       if (healthAvailable) {
-        final authorized = await stepRepo.ensureHealthAuthorized();
+        final authorized = await stepRepo.hasHealthPermission();
         if (authorized) {
           try {
             final steps = await stepRepo.getTodayHealthSteps();
@@ -87,10 +88,10 @@ void callbackDispatcher() {
               final todayKey = ledger.dayKey(DateTime.now());
               await ledger.ensureDayAtLeast(todayKey, steps, minSynced: steps);
               log('BG Health sync: $steps steps', name: 'BackgroundStepsWorker');
-            } else {
-              log('BG Health: 0 steps today', name: 'BackgroundStepsWorker');
+              return true;
             }
-            return true;
+            log('BG Health: 0 steps — falling back to pedometer',
+                name: 'BackgroundStepsWorker');
           } catch (e) {
             log('BG Health sync failed: $e', name: 'BackgroundStepsWorker');
           }

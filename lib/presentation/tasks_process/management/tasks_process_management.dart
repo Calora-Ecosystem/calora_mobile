@@ -15,6 +15,10 @@ abstract class TasksProcessState with _$TasksProcessState {
     @Default(false) bool isFinished,
     @Default(0) int completedTaskCount,
     @Default([]) List<ExercisesRequest> completedExercises,
+    // Count-type exercise fields: decrement by 1 every 3 seconds.
+    @Default(false) bool isCountType,
+    @Default(0) int totalCount,
+    @Default(0) int remainingCount,
   }) = _TasksProcessState;
 }
 

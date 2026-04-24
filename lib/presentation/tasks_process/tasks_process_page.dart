@@ -106,7 +106,13 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
                 const SizedBox(height: 12),
                 ex.title.text(20, 24, 700).c(context.colors.textStrong),
                 const SizedBox(height: 12),
-                _formatSeconds(state.remainingSeconds).text(32, 40, 700).c(context.colors.textStrong),
+                Center(
+                  child: (state.isCountType
+                          ? 'x${state.remainingCount}'
+                          : _formatSeconds(state.remainingSeconds))
+                      .text(32, 40, 700)
+                      .c(context.colors.textStrong),
+                ),
                 const SizedBox(height: 16),
                 ProgressButton(
                   key: ValueKey(state.currentIndex),
