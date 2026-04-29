@@ -6,6 +6,7 @@ import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,29 +24,16 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
     emit(state.copyWith(isUzbekistan: isUzbekistan));
     getPremiumPlans();
     getMyOrders();
-    if (isUzbekistan) {
-      _initializeMethods();
+    final iap = PaymentMethod(icon: Assets.icons.payme, code: 'Iap');
+    final payme = PaymentMethod(icon: Assets.icons.payme, code: 'Payme');
+    final click = PaymentMethod(icon: Assets.icons.click, code: 'Click');
+    if (kDebugMode) {
+      emit(state.copyWith(paymentMethods: [iap, click, payme]));
+    } else if (isUzbekistan) {
+      emit(state.copyWith(paymentMethods: [payme, click]));
     } else {
-      _initializeIapMethod();
+      emit(state.copyWith(paymentMethods: [iap], selectedPaymentMethod: iap));
     }
-  }
-
-  void _initializeIapMethod() {
-    final iapMethod = PaymentMethod(icon: Assets.icons.payme, code: 'Iap');
-    emit(
-      state.copyWith(
-        paymentMethods: [iapMethod],
-        selectedPaymentMethod: iapMethod,
-      ),
-    );
-  }
-
-  void _initializeMethods() {
-    final paymentMethods = [
-      PaymentMethod(icon: Assets.icons.payme, code: 'Payme'),
-      PaymentMethod(icon: Assets.icons.click, code: 'Click'),
-    ];
-    emit(state.copyWith(paymentMethods: paymentMethods));
   }
 
   void selectPlan(PlanModel plan) => emit(state.copyWith(selectedPlan: plan));

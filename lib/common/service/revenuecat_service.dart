@@ -23,16 +23,10 @@ class RevenueCatService {
       kDebugMode ? LogLevel.debug : LogLevel.info,
     );
 
-    PurchasesConfiguration configuration;
-    if (Platform.isAndroid) {
-      configuration = PurchasesConfiguration(
-        'test_RqQDCjIEQygqykNoXndFdysWVWJ',
-      );
-    } else {
-      configuration = PurchasesConfiguration(
-        'appl_VZdWGZmrtjFMtQWQfdlEbRYulSJ',
-      );
-    }
+    final key = Platform.isAndroid
+        ? 'goog_GChcNuFzhSLLuenQOOdpdaatuJQ'
+        : 'appl_VZdWGZmrtjFMtQWQfdlEbRYulSJ';
+    final configuration = PurchasesConfiguration(key);
 
     final profile = await _store.getProfile();
 
@@ -68,10 +62,19 @@ class RevenueCatService {
         customerInfo = await Purchases.restorePurchases();
       } else {
         final packages = offering.availablePackages;
+        packages.forEach((package) {
+          print(package.storeProduct.identifier);
+        });
         final package = packages.firstWhere(
-          (e) => e.storeProduct.identifier == 'product_${plan.id}',
+          (e) =>
+              e.storeProduct.identifier.endsWith('${Platform.isAndroid ? '-' : '_'}${plan.id}'),
         );
         final params = PurchaseParams.package(package);
+
+
+        await Purchases.setAttributes({'order_id': ''});
+        await Purchases.syncAttributesAndOfferingsIfNeeded();
+
         final result = await Purchases.purchase(params);
         customerInfo = result.customerInfo;
       }
