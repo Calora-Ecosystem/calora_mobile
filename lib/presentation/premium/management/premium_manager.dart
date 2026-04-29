@@ -245,16 +245,34 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
         onError: (_) => emit(state.copyWith(isDeletingOrder: false)),
       );
 
-  Future<void> getPaymentLink() async => await _premiumRepo
-      .getPaymentLink(orderId: state.myOrders.first.id ?? -1)
-      .handle(
-        onStart: () => emit(state.copyWith(isGettingPaymentLink: true)),
-        onData: (link) {
-          emit(state.copyWith(isGettingPaymentLink: false, paymentLink: link));
-          _openPaymentUrl(link);
-        },
-        onError: (error) => emit(state.copyWith(isGettingPaymentLink: false)),
+  Future<void> getPaymentLink({bool? restore}) async {
+    final isRestore = restore ?? false;
+    if (state.selectedPaymentMethod?.code == 'Iap') {
+      final plan = state.selectedPlan;
+      if (plan == null) return;
+      emit(
+        state.copyWith(
+          isOrderingSubscription: !isRestore,
+          isRestoringPurchase: isRestore,
+        ),
       );
+      await _openIap(plan, restore: isRestore);
+      return;
+    }
+    await _premiumRepo
+        .getPaymentLink(orderId: state.myOrders.first.id ?? -1)
+        .handle(
+          onStart: () => emit(state.copyWith(isGettingPaymentLink: true)),
+          onData: (link) {
+            emit(
+              state.copyWith(isGettingPaymentLink: false, paymentLink: link),
+            );
+            _openPaymentUrl(link);
+          },
+          onError: (error) =>
+              emit(state.copyWith(isGettingPaymentLink: false)),
+        );
+  }
 
   Future<void> _openPaymentUrl(String url) async {
     try {

@@ -210,9 +210,24 @@ class PremiumSheet
                         Button(
                           height: 40,
                           text: Strings.continuePurchase,
-                          loading: state.isGettingPaymentLink,
+                          enabled: !state.isRestoringPurchase,
+                          loading: state.selectedPaymentMethod?.code == 'Iap'
+                              ? state.isOrderingSubscription
+                              : state.isGettingPaymentLink,
                           onPressed: () => manager.getPaymentLink(),
                         ),
+                        if (state.selectedPaymentMethod?.code == 'Iap') ...[
+                          const SizedBox(height: 12),
+                          Button(
+                            height: 40,
+                            text: 'Restore purchase',
+                            type: ButtonType.secondary,
+                            enabled: !state.isOrderingSubscription,
+                            loading: state.isRestoringPurchase,
+                            onPressed: () =>
+                                manager.getPaymentLink(restore: true),
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         Button(
                           height: 40,
