@@ -185,33 +185,55 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
         );
   }
 
-  Future<void> orderSubscription({bool? restore}) async => await _premiumRepo
-      .orderSubscription(
-        provider: state.selectedPaymentMethod?.code ?? '',
-        plan: SubscriptionPlanType.premium.toApi(),
-        orderMonth: state.selectedPlan?.packageMonth ?? -1,
-        couponId: state.promoCodeValue?.id,
-      )
-      .handle(
-        onStart: () => emit(state.copyWith(isOrderingSubscription: true)),
-        onData: (link) {
-          emit(
+  Future<void> orderSubscription({bool? restore}) async {
+    final isRestore = restore ?? false;
+    final isIap = state.selectedPaymentMethod?.code == 'Iap';
+    await _premiumRepo
+        .orderSubscription(
+          provider: state.selectedPaymentMethod?.code ?? '',
+          plan: SubscriptionPlanType.premium.toApi(),
+          orderMonth: state.selectedPlan?.packageMonth ?? -1,
+          couponId: state.promoCodeValue?.id,
+        )
+        .handle(
+          onStart: () => emit(
+            state.copyWith(
+              isOrderingSubscription: !isRestore,
+              isRestoringPurchase: isRestore,
+            ),
+          ),
+          onData: (link) async {
+            emit(state.copyWith(paymentLink: link.paymentLink ?? ''));
+            if (link.paymentRequired ?? true) {
+              if (isIap) {
+                await _openIap(state.selectedPlan!, restore: isRestore);
+              } else {
+                emit(
+                  state.copyWith(
+                    isOrderingSubscription: false,
+                    isRestoringPurchase: false,
+                  ),
+                );
+                _openPaymentUrl(link.paymentLink ?? '');
+              }
+            } else {
+              emit(
+                state.copyWith(
+                  isOrderingSubscription: false,
+                  isRestoringPurchase: false,
+                ),
+              );
+              publish(const PremiumEffect.subscriptionSuccess());
+            }
+          },
+          onError: (error) => emit(
             state.copyWith(
               isOrderingSubscription: false,
-              paymentLink: link.paymentLink ?? '',
+              isRestoringPurchase: false,
             ),
-          );
-          if (link.paymentRequired ?? true) {
-            if (state.selectedPaymentMethod?.code == 'Iap')
-              _openIap(state.selectedPlan!, restore: restore ?? false);
-            else
-              _openPaymentUrl(link.paymentLink ?? '');
-          } else {
-            publish(const PremiumEffect.subscriptionSuccess());
-          }
-        },
-        onError: (error) => emit(state.copyWith(isOrderingSubscription: false)),
-      );
+          ),
+        );
+  }
 
   Future<void> deleteOrder() async => _premiumRepo
       .deleteOrder(orderId: state.myOrders.first.id ?? -1)
@@ -255,7 +277,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
     }
   }
 
-  void _openIap(PlanModel plan, {bool restore = false}) async {
+  Future<void> _openIap(PlanModel plan, {bool restore = false}) async {
     final orders = await _premiumRepo.getMyOrders();
     final pendingOrder = orders.isNotEmpty
         ? orders.firstWhere(
@@ -267,6 +289,12 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       plan,
       restore,
       pendingOrder,
+    );
+    emit(
+      state.copyWith(
+        isOrderingSubscription: false,
+        isRestoringPurchase: false,
+      ),
     );
     if (purchased) {
       publish(PremiumEffect.subscriptionSuccess());

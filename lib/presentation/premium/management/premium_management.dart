@@ -14,6 +14,7 @@ abstract class PremiumState with _$PremiumState {
     PaymentMethod? selectedPaymentMethod,
     @Default(false) bool isGettingOrders,
     @Default(false) bool isOrderingSubscription,
+    @Default(false) bool isRestoringPurchase,
     @Default(false) bool isDeletingOrder,
     @Default(false) bool isGettingPaymentLink,
     @Default(false) bool isGettingPremiumPlans,

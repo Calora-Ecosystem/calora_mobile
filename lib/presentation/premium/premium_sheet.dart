@@ -231,7 +231,8 @@ class PremiumSheet
                           enabled:
                               state.selectedPlan != null &&
                               (state.selectedPaymentMethod != null ||
-                                  !state.isUzbekistan),
+                                  !state.isUzbekistan) &&
+                              !state.isRestoringPurchase,
                           loading: state.isOrderingSubscription,
                           onPressed: () => manager.orderSubscription(),
                         ),
@@ -242,11 +243,13 @@ class PremiumSheet
                             text: 'Restore purchase',
                             type: ButtonType.secondary,
                             enabled:
-                            state.selectedPlan != null &&
+                                state.selectedPlan != null &&
                                 (state.selectedPaymentMethod != null ||
-                                    !state.isUzbekistan),
-                            loading: state.isOrderingSubscription,
-                            onPressed: () => manager.orderSubscription(restore: true),
+                                    !state.isUzbekistan) &&
+                                !state.isOrderingSubscription,
+                            loading: state.isRestoringPurchase,
+                            onPressed: () =>
+                                manager.orderSubscription(restore: true),
                           ),
                         ],
                       ],
