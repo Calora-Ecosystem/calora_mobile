@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/widgets/display/display.dart';
+import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:flutter/foundation.dart';
@@ -52,8 +53,16 @@ class RevenueCatService {
   Future<bool> purchase(
     PlanModel plan, [
     bool restore = false,
+    MySubscriptionOrderModel? order,
   ]) async {
     try {
+      print('order_id: ${order?.id?.toString() ?? ''}');
+      await Purchases.setAttributes({
+        'order_id': order?.id?.toString() ?? '',
+      });
+      await Purchases.syncAttributesAndOfferingsIfNeeded();
+
+
       final offerings = await Purchases.getOfferings();
       final offering = offerings.all['default']!;
 
@@ -70,10 +79,6 @@ class RevenueCatService {
               e.storeProduct.identifier.endsWith('${Platform.isAndroid ? '-' : '_'}${plan.id}'),
         );
         final params = PurchaseParams.package(package);
-
-
-        await Purchases.setAttributes({'order_id': ''});
-        await Purchases.syncAttributesAndOfferingsIfNeeded();
 
         final result = await Purchases.purchase(params);
         customerInfo = result.customerInfo;

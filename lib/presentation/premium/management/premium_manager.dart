@@ -24,7 +24,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
     emit(state.copyWith(isUzbekistan: isUzbekistan));
     getPremiumPlans();
     getMyOrders();
-    final iap = PaymentMethod(icon: Assets.icons.payme, code: 'Iap');
+    final iap = PaymentMethod(icon: Assets.icons.apple, code: 'Iap');
     final payme = PaymentMethod(icon: Assets.icons.payme, code: 'Payme');
     final click = PaymentMethod(icon: Assets.icons.click, code: 'Click');
     if (kDebugMode) {
@@ -256,7 +256,18 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   }
 
   void _openIap(PlanModel plan, {bool restore = false}) async {
-    final purchased = await getIt<RevenueCatService>().purchase(plan, restore);
+    final orders = await _premiumRepo.getMyOrders();
+    final pendingOrder = orders.isNotEmpty
+        ? orders.firstWhere(
+            (e) => e.status?.trim().toLowerCase() == 'pending',
+            orElse: () => orders.first,
+          )
+        : null;
+    final purchased = await getIt<RevenueCatService>().purchase(
+      plan,
+      restore,
+      pendingOrder,
+    );
     if (purchased) {
       publish(PremiumEffect.subscriptionSuccess());
     }

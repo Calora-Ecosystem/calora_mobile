@@ -15,6 +15,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
 import 'package:calora/widgets/premium/promo_code_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -132,7 +133,7 @@ class PremiumSheet
                       const SizedBox(height: 16),
                       PromoCodeWidget(),
                     ],
-                    if (state.isUzbekistan) ...[
+                    if (state.isUzbekistan || kDebugMode) ...[
                       const SizedBox(height: 16),
                       if (state.isPaymentPending &&
                           state.selectedPaymentMethod != null)
