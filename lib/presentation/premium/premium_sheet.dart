@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/number_extension/number_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/confetti/confetti.dart';
@@ -44,7 +45,7 @@ class PremiumSheet
       subscriptionSuccess: () async {
         await PremiumConfettiOverlay.show(context);
         CustomSnackBar.showSuccess(context, Strings.subscriptionSuccess);
-        context.router.maybePop();
+        context.router.replaceAll([DashboardRoute()]);
       },
     );
   }
