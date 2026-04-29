@@ -5,16 +5,17 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions.dart';
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
+import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:calora/presentation/account/detail/management/account_detail_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class AccountDetailManager
-    extends Manager<AccountDetailState, AccountDetailEffect> {
+class AccountDetailManager extends Manager<AccountDetailState, AccountDetailEffect> {
   final ProfileRepo profileRepo;
+  final QuestionsRepo questionsRepo;
 
-  AccountDetailManager(this.profileRepo) : super(const AccountDetailState());
+  AccountDetailManager(this.profileRepo, this.questionsRepo) : super(const AccountDetailState());
 
   void getProfileDetail() async {
     await profileRepo.getProfileDetail().handle(
@@ -57,23 +58,58 @@ class AccountDetailManager
       return;
     }
 
-    final profileRequest = _buildProfileRequestFromDetailInfos(
+    // 1. Profil ma'lumotlarini store'dan olamiz
+    final profileStoreModel = await profileStore.getProfile();
+
+    // 2. Request yaratishda eski targetWeight ni ham berib yuboramiz
+    final questionsRequest = _buildQuestionsRequestFromDetailInfos(
       state.detailInfos!,
+      profileStoreModel.physicalActivity,
+      profileStoreModel.targetWeight, // ESKI MAQSAD VAZNI SHU YERDAN BERILADI
     );
 
-    await profileRepo
-        .updateProfile(profileRequest)
-        .handle(
-          onData: (_) {
-            emit(state.copyWith(updatingType: null));
-          },
-          onError: (error) {
-            emit(state.copyWith(updatingType: null));
-          },
-        );
+    await questionsRepo
+        .sendAnswers(questionsRequest)
+        .then((_) async {
+          // API muvaffaqiyatli bo'lsa, local store-ni ham yangilaymiz
+          final profileRequest = _buildProfileRequestFromDetailInfos(
+            state.detailInfos!,
+            profileStoreModel.targetWeight, // ESKI MAQSAD VAZNI SHU YERDAN BERILADI
+          );
+
+          double? calculatedBmi;
+          if (profileRequest.weight != null &&
+              profileRequest.height != null &&
+              profileRequest.height! > 0) {
+            final heightInMeters = profileRequest.height! / 100;
+            calculatedBmi = profileRequest.weight! / (heightInMeters * heightInMeters);
+            calculatedBmi = double.parse(calculatedBmi.toStringAsFixed(2));
+          }
+
+          await profileStore.updateProfile(
+            name: profileRequest.name,
+            birthDay: profileRequest.birthDay,
+            height: profileRequest.height,
+            weight: profileRequest.weight,
+            gender: profileRequest.gender,
+            goal: profileRequest.goal,
+            activityLevel: profileRequest.activityLevel,
+            targetWeight: profileRequest.targetWeight,
+            bmi: calculatedBmi,
+          );
+
+          emit(state.copyWith(updatingType: null));
+        })
+        .catchError((error) {
+          emit(state.copyWith(updatingType: null));
+        });
   }
 
-  ProfileRequest _buildProfileRequestFromDetailInfos(List<DetailInfo> infos) {
+  QuestionsRequest _buildQuestionsRequestFromDetailInfos(
+    List<DetailInfo> infos,
+    String? physicalActivity,
+    double? currentTargetWeight, // YANGI QO'SHILGAN PARAMETR
+  ) {
     String? name;
     String? birthDay;
     double? height;
@@ -81,6 +117,7 @@ class AccountDetailManager
     String? gender;
     String? goal;
     String? activityLevel;
+    double? targetWeight; // Bu UI dan keladigan yangi targetWeight
 
     for (var info in infos) {
       switch (info.type) {
@@ -105,10 +142,95 @@ class AccountDetailManager
         case DetailInfoType.activityLevel:
           activityLevel = info.message;
           break;
+        case DetailInfoType.targetWeight:
+          targetWeight = double.tryParse(info.message);
+          break;
         default:
           break;
       }
     }
+
+    // Purpose mappingni onboarding bilan bir xil qilamiz
+    String? purposeApi = goal;
+    if (purposeApi == '0' || purposeApi == 'WeightLoss') {
+      purposeApi = 'WeightLoss';
+    } else if (purposeApi == '1' || purposeApi == 'SaveCurrent') {
+      purposeApi = 'SaveCurrent';
+    } else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') {
+      purposeApi = 'MuscleDevelopment';
+    }
+
+    // YECHIM SHU YERDA: Agar UI dan targetWeight kiritilmagan bo'lsa (0 yoki null),
+    // unda u weight (joriy vazn) ga tenglashib qolmaydi, balki currentTargetWeight (eski vazn) ni oladi.
+    final tWeight = (targetWeight ?? 0) == 0 ? currentTargetWeight : targetWeight;
+
+    double? bmiValue;
+    if (weight != null && height != null && height > 0) {
+      bmiValue = weight / ((height / 100) * (height / 100));
+    }
+
+    return QuestionsRequest(
+      name: name,
+      gender: gender,
+      purpose: purposeApi,
+      birthDate: birthDay != null ? DateTime.tryParse(birthDay) : null,
+      height: height,
+      weight: weight,
+      bmi: bmiValue,
+      targetWeight: tWeight,
+      // Xatodan holi to'g'ri targetWeight
+      activityLevel: activityLevel,
+      language: 'Uzbek',
+      physicalActivity: physicalActivity,
+    );
+  }
+
+  ProfileRequest _buildProfileRequestFromDetailInfos(
+    List<DetailInfo> infos,
+    double? currentTargetWeight, // YANGI QO'SHILGAN PARAMETR
+  ) {
+    String? name;
+    String? birthDay;
+    double? height;
+    double? weight;
+    String? gender;
+    String? goal;
+    String? activityLevel;
+    double? targetWeight; // Bu UI dan keladigan yangi targetWeight
+
+    for (var info in infos) {
+      switch (info.type) {
+        case DetailInfoType.name:
+          name = info.message;
+          break;
+        case DetailInfoType.birthDay:
+          birthDay = info.message;
+          break;
+        case DetailInfoType.height:
+          height = double.tryParse(info.message);
+          break;
+        case DetailInfoType.weight:
+          weight = double.tryParse(info.message);
+          break;
+        case DetailInfoType.gender:
+          gender = info.message;
+          break;
+        case DetailInfoType.goal:
+          goal = info.message;
+          break;
+        case DetailInfoType.activityLevel:
+          activityLevel = info.message;
+          break;
+        case DetailInfoType.targetWeight:
+          targetWeight = double.tryParse(info.message);
+          break;
+        default:
+          break;
+      }
+    }
+
+    // YECHIM SHU YERDA
+    final tWeight = (targetWeight ?? 0) == 0 ? currentTargetWeight : targetWeight;
 
     return ProfileRequest(
       name: name,
@@ -118,6 +240,7 @@ class AccountDetailManager
       gender: gender,
       goal: goal,
       activityLevel: activityLevel,
+      targetWeight: tWeight, // Xatodan holi to'g'ri targetWeight
     );
   }
 }

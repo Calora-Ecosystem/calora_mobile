@@ -7,8 +7,7 @@ import 'package:flutter/animation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-@singleton
-@Injectable()
+@injectable
 class CalculateManager extends Manager<CalculateState, CalculateEffect> {
   final QuestionsRepo questionsRepo;
   Timer? _animationTimer;

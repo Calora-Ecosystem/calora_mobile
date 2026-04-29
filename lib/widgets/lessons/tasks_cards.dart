@@ -11,6 +11,7 @@ import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/task/task_info_page.dart';
 import 'package:calora/widgets/task/task_parametrs_widget.dart';
+import 'package:calora/widgets/train_level/train_level_page.dart';
 import 'package:flutter/material.dart';
 
 class TasksCards extends StatelessWidget {
@@ -18,6 +19,7 @@ class TasksCards extends StatelessWidget {
   final List<ExercisesRequest> exercises;
   final bool loading;
   final Level level;
+  final ValueChanged<int> onLevelChanged;
 
   TasksCards({
     super.key,
@@ -25,6 +27,7 @@ class TasksCards extends StatelessWidget {
     required this.exercises,
     required this.loading,
     required this.level,
+    required this.onLevelChanged,
   });
 
   @override
@@ -40,7 +43,7 @@ class TasksCards extends StatelessWidget {
           ],
           bottomLabel: Strings.exercises,
           bottomCount: exercises.length,
-          onChangePressed: () {},
+          onChangePressed: () => _openSettings(context, level.index),
         ),
         ListView.separated(
           shrinkWrap: true,
@@ -106,6 +109,21 @@ class TasksCards extends StatelessWidget {
 
   void _showTask(BuildContext context, ExercisesRequest exercises) {
     context.showAppBottomSheet(child: TaskInfoPage(exercises: exercises));
+  }
+
+  void _openSettings(BuildContext context, int level) async {
+    final result = await showModalBottomSheet<int>(
+      backgroundColor: context.colors.backgroundBase,
+      isScrollControlled: true,
+      useSafeArea: true,
+      context: context,
+      builder: (context) {
+        return TrainLevelPage(currentLevel: level);
+      },
+    );
+    if (result != null) {
+      onLevelChanged(result);
+    }
   }
 
   bool isLocked(int index, bool isUserPremium) {

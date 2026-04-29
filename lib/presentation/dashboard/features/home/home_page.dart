@@ -1,16 +1,15 @@
+// lib/presentation/dashboard/features/home/page/home_page.dart
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/base/profile_store.dart';
-import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
-import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/calendar/calendar_selector_widget.dart';
-import 'package:calora/common/widgets/confetti/confetti.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -45,7 +44,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
       dashManager.initialize();
     });
     Future.microtask(() {
-      manager.initStepsForeground();
+      manager.requestNotificationPermission();
     });
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
@@ -68,7 +67,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   @override
   Widget builder(BuildContext context, HomeManager manager, HomeState state) {
-    final pedometerService = getIt<PedometerService>();
     return StreamBuilder<ProfileRequest>(
       stream: profileStore.watch(),
       builder: (context, snapshot) {
@@ -112,20 +110,26 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   onDateTap: () => openCalendar(context, manager),
                                   loading: state.isLoading,
                                   onBackward: () {
-                                    final newDay = (state.day ?? DateTime.now()).subtract(const Duration(days: 1));
+                                    final newDay = (state.day ?? DateTime.now()).subtract(
+                                      const Duration(days: 1),
+                                    );
                                     manager.updateDay(newDay);
                                     manager.getSummary();
                                     manager.getWater();
                                   },
                                   onForward: () {
-                                    final newDay = (state.day ?? DateTime.now()).add(const Duration(days: 1));
+                                    final newDay = (state.day ?? DateTime.now()).add(
+                                      const Duration(days: 1),
+                                    );
                                     manager.updateDay(newDay);
                                     manager.getSummary();
                                     manager.getWater();
                                   },
                                   date: state.day ?? DateTime.now(),
-                                  calories: '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
-                                  water: '${(state.targetLiters / 1000).asFixedTruncated(2)} ${Strings.liter}',
+                                  calories:
+                                      '${state.targetKcal.asFixedTruncated(0)} ${Strings.kcal}',
+                                  water:
+                                      '${(state.targetLiters / 1000).asFixedTruncated(2)} ${Strings.liter}',
                                   steps: state.targetSteps.toString(),
                                 ),
                                 GestureDetector(
@@ -149,8 +153,12 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             spacing: 8,
                                             children: [
-                                              Strings.caloraAi.text(24, 30, 700).c(context.colors.white),
-                                              Strings.tryItForFree.text(16, 20, 500).c(context.colors.white),
+                                              Strings.caloraAi
+                                                  .text(24, 30, 700)
+                                                  .c(context.colors.white),
+                                              Strings.tryItForFree
+                                                  .text(16, 20, 500)
+                                                  .c(context.colors.white),
                                             ],
                                           ),
                                         ),
@@ -165,17 +173,20 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 ),
                                 DailyFeedRateWidget(
                                   onAddFoodTap: () => openCaloriesPage(context),
-                                  normCalories: (state.summary?.kcalNorm.value ?? 0).asFixedTruncated(0).toString(),
+                                  normCalories: (state.summary?.kcalNorm.value ?? 0)
+                                      .asFixedTruncated(0)
+                                      .toString(),
                                   nutrients: state.nutrients,
                                   progressPercent:
-                                      (state.summary?.sum.Kcal ?? 0) / (state.summary?.kcalNorm.value ?? 0),
+                                      (state.summary?.sum.Kcal ?? 0) /
+                                      (state.summary?.kcalNorm.value ?? 0),
                                   remainedCalories:
-                                      (state.summary?.kcalNorm.value ?? 0) - (state.summary?.sum.Kcal ?? 0),
+                                      (state.summary?.kcalNorm.value ?? 0) -
+                                      (state.summary?.sum.Kcal ?? 0),
                                   loading: state.isSummaryLoading,
                                 ),
-                                _buildStepCardWithStream(
+                                _buildStepCard(
                                   context: context,
-                                  pedometerService: pedometerService,
                                   state: state,
                                   manager: manager,
                                 ),
@@ -206,15 +217,17 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     );
   }
 
-  Widget _buildStepCardWithStream({
+  /// Step card — `DashboardManager.todaySteps`'dan ko'rsatadi (Health/Pedometer farqi
+  /// ko'rinmaydi, chunki DashboardManager `max(health, pedometer)`'ni beradi).
+  Widget _buildStepCard({
     required BuildContext context,
-    required PedometerService pedometerService,
     required HomeState state,
     required HomeManager manager,
   }) {
     final selectedDay = state.day ?? DateTime.now();
     final isToday = _isToday(selectedDay);
 
+    // Bugungi kun bo'lmasa — backend'dan kelgan qiymatni ko'rsatamiz
     if (!isToday) {
       return StepCardWidget(
         loading: state.isMetricsLoading,
@@ -226,6 +239,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
       );
     }
 
+    // Bugungi kun — DashboardManager'dan live qadam oladi
     return ManagerBuilder<DashboardState, DashboardEffect>(
       manager: context.read<DashboardManager>(),
       properties: (s) => [s.todaySteps],

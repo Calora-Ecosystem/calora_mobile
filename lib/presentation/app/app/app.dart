@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:management/management.dart';
 
-@RoutePage()
 class App extends Managed<AppManager, AppState, AppEffect> {
   App({super.key});
 
@@ -39,29 +38,32 @@ class App extends Managed<AppManager, AppState, AppEffect> {
       startLocale: const Locale('uz', 'UZ'),
       child: Builder(
         builder: (context) {
-          return KeyboardDismisser(
-            child: MaterialApp.router(
-              title: 'Calora',
-              debugShowCheckedModeBanner: false,
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: context.supportedLocales,
-              locale: context.locale,
-              theme: context.theme,
-              routerConfig: appRouter.config(navigatorObservers: () => [CustomNavigatorObserver()]),
-              builder: (context, child) {
-                final mediaQuery = MediaQuery.of(context);
-                return ConnectivityOverlay(
+          return MaterialApp.router(
+            title: 'Calora',
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+            theme: context.theme,
+            routerConfig: appRouter.config(navigatorObservers: () => [CustomNavigatorObserver()]),
+            builder: (context, child) {
+              final mediaQuery = MediaQuery.of(context);
+              return KeyboardDismisser(
+                child: ConnectivityOverlay(
                   child: MediaQuery(
                     data: mediaQuery.copyWith(
-                      textScaler: mediaQuery.textScaler.clamp(minScaleFactor: 0.8, maxScaleFactor: 1.2),
+                      textScaler: mediaQuery.textScaler.clamp(
+                        minScaleFactor: 0.8,
+                        maxScaleFactor: 1.2,
+                      ),
                     ),
                     child: RemoveStatusBarBackground(
                       child: DisplayWidget(key: ValueKey(state.language), child: child!),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           );
         },
       ),

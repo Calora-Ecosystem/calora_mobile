@@ -6,15 +6,18 @@ extension ThemeContextExtensions on BuildContext {
   DefaultThemeColors get colors => getIt<DefaultThemeColors>();
 
   ThemeData get theme => ThemeData(
-    inputDecorationTheme: InputDecorationThemeData(
-      fillColor: Color(0xFFFFFFFF),
+    textSelectionTheme: const TextSelectionThemeData(
+      cursorColor: Color(0xFF46A758),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      fillColor: const Color(0xFFFFFFFF),
       filled: true,
-      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
-      hintStyle: TextStyle(
+      hintStyle: const TextStyle(
         fontSize: 14,
         height: 18 / 14,
         fontWeight: FontWeight.w500,

@@ -5,6 +5,7 @@ class StepLedgerStore {
   static const metaBoxName = 'steps_meta';
 
   Box get _ledger => Hive.box(ledgerBoxName);
+
   Box get _meta => Hive.box(metaBoxName);
 
   String dayKey(DateTime dt) {
@@ -32,7 +33,9 @@ class StepLedgerStore {
   }
 
   int totalFor(String key) => _readDay(key)['total']!;
+
   int syncedFor(String key) => _readDay(key)['synced']!;
+
   bool isPending(String key) => totalFor(key) > syncedFor(key);
 
   Future<void> ensureDayAtLeast(String key, int minTotal, {int? minSynced}) async {
@@ -41,7 +44,9 @@ class StepLedgerStore {
     final curSynced = day['synced']!;
 
     final newTotal = curTotal < minTotal ? minTotal : curTotal;
-    final newSynced = minSynced == null ? curSynced : (curSynced < minSynced ? minSynced : curSynced);
+    final newSynced = minSynced == null
+        ? curSynced
+        : (curSynced < minSynced ? minSynced : curSynced);
 
     if (newTotal > curTotal || (minSynced != null && newSynced > curSynced)) {
       await _writeDay(key, newTotal, newSynced);
@@ -71,8 +76,32 @@ class StepLedgerStore {
   }
 
   int getLastSensorTotal() => (_meta.get('last_sensor_total') as int?) ?? -1;
+
   Future<void> setLastSensorTotal(int v) => _meta.put('last_sensor_total', v);
 
-  String? getLastSensorDate() => _meta.get('last_sensor_date') as String?;
+  String getLastSensorDate() {
+    final now = DateTime.now();
+    final today = dayKey(now);
+    return (_meta.get('last_sensor_date') as String?) ?? today;
+  }
+
   Future<void> setLastSensorDate(String date) => _meta.put('last_sensor_date', date);
+
+  int getLastSyncedBackendTotal(String key) => (_meta.get('backend_sync_$key') as int?) ?? -1;
+
+  Future<void> setLastSyncedBackendTotal(String key, int v) => _meta.put('backend_sync_$key', v);
+
+  // StepLedgerStore classi ichiga:
+
+  bool isHealthHintShown() => (_meta.get('health_hint_shown') as bool?) ?? false;
+
+  Future<void> setHealthHintShown() => _meta.put('health_hint_shown', true);
+
+  bool isHealthHintDismissed() => (_meta.get('health_hint_dismissed') as bool?) ?? false;
+
+  Future<void> setHealthHintDismissed() => _meta.put('health_hint_dismissed', true);
+
+  bool didUserOpenHealthApp() => (_meta.get('user_opened_health_app') as bool?) ?? false;
+
+  Future<void> setUserOpenedHealthApp(bool v) => _meta.put('user_opened_health_app', v);
 }

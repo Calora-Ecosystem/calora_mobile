@@ -16,8 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
+class ProfileDetailPage
+    extends Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
   final String userId;
+
   const ProfileDetailPage({required this.userId, super.key});
 
   @override
@@ -27,7 +29,7 @@ class ProfileDetailPage extends Managed<ProfileDetailManager, ProfileDetailState
         context: context,
         builder: (_) => ConfirmPage(
           onConfirm: () => logOut(manager, context),
-          onCancel: () {},
+          onCancel: () => Navigator.pop(context),
           title: Strings.areYouSureWantLogOut,
           confirmText: Strings.logOut,
           cancelText: Strings.rejection,

@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:calora/common/constants/app_configs.dart';
 import 'package:calora/common/di/network/interceptor/error_interceptor.dart';
 import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -18,6 +20,7 @@ abstract class NetworkModule {
       sendTimeout: const Duration(seconds: 50),
     );
     final dio = Dio(options);
+    // _allowBadCertificates(dio);
     dio.interceptors.clear();
     return dio;
   }
@@ -25,13 +28,18 @@ abstract class NetworkModule {
   @lazySingleton
   @Named('refresh')
   Dio refreshDio() {
+    String baseUrl = kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl;
+    if (baseUrl.isNotEmpty && !baseUrl.endsWith('/')) {
+      baseUrl += '/';
+    }
     final options = BaseOptions(
-      baseUrl: kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl,
+      baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 50),
       receiveTimeout: const Duration(seconds: 50),
       sendTimeout: const Duration(seconds: 50),
     );
     final dio = Dio(options);
+    // _allowBadCertificates(dio);
     dio.interceptors.clear();
     return dio;
   }
@@ -45,6 +53,7 @@ abstract class NetworkModule {
     @Named('refresh') Dio refreshDio,
   ) {
     final dio = Dio(baseOptions);
+    // _allowBadCertificates(dio);
     tokenInterceptor.setDio(dio, refreshDio);
     dio.interceptors.addAll([tokenInterceptor, errorInterceptor]);
     if (kDebugMode) dio.interceptors.add(logger);
@@ -53,15 +62,31 @@ abstract class NetworkModule {
   }
 
   @lazySingleton
-  BaseOptions baseOptions() => BaseOptions(
-    baseUrl: kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl,
-    connectTimeout: const Duration(seconds: 50),
-    receiveTimeout: const Duration(seconds: 50),
-    sendTimeout: const Duration(seconds: 50),
-    headers: {'Connection': 'close', 'Content-Type': 'application/json'},
-  );
+  BaseOptions baseOptions() {
+    String baseUrl = kReleaseMode ? AppConfigs.baseUrl : AppConfigs.stagingBaseUrl;
+    if (baseUrl.isNotEmpty && !baseUrl.endsWith('/')) {
+      baseUrl += '/';
+    }
+    return BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 50),
+      receiveTimeout: const Duration(seconds: 50),
+      sendTimeout: const Duration(seconds: 50),
+      headers: {'Connection': 'close', 'Content-Type': 'application/json'},
+    );
+  }
 
   @lazySingleton
   PrettyDioLogger get logger =>
       PrettyDioLogger(requestHeader: true, requestBody: true, maxWidth: 100);
+
+  // void _allowBadCertificates(Dio dio) {
+  //   if (kDebugMode && !kIsWeb) {
+  //     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+  //       final client = HttpClient();
+  //       client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  //       return client;
+  //     };
+  //   }
+  // }
 }

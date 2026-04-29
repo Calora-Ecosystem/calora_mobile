@@ -7,10 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class VerifyCodeWidget extends StatefulWidget {
+  VerifyCodeWidget({
+    super.key,
+    required this.resend,
+    required this.resultCode,
+    required this.controller,
+  });
+
   final Function(String) resultCode;
   final Function() resend;
-
-  VerifyCodeWidget({super.key, required this.resend, required this.resultCode});
+  final TextEditingController controller;
 
   @override
   State<VerifyCodeWidget> createState() => _VerifyCodeWidgetState();
@@ -41,11 +47,12 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
             border: Border.all(color: context.colors.strokeSoft),
           ),
           child: PinCodeTextField(
+            autoFocus: true,
+            controller: widget.controller,
             appContext: context,
             length: 6,
             keyboardType: TextInputType.number,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            // Even spacing
             pinTheme: PinTheme(
               borderRadius: BorderRadius.circular(12),
               fieldHeight: 36,
@@ -58,9 +65,8 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
               inactiveFillColor: context.colors.backgroundBase,
               inactiveColor: Colors.transparent,
             ),
-            onCompleted: (data) {
-              widget.resultCode(data);
-            },
+            onChanged: (data) => widget.resultCode(data),
+            onCompleted: (data) => widget.resultCode(data),
             hintCharacter: '-',
           ),
         ),
@@ -73,9 +79,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
                 },
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Strings.resend
-                      .text(14, 20, 500)
-                      .c(context.colors.accentSub),
+                  child: Strings.resend.text(14, 20, 500).c(context.colors.accentSub),
                 ),
               )
             : Row(

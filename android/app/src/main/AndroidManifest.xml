@@ -4,15 +4,16 @@
     <!-- Health Connect permissions -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE" />
 
-    <!-- Activity recognition for step counting -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
-    <!-- Body sensors -->
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND" />
 
-    <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -32,12 +33,13 @@
     <!-- Audio -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-    <!-- Storage (deprecated on Android 13+, keep only if you really need it) -->
+    <!-- Storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
 
     <application
         android:name="${applicationName}"
@@ -52,8 +54,7 @@
             android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:launchMode="singleTop"
-            android:taskAffinity=""
+            android:launchMode="standard"
             android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize">
 
@@ -71,11 +72,25 @@
             </intent-filter>
         </activity>
 
-        <!-- Foreground task service (flutter_foreground_task) -->
+        <activity
+            android:name="com.google.android.apps.healthdata.permissions.api.sdk.HealthConnectPermissionActivity"
+            android:exported="true" />
+
+        <activity-alias
+            android:name=".HealthPermissionActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            tools:node="merge">
+            <intent-filter>
+                <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Foreground services -->
         <service
             android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <service
             android:name=".StepsFgService"
@@ -89,9 +104,16 @@
     </application>
 
     <queries>
+        <!-- Health Connect -->
         <package android:name="com.google.android.apps.healthdata" />
         <package android:name="com.google.android.apps.healthdata.debug" />
 
+        <!-- ✅ Fitness app'lar shu yerga ko'chdi -->
+        <package android:name="com.sec.android.app.shealth" />
+        <package android:name="com.mi.health" />
+        <package android:name="com.xiaomi.hm.health" />
+
+        <!-- Health Connect intent'lari -->
         <intent>
             <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
         </intent>
@@ -105,6 +127,7 @@
             <data android:scheme="package" />
         </intent>
 
+        <!-- Share intent'lari -->
         <intent>
             <action android:name="android.intent.action.SEND" />
             <data android:mimeType="text/plain" />

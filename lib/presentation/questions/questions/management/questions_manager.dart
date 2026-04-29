@@ -55,33 +55,38 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
         ? profile.weight! / pow(profile.height! / 100, 2)
         : null;
 
+    final tWeight = (profile.targetWeight ?? 0) == 0 ? profile.weight : profile.targetWeight;
+
     final request = QuestionsRequest(
       name: profile.name,
-      gender: profile.gender?.name,
-      purpose: mapPurpose(profile.purposeIds?.first ?? 0).name,
+      gender: profile.gender?.toApi(),
+      purpose: mapPurpose(profile.purposeIds?.first ?? 0).toApi(),
       birthDate: profile.birthDate,
       height: profile.height,
       weight: profile.weight,
-      targetWeight: profile.targetWeight,
-      activityLevel: profile.activityHours ?? Strings.averageActivity,
+      targetWeight: tWeight,
+      activityLevel: profile.activityHours ?? ActivityLevelEnum.Medium.toApi(),
       bmi: bmi,
       language: 'Uzbek',
+      physicalActivity: 'Healthy',
     );
 
     final profileRequest = ProfileRequest(
       name: profile.name,
-      gender: profile.gender?.name,
-      birthDay: profile.birthDate.toString(),
+      gender: profile.gender?.toApi(),
+      birthDay: profile.birthDate?.toIso8601String(),
       height: profile.height,
       weight: profile.weight,
-      targetWeight: profile.targetWeight,
+      targetWeight: tWeight,
       bmi: bmi,
-      goal: profile.purposeIds?.join(', '),
-      activityLevel: profile.activityHours,
+      goal: mapPurpose(profile.purposeIds?.first ?? 0).toApi(),
+      activityLevel: profile.activityHours ?? ActivityLevelEnum.Medium.toApi(),
+      physicalActivity: 'Healthy',
+      language: 'Uzbek',
     );
 
     getIt<ProfileStore>().set(profileRequest);
-    getIt<ProfileStore>().setGender(profile.gender?.name ?? '');
+    getIt<ProfileStore>().setGender(profile.gender?.toApi() ?? '');
 
     _repo
         .sendTargetWeight(

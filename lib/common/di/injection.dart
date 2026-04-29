@@ -7,8 +7,10 @@ import 'package:injectable/injectable.dart';
 final GetIt getIt = GetIt.instance;
 
 @InjectableInit()
-Future<void> configureDependencies() async {
+Future<void> configureDependencies({bool isBackground = false}) async {
   await getIt.init();
-  final appRouter = AppRouter();
-  getIt.registerSingleton<StackRouter>(appRouter);
+  if (!isBackground) {
+    final appRouter = AppRouter();
+    getIt.registerSingleton<StackRouter>(appRouter);
+  }
 }

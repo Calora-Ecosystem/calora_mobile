@@ -34,41 +34,40 @@ class _TrainLevelPageState extends State<TrainLevelPage> {
       Strings.increaseActivity,
       Strings.highLevelActivity,
     ];
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: IntrinsicHeight(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            Strings.chooseYourWorkoutLevel
-                .text(20, 24, 700)
-                .c(context.colors.textStrong),
-            const SizedBox(height: 16),
-            PurposesWidget(
-              goals: degrees,
-              onPurposeSelected: (value) {
-                setState(() {
-                  level = value;
-                });
-              },
-            ),
-            const SizedBox(height: 36),
-            GestureDetector(
-              onTap: () => Navigator.of(context).pop(level),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: context.colors.accentSub,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Strings.save.text(16, 20, 500).c(context.colors.white).copyWith(textAlign: TextAlign.center),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Strings.chooseYourWorkoutLevel.text(20, 24, 700).c(context.colors.textStrong),
+          const SizedBox(height: 16),
+          PurposesWidget(
+            goals: degrees,
+            onPurposeSelected: (value) {
+              setState(() {
+                level = value;
+              });
+            },
+          ),
+          const SizedBox(height: 36),
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(level),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: context.colors.accentSub,
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: Strings.save
+                  .text(16, 20, 500)
+                  .c(context.colors.white)
+                  .copyWith(textAlign: TextAlign.center),
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }

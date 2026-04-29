@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions.dart' show ActivityLevelEnum;
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/model/reminder/reminder_request.dart';
@@ -69,28 +70,43 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
 
     final activityLevelApi = _activityLevelFromId(info.activityTime);
 
-    final physicalActivity = _physicalActivityFromCondition(info.condition);
+    final physicalActivity = _physicalActivityFromCondition(info.condition) ?? saved.physicalActivity;
 
     await profileStore.updateProfile(
       bmi: bmi,
       activityLevel: activityLevelApi ?? saved.activityLevel,
       physicalActivity: physicalActivity,
     );
+
+    // Purpose mappingni onboarding bilan bir xil qilamiz
+    String? purposeApi = saved.goal;
+    if (purposeApi == '0' || purposeApi == 'WeightLoss') purposeApi = 'WeightLoss';
+    else if (purposeApi == '1' || purposeApi == 'SaveCurrent') purposeApi = 'SaveCurrent';
+    else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') purposeApi = 'MuscleDevelopment';
+
+    final tWeight = (saved.targetWeight ?? 0) == 0 ? saved.weight : saved.targetWeight;
+
     final request = QuestionsRequest(
       name: saved.name,
-      gender: saved.gender,
-      purpose: saved.goal,
+      gender: saved.gender, // Swagger kutgan "Male"/"Female" formatida bo'lishi kerak
+      purpose: purposeApi,
       birthDate: DateTime.tryParse(saved.birthDay ?? ''),
       height: saved.height,
       weight: saved.weight,
-      targetWeight: saved.targetWeight,
+      targetWeight: tWeight,
       bmi: bmi,
-      activityLevel: activityLevelApi ?? Strings.averageActivity,
+      activityLevel: activityLevelApi ?? saved.activityLevel,
       language: 'Uzbek',
       physicalActivity: physicalActivity,
     );
 
-    _questionsRepo.sendAnswers(request);
+    print('DEBUG: Sending full profile update with activityLevel: ${request.activityLevel}');
+
+    try {
+      await _questionsRepo.sendAnswers(request);
+    } catch (e) {
+      print('DEBUG: Error sending answers: $e');
+    }
     updateNotification(_formatTimeToApi(state.courseQuestionsInfo.trainingTime) ?? '00:00:00');
   }
 
@@ -112,7 +128,7 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
       case 0:
         return 'Healthy';
       case 1:
-        return 'Unhealthy ';
+        return 'Unhealthy';
       default:
         return null;
     }

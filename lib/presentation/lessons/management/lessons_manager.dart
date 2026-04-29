@@ -9,7 +9,6 @@ import 'package:management/management.dart';
 @injectable
 class LessonsManager extends Manager<LessonsState, LessonsEffect> {
   final CourseRepo _courseRepo;
-
   final QuestionsRepo _questionsRepo;
 
   LessonsManager(this._courseRepo, this._questionsRepo) : super(const LessonsState());
@@ -18,36 +17,72 @@ class LessonsManager extends Manager<LessonsState, LessonsEffect> {
     emit(state.copyWith(levelIndex: index));
   }
 
+  Future<void> changeActivityLevel(int courseId, int index) async {
+    final levelText = _levelTextFromIndex(index);
+    emit(state.copyWith(levelIndex: index, isLoading: true));
+
+    await profileStore.updateActivityLevel(levelText);
+
+    await refreshActivityLevel(index);
+
+    _courseRepo
+        .getWorkout(courseId, levelText)
+        .handle(
+          onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            publish(LessonsEffect.showError(error.toString()));
+          },
+        );
+  }
+
   void getWorkout(int id) {
     _courseRepo
         .getWorkout(id, _levelTextFromIndex(state.levelIndex))
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (workouts) => emit(state.copyWith(workouts: workouts, isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
+          onError: (error) {
+            emit(state.copyWith(isLoading: false));
+            publish(LessonsEffect.showError(error.toString()));
+          },
         );
   }
 
   Future<void> loadActivityLevel() async {
     final profile = await profileStore.getProfile();
     if (profile.activityLevel is String) {
-      emit(state.copyWith(levelIndex: levelIndexFromText(profile.activityLevel)));
+      emit(state.copyWith(levelIndex: levelIndexFromText(profile.activityLevel ?? '')));
     }
   }
 
   Future<void> refreshActivityLevel(int levelIndex) async {
     final profile = await profileStore.getProfile();
+    final levelText = _levelTextFromIndex(levelIndex);
+
+    String? purposeApi = profile.goal;
+    if (purposeApi == '0' || purposeApi == 'WeightLoss') {
+      purposeApi = 'WeightLoss';
+    } else if (purposeApi == '1' || purposeApi == 'SaveCurrent') {
+      purposeApi = 'SaveCurrent';
+    } else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') {
+      purposeApi = 'MuscleDevelopment';
+    }
+
+    final tWeight = (profile.targetWeight ?? 0) == 0 ? profile.weight : profile.targetWeight;
+
     final request = QuestionsRequest(
       name: profile.name,
       gender: profile.gender,
-      purpose: profile.goal,
+      purpose: purposeApi,
       birthDate: profile.birthDay != null ? DateTime.tryParse(profile.birthDay!) : null,
       height: profile.height,
       weight: profile.weight,
-      targetWeight: profile.targetWeight,
+      targetWeight: tWeight,
       bmi: profile.bmi,
-      activityLevel: _levelTextFromIndex(levelIndex),
+      activityLevel: levelText,
       language: 'Uzbek',
+      physicalActivity: profile.physicalActivity,
     );
     await _questionsRepo.sendAnswers(request);
   }

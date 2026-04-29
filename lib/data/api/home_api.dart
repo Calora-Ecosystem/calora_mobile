@@ -11,14 +11,14 @@ class HomeApi {
   HomeApi(this._dio);
 
   Future<void> postUserDailies(DailiesRequest metric) async {
-    await _dio.post('/users/dailies', data: metric);
+    await _dio.post('users/dailies', data: metric);
   }
 
   Future<DailiesRequest?> getDailies(DateTime date, String metric) async {
     final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
     final response = await _dio.get(
-      '/users/dailies',
+      'users/dailies',
       queryParameters: {
         'from': formattedDate,
         'to': formattedDate,
@@ -46,12 +46,12 @@ class HomeApi {
   }
 
   Future<String> getLatestVersionKey() async {
-    final res = await _dio.get('/versions/latest');
+    final res = await _dio.get('versions/latest');
     return res.data['content']['key']?.toString() ?? '';
   }
 
   Future<bool> isVersionActive(String version) async {
-    final res = await _dio.get('/versions/$version');
+    final res = await _dio.get('versions/$version');
     return (res.data['content']['isActive'] == true);
   }
 }

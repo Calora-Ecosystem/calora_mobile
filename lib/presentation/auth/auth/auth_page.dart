@@ -64,6 +64,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                       if (!state.isUzbekistan) ...[
                         TextField(
                           controller: manager.controller,
+                          cursorColor: context.colors.accentSub,
                           decoration: InputDecoration(
                             hintText: Strings.emailAddress,
                           ),
@@ -102,12 +103,15 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                         Button(
                           type: ButtonType.secondary,
                           onPressed: () => manager.loginWithApple(),
+                          loading: state.loading,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Assets.icons.apple.svg(),
                               const SizedBox(width: 8),
-                              Strings.continueWithApple.text(14, 18, 500).c(context.colors.textStrong),
+                              Strings.continueWithApple
+                                  .text(14, 18, 500)
+                                  .c(context.colors.textStrong),
                             ],
                           ),
                         ),
@@ -115,18 +119,22 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                         Button(
                           type: ButtonType.secondary,
                           onPressed: () => manager.loginWithGoogle(),
+                          loading: state.loading,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Assets.icons.google.svg(),
                               const SizedBox(width: 8),
-                              Strings.continueWithGoogle.text(14, 18, 500).c(context.colors.textStrong),
+                              Strings.continueWithGoogle
+                                  .text(14, 18, 500)
+                                  .c(context.colors.textStrong),
                             ],
                           ),
                         ),
                       ] else ...[
                         TextFormField(
                           controller: manager.controller,
+                          cursorColor: context.colors.accentSub,
                           inputFormatters: [phoneFormatter],
                           keyboardType: TextInputType.phone,
                           style: TextStyle(
@@ -167,6 +175,10 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                           Checkbox(
                             value: state.checked,
                             onChanged: manager.setChecked,
+                            activeColor: context.colors.accentSub,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(

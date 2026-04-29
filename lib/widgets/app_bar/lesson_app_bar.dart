@@ -84,15 +84,10 @@ class LessonAppBar extends StatelessWidget {
                         children: [
                           RatingStars(level: level),
                           const SizedBox(width: 8),
-                          Strings.startEasy
-                              .text(12, 14, 500)
-                              .c(context.colors.textSub),
+                          Strings.startEasy.text(12, 14, 500).c(context.colors.textSub),
                         ],
                       ),
-                      title
-                          .text(24, 32, 700)
-                          .c(context.colors.accentSub)
-                          .copyWith(maxLines: 2),
+                      title.text(24, 32, 700).c(context.colors.accentSub).copyWith(maxLines: 2),
                     ],
                   ),
                 ),
@@ -116,11 +111,10 @@ class LessonAppBar extends StatelessWidget {
     final result = await showModalBottomSheet<int>(
       backgroundColor: context.colors.backgroundBase,
       isScrollControlled: true,
+      useSafeArea: true,
       context: context,
       builder: (context) {
-        return TrainLevelPage(
-          currentLevel: level,
-        );
+        return TrainLevelPage(currentLevel: level);
       },
     );
     if (result != null) {

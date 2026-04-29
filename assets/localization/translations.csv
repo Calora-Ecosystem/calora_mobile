@@ -387,3 +387,7 @@ additional_information_being_analyzed,Additional information is being analyzed..
 notificationFailed,Failed to load notifications,Bildirishnomalarni olishda xatolik,Не удалось загрузить уведомления
 noNotifications,No notifications,Bildirishnomalar yo'q,Уведомления отсутствуют
 installTheNewVersion,"To continue, install the new version of the app.",Davom etish uchun ilovaning yangi versiyasini o‘rnating.,Для продолжения установите новую версию приложения.
+step_synchronization,Step synchronization,Qadamlar sinxronizatsiyasi,Синхронизация шагов
+step_sync_description,"To count your steps correctly, you need to connect the Google Fit app to Health Connect. Please go to settings and check permissions.","Qadamlaringiz to'g'ri hisoblanishi uchun Google Fit ilovasini Health Connect tizimiga ulashingiz kerak. Iltimos, sozlamalarga kirib ruxsatlarni tekshiring.","Чтобы ваши шаги считались правильно, вам нужно подключить приложение Google Fit к Health Connect. Пожалуйста, зайдите в настройки и проверьте разрешения."
+go_to_settings,Go to settings,Sozlamalarga o'tish,Перейти в настройки
+later,Later,Keyinroq,Позже

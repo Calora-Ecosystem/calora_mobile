@@ -23,6 +23,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
   @override
   void init(BuildContext context, CalculateManager manager) {
     manager.getProfile();
+    manager.getDailyGoals();
     super.init(context, manager);
   }
 
@@ -44,6 +45,14 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
     CalculateManager manager,
     CalculateState state,
   ) {
+    if (state.isLoading || state.dailyGoals.isEmpty) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -79,7 +88,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                         _buildIconTextRow(
                           context,
                           icon: Assets.icons.workoutSport.svg(),
-                          count: '6000 ${Strings.step}',
+                          count: '${state.dailyGoals[1].toInt()} ${Strings.step}',
                           title: Strings.steps,
                           subtitle: Strings.dailyGoal,
                         ),
@@ -87,7 +96,7 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
                         _buildIconTextRow(
                           context,
                           icon: Assets.icons.water.svg(),
-                          count: '${state.dailyGoals[2]} ml',
+                          count: '${state.dailyGoals[2].toInt()} ml',
                           title: Strings.water,
                           subtitle: Strings.dailyGoal,
                         ),

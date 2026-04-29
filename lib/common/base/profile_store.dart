@@ -70,7 +70,8 @@ class ProfileStore extends BaseStore<ProfileRequest> {
     String? metrics,
     int? userId,
     String? physicalActivity,
-    dynamic activityLevel,
+    String? activityLevel,
+    String? language,
   }) async {
     final current = await call();
     final updated = current.copyWith(
@@ -86,6 +87,7 @@ class ProfileStore extends BaseStore<ProfileRequest> {
       bmi: bmi ?? current.bmi,
       activityLevel: activityLevel ?? current.activityLevel,
       physicalActivity: physicalActivity ?? current.physicalActivity,
+      language: language ?? current.language,
     );
     await set(updated);
   }

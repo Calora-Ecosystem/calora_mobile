@@ -20,6 +20,7 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
   final CommonStore _commonStore;
   final ProfileStore _profileStore;
   final SplashRepo _splashRepo;
+
   SplashManager(
     this._authStore,
     this._commonStore,
@@ -46,7 +47,8 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
     final bool isOnboardingCompleted = results[2] as bool;
     final bool isQuestionaryFinished = results[3] as bool;
 
-    if (token?.refreshTokenExpireAt != null && token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
+    if (token?.refreshTokenExpireAt != null &&
+        token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
       await _authStore.token.clear();
       await _profileStore.clear();
       token = null;
@@ -73,9 +75,9 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
   Future<bool> getCurrentCountry() async {
     try {
       return await _splashRepo.getCurrentCountry();
-    } on DioException catch (e, s) {
+    } on DioException catch (e) {
       return true;
-    } catch (e, s) {
+    } catch (e) {
       return true;
     }
   }

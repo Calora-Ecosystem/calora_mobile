@@ -13,7 +13,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @lazySingleton
-class NotificationSettingsManager extends Manager<NotificationSettingsState, NotificationSettingsEffect> {
+class NotificationSettingsManager
+    extends Manager<NotificationSettingsState, NotificationSettingsEffect> {
   final NotificationRepo _notificationRepo;
 
   NotificationSettingsManager(this._notificationRepo) : super(const NotificationSettingsState()) {
@@ -25,10 +26,14 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
     onData: (data) {
       final Map<ReminderTypesEnum, ReminderRequest> newRemindersMap = {};
       for (final request in data) {
-        if (request.type != null && (request.menu != null || request.type == ReminderSettingTypeEnum.water.toApi)) {
+        if (request.type != null &&
+            (request.menu != null || request.type == ReminderSettingTypeEnum.water.toApi)) {
           final settingType = ReminderSettingTypeEnum.fromApi(request.type);
           final menuType = MenuTypeEnum.fromApi(request.menu);
-          final reminderType = ReminderTypesEnum.fromReminderSettings(menu: menuType, type: settingType);
+          final reminderType = ReminderTypesEnum.fromReminderSettings(
+            menu: menuType,
+            type: settingType,
+          );
           if (reminderType != ReminderTypesEnum.none) newRemindersMap[reminderType] = request;
         }
       }
@@ -65,7 +70,9 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
     return ReminderTypesEnum.fromReminderSettings(menu: menuType, type: settingType);
   }
 
-  Future<void> saveAllReminderChanges({required Map<ReminderTypesEnum, ReminderRequest> originalReminders}) async {
+  Future<void> saveAllReminderChanges({
+    required Map<ReminderTypesEnum, ReminderRequest> originalReminders,
+  }) async {
     emit(state.copyWith(isSaving: true));
 
     final currentReminders = state.reminders;
@@ -97,17 +104,20 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
 
       if (!currentReminders.containsKey(key)) {
         if (originalReminder.id != null) {
-          deleteFutures.add(_notificationRepo.deleteReminder(originalReminder.id!).then((_) => key));
+          deleteFutures.add(
+            _notificationRepo.deleteReminder(originalReminder.id!).then((_) => key),
+          );
           hasChanges = true;
         }
       }
     }
 
     try {
-      final List<MapEntry<ReminderTypesEnum, ReminderRequest>> updatedEntries = updateFutures.isNotEmpty
-          ? await Future.wait(updateFutures)
+      final List<MapEntry<ReminderTypesEnum, ReminderRequest>> updatedEntries =
+          updateFutures.isNotEmpty ? await Future.wait(updateFutures) : [];
+      final List<ReminderTypesEnum> deletedKeys = deleteFutures.isNotEmpty
+          ? await Future.wait(deleteFutures)
           : [];
-      final List<ReminderTypesEnum> deletedKeys = deleteFutures.isNotEmpty ? await Future.wait(deleteFutures) : [];
 
       final finalReminders = Map<ReminderTypesEnum, ReminderRequest>.from(currentReminders);
 
@@ -115,7 +125,9 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
 
       for (final key in deletedKeys) finalReminders.remove(key);
 
-      emit(state.copyWith(reminders: finalReminders, remoteReminders: finalReminders.values.toList()));
+      emit(
+        state.copyWith(reminders: finalReminders, remoteReminders: finalReminders.values.toList()),
+      );
       if (hasChanges) {
         getIt<Display>().success(Strings.reminderChangedSuccessfully);
       }
@@ -127,7 +139,10 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
     }
   }
 
-  Future<void> saveSingleReminderChange({required ReminderTypesEnum type, ReminderRequest? originalRequest}) async {
+  Future<void> saveSingleReminderChange({
+    required ReminderTypesEnum type,
+    ReminderRequest? originalRequest,
+  }) async {
     emit(state.copyWith(isSaving: true));
 
     final futures = <Future>[];
@@ -141,7 +156,14 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
           final requestToSend = currentReminder.copyWith(time: formattedTime);
           futures.add(
             _notificationRepo.updateReminder(requestToSend).then((updatedReminder) {
-              emit(state.copyWith(reminders: {...state.reminders, type: updatedReminder}));
+              emit(
+                state.copyWith(
+                  reminders: {
+                    ...state.reminders,
+                    type: updatedReminder,
+                  },
+                ),
+              );
               return updatedReminder;
             }),
           );
@@ -157,7 +179,14 @@ class NotificationSettingsManager extends Manager<NotificationSettingsState, Not
     } catch (e) {
       log('Error saving single reminder: $e');
       if (originalRequest != null) {
-        emit(state.copyWith(reminders: {...state.reminders, type: originalRequest}));
+        emit(
+          state.copyWith(
+            reminders: {
+              ...state.reminders,
+              type: originalRequest,
+            },
+          ),
+        );
       } else {
         await getReminders();
       }

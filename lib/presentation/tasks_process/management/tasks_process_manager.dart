@@ -66,7 +66,7 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
 
   void next() {
     _timer?.cancel();
-    _goNextIndex();
+    onExerciseFinished();
   }
 
   void _goNextIndex() {
@@ -77,11 +77,12 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
       _startForCurrent();
       return;
     }
-    final finishedAll = state.completedTaskCount == state.exercises.length;
+
     final id = _workoutId;
-    if (finishedAll && id != null) {
+    if (id != null) {
       unawaited(_courseRepo.finishWorkout(id));
     }
+
     publish(
       TasksProcessEffect.navigateFinish(
         calories: 500,
@@ -117,25 +118,48 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
     final ex = currentExercise;
     if (ex == null) return;
 
-    final total = parseDuration(ex.duration).inSeconds;
+    // `computation.value` is authoritative for both types:
+    //   Count    → number of reps, tick every 3s
+    //   Duration → number of seconds, tick every 1s
+    // The legacy `duration` string is only used as a fallback when
+    // `computation` is missing (older exercises).
+    final comp = ex.computation;
+    if (comp == null) {
+      _startDurationCountdown(parseDuration(ex.duration).inSeconds);
+      return;
+    }
 
+    final value = comp.value.toInt();
+    if (comp.computationType == ComputationType.count) {
+      _startCountCountdown(value);
+    } else {
+      _startDurationCountdown(value);
+    }
+  }
+
+  void _startDurationCountdown(int total) {
     if (total <= 0) {
       emit(
         state.copyWith(
+          isCountType: false,
           totalSeconds: 0,
           remainingSeconds: 0,
+          totalCount: 0,
+          remainingCount: 0,
           isPaused: false,
         ),
       );
-
       onExerciseFinished();
       return;
     }
 
     emit(
       state.copyWith(
+        isCountType: false,
         totalSeconds: total,
         remainingSeconds: total,
+        totalCount: 0,
+        remainingCount: 0,
         isPaused: false,
       ),
     );
@@ -153,10 +177,70 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
     });
   }
 
+  /// Count-type exercise: the provided value (e.g. 10) decrements by 1 every
+  /// 3 seconds until it reaches 0, then the exercise auto-advances.
+  /// totalSeconds/remainingSeconds are kept in sync so the ProgressButton
+  /// animation fills over the full count duration.
+  void _startCountCountdown(int count) {
+    if (count <= 0) {
+      emit(
+        state.copyWith(
+          isCountType: true,
+          totalSeconds: 0,
+          remainingSeconds: 0,
+          totalCount: 0,
+          remainingCount: 0,
+          isPaused: false,
+        ),
+      );
+      onExerciseFinished();
+      return;
+    }
+
+    const tickSeconds = 3;
+    final total = count * tickSeconds;
+
+    emit(
+      state.copyWith(
+        isCountType: true,
+        totalSeconds: total,
+        remainingSeconds: total,
+        totalCount: count,
+        remainingCount: count,
+        isPaused: false,
+      ),
+    );
+
+    _timer = Timer.periodic(const Duration(seconds: tickSeconds), (t) {
+      if (state.isPaused) return;
+
+      final nextRemaining = state.remainingCount - 1;
+      if (nextRemaining <= 0) {
+        t.cancel();
+        emit(state.copyWith(remainingCount: 0, remainingSeconds: 0));
+        onExerciseFinished();
+      } else {
+        emit(
+          state.copyWith(
+            remainingCount: nextRemaining,
+            remainingSeconds: nextRemaining * tickSeconds,
+          ),
+        );
+      }
+    });
+  }
+
   int _totalWorkoutDurationSeconds(List<ExercisesRequest> list) {
     var sum = 0;
     for (final e in list) {
-      sum += parseDuration(e.duration).inSeconds;
+      final comp = e.computation;
+      if (comp == null) {
+        sum += parseDuration(e.duration).inSeconds;
+      } else if (comp.computationType == ComputationType.count) {
+        sum += comp.value.toInt() * 3;
+      } else {
+        sum += comp.value.toInt();
+      }
     }
     return sum;
   }

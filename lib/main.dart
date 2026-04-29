@@ -21,11 +21,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   log('[BG] Message id: ${message.messageId}');
-  log('[BG] Data: ${message.data}');
 
-  if (Platform.isAndroid) {
+  if (Platform.isAndroid && message.notification == null) {
     await NotificationService.instance.initForBackground();
-    await NotificationService.instance.showNotificationFromRemote(message);
+    await NotificationService.instance.showBackgroundDataNotification(message);
   }
 }
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
@@ -15,9 +17,14 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   final AuthRepo _repo;
   final AuthStore _authStore;
 
+  static const String _serverClientId =
+      '638398407864-kt5orfc7nipvl9trmcvt0mlrrfc7k2tg.apps.googleusercontent.com';
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  late final Future<void> _googleInitFuture;
+
   AuthManager(this._repo, this._authStore) : super(const AuthState()) {
     termsRecognizer.onTap = _openTermsOfUse;
-
     _googleInitFuture = _googleSignIn.initialize(
       serverClientId: _serverClientId,
     );
@@ -29,7 +36,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   void setChecked(bool? value) => emit(state.copyWith(checked: value == true));
 
   void _openTermsOfUse() async {
-    final url = Uri.parse('https://www.google.com');
+    final url = Uri.parse('https://calora.uz/term-of-use');
     await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
@@ -50,11 +57,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       return _repo
           .sendOtpToPhone(fullPhoneNumber)
           .handle(
-        onStart: () => emit(state.copyWith(loading: true)),
-        onData: (verification) => publish(AuthEffect.verify(verification)),
-        onError: (error) => emit(state.copyWith(loading: false)),
-        onDone: () => emit(state.copyWith(loading: false)),
-      );
+            onStart: () => emit(state.copyWith(loading: true)),
+            onData: (verification) => publish(AuthEffect.verify(verification)),
+            onError: (error) => emit(state.copyWith(loading: false)),
+            onDone: () => emit(state.copyWith(loading: false)),
+          );
     } else {
       final email = controller.text.trim();
       if (email.isEmpty) {
@@ -69,16 +76,16 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       return _repo
           .sendOtp(email)
           .handle(
-        onStart: () => emit(state.copyWith(loading: true)),
-        onData: (verification) => publish(AuthEffect.verify(verification)),
-        onError: (error) => emit(state.copyWith(loading: false)),
-        onDone: () => emit(state.copyWith(loading: false)),
-      );
+            onStart: () => emit(state.copyWith(loading: true)),
+            onData: (verification) => publish(AuthEffect.verify(verification)),
+            onError: (error) => emit(state.copyWith(loading: false)),
+            onDone: () => emit(state.copyWith(loading: false)),
+          );
     }
   }
 
   bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   Future<void> setIsUzbekistan({bool? value}) async {
@@ -90,12 +97,6 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
     emit(state.copyWith(isUzbekistan: value));
   }
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-
-  late final Future<void> _googleInitFuture;
-
-  static const String _serverClientId = '638398407864-e2qthkeciq05a3conbgd4tujlrn146lq.apps.googleusercontent.com';
-
   Future<void> loginWithGoogle() async {
     try {
       if (!state.checked) {
@@ -104,30 +105,32 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       }
 
       emit(state.copyWith(loading: true));
-      await _googleInitFuture;
 
-      final account = await _googleSignIn.authenticate(
-        scopeHint: const ['email'],
+      await _googleInitFuture;
+      await _googleSignIn.signOut();
+
+      final GoogleSignInAccount account = await _googleSignIn.authenticate(
+        scopeHint: ['email', 'profile'],
       );
 
-      final idToken = account.authentication.idToken;
+      final GoogleSignInAuthentication authentication = await account.authentication;
+      final String? idToken = authentication.idToken;
 
       if (idToken == null || idToken.isEmpty) {
-        publish(AuthEffect.showError('Google idToken topilmadi'));
+        publish(const AuthEffect.showError('Google idToken topilmadi'));
         return;
       }
 
-      final hasNewUser = await _repo.signInGoogle(idToken);
+      final bool hasNewUser = await _repo.signInGoogle(idToken);
+
       if (hasNewUser) {
         publish(AuthEffect.openQuestions(account.email));
         return;
       }
-      publish(AuthEffect.openDashboard());
-    } on GoogleSignInException catch (e, st) {
-      if (e.code == GoogleSignInExceptionCode.canceled) return;
-      publish(AuthEffect.showError('${e.code}: ${e.description ?? ''}'.trim()));
-    } catch (e, st) {
-      publish(AuthEffect.showError(e.toString()));
+      publish(const AuthEffect.openDashboard());
+    } catch (e) {
+      log('Google Sign-In Error: $e');
+      publish(const AuthEffect.showError('Google orqali kirishda xatolik yuz berdi'));
     } finally {
       emit(state.copyWith(loading: false));
     }
@@ -152,7 +155,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       final String? ssoToken = credential.identityToken;
 
       if (ssoToken == null || ssoToken.isEmpty) {
-        publish(AuthEffect.showError('Apple token topilmadi'));
+        publish(const AuthEffect.showError('Apple token topilmadi'));
         return;
       }
 
@@ -163,7 +166,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
         return;
       }
 
-      publish(AuthEffect.openDashboard());
+      publish(const AuthEffect.openDashboard());
     } catch (e) {
       publish(AuthEffect.showError(e.toString()));
     } finally {

@@ -13,12 +13,15 @@ class PedometerService {
   StreamSubscription<PedestrianStatus>? _pedestrianStatusSubscription;
 
   final _stepsController = StreamController<int>.broadcast();
+
   Stream<int> get stepCountStream => _stepsController.stream;
 
   final _errorController = StreamController<String>.broadcast();
+
   Stream<String> get errorStream => _errorController.stream;
 
   bool _isInitialized = false;
+
   bool get isInitialized => _isInitialized;
 
   static Future<bool>? _globalPermissionFuture;
@@ -76,7 +79,7 @@ class PedometerService {
 
       _emitError('unsupported_platform');
       return false;
-    } catch (e, s) {
+    } catch (e) {
       _emitError('permission_check_failed: $e');
       return false;
     }
@@ -96,7 +99,7 @@ class PedometerService {
     try {
       _listenToStepCountStream();
       _isInitialized = true;
-    } catch (e, s) {
+    } catch (e) {
       _isInitialized = false;
       _emitError('initialization_failed: $e');
     }
@@ -120,9 +123,37 @@ class PedometerService {
         },
         cancelOnError: false,
       );
-    } catch (e, s) {
+    } catch (e) {
       _emitError('stream_start_failed: $e');
     }
+  }
+
+  Future<int> getCurrentSteps() async {
+    final completer = Completer<int>();
+    StreamSubscription<int>? sub;
+
+    sub = Pedometer().stepCountStream().listen(
+      (steps) {
+        if (!completer.isCompleted) {
+          completer.complete(steps);
+          sub?.cancel();
+        }
+      },
+      onError: (e) {
+        if (!completer.isCompleted) {
+          completer.completeError(e);
+          sub?.cancel();
+        }
+      },
+    );
+
+    return completer.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        sub?.cancel();
+        throw TimeoutException('Pedometer sensor did not respond in time');
+      },
+    );
   }
 
   Future<int> getStepsForDateRange(DateTime from, DateTime to) async {

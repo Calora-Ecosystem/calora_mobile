@@ -48,7 +48,7 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
             ),
           ),
           Positioned(
-            top: 24,
+            top: MediaQuery.of(context).padding.top,
             right: 16,
             child: Container(
               decoration: BoxDecoration(
@@ -144,8 +144,7 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
   }
 
   void _close(BuildContext context) {
-    final router = context.router;
-    router.removeWhere((r) => r.name == FinishTaskRoute.name || r.name == TasksProcessRoute.name);
+    context.router.popUntilRouteWithName(LessonsRoute.name);
   }
 
   Future<Gender> _getGender() async {

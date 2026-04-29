@@ -1,6 +1,7 @@
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/presentation/auth/verify/management/verify_management.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -10,46 +11,49 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
 
   VerifyManager(this.authRepo) : super(const VerifyState());
 
-  Verification _verification = Verification();
-  String _verificationCode = '';
+  final TextEditingController controller = TextEditingController();
 
-  void setVerification(Verification value) {
-    _verification = value;
-  }
-
-  void setVerificationCode(String code) {
-    _verificationCode = code;
+  void setInitialVerification(Verification initialVerification) {
+    emit(state.copyWith(verification: initialVerification));
   }
 
   void resend() {
+    final currentVerification = state.verification;
+    if (currentVerification?.email == null) return;
+
     authRepo
-        .sendOtp(_verification.email ?? '')
+        .sendOtp(currentVerification!.email!)
         .handle(
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (data) {
-            _verification = data.copyWith(email: _verification.email);
-            emit(state.copyWith(loading: false));
+            final newVerification = data.copyWith(email: currentVerification.email);
+            emit(state.copyWith(loading: false, verification: newVerification));
           },
-          onError: (error) => emit(state.copyWith(loading: false)),
-          onDone: () {},
+          onError: (error) {
+            emit(state.copyWith(loading: false));
+            publish(VerifyEffect.showError(error.toString()));
+          },
         );
   }
 
   void verify() {
+    final currentVerification = state.verification;
+    if (currentVerification == null) return;
+
     authRepo
-        .signIn(_verification, _verificationCode)
+        .signIn(currentVerification, controller.text)
         .handle(
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (hasNewUser) {
             if (hasNewUser) {
-              final identifier =
-                  _verification.email ?? _verification.phone ?? '';
-              publish(VerifyEffect.openQuestions(identifier));
+              publish(VerifyEffect.openQuestions(currentVerification.email ?? ''));
             } else {
               publish(VerifyEffect.openDashboard());
             }
           },
-          onError: (error) => emit(state.copyWith(loading: false)),
+          onError: (error) {
+            publish(VerifyEffect.showError(error.toString()));
+          },
           onDone: () => emit(state.copyWith(loading: false)),
         );
   }
