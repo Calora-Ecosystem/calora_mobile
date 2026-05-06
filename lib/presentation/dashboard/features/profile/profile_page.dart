@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
@@ -19,74 +18,71 @@ import 'package:management/management.dart';
 import 'package:share_plus/share_plus.dart';
 
 @RoutePage()
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
   const ProfilePage({super.key});
 
-  bool _showBmiProgress(String? goal) {
-    final g = (goal ?? '').trim();
-    return g != 'SaveCurrent';
+  @override
+  void init(BuildContext context, ProfileManager manager) {
+    manager.initialize();
+    super.init(context, manager);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<ProfileRequest>(
-      stream: profileStore.stream(),
-      initialData: const ProfileRequest(),
-      builder: (context, snapshot) {
-        final profile = snapshot.data ?? const ProfileRequest();
-        return Scaffold(
-          body: Stack(
-            children: [
-              Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
-              SafeArea(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                    child: Column(
-                      children: [
-                        ProfileCard(
-                          surname: profile.name ?? '',
-                          name: profile.name ?? '',
-                          email: profile.email ?? '',
-                          onEdit: () =>
-                              _openProfileDetailPage(context, profile.userId?.toString() ?? ''),
-                        ),
-                        const SizedBox(height: 16),
-                        BmiCard(
-                          showProgress: _showBmiProgress(profile.goal),
-                          height: profile.height ?? 1,
-                          entryWeight: profile.entryWeight ?? 100,
-                          weight: profile.weight ?? 0,
-                          targetWeight: profile.targetWeight ?? 0,
-                        ),
-                        const SizedBox(height: 16),
-                        SettingsCard(
-                          onAccountTap: () => _openAccountDetailPage(context),
-                          onNormsTap: () => _openNormsPage(context),
-                          onLanguageTap: () => _showLanguageBottomSheet(context),
-                          onNotificationsTap: () => _openNotificationSettingsPage(context),
-                          onInviteTap: () {
-                            SharePlus.instance.share(
-                              ShareParams(
-                                text:
-                                    "Men Calora ilovasidan foydalanayapman.\nSiz ham sog'lom hayot uchun yuklab oling!\n\nIlovani yuklab olish: https://calora.uz",
-                              ),
-                            );
-                          },
-                          onAboutTap: () => _showAboutBottomSheet(context),
-                          onHelpTap: () => _showHelpBottomSheet(context),
-                        ),
-                        const SizedBox(height: 16),
-                        PremiumEntryCard(),
-                      ],
+  Widget builder(BuildContext context, ProfileManager manager, ProfileState state) {
+    final profile = state.profile ?? const ProfileRequest();
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  children: [
+                    ProfileCard(
+                      surname: profile.name ?? '',
+                      name: profile.name ?? '',
+                      email: profile.email ?? '',
+                      onEdit: () => _openProfileDetailPage(
+                        context,
+                        profile.userId?.toString() ?? '',
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    BmiCard(
+                      showProgress: state.showBmiProgress,
+                      height: profile.height ?? 1,
+                      entryWeight: profile.entryWeight ?? 100,
+                      weight: profile.weight ?? 0,
+                      targetWeight: profile.targetWeight ?? 0,
+                    ),
+                    const SizedBox(height: 16),
+                    SettingsCard(
+                      onAccountTap: () => _openAccountDetailPage(context),
+                      onNormsTap: () => _openNormsPage(context),
+                      onLanguageTap: () => _showLanguageBottomSheet(context),
+                      onNotificationsTap: () => _openNotificationSettingsPage(context),
+                      onInviteTap: () {
+                        SharePlus.instance.share(
+                          ShareParams(
+                            text:
+                                "Men Calora ilovasidan foydalanayapman.\nSiz ham sog'lom hayot uchun yuklab oling!\n\nIlovani yuklab olish: https://calora.uz",
+                          ),
+                        );
+                      },
+                      onAboutTap: () => _showAboutBottomSheet(context),
+                      onHelpTap: () => _showHelpBottomSheet(context),
+                    ),
+                    const SizedBox(height: 16),
+                    PremiumEntryCard(),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

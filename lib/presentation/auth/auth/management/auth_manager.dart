@@ -4,6 +4,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/presentation/auth/auth/management/auth_management.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -78,7 +79,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
           .handle(
             onStart: () => emit(state.copyWith(loading: true)),
             onData: (verification) => publish(AuthEffect.verify(verification)),
-            onError: (error) => emit(state.copyWith(loading: false)),
+            onError: (error) {
+              emit(state.copyWith(loading: false));
+              final e = (error as DioException).response?.data['error'];
+              publish(AuthEffect.showError(e.toString()));
+            },
             onDone: () => emit(state.copyWith(loading: false)),
           );
     }

@@ -17,7 +17,6 @@ class ProfileRepoImpl extends ProfileRepo {
   Future<ProfileRequest> getProfile() async {
     final meResponse = await _api.getProfileMe();
     final extrasResponse = await _api.getProfileExtras();
-    final targetWeight = await _api.getTargetWeight();
 
     final meData = meResponse.data['content'];
     var extrasData = extrasResponse.data['content'];
@@ -29,13 +28,15 @@ class ProfileRepoImpl extends ProfileRepo {
       extrasData = <String, dynamic>{};
     }
 
-    final target = (targetWeight.data['content'] as List).isNotEmpty ? targetWeight.data['content'][0] : {'value': 0.0};
     final profile = ProfileRequest.fromJson(extrasData as Map<String, dynamic>);
-    final updated = profile.copyWith(
+
+    // The new /users/extras shape has no flat `targetWeight` — it lives
+    // inside `progress[]` keyed by `metric: "Weight"`. Surface it as the
+    // top-level `targetWeight` so downstream callers keep working.
+    return profile.copyWith(
       email: meData['email'],
-      targetWeight: (target['value'] ?? 0.0).toDouble(),
+      targetWeight: profile.targetForMetric('Weight') ?? profile.targetWeight,
     );
-    return updated;
   }
 
   Future<List<DetailInfo>> getDailyNorms() async {

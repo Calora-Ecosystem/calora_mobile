@@ -289,22 +289,27 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     _mode = StepMode.healthOnly;
     _safetyNetEngaged = false;
 
-    _healthSteps = await _stepRepo.getTodayHealthSteps();
-
-    int backendTotal = await _fetchBackendTotal();
-    await syncOfflineSteps();
-
-    int currentTotal = _displayedSteps;
-    if (backendTotal > currentTotal) currentTotal = backendTotal;
-
     final todayKey = _ledger.dayKey(DateTime.now());
     _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
 
-    emit(state.copyWith(todaySteps: currentTotal));
-    _metricsSync.notifyUpdated(currentTotal);
+    // 1. INSTANT: paint the cached value from the local ledger so the UI
+    //    never shows "0" while we wait on health/backend network calls.
+    final cachedSteps = _ledger.totalFor(todayKey);
+    if (cachedSteps > 0) {
+      _healthSteps = cachedSteps;
+      emit(state.copyWith(todaySteps: cachedSteps));
+      _metricsSync.notifyUpdated(cachedSteps);
+    }
 
+    // 2. FAST: fetch live health data, update UI as soon as it's higher
+    //    than the cached value. Then start the polling loop right away.
+    unawaited(_refreshHealthSteps());
     _startHealthPolling();
     _scheduleSafetyNetCheck();
+
+    // 3. DEFERRED: backend reconciliation runs in the background and never
+    //    blocks the initial UI paint. Result is merged when it arrives.
+    unawaited(_reconcileWithBackend());
   }
 
   Future<void> _switchToPedometer() async {
@@ -313,30 +318,64 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     _safetyNetTimer?.cancel();
     _syncTimer?.cancel();
 
+    final todayKey = _ledger.dayKey(DateTime.now());
+    _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
+
+    // 1. INSTANT: paint cached pedometer value before initializing the
+    //    sensor or hitting the backend.
+    _pedometerSteps = _ledger.totalFor(todayKey);
+    if (_pedometerSteps > 0) {
+      emit(state.copyWith(todaySteps: _pedometerSteps));
+      _metricsSync.notifyUpdated(_pedometerSteps);
+    }
+
+    // 2. Initialize sensor (this can block briefly while permission is
+    //    checked; UI already shows the cached number).
     await _pedometerService.initialize();
     if (!_pedometerService.isInitialized) {
       log('Pedometer init failed — mode=none', name: 'DashboardManager');
       _mode = StepMode.none;
-      emit(state.copyWith(todaySteps: 0));
+      if (_pedometerSteps == 0) emit(state.copyWith(todaySteps: 0));
       return;
     }
 
-    final todayKey = _ledger.dayKey(DateTime.now());
-    _pedometerSteps = _ledger.totalFor(todayKey);
-
-    int backendTotal = await _fetchBackendTotal();
-    await syncOfflineSteps();
-
-    int currentTotal = _displayedSteps;
-    if (backendTotal > currentTotal) currentTotal = backendTotal;
-
-    _lastSyncedTodaySteps = _ledger.syncedFor(todayKey);
-
-    emit(state.copyWith(todaySteps: currentTotal));
-    _metricsSync.notifyUpdated(currentTotal);
-
-    await _startForegroundServiceIfNeeded(currentTotal);
+    await _startForegroundServiceIfNeeded(_pedometerSteps);
     _listenToStepUpdates();
+
+    // 3. DEFERRED: backend reconcile in the background.
+    unawaited(_reconcileWithBackend());
+  }
+
+  /// Fetches the latest health step count and emits it if it's higher
+  /// than what's currently displayed. Safe to call without awaiting.
+  Future<void> _refreshHealthSteps() async {
+    try {
+      final fresh = await _stepRepo.getTodayHealthSteps();
+      if (fresh > _healthSteps) {
+        _healthSteps = fresh;
+        // Mirror to ledger so the next cold start is instant.
+        final todayKey = _ledger.dayKey(DateTime.now());
+        await _ledger.ensureDayAtLeast(todayKey, fresh);
+      }
+      _emitCurrentSteps();
+    } catch (e) {
+      log('_refreshHealthSteps error: $e');
+    }
+  }
+
+  /// Pulls today's backend total and the offline-day batch in the
+  /// background. Never blocks the initial UI paint.
+  Future<void> _reconcileWithBackend() async {
+    try {
+      final backendTotal = await _fetchBackendTotal();
+      if (backendTotal > _displayedSteps) {
+        emit(state.copyWith(todaySteps: backendTotal));
+        _metricsSync.notifyUpdated(backendTotal);
+      }
+      await syncOfflineSteps();
+    } catch (e) {
+      log('_reconcileWithBackend error: $e');
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────

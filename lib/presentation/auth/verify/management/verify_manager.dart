@@ -1,6 +1,7 @@
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/presentation/auth/verify/management/verify_management.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -31,7 +32,8 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
           },
           onError: (error) {
             emit(state.copyWith(loading: false));
-            publish(VerifyEffect.showError(error.toString()));
+            final e = (error as DioException).response?.data['error'];
+            publish(VerifyEffect.showError(e.toString()));
           },
         );
   }
@@ -52,7 +54,8 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
             }
           },
           onError: (error) {
-            publish(VerifyEffect.showError(error.toString()));
+            final e = (error as DioException).response?.data['error'];
+            publish(VerifyEffect.showError(e.toString()));
           },
           onDone: () => emit(state.copyWith(loading: false)),
         );
