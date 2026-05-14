@@ -12,6 +12,7 @@ sealed class PremiumPlanModel with _$PremiumPlanModel {
     String? plan,
     String? createdAt,
     int? fee,
+    int? originalFee,
     bool? isPopular,
   }) = _PremiumPlanModel;
 

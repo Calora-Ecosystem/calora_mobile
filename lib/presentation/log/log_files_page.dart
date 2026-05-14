@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -21,7 +20,7 @@ class LogFilesPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('log_files'.tr()),
+              child: const Text('Log files'),
             ),
           ),
           const SizedBox(height: 16),

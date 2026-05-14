@@ -45,4 +45,24 @@ class ProfileDetailManager extends Manager<ProfileDetailState, ProfileDetailEffe
       onError: (e) {},
     );
   }
+
+  void deleteAccountDialog() {
+    publish(ProfileDetailEffect.showDeleteAccountDialog());
+  }
+
+  Future<void> deleteAccount(String userId) async {
+    if (state.isDeletingAccount) return;
+    emit(state.copyWith(isDeletingAccount: true));
+    try {
+      await _repo.deleteAccount(userId);
+      profileStore.clear();
+      authStore.token.set(null);
+      _commonStore.isQuestionaryFinished.set(false);
+      publish(ProfileDetailEffect.accountDeleted());
+    } catch (_) {
+      publish(ProfileDetailEffect.deleteAccountFailed());
+    } finally {
+      emit(state.copyWith(isDeletingAccount: false));
+    }
+  }
 }

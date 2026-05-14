@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:calora/common/gen/strings.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 
 class DateFormatter {
   static Duration acceptedDifference = const Duration(minutes: 15);

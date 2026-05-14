@@ -1,4 +1,4 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:calora/common/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 enum Language {
@@ -13,9 +13,10 @@ enum Language {
     );
   }
 
-  static Language from(BuildContext context) {
+  static Language fromLocale(Locale locale) {
     return Language.values.firstWhere(
-      (element) => element.locale.languageCode == context.locale.languageCode,
+      (element) => element.locale.languageCode == locale.languageCode,
+      orElse: () => Language.UZ,
     );
   }
 
@@ -49,6 +50,17 @@ enum Language {
         return 'ENG';
       case Language.RU:
         return 'RU';
+    }
+  }
+
+  Widget get flag {
+    switch (this) {
+      case Language.UZ:
+        return Assets.icons.icUzFlag.svg();
+      case Language.EN:
+        return Assets.icons.icEnFlag.svg();
+      case Language.RU:
+        return Assets.icons.icRuFlag.svg();
     }
   }
 }

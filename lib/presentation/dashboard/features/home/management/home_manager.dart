@@ -8,7 +8,7 @@ import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
-import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
+import 'package:calora/common/service/step_counter_service.dart';
 import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
@@ -29,14 +29,14 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
   final StepRepo _stepRepo;
   final HomeRepo _homeRepo;
   final NotificationRepo _notificationRepo;
-  final MetricsSyncService _metricsSync;
+  final StepCounterService _stepCounter;
 
   HomeManager(
     this._profileRepo,
     this._stepRepo,
     this._homeRepo,
     this._notificationRepo,
-    this._metricsSync,
+    this._stepCounter,
   ) : super(HomeState());
 
   StreamSubscription<int>? _metricsSyncSub;
@@ -87,7 +87,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
 
   void _startMetricsLiveSync() {
     _metricsSyncSub?.cancel();
-    _metricsSyncSub = _metricsSync.stream.listen((steps) {
+    _metricsSyncSub = _stepCounter.stream.listen((steps) {
       _scheduleMetricsRefresh();
     });
     _scheduleMetricsRefresh(immediate: true);

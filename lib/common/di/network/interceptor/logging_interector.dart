@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:injectable/injectable.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:convert';

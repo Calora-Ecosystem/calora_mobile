@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -10,28 +11,7 @@ class LanguagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentLocale = context.locale;
-
-    final languages = [
-      Language(
-        code: 'uz',
-        name: "O'zbekcha",
-        locale: const Locale('uz', 'UZ'),
-        flag: Assets.icons.icUzFlag.svg(),
-      ),
-      Language(
-        code: 'ru',
-        name: 'Русский',
-        locale: const Locale('ru', 'RU'),
-        flag: Assets.icons.icRuFlag.svg(),
-      ),
-      Language(
-        code: 'en',
-        name: 'English',
-        locale: const Locale('en', 'US'),
-        flag: Assets.icons.icEnFlag.svg(),
-      ),
-    ];
+    final current = Language.fromLocale(context.locale);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -53,9 +33,8 @@ class LanguagePage extends StatelessWidget {
           const SizedBox(height: 13),
           Strings.applicationLanguage.text(20, 24, 700),
           const SizedBox(height: 16),
-          ...languages.map((lang) {
-            final isSelected =
-                currentLocale.languageCode == lang.locale.languageCode;
+          ...Language.values.map((lang) {
+            final isSelected = lang == current;
             return ListTile(
               leading: lang.flag,
               title: lang.name.text(16, 20, 400),
@@ -66,23 +45,9 @@ class LanguagePage extends StatelessWidget {
                 }
               },
             );
-          }).toList(),
+          }),
         ],
       ),
     );
   }
-}
-
-class Language {
-  final String code;
-  final String name;
-  final Locale locale;
-  final Widget flag;
-
-  Language({
-    required this.code,
-    required this.name,
-    required this.locale,
-    required this.flag,
-  });
 }

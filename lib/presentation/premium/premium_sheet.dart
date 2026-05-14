@@ -277,6 +277,22 @@ class PremiumSheet
     );
   }
 
+  /// Returns the price to render with a strikethrough next to the
+  /// current [PlanModel.price], or null when no strikethrough is needed.
+  ///
+  /// Promo discount (`actualPrice`) takes precedence so a freshly-applied
+  /// coupon visibly crosses out the pre-promo price. Otherwise the API's
+  /// marketing `originalFee` is used (when greater than the current fee).
+  int? _strikethroughPrice(PlanModel plan) {
+    if (plan.actualPrice != null && plan.actualPrice != plan.price) {
+      return plan.actualPrice;
+    }
+    if (plan.originalFee > plan.price) {
+      return plan.originalFee;
+    }
+    return null;
+  }
+
   Widget _planCard({
     required BuildContext context,
     required PlanModel plan,
@@ -348,10 +364,9 @@ class PremiumSheet
                         '${plan.price.formatPrice()} UZS'
                             .text(14, 18, 500)
                             .c(context.colors.textPrimary),
-                        if (plan.actualPrice != null &&
-                            plan.actualPrice != plan.price)
+                        if (_strikethroughPrice(plan) != null)
                           Text(
-                            '${plan.actualPrice!.formatPrice()} UZS',
+                            '${_strikethroughPrice(plan)!.formatPrice()} UZS',
                             style: TextStyle(
                               color: context.colors.textSub,
                               decoration: TextDecoration.lineThrough,

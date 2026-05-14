@@ -138,6 +138,7 @@ class TasksCards extends StatelessWidget {
     );
     if (item == null) return null;
     final url = (item.url?.toString() ?? item['url']?.toString())?.trim();
+    print('SHAMSI: $url');
     return (url == null || url.isEmpty) ? null : url;
   }
 

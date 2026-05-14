@@ -35,6 +35,23 @@ class ProfileDetailPage
           cancelText: Strings.rejection,
         ),
       ),
+      showDeleteAccountDialog: () => showDialog(
+        context: context,
+        builder: (_) => ConfirmPage(
+          onConfirm: () {
+            Navigator.pop(context);
+            manager.deleteAccount(userId);
+          },
+          onCancel: () => Navigator.pop(context),
+          title: Strings.areYouSureDeleteAccount,
+          confirmText: Strings.deleteAccount,
+          cancelText: Strings.rejection,
+        ),
+      ),
+      accountDeleted: () => context.router.replaceAll([AuthRoute()]),
+      deleteAccountFailed: () => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(Strings.deleteAccountFailed)),
+      ),
     );
   }
 
@@ -139,6 +156,30 @@ class ProfileDetailPage
                         Assets.icons.logout.svg(),
                         const SizedBox(width: 8),
                         Strings.logOut.text(14, 16, 600).c(context.colors.errorBase),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: state.isDeletingAccount ? null : () => manager.deleteAccountDialog(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: context.colors.errorLighter,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (state.isDeletingAccount)
+                          const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        else
+                          Strings.deleteAccount.text(14, 16, 600).c(context.colors.errorBase),
                       ],
                     ),
                   ),

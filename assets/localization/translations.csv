@@ -391,3 +391,6 @@ step_synchronization,Step synchronization,Qadamlar sinxronizatsiyasi,Синхр�
 step_sync_description,"To count your steps correctly, you need to connect the Google Fit app to Health Connect. Please go to settings and check permissions.","Qadamlaringiz to'g'ri hisoblanishi uchun Google Fit ilovasini Health Connect tizimiga ulashingiz kerak. Iltimos, sozlamalarga kirib ruxsatlarni tekshiring.","Чтобы ваши шаги считались правильно, вам нужно подключить приложение Google Fit к Health Connect. Пожалуйста, зайдите в настройки и проверьте разрешения."
 go_to_settings,Go to settings,Sozlamalarga o'tish,Перейти в настройки
 later,Later,Keyinroq,Позже
+delete_account,Delete account,Hisobni o'chirish,Удалить аккаунт
+are_you_sure_delete_account,Are you sure you want to delete your account? This action cannot be undone.,Hisobingizni o'chirib tashlamoqchimisiz? Bu amalni qaytarib bo'lmaydi.,"Вы уверены, что хотите удалить аккаунт? Это действие необратимо."
+delete_account_failed,Failed to delete account. Please try again.,Hisobni o'chirib bo'lmadi. Qaytadan urinib ko'ring.,Не удалось удалить аккаунт. Попробуйте снова.

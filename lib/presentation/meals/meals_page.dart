@@ -14,8 +14,8 @@ import 'package:calora/presentation/meals/management/meals_management.dart';
 import 'package:calora/presentation/meals/management/meals_manager.dart' show MealsManager;
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/meals/empty_food_screen.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 

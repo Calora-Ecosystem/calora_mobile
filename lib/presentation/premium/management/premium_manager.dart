@@ -41,45 +41,46 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   void selectPaymentMethod(PaymentMethod method) =>
       emit(state.copyWith(selectedPaymentMethod: method));
 
-  Future<void> getPremiumPlans() async =>
-      await _premiumRepo.getPremiumPlans().handle(
-        onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
-        onData: (data) {
-          final plans = data.map((e) {
-            if (e.duration == 1) {
-              return PlanModel(
-                id: e.id ?? 0,
-                title: Strings.monthlyPremium,
-                price: e.fee ?? 0,
-                packageMonth: e.duration ?? 0,
-                isMostPopular: e.isPopular ?? false,
-              );
-            }
-            return PlanModel(
-              id: e.id ?? 0,
-              title: Strings.nMothPremium(month: e.duration ?? 0),
-              price: e.fee ?? 0,
-              packageMonth: e.duration ?? 0,
-              isMostPopular: e.isPopular ?? false,
-            );
-          }).toList();
-
-          PlanModel? initialPlan;
-          try {
-            initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
-          } catch (e) {
-            initialPlan = plans.isNotEmpty ? plans.first : null;
-          }
-          emit(
-            state.copyWith(
-              isGettingPremiumPlans: false,
-              plans: plans,
-              selectedPlan: initialPlan,
-            ),
+  Future<void> getPremiumPlans() async => await _premiumRepo.getPremiumPlans().handle(
+    onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
+    onData: (data) {
+      final plans = data.map((e) {
+        if (e.duration == 1) {
+          return PlanModel(
+            id: e.id ?? 0,
+            title: Strings.monthlyPremium,
+            price: e.fee ?? 0,
+            originalFee: e.originalFee ?? 0,
+            packageMonth: e.duration ?? 0,
+            isMostPopular: e.isPopular ?? false,
           );
-        },
-        onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
+        }
+        return PlanModel(
+          id: e.id ?? 0,
+          title: Strings.nMothPremium(month: e.duration ?? 0),
+          price: e.fee ?? 0,
+          originalFee: e.originalFee ?? 0,
+          packageMonth: e.duration ?? 0,
+          isMostPopular: e.isPopular ?? false,
+        );
+      }).toList();
+
+      PlanModel? initialPlan;
+      try {
+        initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
+      } catch (e) {
+        initialPlan = plans.isNotEmpty ? plans.first : null;
+      }
+      emit(
+        state.copyWith(
+          isGettingPremiumPlans: false,
+          plans: plans,
+          selectedPlan: initialPlan,
+        ),
       );
+    },
+    onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
+  );
 
   Future<void> getMyOrders() async => await _premiumRepo.getMyOrders().handle(
     onStart: () => emit(state.copyWith(isGettingOrders: true)),
@@ -113,6 +114,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
         id: plan.id,
         title: plan.title,
         price: plan.actualPrice ?? plan.price,
+        originalFee: plan.originalFee,
         packageMonth: plan.packageMonth,
         isMostPopular: plan.isMostPopular,
       );
@@ -145,13 +147,13 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
           onData: (data) {
             if (data.id != null && data.amount != null) {
               final discountedPlans = state.plans.map((plan) {
-                final discountedPrice =
-                    (plan.actualPrice ?? plan.price) - (data.amount ?? 0);
+                final discountedPrice = (plan.actualPrice ?? plan.price) - (data.amount ?? 0);
                 return PlanModel(
                   id: plan.id,
                   title: plan.title,
                   price: discountedPrice > 0 ? discountedPrice : 0,
                   actualPrice: plan.actualPrice ?? plan.price,
+                  originalFee: plan.originalFee,
                   packageMonth: plan.packageMonth,
                   isMostPopular: plan.isMostPopular,
                 );
@@ -163,9 +165,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
                   (plan) => plan.isMostPopular,
                 );
               } catch (e) {
-                newSelectedPlan = discountedPlans.isNotEmpty
-                    ? discountedPlans.first
-                    : null;
+                newSelectedPlan = discountedPlans.isNotEmpty ? discountedPlans.first : null;
               }
 
               emit(
@@ -192,7 +192,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
         .orderSubscription(
           provider: state.selectedPaymentMethod?.code ?? '',
           plan: SubscriptionPlanType.premium.toApi(),
-          orderMonth: state.selectedPlan?.packageMonth ?? -1,
+          orderMonth: state.selectedPlan?.id ?? -1,
           couponId: state.promoCodeValue?.id,
         )
         .handle(
@@ -269,8 +269,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
             );
             _openPaymentUrl(link);
           },
-          onError: (error) =>
-              emit(state.copyWith(isGettingPaymentLink: false)),
+          onError: (error) => emit(state.copyWith(isGettingPaymentLink: false)),
         );
   }
 

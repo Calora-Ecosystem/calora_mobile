@@ -81,7 +81,7 @@ class SelectLanguagePage
 
   void _saveSelectedLanguage(Language language, BuildContext context, manager) {
     manager.setSelectedLanguage(language);
-    EasyLocalization.of(context)?.setLocale(language.locale);
+    context.setLocale(language.locale);
   }
 
   void _openOnboarding(BuildContext context) {

@@ -1,8 +1,8 @@
 import 'package:calora/domain/model/dailies/dailies_request.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:dio/dio.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:injectable/injectable.dart';
+import 'package:intl/intl.dart';
 
 @lazySingleton
 class HomeApi {

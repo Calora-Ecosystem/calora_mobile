@@ -2,12 +2,16 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/background_steps_worker.dart';
 import 'package:calora/common/service/notification_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
+import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/firebase_options.dart';
 import 'package:calora/presentation/app/app/app.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization_loader/easy_localization_loader.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -73,5 +77,14 @@ Future<void> main() async {
 
   await getIt<RevenueCatService>().init();
 
-  runApp(App());
+  runApp(
+    EasyLocalization(
+      supportedLocales: Strings.supportedLocales,
+      path: Assets.localization.translations,
+      assetLoader: CsvAssetLoader(),
+      fallbackLocale: Language.UZ.locale,
+      startLocale: Language.UZ.locale,
+      child: App(),
+    ),
+  );
 }

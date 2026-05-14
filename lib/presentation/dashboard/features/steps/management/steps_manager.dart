@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
-import 'package:calora/common/widgets/stream/metrics_sync_bus.dart';
+import 'package:calora/common/service/step_counter_service.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/pagination/paginated_response.dart';
@@ -21,7 +21,7 @@ import 'package:management/management.dart';
 class StepsManager extends Manager<StepsState, StepsEffect> {
   final StepRepo stepRepo;
   final PedometerService pedometerService;
-  final MetricsSyncService _metricsSync;
+  final StepCounterService _stepCounter;
 
   late final PaginationService<UserStatRequest> _dailyPaginationService;
   late final PaginationService<UserStatRequest> _weeklyPaginationService;
@@ -35,7 +35,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
 
   Future<void>? _normsLoadingFuture;
 
-  StepsManager(this.stepRepo, this.pedometerService, this._metricsSync)
+  StepsManager(this.stepRepo, this.pedometerService, this._stepCounter)
     : super(StepsState(dailyFrom: DateTime.now().toIso8601String(), dailyTo: DateTime.now().toIso8601String())) {
     _initializePaginationServices();
     _listenToMetricsSyncFromDashboard();
@@ -98,7 +98,7 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
   void _listenToMetricsSyncFromDashboard() {
     _syncSubscription?.cancel();
 
-    _syncSubscription = _metricsSync.stream.listen((updatedSteps) {
+    _syncSubscription = _stepCounter.stream.listen((updatedSteps) {
       if (!_isTodayDailyView) return;
 
       updateTodaySteps(updatedSteps);

@@ -46,6 +46,7 @@ class PlanModel {
   final String title;
   final int price;
   final int? actualPrice;
+  final int originalFee;
   final bool isMostPopular;
   final int packageMonth;
 
@@ -54,6 +55,7 @@ class PlanModel {
     required this.title,
     required this.price,
     this.actualPrice,
+    this.originalFee = 0,
     this.isMostPopular = false,
     required this.packageMonth,
   });
@@ -67,6 +69,7 @@ class PlanModel {
           title == other.title &&
           price == other.price &&
           actualPrice == other.actualPrice &&
+          originalFee == other.originalFee &&
           isMostPopular == other.isMostPopular &&
           packageMonth == other.packageMonth;
 
@@ -76,6 +79,7 @@ class PlanModel {
       title.hashCode ^
       price.hashCode ^
       actualPrice.hashCode ^
+      originalFee.hashCode ^
       isMostPopular.hashCode ^
       packageMonth.hashCode;
 }

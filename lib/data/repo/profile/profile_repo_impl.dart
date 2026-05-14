@@ -81,4 +81,9 @@ class ProfileRepoImpl extends ProfileRepo {
   Future<void> logOut() async {
     await _api.logout();
   }
+
+  @override
+  Future<void> deleteAccount(String userId) async {
+    await _api.deleteUser(userId);
+  }
 }

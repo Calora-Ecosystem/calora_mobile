@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 
 extension DoubleExtension on double {
   String toPrettyFormat({

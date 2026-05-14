@@ -6,7 +6,6 @@ import 'package:calora/domain/model/pagination/pagination_query.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:dio/dio.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:injectable/injectable.dart' show lazySingleton;
 
 @lazySingleton

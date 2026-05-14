@@ -81,4 +81,8 @@ class ProfileApi {
   Future<void> logout() async {
     await _dio.get('auth/logout');
   }
+
+  Future<void> deleteUser(String userId) async {
+    await _dio.delete('users/$userId');
+  }
 }
