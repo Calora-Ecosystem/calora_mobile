@@ -2,6 +2,7 @@ import 'package:calora/domain/model/meal/food/food_models.dart'
     show ScannerFood;
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
+import 'package:calora/domain/model/pagination/pagination_query.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:injectable/injectable.dart';
@@ -23,19 +24,26 @@ class CaloriesApi {
     return _dio.get('food/categories');
   }
 
-  Future<Response> fetchFoods(bool latest) {
-    return _dio.get('food', queryParameters: {'Latest': latest});
-  }
+  /// Paginated `/food` listing — supports all backend flags plus the
+  /// `FilteringExpression` array (e.g. `categoryId==12`, `name$$mas`).
+  ///
+  /// Dio's default `ListFormat.multi` serializes the
+  /// `filteringExpression` list as repeated `FilteringExpression=...`
+  /// query params, matching the backend contract.
+  Future<Response> fetchFoodsPaged({
+    required PaginationQuery query,
+    bool? latest,
+    bool? isUserFood,
+    bool? isFavourite,
+  }) {
+    final params = <String, dynamic>{
+      if (latest != null) 'Latest': latest,
+      if (isUserFood != null) 'IsUserFood': isUserFood,
+      if (isFavourite != null) 'IsFavourite': isFavourite,
+      ...query.toJson(),
+    }..removeWhere((_, v) => v == null);
 
-  Future<Response> fetchUserFoods() {
-    return _dio.get('food', queryParameters: {'IsUserFood': true});
-  }
-
-  Future<Response> fetchSearchFood(String name) {
-    return _dio.get(
-      'food',
-      queryParameters: {'FilteringExpression': 'name\$\$${name}'},
-    );
+    return _dio.get('food', queryParameters: params);
   }
 
   Future<Response> addFood(FoodRequest food) {
@@ -59,10 +67,6 @@ class CaloriesApi {
 
   Future<void> addFavourite(int id) {
     return _dio.post('food/favourites/toggle/$id');
-  }
-
-  Future<Response> getFavouriteFoods() {
-    return _dio.get('food/favourites');
   }
 
   Future<List<ScannerFood>> getScannerFood(String filePath) async {

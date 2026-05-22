@@ -1,4 +1,8 @@
+import 'package:calora/common/service/pagination_service.dart';
+import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
+import 'package:calora/domain/model/pagination/paginated_response.dart';
+import 'package:calora/domain/model/pagination/pagination_query.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:calora/presentation/dishes/management/dishes_management.dart';
 import 'package:injectable/injectable.dart';
@@ -6,28 +10,37 @@ import 'package:management/management.dart';
 
 @injectable
 class DishesManager extends Manager<DishesState, DishesEffect> {
-  final CaloriesRepo caloriesRepo;
+  final CaloriesRepo _caloriesRepo;
 
-  DishesManager(this.caloriesRepo) : super(const DishesState());
+  /// Set lazily from [bind] so the paginator can pre-load
+  /// `FilteringExpression=categoryId==<id>` on first build.
+  PaginationService<FoodModel>? _paginator;
 
-  void getDishes(int categoryId) {
-    caloriesRepo
-        .fetchFoods(false)
-        .handle(
-          onStart: () => emit(state.copyWith(isLoading: true)),
-          onData: (value) {
-            final filteredFoods = value
-                .where((food) => food.categoryId == categoryId)
-                .toList();
-            emit(state.copyWith(foods: filteredFoods, isLoading: false));
-          },
-          onDone: () => emit(state.copyWith(isLoading: false)),
-          onError: (error) => emit(state.copyWith(isLoading: false)),
-        );
+  PaginationService<FoodModel> get paginator => _paginator!;
+
+  DishesManager(this._caloriesRepo) : super(const DishesState());
+
+  /// Called from [DishesPage.init] with the selected category id.
+  /// Idempotent — calling more than once for the same id is a no-op.
+  void bindCategory(int categoryId) {
+    if (_paginator != null) return;
+    _paginator = PaginationService<FoodModel>(
+      fetchData: (query) => _fetchPage(query, categoryId),
+      initialQuery: PaginationQuery(
+        filteringExpression: ['categoryId==$categoryId'],
+      ),
+    );
+  }
+
+  Future<PaginatedResponse<FoodModel>> _fetchPage(
+    PaginationQuery query,
+    int categoryId,
+  ) {
+    return _caloriesRepo.fetchFoodsPaged(query: query);
   }
 
   void getFoodById(int id, bool isFavourite) {
-    caloriesRepo
+    _caloriesRepo
         .fetchFoodById(id)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
@@ -42,7 +55,7 @@ class DishesManager extends Manager<DishesState, DishesEffect> {
 
   Future<bool> saveMenuItem(MenuInfo item) async {
     bool success = false;
-    await caloriesRepo
+    await _caloriesRepo
         .saveMenuItem(item)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
@@ -57,12 +70,18 @@ class DishesManager extends Manager<DishesState, DishesEffect> {
   }
 
   void addFavourite(int id) {
-    caloriesRepo
+    _caloriesRepo
         .addFavourite(id)
         .handle(
           onStart: () => emit(state.copyWith(isLoading: true)),
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
+  }
+
+  @override
+  Future<void> close() {
+    _paginator?.dispose();
+    return super.close();
   }
 }

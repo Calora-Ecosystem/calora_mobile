@@ -5,6 +5,8 @@ import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
 import 'package:calora/domain/model/meal/menu/menu_item.dart';
+import 'package:calora/domain/model/pagination/paginated_response.dart';
+import 'package:calora/domain/model/pagination/pagination_query.dart';
 import 'package:calora/domain/model/summary/summary_request.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:injectable/injectable.dart';
@@ -83,25 +85,6 @@ class CaloriesRepoImpl extends CaloriesRepo {
   }
 
   @override
-  Future<List<FoodModel>> fetchFoods(bool latest) async {
-    final response = await _api.fetchFoods(latest);
-    final List list = response.data['content'];
-
-    return list.map((e) {
-      return FoodModel(
-        id: e['id'],
-        name: e['name'],
-        categoryId: e['categoryId'],
-        categoryName: e['categoryName'],
-        coverUrl: e['coverUrl'],
-        metrics: (e['metrics'] as List).map((m) => Metric.fromJson(m)).toList(),
-        isUserFood: e['isUserFood'] ?? false,
-        isFavourite: e['isFavourite'] ?? false,
-      );
-    }).toList();
-  }
-
-  @override
   Future<List<MenuItem>> fetchMenuItem(DateTime date, String menu) async {
     final response = await _api.fetchMenuItem(date, menu);
     final List list = response.data['content'];
@@ -141,25 +124,6 @@ class CaloriesRepoImpl extends CaloriesRepo {
   }
 
   @override
-  Future<List<FoodModel>> getFavouriteFoods() async {
-    final response = await _api.getFavouriteFoods();
-    final List list = response.data['content'];
-
-    return list.map((e) {
-      return FoodModel(
-        id: e['id'],
-        name: e['name'],
-        categoryId: e['categoryId'],
-        categoryName: e['categoryName'],
-        coverUrl: e['coverUrl'],
-        metrics: (e['metrics'] as List).map((m) => Metric.fromJson(m)).toList(),
-        isUserFood: e['isUserFood'] ?? false,
-        isFavourite: e['isFavourite'] ?? false,
-      );
-    }).toList();
-  }
-
-  @override
   Future<List<ScannerFood>> getScannerFood(String filePath) async {
     final response = await _api.getScannerFood(filePath);
     return response;
@@ -178,20 +142,21 @@ class CaloriesRepoImpl extends CaloriesRepo {
   }
 
   @override
-  Future<List<FoodModel>> fetchUserFoods() async {
-    final response = await _api.fetchUserFoods();
-    final List content = response.data['content'];
-    return content
-        .map((e) => FoodModel.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  @override
-  Future<List<FoodModel>> fetchSearchFood(String name) async {
-    final response = await _api.fetchSearchFood(name);
-    final List content = response.data['content'];
-    return content
-        .map((e) => FoodModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<PaginatedResponse<FoodModel>> fetchFoodsPaged({
+    required PaginationQuery query,
+    bool? latest,
+    bool? isUserFood,
+    bool? isFavourite,
+  }) async {
+    final response = await _api.fetchFoodsPaged(
+      query: query,
+      latest: latest,
+      isUserFood: isUserFood,
+      isFavourite: isFavourite,
+    );
+    return PaginatedResponse<FoodModel>.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => FoodModel.fromJson(json as Map<String, dynamic>),
+    );
   }
 }

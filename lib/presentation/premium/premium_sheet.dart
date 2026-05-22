@@ -134,7 +134,8 @@ class PremiumSheet
                       const SizedBox(height: 16),
                       PromoCodeWidget(),
                     ],
-                    if (state.isUzbekistan || kDebugMode) ...[
+                    if ((state.isUzbekistan || kDebugMode) &&
+                        !(state.selectedPlan?.isFree ?? false)) ...[
                       const SizedBox(height: 16),
                       if (state.isPaymentPending &&
                           state.selectedPaymentMethod != null)
@@ -246,13 +247,15 @@ class PremiumSheet
                           text: Strings.purchase,
                           enabled:
                               state.selectedPlan != null &&
-                              (state.selectedPaymentMethod != null ||
+                              ((state.selectedPlan?.isFree ?? false) ||
+                                  state.selectedPaymentMethod != null ||
                                   !state.isUzbekistan) &&
                               !state.isRestoringPurchase,
                           loading: state.isOrderingSubscription,
                           onPressed: () => manager.orderSubscription(),
                         ),
-                        if (state.selectedPaymentMethod?.code == 'Iap') ...[
+                        if (state.selectedPaymentMethod?.code == 'Iap' &&
+                            !(state.selectedPlan?.isFree ?? false)) ...[
                           const SizedBox(height: 12),
                           Button(
                             height: 40,

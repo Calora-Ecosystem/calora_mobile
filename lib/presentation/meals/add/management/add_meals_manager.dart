@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
+import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
+import 'package:calora/domain/model/pagination/paginated_response.dart';
+import 'package:calora/domain/model/pagination/pagination_query.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -15,7 +20,55 @@ import 'package:calora/presentation/meals/add/management/add_meals_management.da
 class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
   final CaloriesRepo _repo;
 
-  AddMealsManager(this._repo) : super(const AddMealsState());
+  AddMealsManager(this._repo) : super(const AddMealsState()) {
+    foodPaginator = PaginationService<FoodModel>(fetchData: _fetchActiveTab);
+  }
+
+  /// Single paginator for the food grid. Its `fetchData` closure
+  /// dispatches by `state.activeTab` + `state.searchQuery` so we can
+  /// reuse one infinite-scroll controller across all tabs and the
+  /// search overlay. Switching tab / search → `refresh()` restarts
+  /// pagination from `Skip=0`.
+  late final PaginationService<FoodModel> foodPaginator;
+
+  Timer? _searchDebounce;
+  static const _searchDebounceDelay = Duration(milliseconds: 350);
+
+  // ── Paginator dispatch ──────────────────────────────────────────────
+
+  Future<PaginatedResponse<FoodModel>> _fetchActiveTab(
+    PaginationQuery query,
+  ) async {
+    final filters = <String>[
+      ...?query.filteringExpression,
+    ];
+
+    switch (state.activeTab) {
+      case FoodTab.search:
+        // Search filter is supplied via `updateFilter` (see
+        // `onSearchChanged`). Backend supports combining with category
+        // / boolean flags should we ever need it.
+        return _repo.fetchFoodsPaged(
+          query: query.copyWith(filteringExpression: filters),
+        );
+
+      case FoodTab.latest:
+        return _repo.fetchFoodsPaged(query: query, latest: true);
+
+      case FoodTab.userFoods:
+        return _repo.fetchFoodsPaged(query: query, isUserFood: true);
+
+      case FoodTab.favourites:
+        return _repo.fetchFoodsPaged(query: query, isFavourite: true);
+
+      case FoodTab.categories:
+        // Not a food list; should never be hit while the paginator is
+        // active. Return an empty page defensively.
+        return const PaginatedResponse<FoodModel>(content: [], total: 0);
+    }
+  }
+
+  // ── Categories (top-level "All Dishes" tab) ─────────────────────────
 
   void fetchFoodCategory() {
     _repo.fetchFoodCategory().handle(
@@ -28,15 +81,65 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     );
   }
 
-  void fetchFavouriteFoods() {
-    _repo.getFavouriteFoods().handle(
-      onStart: () => emit(state.copyWith(isFavourite: true)),
-      onData: (foods) =>
-          emit(state.copyWith(favouriteFoods: foods, isFavourite: false)),
-      onDone: () => emit(state.copyWith(isFavourite: false)),
-      onError: (error) => emit(state.copyWith(isFavourite: false)),
-    );
+  // ── Tab + search routing ────────────────────────────────────────────
+
+  void onToggleChanged(int index) {
+    final tab = switch (index) {
+      0 => FoodTab.categories,
+      1 => FoodTab.latest,
+      2 => FoodTab.userFoods,
+      3 => FoodTab.favourites,
+      _ => FoodTab.categories,
+    };
+
+    // Switching tabs clears any in-flight search so the user gets the
+    // expected results for that tab.
+    emit(state.copyWith(activeTab: tab, searchQuery: ''));
+
+    if (tab == FoodTab.categories) {
+      fetchFoodCategory();
+    } else {
+      foodPaginator.updateFilter(null);
+    }
   }
+
+  /// Called from the search TextField. Debounces the typed query
+  /// (350 ms) before hitting the backend with
+  /// `FilteringExpression=name$$<query>`.
+  void onSearchChanged(String text) {
+    final query = text.trim();
+    _searchDebounce?.cancel();
+
+    if (query.isEmpty) {
+      // Leaving search overlay: restore the previously selected tab if
+      // it was a food tab, otherwise the categories grid.
+      if (state.activeTab == FoodTab.search) {
+        emit(state.copyWith(
+          activeTab: FoodTab.categories,
+          searchQuery: '',
+        ));
+        fetchFoodCategory();
+      } else {
+        emit(state.copyWith(searchQuery: ''));
+      }
+      return;
+    }
+
+    emit(state.copyWith(searchQuery: query, activeTab: FoodTab.search));
+
+    if (query.length < 3) {
+      // Show the search overlay but don't hit the backend yet — short
+      // queries get noisy and the backend matches a min length anyway.
+      foodPaginator.updateFilter(null);
+      return;
+    }
+
+    _searchDebounce = Timer(_searchDebounceDelay, () {
+      foodPaginator.updateFilter(['name\$\$$query']);
+    });
+  }
+
+  // ── Mutations (unchanged) ───────────────────────────────────────────
 
   Future<bool> saveMenuItem(MenuInfo item) async {
     bool success = false;
@@ -64,16 +167,6 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) => emit(state.copyWith(isLoading: false)),
         );
-  }
-
-  void fetchUserFoods() {
-    _repo.fetchUserFoods().handle(
-      onStart: () => emit(state.copyWith(isLoading: true)),
-      onData: (foods) =>
-          emit(state.copyWith(userFoods: foods, isLoading: false)),
-      onDone: () => emit(state.copyWith(isLoading: false)),
-      onError: (error) => emit(state.copyWith(isLoading: false)),
-    );
   }
 
   Future<List<ScannerFood>> getScannerFood(
@@ -114,18 +207,6 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         );
 
     return scannedFood;
-  }
-
-  void fetchLatestFood() {
-    _repo
-        .fetchFoods(true)
-        .handle(
-          onStart: () => emit(state.copyWith(isLatest: true)),
-          onData: (foods) =>
-              emit(state.copyWith(latestFoods: foods, isLatest: false)),
-          onDone: () => emit(state.copyWith(isLatest: false)),
-          onError: (error) => emit(state.copyWith(isLatest: false)),
-        );
   }
 
   Future<bool> addFoodAndMenuWithImage(
@@ -199,38 +280,6 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     return foodId;
   }
 
-  void fetchSearchFood(String name) {
-    _repo
-        .fetchSearchFood(name)
-        .handle(
-          onStart: () => emit(state.copyWith(isSearch: true)),
-          onData: (foods) =>
-              emit(state.copyWith(searchFoods: foods, isSearch: false)),
-          onDone: () => emit(state.copyWith(isSearch: false)),
-          onError: (error) => emit(state.copyWith(isSearch: false)),
-        );
-  }
-
-  void onSearchChanged(String text) {
-    final query = text.trim();
-
-    if (query.isEmpty) {
-      emit(
-        state.copyWith(isSearchMode: false, isSearch: false, searchFoods: []),
-      );
-      return;
-    }
-
-    if (query.length >= 3) {
-      emit(state.copyWith(isSearchMode: true));
-      fetchSearchFood(query);
-    } else {
-      emit(
-        state.copyWith(isSearchMode: true, isSearch: false, searchFoods: []),
-      );
-    }
-  }
-
   void openDishesPage(MealTypeData meal) {
     publish(AddMealsEffect.openDishesPage(meal));
   }
@@ -239,25 +288,10 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     publish(AddMealsEffect.openAboutPage(food, isFavourite));
   }
 
-  void onToggleChanged(int index) {
-    emit(state.copyWith(selectedToggleIndex: index));
-
-    switch (index) {
-      case 0:
-        fetchFoodCategory();
-        break;
-
-      case 1:
-        fetchLatestFood();
-        break;
-
-      case 2:
-        fetchUserFoods();
-        break;
-
-      case 3:
-        fetchFavouriteFoods();
-        break;
-    }
+  @override
+  Future<void> close() {
+    _searchDebounce?.cancel();
+    foodPaginator.dispose();
+    return super.close();
   }
 }

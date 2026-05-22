@@ -134,20 +134,39 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     return now.year == day.year && now.month == day.month && now.day == day.day;
   }
 
-  void getDailyStep() {
+  /// Steps for the currently selected day on the home page.
+  ///
+  /// Reads from HealthKit / Health Connect first (so the displayed
+  /// count matches what the user sees in Apple Health or Samsung
+  /// Health / Google Fit for that day). Falls back to the backend
+  /// daily endpoint only when Health returns 0 — covers Android
+  /// devices without Health Connect installed, iOS users who denied
+  /// the permission, and dates with literally no recorded steps.
+  Future<void> getDailyStep() async {
     final day = state.day ?? DateTime.now();
-    _homeRepo
-        .getDailiesSteps(day)
-        .handle(
-          onStart: () => emit(state.copyWith(isMetricsLoading: true)),
-          onData: (data) => emit(
-            state.copyWith(
-              currentSteps: data.value.toInt(),
-              isMetricsLoading: false,
-            ),
-          ),
-          onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
-        );
+    emit(state.copyWith(isMetricsLoading: true));
+
+    try {
+      final healthSteps = await _stepRepo.getHealthStepsForDay(day);
+      if (healthSteps > 0) {
+        emit(state.copyWith(
+          currentSteps: healthSteps,
+          isMetricsLoading: false,
+        ));
+        return;
+      }
+    } catch (_) {
+      // Swallow and fall through to the backend.
+    }
+
+    await _homeRepo.getDailiesSteps(day).handle(
+      onData: (data) => emit(state.copyWith(
+        currentSteps: data.value.toInt(),
+        isMetricsLoading: false,
+      )),
+      onDone: () => emit(state.copyWith(isMetricsLoading: false)),
+      onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
+    );
   }
 
   void getWater() {

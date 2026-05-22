@@ -1,11 +1,11 @@
+import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/metrics_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
+import 'package:calora/common/widgets/video_player/animated_asset_view.dart';
 import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -21,7 +21,7 @@ class TasksCards extends StatelessWidget {
   final Level level;
   final ValueChanged<int> onLevelChanged;
 
-  TasksCards({
+  const TasksCards({
     super.key,
     required this.workout,
     required this.exercises,
@@ -35,9 +35,9 @@ class TasksCards extends StatelessWidget {
     return Column(
       children: [
         TaskParametersWidget(
-          title: '${workout.title} mashqlari bilan tanishing '.text(20, 24, 600),
+          title: Strings.discoverWorkoutExercises(workoutTitle: workout.title).text(20, 24, 600),
           parameters: [
-            ParameterItem(name: Strings.degree, value: levelToLocalizedString(level)),
+            ParameterItem(name: Strings.degree, value: _levelLabel(level)),
             ParameterItem(name: Strings.kcal, value: '${workout.totalMetrics.sumOf('Kcal')}'),
             ParameterItem(name: Strings.duration, value: '${workout.totalDurationInMin}'),
           ],
@@ -47,102 +47,37 @@ class TasksCards extends StatelessWidget {
         ),
         ListView.separated(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: exercises.length,
           itemBuilder: (context, index) {
-            return ShimmerWrapper(
+            return _ExerciseCard(
+              exercise: exercises[index],
               loading: loading,
-              shimmerChild: ShimmerChild(
-                height: 70,
-                color: context.colors.backgroundElevation,
-              ),
-              child: GestureDetector(
-                onTap: () => _showTask(context, exercises[index]),
-                child: Container(
-                  height: 70,
-                  padding: const EdgeInsets.all(12),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.colors.backgroundElevation,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      CustomCachedNetworkImage.banner(
-                        imageUrl: _assetUrlByType('Default', exercises[index]),
-                        height: 56,
-                        width: 56,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 8,
-                          children: [
-                            exercises[index].title
-                                .text(16, 20, 500)
-                                .c(context.colors.textStrong)
-                                .copyWith(overflow: TextOverflow.ellipsis, maxLines: 1),
-                            exercises[index].duration.text(14, 18, 500).c(context.colors.textSub),
-                          ],
-                        ),
-                      ),
-                      if (exercises[index].isDone)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: Assets.icons.twoDone.svg(),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
+              onTap: () => _showTask(context, exercises[index]),
             );
           },
-          separatorBuilder: (BuildContext context, int index) {
-            return SizedBox(height: 16);
-          },
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
         ),
       ],
     );
   }
 
-  void _showTask(BuildContext context, ExercisesRequest exercises) {
-    context.showAppBottomSheet(child: TaskInfoPage(exercises: exercises));
+  void _showTask(BuildContext context, ExercisesRequest exercise) {
+    context.showAppBottomSheet(child: TaskInfoPage(exercises: exercise));
   }
 
-  void _openSettings(BuildContext context, int level) async {
+  void _openSettings(BuildContext context, int currentLevel) async {
     final result = await showModalBottomSheet<int>(
       backgroundColor: context.colors.backgroundBase,
       isScrollControlled: true,
       useSafeArea: true,
       context: context,
-      builder: (context) {
-        return TrainLevelPage(currentLevel: level);
-      },
+      builder: (_) => TrainLevelPage(currentLevel: currentLevel),
     );
-    if (result != null) {
-      onLevelChanged(result);
-    }
+    if (result != null) onLevelChanged(result);
   }
 
-  bool isLocked(int index, bool isUserPremium) {
-    if (isUserPremium) return false;
-    return index >= 3;
-  }
-
-  String? _assetUrlByType(String type, ExercisesRequest exercises) {
-    final item = exercises.assets.cast<dynamic>().firstWhere(
-      (e) => (e.type?.toString() ?? e['type']?.toString())?.toLowerCase() == type.toLowerCase(),
-      orElse: () => null,
-    );
-    if (item == null) return null;
-    final url = (item.url?.toString() ?? item['url']?.toString())?.trim();
-    print('SHAMSI: $url');
-    return (url == null || url.isEmpty) ? null : url;
-  }
-
-  String levelToLocalizedString(Level level) {
+  String _levelLabel(Level level) {
     switch (level) {
       case Level.minimal:
         return Strings.minimal;
@@ -155,5 +90,131 @@ class TasksCards extends StatelessWidget {
       case Level.maximal:
         return Strings.maximal;
     }
+  }
+}
+
+class _ExerciseCard extends StatelessWidget {
+  final ExercisesRequest exercise;
+  final bool loading;
+  final VoidCallback onTap;
+
+  const _ExerciseCard({
+    required this.exercise,
+    required this.loading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ShimmerWrapper(
+      loading: loading,
+      shimmerChild: ShimmerChild(
+        height: 88,
+        color: context.colors.backgroundElevation,
+      ),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: context.colors.backgroundElevation,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              // Backend's `Default` asset is either a `.gif` (rendered
+              // via CachedNetworkImage) or a `.mp4` (looping muted
+              // video). AnimatedAssetView branches on the extension
+              // and manages controller lifecycle so cards scrolling
+              // past `cacheExtent` release their resources.
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: AnimatedAssetView(
+                  key: ValueKey(exercise.id),
+                  url: exercise.previewAssetUrl,
+                  height: 64,
+                  borderRadius: 12,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    exercise.title
+                        .text(16, 20, 500)
+                        .c(context.colors.textStrong)
+                        .copyWith(overflow: TextOverflow.ellipsis, maxLines: 1),
+                    const SizedBox(height: 6),
+                    _MetricsRow(exercise: exercise),
+                  ],
+                ),
+              ),
+              if (exercise.isDone)
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Icon(
+                    Icons.check_circle,
+                    size: 22,
+                    color: context.colors.accentSub,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MetricsRow extends StatelessWidget {
+  final ExercisesRequest exercise;
+
+  const _MetricsRow({required this.exercise});
+
+  @override
+  Widget build(BuildContext context) {
+    final computation = exercise.computation;
+    if (computation == null) {
+      return exercise.duration.text(14, 18, 500).c(context.colors.textSub);
+    }
+
+    final isDuration = computation.computationType == ComputationType.duration;
+    return _Badge(
+      icon: isDuration ? Icons.timer_outlined : Icons.repeat,
+      label: computation.format(
+        durationUnit: Strings.minute,
+        countUnit: Strings.times,
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _Badge({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: context.colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: context.colors.textSub),
+          const SizedBox(width: 4),
+          label.text(12, 14, 500).c(context.colors.textSub),
+        ],
+      ),
+    );
   }
 }

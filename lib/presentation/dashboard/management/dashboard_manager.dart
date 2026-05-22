@@ -25,6 +25,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   final StepLedgerStore _ledger = StepLedgerStore();
 
   StreamSubscription<int>? _stepsSub;
+  StreamSubscription<StepCounterEvent>? _stepEventsSub;
   StreamSubscription<void>? _forceLogoutSub;
 
   bool _initialized = false;
@@ -52,6 +53,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
       });
 
       _listenToStepCounter();
+      _listenToStepEvents();
       await _decideStepCounterStart();
     } catch (e, s) {
       log('DashboardManager init error: $e', stackTrace: s);
@@ -66,6 +68,38 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
       }
       _maybeStartForegroundService(total);
     });
+  }
+
+  void _listenToStepEvents() {
+    _stepEventsSub?.cancel();
+    _stepEventsSub = _stepCounter.events.listen((event) {
+      switch (event) {
+        case HealthDataNotSyncing():
+          publish(DashboardEffect.requestHealthSyncFix(
+            detectedApp: event.detectedApp,
+          ));
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Stuck-Health dialog actions (called from the UI)
+  // ─────────────────────────────────────────────────────────────────────
+
+  Future<void> onOpenHealthApp(String detectedApp) async {
+    switch (detectedApp) {
+      case 'samsung_health':
+        await InstalledHealthAppsService.openSamsungHealthSettings();
+      case 'mi_fitness':
+        await InstalledHealthAppsService.openMiFitnessSettings();
+      default:
+        await InstalledHealthAppsService.openHealthConnectSettings();
+    }
+    await _ledger.setUserOpenedHealthApp(true);
+  }
+
+  Future<void> onUseSensorInstead() async {
+    await _stepCounter.forcePedometer();
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -131,9 +165,22 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
-    if (lifecycleState == AppLifecycleState.resumed &&
-        _ledger.didUserOpenHealthApp()) {
+    if (lifecycleState != AppLifecycleState.resumed) return;
+
+    if (_ledger.didUserOpenHealthApp()) {
       unawaited(_recheckAfterUserReturn());
+      return;
+    }
+
+    // iOS-specific: HealthKit doesn't expose read-permission status,
+    // so we can't tell when the user fixes it in Settings on their
+    // own. Cheap workaround — every time the app comes to the
+    // foreground and we're not already on Health, ask the service to
+    // try again. `retryHealth` is a no-op if Health is already
+    // active, and silently bails if the probe still returns 0, so
+    // this is safe to fire on every resume.
+    if (Platform.isIOS && _stepCounter.source != StepSource.health) {
+      unawaited(_stepCounter.retryHealth());
     }
   }
 
@@ -161,6 +208,7 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   Future<void> close() {
     WidgetsBinding.instance.removeObserver(this);
     _stepsSub?.cancel();
+    _stepEventsSub?.cancel();
     _forceLogoutSub?.cancel();
     return super.close();
   }

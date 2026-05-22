@@ -26,7 +26,14 @@ abstract class StepRepo {
 
   Future<void> deleteNorm(String metric);
 
-  Future<void> sendDailyData({required String metric, required int value});
+  /// POSTs a single daily-metric record. When [date] is null the
+  /// server is told it belongs to today; pass an explicit date to
+  /// backdate (e.g. historical step backfill).
+  Future<void> sendDailyData({
+    required String metric,
+    required int value,
+    DateTime? date,
+  });
 
   Future<void> sendStepDataDateRange({
     required List<StepsWithMetricsRequest> steps,
@@ -37,6 +44,11 @@ abstract class StepRepo {
   Future<void> sendHealthData({required DateTime from, required DateTime to});
 
   Future<int> getTodayHealthSteps();
+
+  /// Total Steps for a given calendar day (00:00 → 23:59 local time)
+  /// read directly from HealthKit / Health Connect. Returns 0 when
+  /// Health is unavailable, unpermitted, or has no data for that day.
+  Future<int> getHealthStepsForDay(DateTime day);
 
   Future<bool> isHealthDataAvailable();
 

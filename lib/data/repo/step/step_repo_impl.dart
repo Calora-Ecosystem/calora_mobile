@@ -87,8 +87,12 @@ class StepRepoImpl extends StepRepo {
   Future<void> updateNorm(NormsRequest norm) => _stepsApi.updateNorm(norm);
 
   @override
-  Future<void> sendDailyData({required String metric, required int value}) =>
-      _stepsApi.sendDailyData(metric: metric, value: value);
+  Future<void> sendDailyData({
+    required String metric,
+    required int value,
+    DateTime? date,
+  }) =>
+      _stepsApi.sendDailyData(metric: metric, value: value, date: date);
 
   @override
   Future<void> sendStepDataDateRange({
@@ -199,7 +203,15 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<void> sendHealthData({required DateTime from, required DateTime to}) async {
     try {
-      if (!await hasHealthPermission()) return;
+      // iOS HealthKit hides read-permission status (Apple privacy
+      // model), so `hasHealthPermission()` returns false on iOS even
+      // after grant. We gate only on Android (Health Connect) and
+      // probe the store directly on iOS — a missing permission just
+      // returns null from `getTotalStepsInInterval` below, which we
+      // already coalesce to 0.
+      if (defaultTargetPlatform != TargetPlatform.iOS) {
+        if (!await hasHealthPermission()) return;
+      }
 
       final now = DateTime.now();
       // Never query the future — cap upper bound at "now".
@@ -271,6 +283,37 @@ class StepRepoImpl extends StepRepo {
   }
 
   @override
+  Future<int> getHealthStepsForDay(DateTime day) async {
+    try {
+      // iOS's HealthKit doesn't surface read-permission status, so
+      // `ensureHealthAuthorized` is unreliable there. Skip the gate
+      // and probe the store directly — if permission is actually
+      // missing the underlying call returns null which we coerce to 0.
+      if (defaultTargetPlatform != TargetPlatform.iOS) {
+        final authorized = await ensureHealthAuthorized();
+        if (!authorized) return 0;
+      }
+
+      final start = DateTime(day.year, day.month, day.day).toLocal();
+      final end = DateTime(
+        day.year,
+        day.month,
+        day.day,
+        23,
+        59,
+        59,
+      ).toLocal();
+
+      final steps = await _health.getTotalStepsInInterval(start, end);
+      log('[Health] Steps for ${start.toIso8601String()}: $steps');
+      return steps ?? 0;
+    } catch (e) {
+      log('Error getting health steps for day: $e');
+      return 0;
+    }
+  }
+
+  @override
   Future<bool> isHealthDataAvailable() async {
     try {
       if (defaultTargetPlatform == TargetPlatform.android) {
@@ -315,6 +358,23 @@ class StepRepoImpl extends StepRepo {
         from.year,
         from.month + 1,
       ).subtract(const Duration(seconds: 1));
+    }
+
+    // Cap `to` at end-of-today so the API window never includes future
+    // dates. Without this the monthly view requests e.g. 2026-05-01 →
+    // 2026-05-31 even when today is 2026-05-19, and the server dutifully
+    // returns 0-step rows for May 20–31 that the chart then renders as
+    // empty bars after today's position.
+    final endOfToday = DateTime(
+      currentTime.year,
+      currentTime.month,
+      currentTime.day,
+      23,
+      59,
+      59,
+    );
+    if (to.isAfter(endOfToday)) {
+      to = endOfToday;
     }
 
     return {'from': from, 'to': to};

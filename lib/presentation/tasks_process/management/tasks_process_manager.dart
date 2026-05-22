@@ -120,7 +120,9 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
 
     // `computation.value` is authoritative for both types:
     //   Count    → number of reps, tick every 3s
-    //   Duration → number of seconds, tick every 1s
+    //   Duration → number of MINUTES (per backend contract); converted
+    //              to seconds here because `_startDurationCountdown`
+    //              ticks every 1s.
     // The legacy `duration` string is only used as a fallback when
     // `computation` is missing (older exercises).
     final comp = ex.computation;
@@ -133,7 +135,7 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
     if (comp.computationType == ComputationType.count) {
       _startCountCountdown(value);
     } else {
-      _startDurationCountdown(value);
+      _startDurationCountdown(value * 60);
     }
   }
 

@@ -4,26 +4,38 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'add_meals_management.freezed.dart';
 
+/// Which paginated list the food grid is currently rendering.
+enum FoodTab {
+  /// Category cards — "All Dishes". Not a food list; tapping a card
+  /// pushes [DishesPage].
+  categories,
+
+  /// `/food?Latest=true` — recently eaten foods.
+  latest,
+
+  /// `/food?IsUserFood=true` — foods the user authored.
+  userFoods,
+
+  /// `/food?IsFavourite=true` — favourited foods.
+  favourites,
+
+  /// Search overlay — `FilteringExpression=name$$<q>`. Active while the
+  /// search field has 3+ characters.
+  search,
+}
+
 @freezed
 abstract class AddMealsState with _$AddMealsState {
   const factory AddMealsState({
     @Default(false) bool hasOpenedCreator,
-    @Default(0) int selectedToggleIndex,
+    @Default(FoodTab.categories) FoodTab activeTab,
     @Default([]) List<MealTypeData> mealCategories,
-    @Default([]) List<FoodModel> favouriteFoods,
-    @Default([]) List<FoodModel> latestFoods,
     @Default([]) List<ScannerFood> scannedFoods,
     @Default([]) List<ScannerFood> scannedFoodsByVoice,
-    @Default([]) List<FoodModel> userFoods,
     int? addedFoodId,
     @Default(false) bool isLoading,
-    @Default([]) List<FoodModel> searchFoods,
-    @Default(false) bool isSearch,
-    @Default(false) bool isSearchMode,
     @Default(false) bool isMealCategory,
-    @Default(false) bool isLatest,
-    @Default(false) bool isUserFoods,
-    @Default(false) bool isFavourite,
+    @Default('') String searchQuery,
   }) = _AddMealsState;
 }
 

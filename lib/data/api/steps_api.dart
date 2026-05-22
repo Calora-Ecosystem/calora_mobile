@@ -51,14 +51,24 @@ class StepsApi {
     }
   }
 
-  Future<PaginatedResponse<UserStatRequest>> getStats(DateTime from, DateTime to, int skip, int take) async {
+  Future<PaginatedResponse<UserStatRequest>> getStats(
+    DateTime from,
+    DateTime to,
+    int skip,
+    int take,
+  ) async {
     final fromUtc = DateTime.utc(from.year, from.month, from.day);
     final toUtc = DateTime.utc(to.year, to.month, to.day, 23, 59, 59);
     final profile = await profileStore.getProfile();
     final currentUserId = profile.userId ?? 0;
     final response = await _dio.get(
       'users/steps/stat',
-      queryParameters: {'from': fromUtc.toIso8601String(), 'to': toUtc.toIso8601String(), 'Skip': skip, 'Take': take},
+      queryParameters: {
+        'from': fromUtc.toIso8601String(),
+        'to': toUtc.toIso8601String(),
+        'Skip': skip,
+        'Take': take,
+      },
     );
     final data = response.data as Map<String, dynamic>;
     final content = (data['content'] as List<dynamic>).map((e) {
@@ -105,8 +115,16 @@ class StepsApi {
     await _dio.delete('users/norms/$metric');
   }
 
-  Future<void> sendDailyData({required String metric, required int value}) async {
-    final body = {'metric': metric, 'value': value, 'date': DateTime.now().toUtc().toIso8601String()};
+  Future<void> sendDailyData({
+    required String metric,
+    required int value,
+    DateTime? date,
+  }) async {
+    final body = {
+      'metric': metric,
+      'value': value,
+      'date': (date ?? DateTime.now()).toUtc().toIso8601String(),
+    };
     await _dio.post('users/dailies', data: body);
   }
 
@@ -118,7 +136,9 @@ class StepsApi {
   Future<bool> deleteUserDailyData({required String date}) async {
     try {
       final response = await _dio.delete('users/dailies/reset', queryParameters: {'date': date});
-      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
+      return response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300;
     } on DioException {
       return false;
     }

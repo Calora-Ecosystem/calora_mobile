@@ -20,7 +20,14 @@ class ChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int itemCount = type == ChartType.weekly ? 7 : 30;
+    // Weekly is always exactly 7 bars. Monthly used to be hard-coded
+    // to 30, which mis-rendered February (28/29) and 31-day months
+    // (Jan, Mar, May, …). Use the supplied `primaryValues` length —
+    // `StepsManager._buildMonthlySteps` already sizes it with
+    // `DateUtils.getDaysInMonth(target.year, target.month)`.
+    final int itemCount = type == ChartType.weekly
+        ? 7
+        : (primaryValues.isEmpty ? 30 : primaryValues.length);
 
     final values = List<double>.generate(
       itemCount,

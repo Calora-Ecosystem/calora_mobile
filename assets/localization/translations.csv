@@ -320,7 +320,7 @@ notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj
 should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
 yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
 please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
-your_data_has_been_saved,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+your_data_has_been_saved,Your data has been successfully saved.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
 no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
 liter,liter,litr,литр
@@ -394,3 +394,5 @@ later,Later,Keyinroq,Позже
 delete_account,Delete account,Hisobni o'chirish,Удалить аккаунт
 are_you_sure_delete_account,Are you sure you want to delete your account? This action cannot be undone.,Hisobingizni o'chirib tashlamoqchimisiz? Bu amalni qaytarib bo'lmaydi.,"Вы уверены, что хотите удалить аккаунт? Это действие необратимо."
 delete_account_failed,Failed to delete account. Please try again.,Hisobni o'chirib bo'lmadi. Qaytadan urinib ko'ring.,Не удалось удалить аккаунт. Попробуйте снова.
+times,times,marotaba,раза
+discoverWorkoutExercises,Discover {workoutTitle} exercises,{workoutTitle} mashqlari bilan tanishing,Познакомьтесь с упражнениями {workoutTitle}

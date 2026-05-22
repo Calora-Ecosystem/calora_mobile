@@ -146,13 +146,24 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
           onStart: () => emit(state.copyWith(isGettingPromoCodeValue: true)),
           onData: (data) {
             if (data.id != null && data.amount != null) {
+              // Coupon `amount` is in the same unit as plan `fee` —
+              // UZS. Backends commonly encode "100% off" by returning
+              // an `amount` that meets or exceeds every plan price
+              // (e.g. TEST001 returns 4 800 000 against a 49 000 UZS
+              // plan); the `paymentRequired: false` flow at order
+              // time then takes the user to the success state without
+              // hitting Payme / Click. The clamp below floors the
+              // visible payable amount at 0 for that case while still
+              // doing the correct subtraction for partial discounts.
+              final amount = data.amount ?? 0;
               final discountedPlans = state.plans.map((plan) {
-                final discountedPrice = (plan.actualPrice ?? plan.price) - (data.amount ?? 0);
+                final base = plan.actualPrice ?? plan.price;
+                final discountedPrice = (base - amount).clamp(0, base);
                 return PlanModel(
                   id: plan.id,
                   title: plan.title,
-                  price: discountedPrice > 0 ? discountedPrice : 0,
-                  actualPrice: plan.actualPrice ?? plan.price,
+                  price: discountedPrice,
+                  actualPrice: base,
                   originalFee: plan.originalFee,
                   packageMonth: plan.packageMonth,
                   isMostPopular: plan.isMostPopular,
@@ -168,12 +179,25 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
                 newSelectedPlan = discountedPlans.isNotEmpty ? discountedPlans.first : null;
               }
 
+              // When the promo zeroes-out the selected plan and the
+              // user hasn't picked a method, auto-pick the first one
+              // so the order POST still has a valid `provider` field —
+              // backend will then reply `paymentRequired: false` and
+              // the existing success path takes over.
+              PaymentMethod? autoMethod = state.selectedPaymentMethod;
+              if (autoMethod == null &&
+                  (newSelectedPlan?.isFree ?? false) &&
+                  state.paymentMethods.isNotEmpty) {
+                autoMethod = state.paymentMethods.first;
+              }
+
               emit(
                 state.copyWith(
                   isGettingPromoCodeValue: false,
                   promoCodeValue: data,
                   plans: discountedPlans,
                   selectedPlan: newSelectedPlan,
+                  selectedPaymentMethod: autoMethod,
                 ),
               );
             } else {
@@ -188,9 +212,23 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   Future<void> orderSubscription({bool? restore}) async {
     final isRestore = restore ?? false;
     final isIap = state.selectedPaymentMethod?.code == 'Iap';
+
+    // Free-plan defense-in-depth: when a 100% promo is applied the UI
+    // hides the payment picker, but the order POST still needs a
+    // non-empty `provider`. If `getPromoCodeValue` didn't get to
+    // auto-select one (e.g. promo applied before plans/methods loaded),
+    // fall back to the first available method here. The backend will
+    // still reply `paymentRequired: false` so the value is effectively
+    // ignored — we just need the field to validate.
+    final isFreePlan = state.selectedPlan?.isFree ?? false;
+    final providerCode = state.selectedPaymentMethod?.code ??
+        (isFreePlan && state.paymentMethods.isNotEmpty
+            ? state.paymentMethods.first.code
+            : '');
+
     await _premiumRepo
         .orderSubscription(
-          provider: state.selectedPaymentMethod?.code ?? '',
+          provider: providerCode,
           plan: SubscriptionPlanType.premium.toApi(),
           orderMonth: state.selectedPlan?.id ?? -1,
           couponId: state.promoCodeValue?.id,

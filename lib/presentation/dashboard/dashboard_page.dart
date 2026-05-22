@@ -8,6 +8,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:calora/presentation/dashboard/widgets/health_connect_hint_dialog.dart';
+import 'package:calora/presentation/dashboard/widgets/health_sync_fix_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
@@ -32,6 +33,15 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
           detectedApp: detectedApp,
           onAccept: () => manager.onUserAcceptedHealthPermission(),
           onDecline: () => manager.onUserDeclinedHealthPermission(),
+        );
+      },
+      requestHealthSyncFix: (detectedApp) {
+        HealthSyncFixDialog.show(
+          context: context,
+          detectedApp: detectedApp,
+          onOpenSourceApp: () => manager.onOpenHealthApp(detectedApp),
+          onUseSensorInstead: () => manager.onUseSensorInstead(),
+          onDismiss: () {},
         );
       },
     );

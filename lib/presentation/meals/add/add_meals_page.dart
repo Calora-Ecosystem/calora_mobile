@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
@@ -28,6 +26,7 @@ import 'package:calora/widgets/creator/food_creator_with_image.dart';
 import 'package:calora/widgets/creator/food_creator_with_speech.dart';
 import 'package:calora/widgets/info/dish_info_page.dart';
 import 'package:calora/widgets/meals/meals_type_widget.dart';
+import 'package:calora/widgets/meals/paginated_food_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -49,31 +48,18 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   });
 
   late final TextEditingController _searchController;
-  Timer? _debounce;
 
   @override
   void init(BuildContext context, AddMealsManager manager) {
     _searchController = TextEditingController();
-    _searchController.addListener(() => _onSearchChanged(manager));
+    // Debounce + length-gating live in the manager — the page is a
+    // dumb forwarder so manager logic can be unit-tested without
+    // pumping a widget tree.
+    _searchController.addListener(() {
+      manager.onSearchChanged(_searchController.text);
+    });
     super.init(context, manager);
     manager.fetchFoodCategory();
-  }
-
-  void _onSearchChanged(AddMealsManager manager) {
-    final text = _searchController.text.trim();
-    _debounce?.cancel();
-
-    if (text.isEmpty) {
-      manager.onSearchChanged('');
-      return;
-    }
-
-    if (text.length >= 3) {
-      // 200ms debounce
-      _debounce = Timer(const Duration(milliseconds: 200), () {
-        manager.onSearchChanged(text);
-      });
-    }
   }
 
   @override
@@ -89,7 +75,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -118,7 +103,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   controller: _searchController,
                 ),
                 if (context.read<AppManager>().state.isUserPremium) const SizedBox(height: 12),
-                if (!state.isSearchMode) ...[
+                if (state.activeTab != FoodTab.search) ...[
                   Row(
                     children: [
                       buildActionCard(
@@ -150,58 +135,42 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   ),
                   const SizedBox(height: 12),
                   ToggleButtonsWidget(
-                    onChanged: (value) => manager.onToggleChanged(value),
+                    onChanged: manager.onToggleChanged,
                     titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
                   ),
                   const SizedBox(height: 12),
-                  Flexible(
-                    child: state.selectedToggleIndex == 3
-                        ? RepaintBoundary(
-                            child: FavouriteFoodGrid(
-                              isLoading: state.isFavourite,
-                              foods: state.favouriteFoods,
-                              onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                            ),
-                          )
-                        : state.selectedToggleIndex == 1
-                        ? RepaintBoundary(
-                            child: FavouriteFoodGrid(
-                              isLoading: state.isLatest,
-                              foods: state.latestFoods,
-                              onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                            ),
-                          )
-                        : state.selectedToggleIndex == 2
-                        ? RepaintBoundary(
-                            child: FavouriteFoodGrid(
-                              isLoading: state.isUserFoods,
-                              foods: state.userFoods,
-                              onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                            ),
-                          )
-                        : RepaintBoundary(
-                            child: MealTypeGrid(
-                              isLoading: state.isMealCategory,
-                              mealTypes: state.mealCategories,
-                              onMealTypeSelected: (meal) => manager.openDishesPage(meal),
-                            ),
-                          ),
-                  ),
                 ],
-                if (state.isSearchMode) ...[
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: FavouriteFoodGrid(
-                      isLoading: state.isSearch,
-                      foods: state.searchFoods,
-                      onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
-                    ),
-                  ),
-                ],
+                Expanded(
+                  child: _buildBody(context, manager, state),
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    AddMealsManager manager,
+    AddMealsState state,
+  ) {
+    if (state.activeTab == FoodTab.categories) {
+      return RepaintBoundary(
+        child: MealTypeGrid(
+          isLoading: state.isMealCategory,
+          mealTypes: state.mealCategories,
+          onMealTypeSelected: manager.openDishesPage,
+        ),
+      );
+    }
+
+    return RepaintBoundary(
+      child: PaginatedFoodGrid(
+        controller: manager.foodPaginator.pagingController,
+        onFoodSelected: (food) =>
+            manager.openAboutPage(food, food.isFavourite),
       ),
     );
   }

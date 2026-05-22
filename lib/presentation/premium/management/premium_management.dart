@@ -60,6 +60,13 @@ class PlanModel {
     required this.packageMonth,
   });
 
+  /// `true` when no payment is required — typically because a 100%
+  /// promo brought [price] to 0. Drives both the UI (hide the Payme /
+  /// Click picker, allow "Sotib olish" without a selected method) and
+  /// the order flow (auto-fill a provider so the API call still
+  /// validates; backend will reply `paymentRequired: false`).
+  bool get isFree => price <= 0;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

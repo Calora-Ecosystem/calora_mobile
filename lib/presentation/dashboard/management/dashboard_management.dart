@@ -20,4 +20,13 @@ class DashboardEffect with _$DashboardEffect {
   const factory DashboardEffect.requestHealthPermission({
     required String detectedApp,
   }) = _RequestHealthPermission;
+
+  /// Health permission is granted but the central health repository
+  /// keeps reporting ~0 steps because a third-party tracker (Samsung
+  /// Health, Mi Fitness, …) hasn't been configured to sync into
+  /// Health Connect. [detectedApp] identifies which app to guide the
+  /// user toward.
+  const factory DashboardEffect.requestHealthSyncFix({
+    required String detectedApp,
+  }) = _RequestHealthSyncFix;
 }

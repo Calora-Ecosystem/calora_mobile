@@ -68,6 +68,59 @@ extension LessonAssetsExtension on LessonRequest {
   String? get coverImageUrl => _getAssetUrl('CoverImage');
 }
 
+/// Asset-parsing helpers for [ExercisesRequest] / [ExerciseAsset].
+///
+/// Keeps URL resolution + asset-type lookup out of UI widgets so the
+/// rendering code stays a thin presentational layer and the parsing
+/// can be unit-tested in isolation.
 extension ExerciseAssetX on ExerciseAsset {
-  String get onlyUrl => url;
+  /// Returns the asset URL with the file-server base prepended when
+  /// the backend returned a relative path (`videos/1.mp4` →
+  /// `https://.../file/videos/1.mp4`). Absolute URLs (YouTube, etc.)
+  /// pass through unchanged.
+  String get fullUrl => url.startsWith('http') ? url : '$baseUrl$url';
+}
+
+extension ExercisesRequestX on ExercisesRequest {
+  ExerciseAsset? _assetOfType(String type) {
+    for (final asset in assets) {
+      if (asset.type.toLowerCase() == type.toLowerCase()) return asset;
+    }
+    return null;
+  }
+
+  /// Preview asset (typically a short `.mp4` rendered as a looping
+  /// muted GIF on the card). Resolved to an absolute URL.
+  String? get previewAssetUrl {
+    final raw = _assetOfType('Default')?.url.trim();
+    if (raw == null || raw.isEmpty) return null;
+    return raw.startsWith('http') ? raw : '$baseUrl$raw';
+  }
+
+  /// YouTube tutorial URL — already absolute in the API payload.
+  String? get youtubeAssetUrl {
+    final raw = _assetOfType('Video')?.url.trim();
+    if (raw == null || raw.isEmpty) return null;
+    return raw;
+  }
+}
+
+extension ExerciseComputationX on ExerciseComputation {
+  /// Localized formatter for the computation badge on the card
+  /// ("5 daqiqa" for [ComputationType.duration], "25 marta" for
+  /// [ComputationType.count]).
+  ///
+  /// `value` is **minutes** for Duration and **reps** for Count, per
+  /// the backend contract. Pass the localized unit strings from the
+  /// caller so this helper stays free of `easy_localization`
+  /// dependency (and is testable).
+  String format({required String durationUnit, required String countUnit}) {
+    final n = value % 1 == 0 ? value.toInt().toString() : value.toString();
+    switch (computationType) {
+      case ComputationType.duration:
+        return '$n $durationUnit';
+      case ComputationType.count:
+        return '$n $countUnit';
+    }
+  }
 }

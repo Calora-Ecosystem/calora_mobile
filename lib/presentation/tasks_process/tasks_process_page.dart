@@ -3,9 +3,10 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/widgets/button/progress_button.dart';
 import 'package:calora/common/widgets/button/simple_button.dart';
-import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
+import 'package:calora/common/widgets/video_player/animated_asset_view.dart';
 import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -102,7 +103,11 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
                   total: state.exercises.length,
                 ),
                 const SizedBox(height: 28),
-                CustomCachedNetworkImage.banner(imageUrl: _assetUrlByType('Default', ex), height: 200),
+                AnimatedAssetView(
+                  key: ValueKey('process-${ex.id}'),
+                  url: ex.previewAssetUrl,
+                  height: 200,
+                ),
                 const SizedBox(height: 12),
                 ex.title.text(20, 24, 700).c(context.colors.textStrong),
                 const SizedBox(height: 12),
@@ -152,16 +157,6 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
         ),
       ),
     );
-  }
-
-  String? _assetUrlByType(String type, ExercisesRequest exercises) {
-    final item = exercises.assets.cast<dynamic>().firstWhere(
-      (e) => (e.type?.toString() ?? e['type']?.toString())?.toLowerCase() == type.toLowerCase(),
-      orElse: () => null,
-    );
-    if (item == null) return null;
-    final url = (item.url?.toString() ?? item['url']?.toString())?.trim();
-    return (url == null || url.isEmpty) ? null : url;
   }
 
   String _formatSeconds(int totalSeconds) {

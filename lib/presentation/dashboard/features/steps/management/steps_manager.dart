@@ -181,6 +181,12 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
           onStart: () {},
           onData: (data) {
             if (period == 0) {
+              // Today (offset == 0) trusts the live count from
+              // DashboardManager's Health/pedometer stream (mirrored
+              // into state.stepCount via _listenToMetricsSyncFromDashboard).
+              // Past days fall back to whatever the backend has for
+              // that date — the 1-min sync + startup backfill keep
+              // those values fresh.
               final displayStepCount = offset == 0 ? state.stepCount : _buildDailySteps(data, offset, now);
               emit(state.copyWith(dailySteps: data, dailyDisplayStepCount: displayStepCount, isGettingSteps: false));
             } else if (period == 1) {
@@ -228,6 +234,11 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       default:
         return;
     }
+
+    // Never request future dates — the server happily echoes them back
+    // as zero-step rows that show up as empty trailing bars.
+    final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    if (toDate.isAfter(endOfToday)) toDate = endOfToday;
 
     await stepRepo
         .getUserMetrics(from: fromDate.toIso8601String(), to: toDate.toIso8601String())
