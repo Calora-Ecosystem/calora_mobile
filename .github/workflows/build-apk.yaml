@@ -3,9 +3,11 @@ name: Build Android APK
 on:
     push:
         branches: [healthy]
-    pull_request:
-        branches: [healthy]
     workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     build-apk:
@@ -29,6 +31,32 @@ jobs:
                   flutter-version: "3.35.x"
                   cache: true
 
+            - name: Cache Pub dependencies
+              uses: actions/cache@v4
+              with:
+                  path: ~/.pub-cache
+                  key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pub-
+
+            - name: Cache Gradle dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.gradle/caches
+                      ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+                  restore-keys: |
+                      ${{ runner.os }}-gradle-
+
+            - name: Cache build_runner outputs
+              uses: actions/cache@v4
+              with:
+                  path: .dart_tool/build
+                  key: ${{ runner.os }}-build-runner-${{ hashFiles('**/pubspec.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-build-runner-
+
             - name: Create .env file
               run: |
                   if [ -n "${{ secrets.ENV_FILE }}" ]; then
@@ -37,9 +65,6 @@ jobs:
                     touch .env
                   fi
 
-            - name: Flutter version
-              run: flutter --version
-
             - name: Get Flutter dependencies
               run: flutter pub get
 
@@ -47,7 +72,7 @@ jobs:
               run: dart run build_runner build --delete-conflicting-outputs
 
             - name: Build release APK
-              run: flutter build apk --release
+              run: flutter build apk --release --target-platform=android-arm64
 
             - name: Upload APK artifact
               uses: actions/upload-artifact@v4
@@ -56,3 +81,18 @@ jobs:
                   path: build/app/outputs/flutter-apk/app-release.apk
                   if-no-files-found: error
                   retention-days: 30
+
+            - name: Send APK to Telegram
+              env:
+                  TELEGRAM_BOT_TOKEN: "8659568104:AAEQAsm61KTKL4QihJVeqrfZlEViKP8iC_U"
+                  TELEGRAM_CHAT_ID: "-1002971622045"
+              run: |
+                  APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+                  VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  CAPTION=$(printf "📦 Calora APK\n\n*Version:* %s\n*Commit:* %s" "$VERSION" "$COMMIT_MSG")
+                  curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
+                      -F "chat_id=${TELEGRAM_CHAT_ID}" \
+                      -F "document=@${APK_PATH}" \
+                      -F "caption=${CAPTION}" \
+                      -F "parse_mode=Markdown"
