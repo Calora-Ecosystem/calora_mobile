@@ -211,12 +211,10 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
 
   Future<bool> addFoodAndMenuWithImage(
     ScannerFood food,
-    int categoryId,
     String menu,
   ) async {
     final userId = await profileStore.getUserId() ?? 0;
     final foodRequest = food.toFoodRequest(
-      categoryId: categoryId,
       userId: userId,
       coverUrl: abstractImageUrl,
     );
@@ -234,12 +232,11 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     return false;
   }
 
-  Future<bool> addFoodAndMenuWithVoice(int categoryId, String menu) async {
+  Future<bool> addFoodAndMenuWithVoice(String menu) async {
     final userId = await profileStore.getUserId();
     final List<FoodRequest> foodRequests = state.scannedFoodsByVoice
         .map(
           (e) => e.toFoodRequest(
-            categoryId: categoryId,
             userId: userId ?? 0,
             coverUrl: abstractImageUrl,
           ),

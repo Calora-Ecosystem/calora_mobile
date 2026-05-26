@@ -2,6 +2,7 @@ import 'package:auto_route/annotations.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/presentation/app/app/management/app_manager.dart';
@@ -17,8 +18,9 @@ import 'package:management/management.dart';
 @RoutePage()
 class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
   final int courseId;
+  final String imageUrl;
 
-  const LessonsPage({super.key, required this.courseId});
+  const LessonsPage({super.key, required this.courseId, required this.imageUrl});
 
   Level _mapIntToLevel(int index) {
     switch (index) {
@@ -62,7 +64,9 @@ class LessonsPage extends Managed<LessonsManager, LessonsState, LessonsEffect> {
               child: SizedBox(
                 height: 200,
                 width: 200,
-                child: Assets.images.courseImage.image(fit: BoxFit.cover),
+                child: ClipRect(
+                  child: CustomCachedNetworkImage.banner(imageUrl: imageUrl),
+                ),
               ),
             ),
           ),

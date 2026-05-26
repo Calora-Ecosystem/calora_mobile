@@ -16,9 +16,11 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
 import 'package:calora/widgets/premium/promo_code_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
+import 'package:url_launcher/url_launcher.dart' show launchUrl, LaunchMode;
 
 class PremiumSheet
     extends Managed<PremiumManager, PremiumState, PremiumEffect> {
@@ -209,6 +211,8 @@ class PremiumSheet
               child: state.isPaymentPending
                   ? Column(
                       children: [
+                        _legalLinks(context),
+                        const SizedBox(height: 12),
                         Button(
                           height: 40,
                           text: Strings.continuePurchase,
@@ -242,6 +246,8 @@ class PremiumSheet
                     )
                   : Column(
                       children: [
+                        _legalLinks(context),
+                        const SizedBox(height: 12),
                         Button(
                           height: 40,
                           text: Strings.purchase,
@@ -416,6 +422,53 @@ class PremiumSheet
           ],
         ),
       ),
+    );
+  }
+
+  Widget _legalLinks(BuildContext context) {
+    final disclaimerStyle = TextStyle(
+      fontSize: 11,
+      height: 14 / 11,
+      color: context.colors.textSub,
+    );
+    final linkStyle = TextStyle(
+      fontSize: 11,
+      height: 14 / 11,
+      color: context.colors.textPrimary,
+      decoration: TextDecoration.underline,
+      fontWeight: FontWeight.w500,
+    );
+    return Column(
+      children: [
+        Text(
+          'subscription_auto_renew_note'.tr(),
+          style: disclaimerStyle,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text('${'subscription_legal_terms'.tr()} ', style: disclaimerStyle),
+            GestureDetector(
+              onTap: () => launchUrl(
+                Uri.parse('https://calora.uz/term-of-use'),
+                mode: LaunchMode.externalApplication,
+              ),
+              child: Text(Strings.termsOfUseLink, style: linkStyle),
+            ),
+            Text(' • ', style: disclaimerStyle),
+            GestureDetector(
+              onTap: () => launchUrl(
+                Uri.parse('https://calora.uz/privacy-policy'),
+                mode: LaunchMode.externalApplication,
+              ),
+              child: Text('privacy_policy'.tr(), style: linkStyle),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

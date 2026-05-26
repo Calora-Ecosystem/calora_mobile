@@ -12,10 +12,12 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class CourseQuestionsPage extends Managed<CourseQuestionsManager, CourseQuestionsState, CourseQuestionsEffect> {
+class CourseQuestionsPage
+    extends Managed<CourseQuestionsManager, CourseQuestionsState, CourseQuestionsEffect> {
   final int courseId;
+  final String imageUrl;
 
-  const CourseQuestionsPage({super.key, required this.courseId});
+  const CourseQuestionsPage({super.key, required this.courseId, required this.imageUrl});
 
   @override
   void init(context, manager) {}
@@ -59,7 +61,7 @@ class CourseQuestionsPage extends Managed<CourseQuestionsManager, CourseQuestion
                         context.router.push(
                           ProgressRoute(
                             key: UniqueKey(),
-                            nextRoute: LessonsRoute(courseId: courseId),
+                            nextRoute: LessonsRoute(courseId: courseId, imageUrl: imageUrl),
                             apiCall: () => manager.finish(),
                             title: Strings.weWillMakeDailyPlan,
                             analyzeItems: [

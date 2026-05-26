@@ -3,6 +3,7 @@ import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/menu/menu_info.dart';
 import 'package:calora/domain/model/meal/menu/menu_item.dart';
+import 'package:flutter/widgets.dart';
 
 enum MetricType {
   protein('Protein'),
@@ -38,13 +39,12 @@ class MetricsHelper {
 
 extension ScannerFoodMapper on ScannerFood {
   FoodRequest toFoodRequest({
-    required int categoryId,
     required int userId,
     required String coverUrl,
   }) {
     return FoodRequest(
       categoryId: categoryId,
-      name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
+      name: name,
       coverUrl: coverUrl,
       metrics: metrics,
       userId: userId,
@@ -57,6 +57,20 @@ extension ScannerFoodMapper on ScannerFood {
     required int foodId,
   }) {
     return MenuInfo(menu: menu, date: date, foodId: foodId, weightInGr: weight);
+  }
+}
+
+extension FoodNameLocalized on FoodName {
+  String localized(Locale locale) {
+    switch (locale.languageCode) {
+      case 'ru':
+        return ru;
+      case 'en':
+        return eng;
+      case 'uz':
+      default:
+        return uz;
+    }
   }
 }
 

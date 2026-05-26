@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/citation/citation_link.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,10 @@ class DailyMealPlanWidget extends StatelessWidget {
             title: Strings.leftoverFoodPlan,
             value: leftover.toString(),
             loading: loading,
+          ),
+          const CitationLink(
+            url: 'https://www.calculator.net/calorie-calculator.html',
+            label: 'calculator.net',
           ),
         ],
       ),

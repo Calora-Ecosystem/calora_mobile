@@ -7,7 +7,7 @@ part 'food_request.g.dart';
 @freezed
 abstract class FoodRequest with _$FoodRequest {
   const factory FoodRequest({
-    required int categoryId,
+    @JsonKey(includeIfNull: false) int? categoryId,
     required FoodName name,
     required String coverUrl,
     String? description,
@@ -15,19 +15,5 @@ abstract class FoodRequest with _$FoodRequest {
     required int userId,
   }) = _FoodRequest;
 
-  factory FoodRequest.fromJson(Map<String, dynamic> json) =>
-      _$FoodRequestFromJson(json);
-}
-
-@freezed
-abstract class FoodName with _$FoodName {
-  const factory FoodName({
-    required String uz,
-    required String ru,
-    required String eng,
-    required String cyrl,
-  }) = _FoodName;
-
-  factory FoodName.fromJson(Map<String, dynamic> json) =>
-      _$FoodNameFromJson(json);
+  factory FoodRequest.fromJson(Map<String, dynamic> json) => _$FoodRequestFromJson(json);
 }

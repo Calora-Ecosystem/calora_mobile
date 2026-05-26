@@ -24,6 +24,34 @@ abstract class FoodModel with _$FoodModel {
 }
 
 @freezed
+abstract class FoodName with _$FoodName {
+  const factory FoodName({
+    required String uz,
+    required String ru,
+    required String eng,
+    required String cyrl,
+  }) = _FoodName;
+
+  factory FoodName.fromJson(Map<String, dynamic> json) =>
+      _$FoodNameFromJson(json);
+}
+
+class FoodNameConverter implements JsonConverter<FoodName, Object> {
+  const FoodNameConverter();
+
+  @override
+  FoodName fromJson(Object json) {
+    if (json is String) {
+      return FoodName(uz: json, ru: json, eng: json, cyrl: json);
+    }
+    return FoodName.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Map<String, dynamic> toJson(FoodName object) => object.toJson();
+}
+
+@freezed
 abstract class Metric with _$Metric {
   const factory Metric({
     int? userId,
@@ -37,7 +65,8 @@ abstract class Metric with _$Metric {
 @freezed
 abstract class ScannerFood with _$ScannerFood {
   const factory ScannerFood({
-    required String name,
+    @FoodNameConverter() required FoodName name,
+    required int categoryId,
     required int weight,
     required List<Metric> metrics,
   }) = _ScannerFood;

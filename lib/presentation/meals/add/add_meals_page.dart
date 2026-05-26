@@ -217,7 +217,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           final int userId = await profileStore.getUserId() ?? 0;
           final addedFoodId = await manager.addFood(
             FoodRequest(
-              categoryId: categoryId,
               name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
               coverUrl: abstractImageUrl,
               metrics: [
@@ -250,9 +249,9 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     context.showAppBottomSheet(
       child: FoodCreatorWithImage(
         isLoading: manager.state.isLoading,
-        name: food.name,
+        name: food.name.localized(Localizations.localeOf(context)),
         addButton: () async {
-          final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
+          final success = await manager.addFoodAndMenuWithImage(food, type.name);
           if (context.mounted) context.router.pop();
           if (success) {
             _showInfoDialog(context);
@@ -267,16 +266,17 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   }
 
   void openCreatorWithSpeech(BuildContext context, AddMealsManager manager, List<ScannerFood> foods) {
+    final locale = Localizations.localeOf(context);
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
         isLoading: manager.state.isLoading,
         meals: foods
-            .map((e) => '${e.name} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
+            .map((e) => '${e.name.localized(locale)} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
             .toList(),
         onAdd: () async {
           bool allSucceeded = true;
           for (final food in foods) {
-            final success = await manager.addFoodAndMenuWithImage(food, categoryId, type.name);
+            final success = await manager.addFoodAndMenuWithImage(food, type.name);
             if (!success) {
               allSucceeded = false;
             }

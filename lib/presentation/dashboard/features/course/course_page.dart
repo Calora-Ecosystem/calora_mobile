@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -79,7 +80,9 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                     builder: (_, isScrolled, __) {
                       return SliverAppBar(
                         pinned: true,
-                        backgroundColor: isScrolled ? context.colors.white : context.colors.transparent,
+                        backgroundColor: isScrolled
+                            ? context.colors.white
+                            : context.colors.transparent,
                         elevation: isScrolled ? 4 : 0,
                         scrolledUnderElevation: 4,
                         shadowColor: context.colors.black.withValues(alpha: 0.2),
@@ -115,11 +118,22 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                               }
                               final profile = await getIt<ProfileStore>().getProfile();
                               final physicalActivity = profile.physicalActivity;
-                              final needsQuestions = physicalActivity == null || physicalActivity.trim().isEmpty;
+                              final needsQuestions =
+                                  physicalActivity == null || physicalActivity.trim().isEmpty;
                               if (needsQuestions) {
-                                context.router.push(CourseQuestionsRoute(courseId: course.id ?? 0));
+                                context.router.push(
+                                  CourseQuestionsRoute(
+                                    courseId: course.id ?? 0,
+                                    imageUrl: course.subCoverImage ?? '',
+                                  ),
+                                );
                               } else {
-                                context.router.push(LessonsRoute(courseId: course.id ?? 0));
+                                context.router.push(
+                                  LessonsRoute(
+                                    courseId: course.id ?? 0,
+                                    imageUrl: course.subCoverImage ?? '',
+                                  ),
+                                );
                               }
                             },
                           ),

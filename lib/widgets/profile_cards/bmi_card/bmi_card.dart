@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/citation/citation_link.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/profile_cards/bmi_card/color_level_bar.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +105,10 @@ class BmiCard extends StatelessWidget {
                 ],
               ),
             ],
+            const CitationLink(
+              url: 'https://www.calculator.net/bmi-calculator.html',
+              label: 'calculator.net',
+            ),
           ],
         ),
       ),

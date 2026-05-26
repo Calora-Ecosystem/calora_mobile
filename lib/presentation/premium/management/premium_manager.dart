@@ -146,16 +146,13 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
           onStart: () => emit(state.copyWith(isGettingPromoCodeValue: true)),
           onData: (data) {
             if (data.id != null && data.amount != null) {
-              // Coupon `amount` is in the same unit as plan `fee` —
-              // UZS. Backends commonly encode "100% off" by returning
-              // an `amount` that meets or exceeds every plan price
-              // (e.g. TEST001 returns 4 800 000 against a 49 000 UZS
-              // plan); the `paymentRequired: false` flow at order
-              // time then takes the user to the success state without
-              // hitting Payme / Click. The clamp below floors the
-              // visible payable amount at 0 for that case while still
-              // doing the correct subtraction for partial discounts.
-              final amount = data.amount ?? 0;
+              // Coupon `amount` is returned in tiyin (1 UZS = 100
+              // tiyin) while plan `fee` is in UZS — convert before
+              // subtracting. The clamp below floors the visible
+              // payable amount at 0 for "100% off" coupons; in that
+              // case the order POST replies `paymentRequired: false`
+              // and the success flow runs without hitting Payme / Click.
+              final amount = (data.amount ?? 0) ~/ 100;
               final discountedPlans = state.plans.map((plan) {
                 final base = plan.actualPrice ?? plan.price;
                 final discountedPrice = (base - amount).clamp(0, base);
