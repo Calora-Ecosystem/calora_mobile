@@ -1,5 +1,6 @@
 // lib/presentation/dashboard/widgets/health_sync_fix_dialog.dart
 
+import 'package:calora/common/gen/strings.dart';
 import 'package:flutter/material.dart';
 
 /// Shown when Health permission is granted but Health Connect is
@@ -48,7 +49,7 @@ class HealthSyncFixDialog extends StatelessWidget {
       case 'mi_fitness':
         return 'Mi Fitness';
       default:
-        return 'fitnes app\'ingiz';
+        return Strings.fallbackFitnessApp;
     }
   }
 
@@ -75,7 +76,7 @@ class HealthSyncFixDialog extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Qadamlar sinxronlanmayapti',
+            Strings.syncFixTitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
@@ -83,10 +84,7 @@ class HealthSyncFixDialog extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '$_sourceAppName\'da qadam ma\'lumotlari bor, lekin Health '
-            'Connect\'ga sinxronlanmayapti. Iltimos, $_sourceAppName\'ni '
-            'oching va Sozlamalar → Health Connect bilan ulanish bo\'limidan '
-            'sinxronlashni yoqing.',
+            Strings.syncFixBody(sourceApp: _sourceAppName),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -99,7 +97,9 @@ class HealthSyncFixDialog extends StatelessWidget {
                 onOpenSourceApp();
               },
               icon: const Icon(Icons.open_in_new, size: 18),
-              label: Text('$_sourceAppName\'ni ochish'),
+              label: Text(
+                Strings.syncFixOpenApp(sourceApp: _sourceAppName),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -110,7 +110,7 @@ class HealthSyncFixDialog extends StatelessWidget {
                 Navigator.pop(context);
                 onUseSensorInstead();
               },
-              child: const Text('Telefon sensoridan foydalanish'),
+              child: Text(Strings.syncFixUseSensor),
             ),
           ),
           const SizedBox(height: 4),
@@ -119,7 +119,7 @@ class HealthSyncFixDialog extends StatelessWidget {
               Navigator.pop(context);
               onDismiss();
             },
-            child: const Text('Keyinroq'),
+            child: Text(Strings.syncFixLater),
           ),
         ],
       ),

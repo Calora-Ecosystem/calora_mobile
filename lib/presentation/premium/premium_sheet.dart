@@ -226,7 +226,7 @@ class PremiumSheet
                           const SizedBox(height: 12),
                           Button(
                             height: 40,
-                            text: 'Restore purchase',
+                            text: Strings.restorePurchase,
                             type: ButtonType.secondary,
                             enabled: !state.isOrderingSubscription,
                             loading: state.isRestoringPurchase,
@@ -265,7 +265,7 @@ class PremiumSheet
                           const SizedBox(height: 12),
                           Button(
                             height: 40,
-                            text: 'Restore purchase',
+                            text: Strings.restorePurchase,
                             type: ButtonType.secondary,
                             enabled:
                                 state.selectedPlan != null &&

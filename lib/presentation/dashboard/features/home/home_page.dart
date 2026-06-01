@@ -1,5 +1,3 @@
-// lib/presentation/dashboard/features/home/page/home_page.dart
-
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/base/profile_store.dart';

@@ -1,3 +1,4 @@
+import 'package:calora/common/gen/strings.dart';
 import 'package:flutter/material.dart';
 
 class ErrorView extends StatelessWidget {
@@ -8,6 +9,11 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text('TODO: ERROR VIEW');
+    return Center(
+      child: Text(
+        error ?? Strings.errorViewMessage,
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }

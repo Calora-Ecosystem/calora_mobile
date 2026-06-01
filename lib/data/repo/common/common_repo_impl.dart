@@ -12,8 +12,8 @@ class CommonRepoImpl extends CommonRepo {
   CommonRepoImpl(this._commonStore, this._store);
 
   @override
-  void setSelectedLanguage(Language language) {
-    _commonStore.language.set(language);
+  Future<void> setSelectedLanguage(Language language) {
+    return _commonStore.language.set(language);
   }
 
   @override

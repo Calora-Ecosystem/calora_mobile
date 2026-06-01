@@ -1,9 +1,11 @@
 import 'dart:ui';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/service/course_tab_signal.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
@@ -142,7 +144,17 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
                   selectedItemColor: context.colors.accentSub,
                   unselectedItemColor: context.colors.iconSub,
                   selectedFontSize: 10,
-                  onTap: tabsRouter.setActiveIndex,
+                  onTap: (index) {
+                    tabsRouter.setActiveIndex(index);
+                    // Tab indexes match the `routes` list above:
+                    // 0 Home, 1 Calories, 2 Course, 3 Steps, 4 Profile.
+                    // Tapping Course should always trigger a re-fetch so
+                    // a freshly-changed app language reflects in the
+                    // server-localized course titles.
+                    if (index == 2) {
+                      getIt<CourseTabSignal>().fire();
+                    }
+                  },
                 ),
               ),
             ),

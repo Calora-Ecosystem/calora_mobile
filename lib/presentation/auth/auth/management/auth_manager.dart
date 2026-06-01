@@ -126,7 +126,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       final String? idToken = authentication.idToken;
 
       if (idToken == null || idToken.isEmpty) {
-        publish(const AuthEffect.showError('Google idToken topilmadi'));
+        publish(AuthEffect.showError(Strings.googleIdTokenNotFound));
         return;
       }
 
@@ -139,7 +139,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       publish(const AuthEffect.openDashboard());
     } catch (e) {
       log('Google Sign-In Error: $e');
-      publish(const AuthEffect.showError('Google orqali kirishda xatolik yuz berdi'));
+      publish(AuthEffect.showError(Strings.googleSigninFailed));
     } finally {
       emit(state.copyWith(loading: false));
     }
@@ -164,7 +164,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       final String? ssoToken = credential.identityToken;
 
       if (ssoToken == null || ssoToken.isEmpty) {
-        publish(const AuthEffect.showError('Apple token topilmadi'));
+        publish(AuthEffect.showError(Strings.appleTokenNotFound));
         return;
       }
 

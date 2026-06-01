@@ -1,4 +1,5 @@
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -67,7 +68,7 @@ class TaskParametersWidget extends StatelessWidget {
               if (onChangePressed != null)
                 TextButton(
                   onPressed: onChangePressed,
-                  child: 'O‘zgartirish'.text(14, 16, 600).c(colors.accentSub),
+                  child: Strings.change.text(14, 16, 600).c(colors.accentSub),
                 ),
             ],
           ),

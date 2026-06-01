@@ -1,5 +1,6 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -80,7 +81,7 @@ class _ProgressButtonState extends State<ProgressButton> with SingleTickerProvid
                     children: [
                       widget.isPaused ? Assets.icons.start.svg(color: context.colors.black) : Assets.icons.pause.svg(),
                       const SizedBox(width: 8),
-                      (widget.isPaused ? 'Resume' : 'Pause').text(16, 20, 500).c(context.colors.textStrong),
+                      (widget.isPaused ? Strings.resume : Strings.pause).text(16, 20, 500).c(context.colors.textStrong),
                     ],
                   ),
                 ),

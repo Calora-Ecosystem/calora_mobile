@@ -59,7 +59,7 @@ class ProfileDetailPage
   Widget builder(context, manager, state) {
     return Scaffold(
       backgroundColor: context.colors.white,
-      appBar: CustomAppBar(title: 'Profile'),
+      appBar: CustomAppBar(title: Strings.profile),
       body: Column(
         children: [
           Divider(color: context.colors.strokeSoft),
@@ -68,8 +68,12 @@ class ProfileDetailPage
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildRow('User ID', userId, context),
-                _buildRow('Subscription', 'Restore purchase', context),
+                _buildRow(Strings.profileUserId, userId, context),
+                _buildRow(
+                  Strings.profileSubscription,
+                  Strings.restorePurchase,
+                  context,
+                ),
                 const SizedBox(height: 16),
                 SocialButton(
                   label: Strings.throughAppleId,

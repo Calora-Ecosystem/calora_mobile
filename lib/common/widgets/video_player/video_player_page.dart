@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/video_player/full_screen_video_player.dart';
 import 'package:calora/common/widgets/video_player/management/video_management.dart';
 import 'package:calora/common/widgets/video_player/management/video_manager.dart';
@@ -39,9 +40,9 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
   ) {
     effect.when(
       showError: (message) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Xatolik: $message')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${Strings.errorLabel}: $message')),
+        );
       },
       openFullscreen: () {
         if (manager.controller != null) {
@@ -76,7 +77,7 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
         content = Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            'Xatolik: ${state.errorMessage}',
+            '${Strings.errorLabel}: ${state.errorMessage}',
             style: const TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
           ),

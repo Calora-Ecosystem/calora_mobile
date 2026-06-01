@@ -400,3 +400,46 @@ privacy_policy,Privacy Policy,Maxfiylik siyosati,Политика конфиде
 subscription_legal_terms,"By continuing, you agree to our",Davom etish orqali siz quyidagilarga rozilik bildirasiz,"Продолжая, вы соглашаетесь с нашими"
 subscription_auto_renew_note,Subscription auto-renews. Cancel any time in your App Store account.,Obuna avtomatik yangilanadi. Istalgan vaqtda App Store hisobingizdan bekor qilishingiz mumkin.,Подписка продлевается автоматически. Отменить можно в любое время в учётной записи App Store.
 source_label,Source,Manba,Источник
+google_id_token_not_found,Google ID token not found,Google ID token topilmadi,Токен Google не найден
+google_signin_failed,Failed to sign in with Google,Google orqali kirishda xatolik yuz berdi,Не удалось войти через Google
+apple_token_not_found,Apple ID token not found,Apple ID token topilmadi,Токен Apple не найден
+health_hint_title,Allow accurate step counting,Qadamlaringizni aniq hisoblashga ruxsat bering,Разрешите точный подсчёт шагов
+health_hint_subtitle,Letting us read your step data from {sourceApp} via {repo} unlocks:,{repo} orqali {sourceApp}dagi qadam maʼlumotlaringizni oʻqishimizga ruxsat bersangiz:,Если вы разрешите нам читать данные о шагах из {sourceApp} через {repo}:
+health_hint_benefit_accuracy,More accurate step count,Aniqroq qadam hisobi,Более точный подсчёт шагов
+health_hint_benefit_devices,Watches and fitness trackers included,Soat va fitnes trekkeringiz qoʻshiladi,Часы и фитнес-трекеры учитываются
+health_hint_benefit_allday,All activity throughout the day,Kun davomidagi barcha harakat,Вся активность за день
+health_hint_info,"If you decline, your phone sensor will still count steps — but less accurately.",Ruxsat bermasangiz telefon sensorida qadamlar sanalib turadi — lekin aniqligi pastroq boʻlishi mumkin.,"Если вы откажете, телефонный датчик продолжит считать шаги — но с меньшей точностью."
+dialog_no,No,Yoʻq,Нет
+dialog_yes,Yes,Ha,Да
+fallback_health_app,your health app,sogʻliq appingiz,ваше приложение здоровья
+fallback_fitness_app,your fitness app,fitnes appingiz,ваше фитнес-приложение
+sync_fix_title,Steps are not syncing,Qadamlar sinxronlanmayapti,Шаги не синхронизируются
+sync_fix_body,"{sourceApp} has step data, but it isn't syncing to Health Connect. Please open {sourceApp} and turn on syncing in Settings → Connect to Health Connect.","{sourceApp}da qadam maʼlumotlari bor, lekin Health Connectga sinxronlanmayapti. Iltimos, {sourceApp}ni oching va Sozlamalar → Health Connect bilan ulanish boʻlimidan sinxronlashni yoqing.","В {sourceApp} есть данные о шагах, но они не синхронизируются с Health Connect. Откройте {sourceApp} и включите синхронизацию в разделе Настройки → Подключение к Health Connect."
+sync_fix_open_app,Open {sourceApp},{sourceApp}ni ochish,Открыть {sourceApp}
+sync_fix_use_sensor,Use phone sensor,Telefon sensoridan foydalanish,Использовать датчик телефона
+sync_fix_later,Later,Keyinroq,Позже
+automatic_tracker_subtitle,Automatic tracker,Avtomatik kuzatuvchi,Автоматический трекер
+garmin_intro,"Workout and activity data from your Garmin watch/bracelet arrives in Calora automatically: steps, distance, calories, workout sessions, heart rate (HR), sleep, even weight (if you have a Garmin Index). This data enriches Calora's daily goals, trends and analyses. Not medical advice.","Garmin soatingiz/braceletingizdagi mashgʻulot va faoliyat maʼlumotlari Caloraga avtomatik keladi: qadamlar, masofa, kaloriyalar, mashgʻulot seanslari, yurak urishi (HR), uyqu, hatto vazn (Garmin Index boʻlsa). Bu maʼlumotlar Caloradagi kunlik maqsadlar, trendlar va tahlillarni boyitadi. Tibbiy diagnostika emas.","Данные о тренировках и активности с ваших часов или браслета Garmin поступают в Calora автоматически: шаги, расстояние, калории, тренировки, пульс (HR), сон и даже вес (если у вас есть Garmin Index). Эти данные обогащают цели, тренды и анализ в Calora. Это не медицинская диагностика."
+requirements_label,Requirements,Talablar,Требования
+garmin_req_device,• Garmin device (watch/bracelet),• Garmin qurilmasi (soat/braclet),• Устройство Garmin (часы или браслет)
+garmin_req_app,• Garmin Connect app (iOS/Android) and login,• Garmin Connect ilovasi (iOS/Android) va login,• Приложение Garmin Connect (iOS/Android) и вход в аккаунт
+garmin_req_internet,• Internet connection,• Internetga ulanish,• Подключение к интернету
+garmin_req_calora_version,• Latest version of the Calora app,• Calora ilovasining soʻnggi versiyasi,• Последняя версия приложения Calora
+how_to_connect,How to connect (2 minutes),Qanday ulanadi (2 daqiqa),Как подключиться (2 минуты)
+garmin_step_1,"1. In Calora, go to Profile → Integrations → Garmin.",1. Calora → Profil → Ulanishlar (Integrations) → Garmin ni tanlang.,1. В Calora перейдите в Профиль → Интеграции → Garmin.
+garmin_step_2,"2. Tap ""Connect Garmin"".","2. ""Garminni ulash"" tugmasini bosing.",2. Нажмите кнопку «Подключить Garmin».
+garmin_step_3,3. Log in to (or confirm) Garmin Connect.,3. Garmin Connect oynasida login qiling (yoki tasdiqlang).,3. Войдите (или подтвердите вход) в Garmin Connect.
+garmin_step_4,4. Review the permissions Calora is requesting.,4. Calora soʻrayotgan ruxsatlarni koʻrib chiqing.,4. Просмотрите разрешения которые запрашивает Calora.
+garmin_step_5,"5. Return to Calora — you'll see the ""Connected"" status.","5. Calora oynasiga qayting: ""Ulandi"" holatini koʻrasiz.",5. Вернитесь в Calora — вы увидите статус «Подключено».
+error_label,Error,Xatolik,Ошибка
+youtube_link_invalid,Invalid YouTube link,YouTube link notoʻgʻri,Неверная ссылка YouTube
+youtube_inline_blocked,This video can't be played inside the app.\nOpen it on YouTube.,Bu video ilovaning ichida koʻrsatilmaydi.\nYouTubeʼda ochib koʻring.,Это видео нельзя воспроизвести внутри приложения.\nОткройте его в YouTube.
+open_in_youtube,Open in YouTube,YouTubeʼda ochish,Открыть в YouTube
+profile_user_id,User ID,Foydalanuvchi ID,ID пользователя
+profile_subscription,Subscription,Obuna,Подписка
+resume,Resume,Davom etish,Продолжить
+pause,Pause,Toʻxtatish,Пауза
+change,Change,Oʻzgartirish,Изменить
+no_food_found_in_image,No food found in the image,Rasmdan taom topilmadi,В изображении не найдено блюд
+no_food_found_in_voice,No food found in the recording,Yozuvdan taom topilmadi,В записи не найдено блюд
+error_view_message,Something went wrong. Please try again.,Xatolik yuz berdi. Qayta urinib koʻring.,Произошла ошибка. Попробуйте снова.

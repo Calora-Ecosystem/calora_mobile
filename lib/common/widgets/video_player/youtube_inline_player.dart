@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -128,8 +129,8 @@ class _YoutubeInlinePlayerState extends State<YoutubeInlinePlayer> {
   Widget build(BuildContext context) {
     final id = _extractYoutubeId(widget.youtubeUrl);
     if (id == null) {
-      return const _Fallback(
-        message: 'YouTube link noto‘g‘ri',
+      return _Fallback(
+        message: Strings.youtubeLinkInvalid,
         canOpen: false,
         onOpen: null,
       );
@@ -141,8 +142,7 @@ class _YoutubeInlinePlayerState extends State<YoutubeInlinePlayer> {
 
     if (_embedBlocked || _controller == null) {
       return _Fallback(
-        message: 'Bu video ilovaning ichida ko‘rsatilmaydi.\n'
-            'YouTube’da ochib ko‘ring.',
+        message: Strings.youtubeInlineBlocked,
         canOpen: true,
         onOpen: () => _openExternally(widget.youtubeUrl),
       );
@@ -216,7 +216,7 @@ class _OpenOnYoutubeLink extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                'YouTube’da ochish',
+                Strings.openInYoutube,
                 style: TextStyle(
                   fontSize: 13,
                   height: 16 / 13,
@@ -298,7 +298,7 @@ class _Fallback extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: onOpen,
                   icon: const Icon(Icons.open_in_new, size: 18),
-                  label: const Text('YouTube’da ochish'),
+                  label: Text(Strings.openInYoutube),
                 ),
               ],
             ],

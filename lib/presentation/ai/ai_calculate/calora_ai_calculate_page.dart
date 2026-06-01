@@ -172,7 +172,7 @@ class CaloraAiCalculatePage
             const SizedBox(height: 20),
             Button(
               onPressed: () => context.router.maybePop(),
-              text: 'Try Again',
+              text: Strings.tryAgain,
             ),
           ],
         ),

@@ -1,16 +1,8 @@
-// lib/presentation/dashboard/widgets/health_connect_hint_dialog.dart
-
 import 'dart:io';
 
+import 'package:calora/common/gen/strings.dart';
 import 'package:flutter/material.dart';
 
-/// Pre-permission rationale dialog shown before we call the system
-/// Health Connect (Android) / HealthKit (iOS) permission prompt.
-///
-/// The user is told why we want access to the Health repository — they can
-/// accept (triggering the OS prompt, and falling back to device settings if
-/// the prompt is suppressed) or decline (falling back to the pedometer
-/// sensor).
 class HealthConnectHintDialog extends StatelessWidget {
   final String detectedApp;
   final VoidCallback onAccept;
@@ -54,7 +46,7 @@ class HealthConnectHintDialog extends StatelessWidget {
       case 'ios':
         return 'Apple Health';
       default:
-        return 'sog\'liq app\'ingiz';
+        return Strings.fallbackHealthApp;
     }
   }
 
@@ -77,7 +69,7 @@ class HealthConnectHintDialog extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Qadamlaringizni aniq hisoblashga ruxsat bering',
+            Strings.healthHintTitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
@@ -85,15 +77,17 @@ class HealthConnectHintDialog extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '$_repoName orqali $_sourceAppName\'dagi qadam ma\'lumotlaringizni '
-            'o\'qishimizga ruxsat bersangiz:',
+            Strings.healthHintSubtitle(
+              sourceApp: _sourceAppName,
+              repo: _repoName,
+            ),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
-          const _BenefitRow(text: 'Aniqroq qadam hisobi'),
-          const _BenefitRow(text: 'Soat va fitnes trekkeringiz qo\'shiladi'),
-          const _BenefitRow(text: 'Kun davomidagi barcha harakat'),
+          _BenefitRow(text: Strings.healthHintBenefitAccuracy),
+          _BenefitRow(text: Strings.healthHintBenefitDevices),
+          _BenefitRow(text: Strings.healthHintBenefitAllday),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
@@ -101,16 +95,15 @@ class HealthConnectHintDialog extends StatelessWidget {
               color: Colors.blue.shade50,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, size: 18, color: Colors.blue),
-                SizedBox(width: 8),
+                const Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Ruxsat bermasangiz, telefon sensorida qadamlar sanalib '
-                    'turadi — lekin aniqligi pastroq bo\'lishi mumkin.',
-                    style: TextStyle(fontSize: 12, height: 1.4),
+                    Strings.healthHintInfo,
+                    style: const TextStyle(fontSize: 12, height: 1.4),
                   ),
                 ),
               ],
@@ -125,7 +118,7 @@ class HealthConnectHintDialog extends StatelessWidget {
                     Navigator.pop(context);
                     onDecline();
                   },
-                  child: const Text('Yo\'q'),
+                  child: Text(Strings.dialogNo),
                 ),
               ),
               const SizedBox(width: 12),
@@ -135,7 +128,7 @@ class HealthConnectHintDialog extends StatelessWidget {
                     Navigator.pop(context);
                     onAccept();
                   },
-                  child: const Text('Ha'),
+                  child: Text(Strings.dialogYes),
                 ),
               ),
             ],

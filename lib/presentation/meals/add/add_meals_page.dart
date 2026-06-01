@@ -320,7 +320,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     if (context.mounted) {
       final scannedFoods = manager.state.scannedFoods;
       if (scannedFoods.isEmpty) {
-        CustomSnackBar.show(context, 'No food found in image');
+        CustomSnackBar.show(context, Strings.noFoodFoundInImage);
         return;
       }
       if (scannedFoods.length == 1) {
@@ -351,7 +351,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           if (context.mounted) {
             final scannedFoods = manager.state.scannedFoodsByVoice;
             if (scannedFoods.isEmpty) {
-              CustomSnackBar.show(context, 'No food found in voice');
+              CustomSnackBar.show(context, Strings.noFoodFoundInVoice);
               return;
             }
             if (scannedFoods.length == 1) {

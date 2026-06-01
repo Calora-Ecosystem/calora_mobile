@@ -98,10 +98,11 @@ class VideoCourseBodyWidgetPage
                           ],
                         ),
                         parameters: [
-                          ParameterItem(
-                            name: Strings.price,
-                            value: '${course.price} so‘m',
-                          ),
+                          if (course.price != null)
+                            ParameterItem(
+                              name: Strings.price,
+                              value: '${course.price} so‘m',
+                            ),
                           ParameterItem(
                             name: Strings.numberOfLessons,
                             value: '${state.lessons.length} ta',
