@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/presentation/auth/verify/management/verify_management.dart';
@@ -5,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
+import 'package:smart_auth/smart_auth.dart';
 
 @injectable
 class VerifyManager extends Manager<VerifyState, VerifyEffect> {
@@ -14,8 +17,30 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
 
   final TextEditingController controller = TextEditingController();
 
+  bool _smsListenerActive = false;
+
   void setInitialVerification(Verification initialVerification) {
     emit(state.copyWith(verification: initialVerification));
+    _startSmsListener();
+  }
+
+  Future<void> _startSmsListener() async {
+    if (!Platform.isAndroid) return;
+    if (_smsListenerActive) return;
+    _smsListenerActive = true;
+    final result = await SmartAuth.instance.getSmsWithUserConsentApi();
+    _smsListenerActive = false;
+    final code = result.data?.code;
+    if (code == null || code.isEmpty || isClosed) return;
+    controller.text = code;
+    if (code.length == 6) verify();
+  }
+
+  Future<void> _stopSmsListener() async {
+    if (!Platform.isAndroid) return;
+    if (!_smsListenerActive) return;
+    _smsListenerActive = false;
+    await SmartAuth.instance.removeUserConsentApiListener();
   }
 
   void resend() {
@@ -29,6 +54,7 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
           onData: (data) {
             final newVerification = data.copyWith(email: currentVerification.email);
             emit(state.copyWith(loading: false, verification: newVerification));
+            _startSmsListener();
           },
           onError: (error) {
             emit(state.copyWith(loading: false));
@@ -59,5 +85,12 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
           },
           onDone: () => emit(state.copyWith(loading: false)),
         );
+  }
+
+  @override
+  Future<void> close() async {
+    await _stopSmsListener();
+    controller.dispose();
+    return super.close();
   }
 }

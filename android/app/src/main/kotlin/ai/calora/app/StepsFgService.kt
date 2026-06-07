@@ -67,6 +67,9 @@ class StepsFgService : Service(), SensorEventListener {
     private val KEY_SYNC_BASE_SENSOR = "sync_base_sensor"
     private val KEY_SYNC_BASE_STEPS = "sync_base_steps"
     private val KEY_WEIGHT = "weight_kg"
+    private val KEY_SHOWN_STEPS = "shown_steps"
+    private val KEY_LAST_SENSOR = "last_sensor"
+    private val KEY_GOAL = "goal"
 
     override fun onCreate() {
         super.onCreate()
@@ -77,9 +80,10 @@ class StepsFgService : Service(), SensorEventListener {
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
         restoreSyncIfSameDay()
+        restoreShownStateIfSameDay()
 
-        // ✅ restore weight
         weightKg = prefs.getFloat(KEY_WEIGHT, 70f).coerceAtLeast(30f)
+        goal = prefs.getInt(KEY_GOAL, 8000).coerceAtLeast(1)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -89,26 +93,45 @@ class StepsFgService : Service(), SensorEventListener {
             ACTION_UPDATE_GOAL -> handleUpdateGoal(intent)
             ACTION_SYNC -> handleSync(intent)
             ACTION_STOP -> handleStop()
-            else -> Log.w("StepsService", "Unknown action: ${intent?.action}")
+            else -> handleAutoRestart()
         }
         return START_STICKY
     }
 
-    private fun handleStart(intent: Intent) {
-        goal = intent.getIntExtra(EXTRA_GOAL, 8000).coerceAtLeast(1)
+    private fun handleAutoRestart() {
+        Log.i("StepsFgService", "Auto-restart: re-attaching foreground (shown=$shownSteps)")
+        try {
+            startForeground(NOTIF_ID, buildNotification(shownSteps))
+        } catch (e: Exception) {
+            Log.e("StepsFgService", "Auto-restart startForeground failed", e)
+            return
+        }
+        if (!hasActivityPermission()) return
+        if (stepCounterSensor == null) {
+            stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        }
+        registerStepSensor()
+    }
 
-        // ✅ weight update
+    private fun handleStart(intent: Intent) {
+        goal = intent.getIntExtra(EXTRA_GOAL, goal).coerceAtLeast(1)
+        prefs.edit().putInt(KEY_GOAL, goal).apply()
+
         val w = intent.getFloatExtra(EXTRA_WEIGHT_KG, weightKg).coerceAtLeast(30f)
         weightKg = w
         prefs.edit().putFloat(KEY_WEIGHT, weightKg).apply()
 
-        shownSteps = computeDisplayedSteps() ?: 0
-        previousShownSteps = shownSteps
+        val computed = computeDisplayedSteps()
+        if (computed != null) {
+            shownSteps = computed
+            previousShownSteps = shownSteps
+            persistShown(shownSteps)
+        }
 
         try {
             Log.d("StepsFgService", "Attempting to call startForeground...")
             startForeground(NOTIF_ID, buildNotification(shownSteps))
-            Log.i("StepsFgService", "startForeground successfully called. goal=$goal shown=$shownSteps weightKg=$weightKg")
+            Log.i("StepsFgService", "startForeground OK. goal=$goal shown=$shownSteps weightKg=$weightKg")
         } catch (e: Exception) {
             Log.e("StepsFgService", "!!! FAILED to call startForeground !!!", e)
         }
@@ -129,6 +152,7 @@ class StepsFgService : Service(), SensorEventListener {
 
     private fun handleUpdateGoal(intent: Intent) {
         goal = intent.getIntExtra(EXTRA_GOAL, goal).coerceAtLeast(1)
+        prefs.edit().putInt(KEY_GOAL, goal).apply()
         Log.i("StepsService", "Goal updated: $goal")
         updateNotification(force = true)
     }
@@ -153,6 +177,7 @@ class StepsFgService : Service(), SensorEventListener {
             shownSteps = steps
             previousShownSteps = steps
             saveDay()
+            persistShown(steps)
             updateNotification(force = true)
             Log.i("StepsService", "SYNC pending (no sensor yet). steps=$steps weightKg=$weightKg")
             return
@@ -165,6 +190,8 @@ class StepsFgService : Service(), SensorEventListener {
         persistSync(sensorNow, steps)
         shownSteps = steps
         previousShownSteps = steps
+        persistShown(steps)
+        persistLastSensor(sensorNow)
         updateNotification(force = true)
 
         Log.i("StepsService", "SYNC applied. steps=$steps sensorBase=$sensorNow weightKg=$weightKg")
@@ -208,7 +235,17 @@ class StepsFgService : Service(), SensorEventListener {
         if (event.sensor.type != Sensor.TYPE_STEP_COUNTER) return
 
         val currentSensor = event.values[0]
+
+        val base = syncBaseSensorValue
+        if (base != null && currentSensor + 1f < base) {
+            syncBaseSensorValue = currentSensor
+            syncBaseSteps = shownSteps
+            persistSync(currentSensor, shownSteps)
+            Log.i("StepsService", "Sensor rollback (reboot) detected. rebased base=$currentSensor steps=$shownSteps")
+        }
+
         lastSensorValue = currentSensor
+        persistLastSensor(currentSensor)
 
         if (isNewDay()) {
             clearSync()
@@ -222,6 +259,7 @@ class StepsFgService : Service(), SensorEventListener {
             persistSync(currentSensor, p)
             shownSteps = p
             previousShownSteps = p
+            persistShown(p)
             updateNotification(force = true)
             Log.i("StepsService", "Pending SYNC applied on first sensor event. steps=$p base=$currentSensor")
             return
@@ -231,6 +269,7 @@ class StepsFgService : Service(), SensorEventListener {
         if (displayed != null && displayed != previousShownSteps) {
             previousShownSteps = displayed
             shownSteps = displayed
+            persistShown(displayed)
             updateNotification(force = false)
         }
     }
@@ -276,7 +315,7 @@ class StepsFgService : Service(), SensorEventListener {
                     (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
         )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val notif = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setCustomContentView(rv)
             .setCustomBigContentView(rv)
@@ -288,7 +327,13 @@ class StepsFgService : Service(), SensorEventListener {
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
+        notif.flags = notif.flags or
+                Notification.FLAG_NO_CLEAR or
+                Notification.FLAG_ONGOING_EVENT or
+                Notification.FLAG_FOREGROUND_SERVICE
+        return notif
     }
 
     private fun ensureChannel() {
@@ -351,16 +396,42 @@ class StepsFgService : Service(), SensorEventListener {
         }
     }
 
+    private fun restoreShownStateIfSameDay() {
+        val savedDay = prefs.getInt(KEY_DAY, 0)
+        if (savedDay != yyyymmdd()) return
+
+        shownSteps = prefs.getInt(KEY_SHOWN_STEPS, 0).coerceAtLeast(0)
+        previousShownSteps = shownSteps
+
+        val ls = prefs.getFloat(KEY_LAST_SENSOR, -1f)
+        if (ls >= 0f) lastSensorValue = ls
+    }
+
+    private fun persistShown(steps: Int) {
+        prefs.edit()
+            .putInt(KEY_SHOWN_STEPS, steps)
+            .putInt(KEY_DAY, yyyymmdd())
+            .apply()
+    }
+
+    private fun persistLastSensor(value: Float) {
+        prefs.edit().putFloat(KEY_LAST_SENSOR, value).apply()
+    }
+
     private fun clearSync() {
         syncBaseSensorValue = null
         syncBaseSteps = 0
         pendingSyncSteps = null
+        lastSensorValue = null
         saveDay()
         prefs.edit()
             .remove(KEY_SYNC_BASE_SENSOR)
             .remove(KEY_SYNC_BASE_STEPS)
+            .remove(KEY_SHOWN_STEPS)
+            .remove(KEY_LAST_SENSOR)
             .apply()
         shownSteps = 0
+        previousShownSteps = -1
         updateNotification(force = true)
     }
 }

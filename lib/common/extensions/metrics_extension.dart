@@ -50,7 +50,7 @@ extension WorkoutRequestMetrics on WorkoutRequest {
 
   int get carb => getMetricSum('Carb');
 
-  int get kcal => getMetricSum('Kcal');
+  int get kcal => totalKcal > 0 ? totalKcal : getMetricSum('Kcal');
 
   int get water => getMetricSum('Water');
 

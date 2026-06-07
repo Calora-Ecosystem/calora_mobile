@@ -19,8 +19,7 @@ abstract class AppModule {
 
   @lazySingleton
   Alice getAlice(AppRouter appRouter, AliceDioAdapter aliceDioAdapter) {
-    final configuration = AliceConfiguration(showNotification: kProfileMode);
-    final alice = Alice(configuration: configuration);
+    final alice = Alice(configuration: AliceConfiguration());
     alice.setNavigatorKey(appRouter.navigatorKey);
     alice.addAdapter(aliceDioAdapter);
     return alice;

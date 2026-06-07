@@ -16,6 +16,7 @@ abstract class WorkoutRequest with _$WorkoutRequest {
     required int totalDurationInMin,
     required List<TotalMetric> totalMetrics,
     required int order,
+    @Default(0) int totalKcal,
   }) = _WorkoutRequest;
 
   factory WorkoutRequest.fromJson(Map<String, dynamic> json) =>
