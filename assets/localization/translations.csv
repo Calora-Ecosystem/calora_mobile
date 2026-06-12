@@ -1,11 +1,11 @@
 str,en_US,uz_UZ,ru_RU
-emailAddress,Email manzil,Email manzil,Email manzil
-doContinue,Davom etish,Davom etish,Davom etish
-or,yoki,yoki,yoki
-continueWithApple,Apple orqali davom etish,Apple orqali davom etish,Apple orqali davom etish
-continueWithGoogle,Google orqali davom etish,Google orqali davom etish,Google orqali davom etish
-termsOfUse,"Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman","Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman","Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman"
-resend,Qayta yuborish,Qayta yuborish,Отправить повторно
+emailAddress,Email address,Email manzil,Адрес электронной почты
+doContinue,Continue,Davom etish,Продолжить
+or,Or,yoki,Или
+continueWithApple,Continue with Apple,Apple orqali davom etish,Продолжить с Apple
+continueWithGoogle,Continue with Google,Google orqali davom etish,Продолжить с Google
+termsOfUse,"I have read and agree to the <a href=""{link}"">Terms of Use</a>","Men <a href=""{link}"">Foydalanuvchi shartlarini</a> o‘rganib chiqdim va roziman","Я ознакомился с <a href=""{link}"">Условиями использования</a> и согласен"
+resend,Resend,Qayta yuborish,Отправить повторно
 select_language,Select the language,Tilni tanlang,Выберите язык
 changing_lifestyle,Lifestyle change,Hayot tarzini o’zgartirish,Изменение образа жизни
 changing_lifestyle_desc,Don't delay changing your lifestyle. Take your first step today.,Hayot tarzini o‘zgartirishni kechiktirma. Bugun birinchi qadamingni qo‘y.,Не откладывайте изменение образа жизни. Сделайте первый шаг уже сегодня.
@@ -211,7 +211,7 @@ before_starting_any_diet,"Before starting any diet, consult your doctor to make 
 water,Water,Suv,Вода
 activity,Activity,Aktivlik,Активность
 enter_email_address,Enter email address,Email manzilini kiriting,Введите адрес электронной почты
-email_address_is_wrong_format,Email address is in the wrong format.,Email manzili noto'g'ro formatda,Адрес электронной почты имеет неправильный формат.
+email_address_is_wrong_format,Email address is in the wrong format.,Email manzili noto'g'ri formatda.,Адрес электронной почты имеет неправильный формат.
 you_must_agree_to_the_terms,You must agree to the terms of use.,Foydalanish shartlariga rozilik berishingiz kerak,Вы должны согласиться с условиями использования.
 brief_information,Brief information about the course!,Kurs haqida qisqacha ma’lumot !,Краткая информация о курсе!
 weight_loss_course,Weight loss course,Ozish kursi,Курс похудения
@@ -319,14 +319,14 @@ sleep_reminders,Sleep reminders,Uxlash uchun eslatmalar,Напоминания �
 notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj uchun eslatmalar,Заметки к 30-дневному челленджу
 should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
 yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
-please_enter_food_name,"Please, enter food name","Please, enter food name","Пожалуйста, введите название продукта."
+please_enter_the_name_of_the_dish,Please enter the name of the dish.,"Iltimos, taom nomini kiriting","Пожалуйста, введите название блюда."
 your_data_has_been_saved,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
 no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
 liter,liter,litr,литр
 fillBlank,Fill in the blank,Bo'sh jo'yni to'ldiring,Вставьте пропуск
 today,Today,Bugun,Сегодня
-please_enter_food_metrics,"Please, enter food metrics","Please, enter food metrics","Пожалуйста, введите показатели качества продуктов питания."
+please_enter_meal_metrics,Please enter meal metrics,"Iltimos, taom metrikalarini kiriting","Пожалуйста, введите показатели количества съеденных блюд."
 number_of_lessons,Number of lessons,Darslar soni,Количество уроков
 price,Price,Narxi,Цена
 snack,snack,gazak,перекус
@@ -414,7 +414,7 @@ dialog_yes,Yes,Ha,Да
 fallback_health_app,your health app,sogʻliq appingiz,ваше приложение здоровья
 fallback_fitness_app,your fitness app,fitnes appingiz,ваше фитнес-приложение
 sync_fix_title,Steps are not syncing,Qadamlar sinxronlanmayapti,Шаги не синхронизируются
-sync_fix_body,"{sourceApp} has step data, but it isn't syncing to Health Connect. Please open {sourceApp} and turn on syncing in Settings → Connect to Health Connect.","{sourceApp}da qadam maʼlumotlari bor, lekin Health Connectga sinxronlanmayapti. Iltimos, {sourceApp}ni oching va Sozlamalar → Health Connect bilan ulanish boʻlimidan sinxronlashni yoqing.","В {sourceApp} есть данные о шагах, но они не синхронизируются с Health Connect. Откройте {sourceApp} и включите синхронизацию в разделе Настройки → Подключение к Health Connect."
+sync_fix_body,Step data is in {sourceApp} but isn't syncing to Health Connect. Open it and turn on syncing in Settings → Connect to Health Connect.,"{sourceApp}da qadam maʼlumotlari bor, lekin Health Connectga sinxronlanmayapti. Iltimos, uni oching va Sozlamalar → Health Connect bilan ulanish boʻlimidan sinxronlashni yoqing.","В {sourceApp} есть данные о шагах, но они не синхронизируются с Health Connect. Откройте его и включите синхронизацию в разделе Настройки → Подключение к Health Connect."
 sync_fix_open_app,Open {sourceApp},{sourceApp}ni ochish,Открыть {sourceApp}
 sync_fix_use_sensor,Use phone sensor,Telefon sensoridan foydalanish,Использовать датчик телефона
 sync_fix_later,Later,Keyinroq,Позже
@@ -443,3 +443,5 @@ change,Change,Oʻzgartirish,Изменить
 no_food_found_in_image,No food found in the image,Rasmdan taom topilmadi,В изображении не найдено блюд
 no_food_found_in_voice,No food found in the recording,Yozuvdan taom topilmadi,В записи не найдено блюд
 error_view_message,Something went wrong. Please try again.,Xatolik yuz berdi. Qayta urinib koʻring.,Произошла ошибка. Попробуйте снова.
+please_enter_food_name,"Please, enter food name","Iltimos, taom nomini kiriting","Пожалуйста, введите название продукта"
+please_enter_food_metrics,"Please, enter food metrics","Iltimos, taom metrikalarini kiriting","Пожалуйста, введите показатели качества продуктов питания"
