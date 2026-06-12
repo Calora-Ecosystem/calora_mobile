@@ -84,5 +84,11 @@
         </array>
       </dict>
     </array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>mailto</string>
+      <string>tg</string>
+      <string>https</string>
+    </array>
 </dict>
 </plist>

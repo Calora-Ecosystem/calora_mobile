@@ -73,18 +73,24 @@ class HelpPage extends StatelessWidget {
   }
 
   Future<void> _launchTelegram() async {
-    final url = Uri.parse('https://t.me/N0d1rbe');
+    final url = Uri.parse('https://t.me/calora_support');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
 
   Future<void> _launchMail() async {
-    final gmailUri = Uri.parse(
-      'https://mail.google.com/mail/?view=cm&fs=1&to=hasanovnodir2005@gmail.com',
+    const address = 'calorauz@gmail.com';
+    final mailto = Uri.parse('mailto:$address');
+    if (await canLaunchUrl(mailto)) {
+      await launchUrl(mailto);
+      return;
+    }
+    final gmailWeb = Uri.parse(
+      'https://mail.google.com/mail/?view=cm&fs=1&to=$address',
     );
-    if (await canLaunchUrl(gmailUri)) {
-      await launchUrl(gmailUri, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(gmailWeb)) {
+      await launchUrl(gmailWeb, mode: LaunchMode.externalApplication);
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/presentation/ai/ai_calculate/management/calora_ai_calculate_management.dart';
 import 'package:calora/presentation/ai/ai_calculate/management/calora_ai_calculate_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -39,7 +40,10 @@ class CaloraAiCalculatePage
     CaloraAiCalculateManager manager,
     CaloraAiCalculateEffect effect,
   ) {
-    effect.when(error: (message) {}, analysisComplete: () {});
+    effect.when(
+      error: (message) => CustomSnackBar.show(context, message),
+      analysisComplete: () {},
+    );
   }
 
   @override

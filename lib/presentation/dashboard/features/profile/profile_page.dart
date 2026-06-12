@@ -15,7 +15,7 @@ import 'package:calora/widgets/profile_cards/profile_card.dart';
 import 'package:calora/widgets/profile_cards/settings_card.dart' show SettingsCard;
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
 class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
@@ -63,14 +63,10 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       onNormsTap: () => _openNormsPage(context),
                       onLanguageTap: () => _showLanguageBottomSheet(context),
                       onNotificationsTap: () => _openNotificationSettingsPage(context),
-                      onInviteTap: () {
-                        SharePlus.instance.share(
-                          ShareParams(
-                            text:
-                                "Men Calora ilovasidan foydalanayapman.\nSiz ham sog'lom hayot uchun yuklab oling!\n\nIlovani yuklab olish: https://calora.uz",
-                          ),
-                        );
-                      },
+                      onInviteTap: () => launchUrl(
+                        Uri.parse('https://calora.uz'),
+                        mode: LaunchMode.externalApplication,
+                      ),
                       onAboutTap: () => _showAboutBottomSheet(context),
                       onHelpTap: () => _showHelpBottomSheet(context),
                     ),

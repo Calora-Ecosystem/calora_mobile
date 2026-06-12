@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/domain/model/base_response/base_response.dart';
@@ -15,12 +16,10 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 @injectable
-class CaloraAiCalculateManager
-    extends Manager<CaloraAiCalculateState, CaloraAiCalculateEffect> {
+class CaloraAiCalculateManager extends Manager<CaloraAiCalculateState, CaloraAiCalculateEffect> {
   final AiRepo _aiRepo;
 
-  CaloraAiCalculateManager(this._aiRepo)
-    : super(CaloraAiCalculateState.initial());
+  CaloraAiCalculateManager(this._aiRepo) : super(CaloraAiCalculateState.initial());
 
   Timer? _animationTimer;
 
@@ -43,8 +42,7 @@ class CaloraAiCalculateManager
     });
 
     try {
-      final BaseResponse<FaceAnalysisModel> response = await _aiRepo
-          .analyzeFace(filePath);
+      final BaseResponse<FaceAnalysisModel> response = await _aiRepo.analyzeFace(filePath);
 
       if (response.error != null || response.content == null) {
         _animationTimer?.cancel();
@@ -100,8 +98,7 @@ class CaloraAiCalculateManager
     return [
       if (model.rashes != null)
         AnalysisItem(
-          description:
-              'Yuzda toshmaalar bor - Jigarlangiz yoki oshqozoningizni tekshirting.',
+          description: 'Yuzda toshmaalar bor - Jigarlangiz yoki oshqozoningizni tekshirting.',
           iconPath: Assets.icons.redUser.svg(),
           percentage: model.rashes!,
           status: 'Normal',
@@ -141,7 +138,8 @@ class CaloraAiCalculateManager
     emit(state.copyWith(isSharing: true));
     try {
       final imageBytes = await controller.capture(
-        delay: const Duration(milliseconds: 10),
+        delay: const Duration(milliseconds: 350),
+        pixelRatio: 2.0,
       );
       if (imageBytes == null) {
         throw Exception('Failed to capture screenshot.');
@@ -151,14 +149,15 @@ class CaloraAiCalculateManager
       final file = await File('${tempDir.path}/calora_analysis.png').create();
       await file.writeAsBytes(imageBytes);
 
-      await SharePlus.instance.share(
+      final result = await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: 'image/png')],
-          text: 'Check out my Calora AI analysis!',
+          sharePositionOrigin: const Rect.fromLTWH(0, 0, 100, 100),
         ),
       );
-    } catch (e) {
-      log('Share error: $e');
+      log('Share result: ${result.status} ${result.raw}');
+    } catch (e, s) {
+      log('Share error: $e', stackTrace: s);
       publish(
         CaloraAiCalculateEffect.error(
           'Could not share results: ${e.toString()}',
