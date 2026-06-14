@@ -330,26 +330,31 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
   }
 
   Future<void> _openIap(PlanModel plan, {bool restore = false}) async {
-    final orders = await _premiumRepo.getMyOrders();
-    final pendingOrder = orders.isNotEmpty
-        ? orders.firstWhere(
-            (e) => e.status?.trim().toLowerCase() == 'pending',
-            orElse: () => orders.first,
-          )
-        : null;
-    final purchased = await getIt<RevenueCatService>().purchase(
-      plan,
-      restore,
-      pendingOrder,
-    );
-    emit(
-      state.copyWith(
-        isOrderingSubscription: false,
-        isRestoringPurchase: false,
-      ),
-    );
-    if (purchased) {
-      publish(PremiumEffect.subscriptionSuccess());
+    try {
+      final orders = await _premiumRepo.getMyOrders();
+      final pendingOrder = orders.isNotEmpty
+          ? orders.firstWhere(
+              (e) => e.status?.trim().toLowerCase() == 'pending',
+              orElse: () => orders.first,
+            )
+          : null;
+      final purchased = await getIt<RevenueCatService>().purchase(
+        plan,
+        restore,
+        pendingOrder,
+      );
+      if (purchased) {
+        publish(PremiumEffect.subscriptionSuccess());
+      }
+    } catch (e) {
+      publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
+    } finally {
+      emit(
+        state.copyWith(
+          isOrderingSubscription: false,
+          isRestoringPurchase: false,
+        ),
+      );
     }
   }
 }

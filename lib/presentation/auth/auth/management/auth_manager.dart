@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
@@ -171,6 +172,16 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       final bool hasNewUser = await _repo.signInApple(ssoToken);
 
       if (hasNewUser) {
+        final fullName = [
+          credential.givenName,
+          credential.familyName,
+        ].whereType<String>().where((s) => s.trim().isNotEmpty).join(' ').trim();
+        if (fullName.isNotEmpty || (credential.email ?? '').isNotEmpty) {
+          await profileStore.updateProfile(
+            name: fullName.isEmpty ? null : fullName,
+            email: credential.email,
+          );
+        }
         publish(AuthEffect.openQuestions(credential.email ?? ''));
         return;
       }

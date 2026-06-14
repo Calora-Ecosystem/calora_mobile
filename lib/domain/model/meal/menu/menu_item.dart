@@ -8,16 +8,16 @@ part 'menu_item.g.dart';
 @freezed
 abstract class MenuItem with _$MenuItem {
   const factory MenuItem({
-    required String menu,
-    required DateTime date,
-    required int foodId,
-    required String foodName,
-    required int categoryId,
-    required String categoryName,
-    required String coverUrl,
-    required List<Metric> metrics,
+    String? menu,
+    DateTime? date,
+    int? foodId,
+    String? foodName,
+    int? categoryId,
+    String? categoryName,
+    String? coverUrl,
+    List<Metric>? metrics,
     int? userId,
-    required double weight,
+    double? weight,
   }) = _MenuItem;
 
   factory MenuItem.fromJson(Map<String, dynamic> json) =>

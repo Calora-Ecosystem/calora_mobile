@@ -118,7 +118,7 @@ class HealthConnectHintDialog extends StatelessWidget {
                     Navigator.pop(context);
                     onDecline();
                   },
-                  child: Text(Strings.dialogNo),
+                  child: Text(Strings.later),
                 ),
               ),
               const SizedBox(width: 12),
@@ -128,7 +128,7 @@ class HealthConnectHintDialog extends StatelessWidget {
                     Navigator.pop(context);
                     onAccept();
                   },
-                  child: Text(Strings.dialogYes),
+                  child: Text(Strings.doContinue),
                 ),
               ),
             ],

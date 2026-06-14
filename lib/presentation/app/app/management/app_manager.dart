@@ -19,6 +19,7 @@ class AppManager extends Manager<AppState, AppEffect> {
   final AuthStore _authStore;
 
   StreamSubscription<bool>? _premiumSub;
+  StreamSubscription<void>? _forceLogoutSub;
 
   AppManager(
     this._commonStore,
@@ -30,6 +31,9 @@ class AppManager extends Manager<AppState, AppEffect> {
   }
 
   Future<void> _init() async {
+    _forceLogoutSub = _authStore.onForceLogout.listen((_) {
+      _handleReLoginRequired();
+    });
     final isPremium = await _commonStore.isUserPremium();
     emit(state.copyWith(isUserPremium: isPremium));
     _premiumSub = _commonStore.isUserPremium.watch().listen((value) {
@@ -48,6 +52,7 @@ class AppManager extends Manager<AppState, AppEffect> {
   @override
   Future<void> close() {
     _premiumSub?.cancel();
+    _forceLogoutSub?.cancel();
     return super.close();
   }
 }

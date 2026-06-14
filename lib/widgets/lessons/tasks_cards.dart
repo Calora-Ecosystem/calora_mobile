@@ -38,7 +38,7 @@ class TasksCards extends StatelessWidget {
           title: Strings.discoverWorkoutExercises(workoutTitle: workout.title).text(20, 24, 600),
           parameters: [
             ParameterItem(name: Strings.degree, value: _levelLabel(level)),
-            ParameterItem(name: Strings.kcal, value: '${workout.totalMetrics.sumOf('Kcal')}'),
+            ParameterItem(name: Strings.kcal, value: '${workout.kcal}'),
             ParameterItem(name: Strings.duration, value: '${workout.totalDurationInMin}'),
           ],
           bottomLabel: Strings.exercises,

@@ -16,7 +16,22 @@ import 'package:management/management.dart';
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
   final QuestionsRepo _repo;
 
-  QuestionsManager(this._repo) : super(const QuestionsState());
+  QuestionsManager(this._repo) : super(const QuestionsState()) {
+    _hydrateFromProfile();
+  }
+
+  Future<void> _hydrateFromProfile() async {
+    final stored = await getIt<ProfileStore>().getProfile();
+    final hasName = (stored.name ?? '').trim().isNotEmpty;
+    if (!hasName) return;
+    emit(
+      state.copyWith(
+        answers: (state.answers ?? const Questions()).copyWith(
+          name: stored.name,
+        ),
+      ),
+    );
+  }
 
   void setAnswer(Questions model) {
     final updated =

@@ -62,7 +62,7 @@ Future<void> main() async {
 
       await configureDependencies();
 
-      getIt<Alice>();
+      if (kDebugMode) getIt<Alice>();
 
       FirebaseMessaging.onBackgroundMessage(
         _firebaseMessagingBackgroundHandler,

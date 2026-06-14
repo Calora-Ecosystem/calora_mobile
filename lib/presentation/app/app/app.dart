@@ -22,6 +22,10 @@ class App extends Managed<AppManager, AppState, AppEffect> {
   @override
   void listener(BuildContext context, AppManager manager, AppEffect effect) {
     super.listener(context, manager, effect);
+    effect.mapOrNull(
+      null,
+      reLoginRequired: (_) => getIt<AppRouter>().replaceAll([AuthRoute()]),
+    );
   }
 
   @override

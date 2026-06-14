@@ -15,7 +15,6 @@ import 'package:calora/presentation/meals/management/meals_manager.dart' show Me
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/meals/empty_food_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:management/management.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
@@ -207,17 +206,11 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  '${item.calories.asFixedTruncated(1)} ${Strings.kcal}'
-                                      .text(16, 20, 500)
-                                      .c(context.colors.textStrong),
-                                  DateFormat('HH:mm').format(item.date).text(14, 16, 400).c(context.colors.textSub),
-                                ],
-                              ),
+                              '${item.calories.asFixedTruncated(1)} ${Strings.kcal}'
+                                  .text(16, 20, 500)
+                                  .c(context.colors.textStrong),
                               const SizedBox(height: 4),
-                              '${item.foodName} · ${item.weight.asFixedTruncated(1)}'
+                              '${item.foodName ?? ''} · ${(item.weight ?? 0).asFixedTruncated(1)}'
                                   .text(14, 16, 400)
                                   .c(context.colors.textSub),
                               const SizedBox(height: 8),

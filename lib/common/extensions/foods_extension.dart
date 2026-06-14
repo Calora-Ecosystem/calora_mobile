@@ -95,7 +95,7 @@ extension FoodModelMetrics on FoodModel {
 // MenuItem extension
 extension MenuItemMetrics on MenuItem {
   double getMetricValue(MetricType type) =>
-      MetricsHelper.getMetricValue(metrics, type);
+      MetricsHelper.getMetricValue(metrics ?? const [], type);
 
   double get proteins => getMetricValue(MetricType.protein);
 

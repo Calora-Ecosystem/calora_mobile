@@ -94,7 +94,10 @@ class RevenueCatService {
       return true;
     } on PlatformException catch (e, st) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
-      getIt<Logger>().e(e.toString(), stackTrace: st);
+      getIt<Logger>().e('IAP PlatformException $errorCode: $e', stackTrace: st);
+      return false;
+    } catch (e, st) {
+      getIt<Logger>().e('IAP error: $e', stackTrace: st);
       return false;
     }
   }

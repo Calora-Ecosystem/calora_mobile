@@ -90,17 +90,24 @@ class CaloriesRepoImpl extends CaloriesRepo {
     final List list = response.data['content'];
 
     return list.map((e) {
+      final weightRaw = e['weight'];
+      final dateRaw = e['date'];
+      final metricsRaw = e['metrics'];
       return MenuItem(
-        weight: (e['weight'] as num).toDouble(),
-        menu: e['menu'],
-        date: DateTime.parse(e['date']),
-        foodId: e['foodId'],
-        foodName: e['foodName'],
-        categoryId: e['categoryId'],
-        categoryName: e['categoryName'],
-        coverUrl: e['coverUrl'],
-        metrics: (e['metrics'] as List).map((m) => Metric.fromJson(m)).toList(),
-        userId: e['userId'],
+        weight: weightRaw is num ? weightRaw.toDouble() : null,
+        menu: e['menu'] as String?,
+        date: dateRaw is String ? DateTime.tryParse(dateRaw) : null,
+        foodId: e['foodId'] as int?,
+        foodName: e['foodName'] as String?,
+        categoryId: e['categoryId'] as int?,
+        categoryName: e['categoryName'] as String?,
+        coverUrl: e['coverUrl'] as String?,
+        metrics: metricsRaw is List
+            ? metricsRaw
+                .map((m) => Metric.fromJson(m as Map<String, dynamic>))
+                .toList()
+            : null,
+        userId: e['userId'] as int?,
       );
     }).toList();
   }
