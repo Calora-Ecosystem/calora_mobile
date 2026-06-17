@@ -76,8 +76,8 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                       children: [
                         QuestionProgressWidget(
                           title: Strings.weHaveQuestions,
-                          current: state.currentIndex + 1,
-                          total: 8,
+                          current: state.currentIndex - manager.startIndex + 1,
+                          total: 8 - manager.startIndex,
                         ),
                         const SizedBox(height: 16),
                         QuestionsBodyWidget(),
@@ -97,8 +97,8 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
                   ),
                   child: NavigationButtons(
                     isLoading: state.isLoading,
-                    currentIndex: state.currentIndex,
-                    total: 8,
+                    currentIndex: state.currentIndex - manager.startIndex,
+                    total: 8 - manager.startIndex,
                     isAnswerProvided: currentAnswer != null,
                     onNext: manager.next,
                     onBack: manager.back,

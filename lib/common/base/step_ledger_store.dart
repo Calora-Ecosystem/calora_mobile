@@ -104,4 +104,8 @@ class StepLedgerStore {
   bool didUserOpenHealthApp() => (_meta.get('user_opened_health_app') as bool?) ?? false;
 
   Future<void> setUserOpenedHealthApp(bool v) => _meta.put('user_opened_health_app', v);
+
+  bool isBatteryHintShown() => (_meta.get('battery_hint_shown') as bool?) ?? false;
+
+  Future<void> setBatteryHintShown() => _meta.put('battery_hint_shown', true);
 }

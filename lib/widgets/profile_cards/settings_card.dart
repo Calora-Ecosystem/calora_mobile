@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -9,6 +11,7 @@ class SettingsCard extends StatelessWidget {
   final VoidCallback onNormsTap;
   final VoidCallback onLanguageTap;
   final VoidCallback onNotificationsTap;
+  final VoidCallback onHealthTap;
   final VoidCallback onInviteTap;
   final VoidCallback onAboutTap;
   final VoidCallback onHelpTap;
@@ -19,10 +22,17 @@ class SettingsCard extends StatelessWidget {
     required this.onNormsTap,
     required this.onLanguageTap,
     required this.onNotificationsTap,
+    required this.onHealthTap,
     required this.onInviteTap,
     required this.onAboutTap,
     required this.onHelpTap,
   });
+
+  /// The platform-specific name of the health data source surfaced to
+  /// the user, so HealthKit (iOS) / Health Connect (Android) integration
+  /// is clearly identified in the UI (App Store Review Guideline 2.5.1).
+  String get _healthSourceName =>
+      Platform.isIOS ? 'Apple Health' : 'Health Connect';
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +56,15 @@ class SettingsCard extends StatelessWidget {
         'icon': Assets.icons.notification.svg(),
         'title': Strings.settingUpNotification,
         'onTap': onNotificationsTap,
+      },
+      {
+        'icon': Icon(
+          Icons.favorite_rounded,
+          size: 20,
+          color: context.colors.accentSub,
+        ),
+        'title': _healthSourceName,
+        'onTap': onHealthTap,
       },
       {
         'icon': Assets.icons.addTeam.svg(),

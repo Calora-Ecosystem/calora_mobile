@@ -17,6 +17,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Let the user whitelist the app from battery optimization so the
+         step foreground service isn't killed in the background. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <!-- Notifications (FCM + local notifications) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 

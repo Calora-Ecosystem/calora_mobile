@@ -445,3 +445,7 @@ no_food_found_in_voice,No food found in the recording,Yozuvdan taom topilmadi,В
 error_view_message,Something went wrong. Please try again.,Xatolik yuz berdi. Qayta urinib koʻring.,Произошла ошибка. Попробуйте снова.
 please_enter_food_name,"Please, enter food name","Iltimos, taom nomini kiriting","Пожалуйста, введите название продукта"
 please_enter_food_metrics,"Please, enter food metrics","Iltimos, taom metrikalarini kiriting","Пожалуйста, введите показатели качества продуктов питания"
+battery_hint_title,Keep step tracking running,Qadam hisoblashni faol saqlang,Не выключайте подсчёт шагов
+battery_hint_body,"Allow background activity and turn off battery optimization so steps are counted while the app is closed.","Ilova yopiq bo'lganda qadamlar hisoblanishi uchun fonda ishlashga ruxsat bering va batareya optimizatsiyasini o'chiring.","Разрешите работу в фоне и отключите оптимизацию батареи чтобы шаги считались при закрытом приложении."
+battery_hint_allow,Allow background activity,Fonda ishlashga ruxsat berish,Разрешить работу в фоне
+battery_hint_autostart,Open autostart settings,Avto-ishga tushirish sozlamalari,Открыть настройки автозапуска

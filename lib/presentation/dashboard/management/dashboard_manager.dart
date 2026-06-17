@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:calora/common/base/step_ledger_store.dart';
+import 'package:calora/common/service/device_care_service.dart';
 import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/common/service/step_counter_service.dart';
@@ -66,7 +67,6 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
       if (state.todaySteps != total) {
         emit(state.copyWith(todaySteps: total));
       }
-      _maybeStartForegroundService(total);
     });
   }
 
@@ -87,16 +87,28 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   // ─────────────────────────────────────────────────────────────────────
 
   Future<void> onOpenHealthApp(String detectedApp) async {
-    switch (detectedApp) {
-      case 'samsung_health':
-        await InstalledHealthAppsService.openSamsungHealthSettings();
-      case 'mi_fitness':
-        await InstalledHealthAppsService.openMiFitnessSettings();
-      default:
-        await InstalledHealthAppsService.openHealthConnectSettings();
-    }
+    // Deep-link straight to the Health Connect screen where the user
+    // manages this tracker's data sharing, so they can flip "Allow all"
+    // for Samsung Health / Google Fit and start writing Steps into
+    // Health Connect. Falls back to Health Connect's main settings
+    // natively when the tracker is unknown.
+    await DeviceCareService.openHealthConnectAppPermissions(detectedApp: detectedApp);
     await _ledger.setUserOpenedHealthApp(true);
   }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Battery-optimization whitelist prompt (background reliability)
+  // ─────────────────────────────────────────────────────────────────────
+
+  /// True when we should show the battery-whitelist dialog: Android, the
+  /// app isn't already exempt, and we haven't shown it before.
+  Future<bool> shouldPromptBatteryWhitelist() async {
+    if (!Platform.isAndroid) return false;
+    if (_ledger.isBatteryHintShown()) return false;
+    return !await DeviceCareService.isIgnoringBatteryOptimizations();
+  }
+
+  Future<void> markBatteryHintShown() => _ledger.setBatteryHintShown();
 
   Future<void> onUseSensorInstead() async {
     await _stepCounter.forcePedometer();
@@ -188,20 +200,6 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     await _ledger.setUserOpenedHealthApp(false);
     await Future.delayed(const Duration(seconds: 2));
     await _stepCounter.retryHealth();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Android foreground notification — start lazily on first non-zero count
-  // ─────────────────────────────────────────────────────────────────────
-
-  Future<void> _maybeStartForegroundService(int currentSteps) async {
-    if (!Platform.isAndroid) return;
-    if (StepsForegroundService.instance.isRunning) return;
-
-    final started = await StepsForegroundService.instance.start();
-    if (started) {
-      unawaited(StepsForegroundService.instance.syncSteps(currentSteps));
-    }
   }
 
   @override

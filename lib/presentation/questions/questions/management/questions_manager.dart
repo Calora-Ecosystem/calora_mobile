@@ -16,6 +16,10 @@ import 'package:management/management.dart';
 class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
   final QuestionsRepo _repo;
 
+  int _startIndex = 0;
+
+  int get startIndex => _startIndex;
+
   QuestionsManager(this._repo) : super(const QuestionsState()) {
     _hydrateFromProfile();
   }
@@ -24,8 +28,10 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
     final stored = await getIt<ProfileStore>().getProfile();
     final hasName = (stored.name ?? '').trim().isNotEmpty;
     if (!hasName) return;
+    _startIndex = 1;
     emit(
       state.copyWith(
+        currentIndex: _startIndex,
         answers: (state.answers ?? const Questions()).copyWith(
           name: stored.name,
         ),
@@ -55,7 +61,7 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
   }
 
   void back() {
-    if (state.currentIndex > 0) {
+    if (state.currentIndex > _startIndex) {
       emit(state.copyWith(currentIndex: state.currentIndex - 1));
     }
   }

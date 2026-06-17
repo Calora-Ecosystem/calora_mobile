@@ -13,6 +13,7 @@ import 'package:calora/widgets/premium/premium_entry_card.dart';
 import 'package:calora/widgets/profile_cards/bmi_card/bmi_card.dart';
 import 'package:calora/widgets/profile_cards/profile_card.dart';
 import 'package:calora/widgets/profile_cards/settings_card.dart' show SettingsCard;
+import 'package:calora/widgets/health/health_sync_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -63,6 +64,7 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                       onNormsTap: () => _openNormsPage(context),
                       onLanguageTap: () => _showLanguageBottomSheet(context),
                       onNotificationsTap: () => _openNotificationSettingsPage(context),
+                      onHealthTap: () => HealthSyncBottomSheet.show(context),
                       onInviteTap: () => launchUrl(
                         Uri.parse('https://calora.uz'),
                         mode: LaunchMode.externalApplication,

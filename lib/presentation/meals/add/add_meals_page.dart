@@ -190,7 +190,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               menu: type.name,
               date: DateTime.now(),
               foodId: food.id ?? 0,
-              weightInGr: value == 0 ? 400 : value.toInt(),
+              weightInGr: value == 0 ? 100 : value.toInt(),
             ),
           );
           if (context.mounted) context.router.pop();

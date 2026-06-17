@@ -16,6 +16,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.widget.RemoteViews
@@ -38,14 +39,41 @@ class StepsFgService : Service(), SensorEventListener {
         const val EXTRA_GOAL = "goal"
         const val EXTRA_STEPS = "steps"
         const val EXTRA_WEIGHT_KG = "weight_kg"
+        const val EXTRA_MODE = "mode"
+
+        /// Native sensor is the authority: the service counts steps from
+        /// TYPE_STEP_COUNTER and drives the displayed value itself. Used
+        /// for the pedometer fallback so counting survives the app being
+        /// closed.
+        const val MODE_SENSOR = "sensor"
+
+        /// Flutter is the authority (Health Connect): the displayed value
+        /// is whatever the last SYNC pushed; the sensor is NOT used to
+        /// extrapolate the notification, so it can never drift away from
+        /// the in-app number.
+        const val MODE_MIRROR = "mirror"
     }
 
     private var goal: Int = 8000
+
+    private var mode: String = MODE_SENSOR
 
     private var weightKg: Float = 70f
 
     private lateinit var sensorManager: SensorManager
     private var stepCounterSensor: Sensor? = null
+
+    /// True when [stepCounterSensor] is the wake-up variant, which can
+    /// deliver events while the CPU is asleep. When false we hold a
+    /// partial wakelock instead so background counting still works.
+    private var usingWakeUpSensor: Boolean = false
+    private var wakeLock: PowerManager.WakeLock? = null
+
+    /// Batch sensor delivery by up to this latency. With a wake-up
+    /// sensor this lets the hardware FIFO wake the CPU periodically in
+    /// Doze; in the foreground events still arrive well within a few
+    /// seconds, which is plenty for a step counter.
+    private val sensorMaxLatencyUs = 3_000_000
 
     private var lastSensorValue: Float? = null
 
@@ -70,6 +98,7 @@ class StepsFgService : Service(), SensorEventListener {
     private val KEY_SHOWN_STEPS = "shown_steps"
     private val KEY_LAST_SENSOR = "last_sensor"
     private val KEY_GOAL = "goal"
+    private val KEY_MODE = "mode"
 
     override fun onCreate() {
         super.onCreate()
@@ -77,13 +106,19 @@ class StepsFgService : Service(), SensorEventListener {
         ensureChannel()
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        stepCounterSensor = resolveStepSensor()
 
         restoreSyncIfSameDay()
         restoreShownStateIfSameDay()
 
         weightKg = prefs.getFloat(KEY_WEIGHT, 70f).coerceAtLeast(30f)
         goal = prefs.getInt(KEY_GOAL, 8000).coerceAtLeast(1)
+        mode = prefs.getString(KEY_MODE, MODE_SENSOR) ?: MODE_SENSOR
+    }
+
+    private fun persistMode(value: String) {
+        mode = value
+        prefs.edit().putString(KEY_MODE, value).apply()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -108,12 +143,14 @@ class StepsFgService : Service(), SensorEventListener {
         }
         if (!hasActivityPermission()) return
         if (stepCounterSensor == null) {
-            stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+            stepCounterSensor = resolveStepSensor()
         }
         registerStepSensor()
     }
 
     private fun handleStart(intent: Intent) {
+        intent.getStringExtra(EXTRA_MODE)?.let { persistMode(it) }
+
         goal = intent.getIntExtra(EXTRA_GOAL, goal).coerceAtLeast(1)
         prefs.edit().putInt(KEY_GOAL, goal).apply()
 
@@ -141,7 +178,7 @@ class StepsFgService : Service(), SensorEventListener {
             return
         }
 
-        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        stepCounterSensor = resolveStepSensor()
         if (stepCounterSensor == null) {
             Log.e("StepsService", "TYPE_STEP_COUNTER sensor mavjud emas!")
             return
@@ -158,6 +195,8 @@ class StepsFgService : Service(), SensorEventListener {
     }
 
     private fun handleSync(intent: Intent) {
+        intent.getStringExtra(EXTRA_MODE)?.let { persistMode(it) }
+
         val steps = intent.getIntExtra(EXTRA_STEPS, 0).coerceAtLeast(0)
 
         val w = intent.getFloatExtra(EXTRA_WEIGHT_KG, weightKg).coerceAtLeast(30f)
@@ -199,18 +238,57 @@ class StepsFgService : Service(), SensorEventListener {
 
     private fun handleStop() {
         Log.i("StepsService", "Stopping service")
+        releaseWakeLock()
         unregisterStepSensor()
         stopForeground(true)
         stopSelf()
     }
 
     override fun onDestroy() {
+        releaseWakeLock()
         unregisterStepSensor()
         Log.i("StepsService", "Destroyed")
         super.onDestroy()
     }
 
+    /// The user swiped the app out of recents. START_STICKY alone is
+    /// unreliable on aggressive OEMs (Samsung/Xiaomi), so explicitly
+    /// re-launch the foreground service to keep counting in the
+    /// background. Guarded — a background-start refusal is non-fatal.
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        try {
+            val restart = Intent(applicationContext, StepsFgService::class.java).apply {
+                action = ACTION_START
+                putExtra(EXTRA_GOAL, goal)
+                putExtra(EXTRA_WEIGHT_KG, weightKg)
+                putExtra(EXTRA_MODE, mode)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(applicationContext, restart)
+            } else {
+                startService(restart)
+            }
+        } catch (t: Throwable) {
+            Log.w("StepsService", "onTaskRemoved restart failed: ${t.message}")
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
+
+    /// Prefer the wake-up step counter (delivers events while the CPU is
+    /// asleep). Falls back to the normal sensor, in which case
+    /// [registerStepSensor] holds a wakelock so background delivery keeps
+    /// working.
+    private fun resolveStepSensor(): Sensor? {
+        val wake = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER, true)
+        if (wake != null) {
+            usingWakeUpSensor = true
+            return wake
+        }
+        usingWakeUpSensor = false
+        return sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+    }
 
     private fun registerStepSensor() {
         val s = stepCounterSensor ?: run {
@@ -218,9 +296,50 @@ class StepsFgService : Service(), SensorEventListener {
             return
         }
 
-        val registered = sensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_NORMAL)
-        if (!registered) Log.e("StepsService", "Sensor register bo'lmadi!")
-        else Log.i("StepsService", "Sensor registered")
+        // Batched registration so the hardware FIFO keeps accumulating
+        // (and, for a wake-up sensor, wakes the CPU to deliver) while the
+        // app is in the background / the screen is off.
+        var registered = sensorManager.registerListener(
+            this, s, SensorManager.SENSOR_DELAY_NORMAL, sensorMaxLatencyUs
+        )
+        if (!registered) {
+            // Some devices reject batching — retry without it.
+            registered = sensorManager.registerListener(
+                this, s, SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
+        if (!registered) {
+            Log.e("StepsService", "Sensor register failed!")
+            return
+        }
+        Log.i("StepsService", "Sensor registered (wakeUp=$usingWakeUpSensor)")
+
+        // Without a wake-up sensor the CPU must stay awake to receive
+        // step events in the background — hold a partial wakelock.
+        if (!usingWakeUpSensor) acquireWakeLock()
+    }
+
+    private fun acquireWakeLock() {
+        if (wakeLock?.isHeld == true) return
+        try {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "calora:steps").apply {
+                setReferenceCounted(false)
+                acquire()
+            }
+            Log.i("StepsService", "WakeLock acquired (non-wake-up sensor)")
+        } catch (t: Throwable) {
+            Log.w("StepsService", "WakeLock acquire failed: ${t.message}")
+        }
+    }
+
+    private fun releaseWakeLock() {
+        try {
+            if (wakeLock?.isHeld == true) wakeLock?.release()
+        } catch (t: Throwable) {
+            Log.w("StepsService", "WakeLock release failed: ${t.message}")
+        }
+        wakeLock = null
     }
 
     private fun unregisterStepSensor() {
@@ -264,6 +383,14 @@ class StepsFgService : Service(), SensorEventListener {
             Log.i("StepsService", "Pending SYNC applied on first sensor event. steps=$p base=$currentSensor")
             return
         }
+
+        // In MIRROR mode (Health Connect is the authority) the displayed
+        // value is whatever the last SYNC pushed. We keep the sensor
+        // baseline warm above so a later switch to SENSOR mode is
+        // seamless, but we must NOT move the notification from the raw
+        // sensor here — that is exactly what makes the notification drift
+        // away from the in-app number.
+        if (mode == MODE_MIRROR) return
 
         val displayed = computeDisplayedSteps()
         if (displayed != null && displayed != previousShownSteps) {

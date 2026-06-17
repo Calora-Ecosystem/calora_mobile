@@ -225,7 +225,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           menu: menu,
           date: DateTime.now(),
           foodId: addedFoodId,
-          weightInGr: 400,
+          weightInGr: 100,
         ),
       );
     }
@@ -250,7 +250,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           menu: menu,
           date: DateTime.now(),
           foodId: addedFoodId,
-          weightInGr: 400,
+          weightInGr: 100,
         ),
       );
       if (!success) return false;

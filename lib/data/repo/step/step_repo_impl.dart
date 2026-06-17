@@ -235,8 +235,7 @@ class StepRepoImpl extends StepRepo {
             : DateTime(cursor.year, cursor.month, cursor.day, 23, 59, 59, 999);
 
         try {
-          final steps = await _health.getTotalStepsInInterval(dayStart, dayEnd);
-          final value = steps ?? 0;
+          final value = await _stepsInInterval(dayStart, dayEnd);
           if (value > 0) {
             dailyTotals.add(
               StepsWithMetricsRequest(
@@ -270,14 +269,42 @@ class StepRepoImpl extends StepRepo {
       if (!authorized) return 0;
 
       final now = DateTime.now();
-      final midnight = DateTime(now.year, now.month, now.day).toLocal();
+      final midnight = DateTime(now.year, now.month, now.day);
 
-      final steps = await _health.getTotalStepsInInterval(midnight, now.toLocal());
-      log('[Health] Today\'s steps: $steps');
+      final steps = await _stepsInInterval(midnight, now);
+      log('[Health] Today\'s steps (deduped): $steps');
 
-      return steps ?? 0;
+      return steps;
     } catch (e) {
       log('Error getting today health steps: $e');
+      return 0;
+    }
+  }
+
+  /// Reads the step total in [start, end] via Health Connect's native
+  /// aggregate ([Health.getTotalStepsInInterval]).
+  ///
+  /// Health Connect's aggregate de-duplicates overlapping records across
+  /// source apps using its data-origin priority, so it returns one
+  /// coherent number that includes Samsung Health, Google Fit and the
+  /// platform provider — without double-counting.
+  ///
+  /// NB: we deliberately do NOT read raw records and de-dupe in Dart.
+  /// That approach returned 0 for Samsung Health on real devices —
+  /// Samsung's step records are not reliably visible to the per-record
+  /// query (`getHealthDataFromTypes`) even when they ARE included in the
+  /// aggregate. The aggregate is the only dependable read.
+  Future<int> _stepsInInterval(DateTime start, DateTime end) async {
+    final now = DateTime.now();
+    final cappedEnd = end.isAfter(now) ? now : end;
+    if (!cappedEnd.isAfter(start)) return 0;
+
+    try {
+      final steps = await _health.getTotalStepsInInterval(start, cappedEnd);
+      return steps ?? 0;
+    } catch (e) {
+      log('[Health] getTotalStepsInInterval failed for '
+          '${start.toIso8601String()}–${cappedEnd.toIso8601String()}: $e');
       return 0;
     }
   }
@@ -294,19 +321,12 @@ class StepRepoImpl extends StepRepo {
         if (!authorized) return 0;
       }
 
-      final start = DateTime(day.year, day.month, day.day).toLocal();
-      final end = DateTime(
-        day.year,
-        day.month,
-        day.day,
-        23,
-        59,
-        59,
-      ).toLocal();
+      final start = DateTime(day.year, day.month, day.day);
+      final end = DateTime(day.year, day.month, day.day, 23, 59, 59);
 
-      final steps = await _health.getTotalStepsInInterval(start, end);
+      final steps = await _stepsInInterval(start, end);
       log('[Health] Steps for ${start.toIso8601String()}: $steps');
-      return steps ?? 0;
+      return steps;
     } catch (e) {
       log('Error getting health steps for day: $e');
       return 0;

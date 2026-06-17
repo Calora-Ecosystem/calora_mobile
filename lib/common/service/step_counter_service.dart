@@ -106,6 +106,14 @@ class StepCounterService {
   Timer? _stuckHealthTimer;
   Timer? _backendSyncTimer;
 
+  /// Polls the native foreground service for its step total while the
+  /// pedometer fallback is the active source on Android. The native
+  /// service owns the hardware sensor and keeps counting in the
+  /// background, so this is how the in-app number stays in lock-step
+  /// with the notification — and how steps counted while the app was
+  /// closed are recovered on the next poll.
+  Timer? _nativePollTimer;
+
   StepSource _source = StepSource.none;
 
   /// Set to `true` after we've raised [HealthDataNotSyncing] this
@@ -118,6 +126,7 @@ class StepCounterService {
   static const Duration _pollInterval = Duration(seconds: 5);
   static const Duration _stuckHealthGracePeriod = Duration(seconds: 15);
   static const Duration _backendSyncInterval = Duration(minutes: 1);
+  static const Duration _nativePollInterval = Duration(seconds: 2);
 
   /// How many days of Health history to push to the backend on startup.
   /// Sized to cover the monthly chart's full window so a user who
@@ -167,6 +176,8 @@ class StepCounterService {
     _stuckHealthTimer = null;
     _backendSyncTimer?.cancel();
     _backendSyncTimer = null;
+    _nativePollTimer?.cancel();
+    _nativePollTimer = null;
     _initialized = false;
     _initFuture = null;
   }
@@ -195,6 +206,8 @@ class StepCounterService {
 
       await _sensorSub?.cancel();
       _sensorSub = null;
+      _nativePollTimer?.cancel();
+      _nativePollTimer = null;
       _source = StepSource.health;
       _stuckHealthRaised = false;
 
@@ -205,6 +218,7 @@ class StepCounterService {
       }
 
       _startHealthPolling();
+      await _startNativeMirror();
       _scheduleStuckHealthCheck();
     } catch (e, s) {
       log('retryHealth failed: $e',
@@ -264,6 +278,7 @@ class StepCounterService {
       }
 
       _startHealthPolling();
+      await _startNativeMirror();
       return true;
     } catch (e, s) {
       log('Health activation failed: $e',
@@ -317,14 +332,129 @@ class StepCounterService {
 
       _stuckHealthRaised = true;
       if (!_events.isClosed) _events.add(HealthDataNotSyncing(app));
+
+      // Resilience: Health Connect is permitted but the tracker (e.g.
+      // Samsung Health) isn't actually writing steps into it, so the
+      // aggregate stays at ~0. Rather than sit at 0, switch to the
+      // native sensor so steps count now. The dialog above still tells
+      // the user how to enable proper sync; if they fix it and return,
+      // `_recheckAfterUserReturn` promotes back to Health.
+      if (Platform.isAndroid) {
+        log('Health permitted but no data — falling back to native sensor.',
+            name: 'StepCounterService');
+        unawaited(forcePedometer());
+      }
     } catch (e) {
       log('Stuck-health check failed: $e', name: 'StepCounterService');
     }
   }
 
+  // ── Native foreground notification (mirror in Health mode) ──────────
+
+  /// Starts (or re-points) the Android foreground service in MIRROR
+  /// mode: the notification shows exactly the value Flutter pushes, so
+  /// it can never drift from the in-app number. No-op off Android.
+  Future<void> _startNativeMirror() async {
+    if (!Platform.isAndroid) return;
+    final fg = StepsForegroundService.instance;
+    if (!fg.isRunning) {
+      await fg.start(mode: StepsForegroundService.modeMirror);
+    }
+    // Push the current value and assert MIRROR mode (handles the
+    // pedometer→health switch, which leaves the service in SENSOR mode).
+    await fg.syncSteps(currentSteps, mode: StepsForegroundService.modeMirror);
+  }
+
   // ── Pedometer fallback path ─────────────────────────────────────────
 
   Future<void> _useSensor() async {
+    _source = StepSource.pedometer;
+
+    // On Android the native foreground service is the authority: it owns
+    // TYPE_STEP_COUNTER and keeps counting (and persisting) even after
+    // the app is closed. Flutter mirrors its value by polling, instead
+    // of running its own in-process pedometer that would die with the
+    // app. iOS has no such service, so it keeps using the in-process
+    // pedometer (CMPedometer counts in the background there anyway).
+    if (Platform.isAndroid) {
+      await _startNativeSensorAuthority();
+      return;
+    }
+
+    await _fallbackToInProcessPedometer();
+  }
+
+  Future<void> _startNativeSensorAuthority() async {
+    // The native foreground service reads TYPE_STEP_COUNTER, which needs
+    // the ACTIVITY_RECOGNITION runtime permission. This path no longer
+    // initialises the in-process pedometer, so nothing else requests it —
+    // without the grant the service starts but can never register the
+    // sensor (count stays 0), and on Android 14+ the health-typed
+    // foreground service can't even enter the foreground.
+    final granted = await _pedometer.ensurePermissionGranted();
+    if (!granted) {
+      log('Pedometer fallback: ACTIVITY_RECOGNITION not granted — '
+          'cannot count steps until the user grants it.',
+          name: 'StepCounterService');
+      _emit(_ledger.totalFor(_ledger.dayKey(DateTime.now())));
+      return;
+    }
+
+    final fg = StepsForegroundService.instance;
+
+    // ALWAYS read the native service's persisted total FIRST — never gate
+    // this on `fg.isRunning`. The native service keeps counting (and
+    // persisting) while the app is dead, and `currentNativeSteps()` reads
+    // prefs directly, so it returns the real background total (e.g. 620)
+    // even on a cold start where the Dart-side `isRunning` flag was reset
+    // to false. Seeding with max(native, cached) is what stops us from
+    // blindly pushing a stale cached value (e.g. 13) down and wiping the
+    // steps counted in the background.
+    final native = await fg.currentNativeSteps();
+    final cached = _ledger.totalFor(_ledger.dayKey(DateTime.now()));
+    final seed = native > cached ? native : cached;
+
+    // (Re)attach the service if the Dart binding lost its state across
+    // the cold start. handleStart preserves the native count, so this
+    // never lowers it. If it can't start, degrade to the in-process
+    // pedometer so foreground counting at least works.
+    if (!fg.isRunning) {
+      final started = await fg.start();
+      if (!started) {
+        await _fallbackToInProcessPedometer();
+        return;
+      }
+    }
+
+    // Assert SENSOR mode and rebase the baseline at `seed`. Because
+    // seed >= native, this never lowers the native count — it just says
+    // "count up from here".
+    await fg.syncSteps(seed, mode: StepsForegroundService.modeSensor);
+    _adoptNativeSteps(seed);
+    _startNativePolling();
+  }
+
+  void _startNativePolling() {
+    _nativePollTimer?.cancel();
+    _nativePollTimer = Timer.periodic(_nativePollInterval, (_) async {
+      if (_source != StepSource.pedometer) return;
+      try {
+        final native = await StepsForegroundService.instance.currentNativeSteps();
+        _adoptNativeSteps(native);
+      } catch (e) {
+        log('Native step poll error: $e', name: 'StepCounterService');
+      }
+    });
+  }
+
+  void _adoptNativeSteps(int native) {
+    if (native <= 0) return;
+    final todayKey = _ledger.dayKey(DateTime.now());
+    unawaited(_ledger.ensureDayAtLeast(todayKey, native));
+    _emit(native);
+  }
+
+  Future<void> _fallbackToInProcessPedometer() async {
     await _pedometer.initialize();
     if (!_pedometer.isInitialized) {
       _source = StepSource.none;
@@ -493,10 +623,17 @@ class StepCounterService {
     if (_subject.valueOrNull == total) return;
     _subject.add(total);
 
-    // Mirror to the Android foreground notification — single writer, so
-    // the UI and the notification can never disagree.
-    if (Platform.isAndroid && StepsForegroundService.instance.isRunning) {
-      unawaited(StepsForegroundService.instance.syncSteps(total));
+    // Mirror to the Android notification ONLY when Flutter is the
+    // authority (Health Connect). In pedometer mode the native service
+    // is the source of truth and pushes its value up to us — syncing
+    // back here would reset its sensor baseline and corrupt the count.
+    if (Platform.isAndroid &&
+        _source == StepSource.health &&
+        StepsForegroundService.instance.isRunning) {
+      unawaited(
+        StepsForegroundService.instance
+            .syncSteps(total, mode: StepsForegroundService.modeMirror),
+      );
     }
   }
 }

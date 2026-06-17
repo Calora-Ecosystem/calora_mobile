@@ -9,6 +9,7 @@ import 'package:calora/common/service/course_tab_signal.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
+import 'package:calora/presentation/dashboard/widgets/battery_optimization_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_connect_hint_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_sync_fix_dialog.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,23 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   void init(BuildContext context, DashboardManager manager) {
     manager.initialize();
     super.init(context, manager);
+    _maybePromptBatteryWhitelist(context, manager);
+  }
+
+  /// After the dashboard is up, if the app isn't exempt from battery
+  /// optimization (and we haven't asked before), guide the user to
+  /// whitelist it so the step foreground service survives in the
+  /// background.
+  void _maybePromptBatteryWhitelist(
+    BuildContext context,
+    DashboardManager manager,
+  ) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!await manager.shouldPromptBatteryWhitelist()) return;
+      await manager.markBatteryHintShown();
+      if (!context.mounted) return;
+      await BatteryOptimizationDialog.show(context);
+    });
   }
 
   @override

@@ -9,9 +9,14 @@ class StepsForegroundService {
 
   static const MethodChannel _ch = MethodChannel('ai.calora.app/steps_native_fgs');
 
+  /// Notification authority modes — must match StepsFgService.MODE_*.
+  static const String modeSensor = 'sensor';
+  static const String modeMirror = 'mirror';
+
   int _goalSteps = 10000;
   double _weightKg = 70;
   bool _started = false;
+  String _mode = modeSensor;
 
   void setGoalSteps(int goal) {
     _goalSteps = goal <= 0 ? 10000 : goal;
@@ -22,19 +27,37 @@ class StepsForegroundService {
     _weightKg = w;
   }
 
-  Future<bool> start() async {
+  /// [mode] decides whether the native service drives the notification
+  /// from its own sensor ([modeSensor], pedometer fallback) or just
+  /// mirrors the value Flutter pushes ([modeMirror], Health Connect).
+  Future<bool> start({String mode = modeSensor}) async {
     if (!Platform.isAndroid) return false;
 
+    _mode = mode;
     try {
       final res = await _ch.invokeMethod<bool>('start', {
         'goal': _goalSteps,
         'weight_kg': _weightKg,
+        'mode': mode,
       });
       _started = res ?? true;
       return _started;
     } catch (e) {
       _started = false;
       return false;
+    }
+  }
+
+  /// Today's step total the native foreground service has persisted.
+  /// Keeps advancing while the app is closed (pedometer fallback), so
+  /// this is how Flutter recovers background-counted steps on resume.
+  Future<int> currentNativeSteps() async {
+    if (!Platform.isAndroid) return 0;
+    try {
+      final res = await _ch.invokeMethod<int>('getNativeSteps');
+      return res ?? 0;
+    } catch (e) {
+      return 0;
     }
   }
 
@@ -51,14 +74,16 @@ class StepsForegroundService {
     }
   }
 
-  Future<void> syncSteps(int steps) async {
+  Future<void> syncSteps(int steps, {String? mode}) async {
     if (!Platform.isAndroid) return;
     if (!_started) return;
 
+    final syncMode = mode ?? _mode;
     try {
       await _ch.invokeMethod('sync', {
         'steps': steps,
         'weight_kg': _weightKg,
+        'mode': syncMode,
       });
     } catch (e, s) {
       log('Native FGS sync error: $e', name: 'StepsForegroundService', stackTrace: s);

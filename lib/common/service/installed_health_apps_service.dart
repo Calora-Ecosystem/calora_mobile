@@ -80,17 +80,10 @@ class InstalledHealthAppsService {
       await intent.launch();
       return true;
     } catch (_) {
-      // Fallback — Play Store
-      try {
-        final fallback = AndroidIntent(
-          action: 'android.intent.action.VIEW',
-          data: 'market://details?id=$packageName',
-        );
-        await fallback.launch();
-        return true;
-      } catch (_) {
-        return false;
-      }
+      // App not installed — do NOT redirect to the Play Store. Report
+      // failure so the caller can fall back silently to the native
+      // sensor instead of prompting an install.
+      return false;
     }
   }
 }
