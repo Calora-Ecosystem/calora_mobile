@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
 import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -6,17 +9,39 @@ import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @injectable
-class PremiumManager extends Manager<PremiumState, PremiumEffect> {
+class PremiumManager extends Manager<PremiumState, PremiumEffect>
+    with WidgetsBindingObserver {
   final PremiumRepo _premiumRepo;
 
+  // ── External-payment (Click/Payme) result watching ──────────────────
+  // Click/Payme open externally and complete via a backend webhook, so
+  // the app must detect completion itself (on app-resume + a foreground
+  // backup poll) and refresh the premium state — otherwise the UI only
+  // updates after a manual app restart.
+  bool _awaitingExternalPayment = false;
+  Timer? _paymentPollTimer;
+  int _paymentPollTicks = 0;
+  static const Duration _paymentPollInterval = Duration(seconds: 5);
+  static const int _paymentPollMaxTicks = 24; // ~2 min foreground backstop
+
   PremiumManager(this._premiumRepo) : super(const PremiumState()) {
+    WidgetsBinding.instance.addObserver(this);
     _init();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
+    // Primary trigger: user returns from the Click/Payme app/page.
+    if (lifecycleState == AppLifecycleState.resumed && _awaitingExternalPayment) {
+      unawaited(_checkExternalPayment());
+    }
   }
 
   Future<void> _init() async {
@@ -274,9 +299,13 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       .deleteOrder(orderId: state.myOrders.first.id ?? -1)
       .handle(
         onStart: () => emit(state.copyWith(isDeletingOrder: true)),
-        onData: (_) => emit(
-          state.copyWith(isDeletingOrder: false, isPaymentPending: false),
-        ),
+        onData: (_) {
+          // User abandoned the pending order — stop watching for a result.
+          _stopPaymentPolling();
+          emit(
+            state.copyWith(isDeletingOrder: false, isPaymentPending: false),
+          );
+        },
         onError: (_) => emit(state.copyWith(isDeletingOrder: false)),
       );
 
@@ -318,7 +347,14 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
               Strings.couldNotLaunchPaymentUrl,
             ),
           );
+          return;
         }
+        // Click/Payme is now open externally. The payment completes via a
+        // backend webhook, so start watching for the result — on
+        // app-resume (primary) and a foreground backup poll — and flip the
+        // UI to premium without requiring an app restart.
+        _awaitingExternalPayment = true;
+        _startPaymentPolling();
       } else {
         publish(
           PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl),
@@ -326,6 +362,42 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
       }
     } catch (e) {
       publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
+    }
+  }
+
+  void _startPaymentPolling() {
+    _paymentPollTicks = 0;
+    _paymentPollTimer?.cancel();
+    _paymentPollTimer = Timer.periodic(_paymentPollInterval, (_) {
+      _paymentPollTicks++;
+      if (_paymentPollTicks > _paymentPollMaxTicks) {
+        _stopPaymentPolling();
+        return;
+      }
+      unawaited(_checkExternalPayment());
+    });
+  }
+
+  void _stopPaymentPolling() {
+    _paymentPollTimer?.cancel();
+    _paymentPollTimer = null;
+    _awaitingExternalPayment = false;
+  }
+
+  /// Authoritative check after an external payment: force a token refresh
+  /// and read the new `plan` claim. The Click/Payme webhook updates the
+  /// subscription server-side; once it lands, the refreshed token is
+  /// premium and `_commonStore.isUserPremium` flips — which the whole app
+  /// watches reactively. We also refresh the sheet's order/pending state.
+  Future<void> _checkExternalPayment() async {
+    if (!_awaitingExternalPayment) return;
+
+    final premium = await getIt<TokenInterceptor>().refreshAndCheckPremium();
+    await getMyOrders(); // keep the pending/plan UI in sync either way
+
+    if (premium) {
+      _stopPaymentPolling();
+      publish(const PremiumEffect.subscriptionSuccess());
     }
   }
 
@@ -356,5 +428,12 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> {
         ),
       );
     }
+  }
+
+  @override
+  Future<void> close() {
+    WidgetsBinding.instance.removeObserver(this);
+    _paymentPollTimer?.cancel();
+    return super.close();
   }
 }

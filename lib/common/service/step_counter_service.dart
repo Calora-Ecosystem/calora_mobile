@@ -116,6 +116,26 @@ class StepCounterService {
 
   StepSource _source = StepSource.none;
 
+  /// The calendar day the displayed total currently belongs to. Used to
+  /// detect the midnight rollover so we reset the on-screen value to the
+  /// new day's count (even 0) instead of leaving yesterday's total stuck.
+  String _activeDayKey = '';
+
+  /// Returns `true` exactly once when the calendar day changes (and
+  /// records the new day). The first call just records today.
+  bool _consumeDayRollover() {
+    final todayKey = _ledger.dayKey(DateTime.now());
+    if (_activeDayKey.isEmpty) {
+      _activeDayKey = todayKey;
+      return false;
+    }
+    if (_activeDayKey != todayKey) {
+      _activeDayKey = todayKey;
+      return true;
+    }
+    return false;
+  }
+
   /// Set to `true` after we've raised [HealthDataNotSyncing] this
   /// process so we don't nag the user repeatedly.
   bool _stuckHealthRaised = false;
@@ -288,10 +308,20 @@ class StepCounterService {
   }
 
   Future<void> _refreshFromHealth() async {
+    final rolled = _consumeDayRollover();
     final fresh = await _stepRepo.getTodayHealthSteps();
-    if (fresh <= 0) return;
-
     final todayKey = _ledger.dayKey(DateTime.now());
+
+    if (rolled) {
+      // Midnight: reset the on-screen total to the new day's Health
+      // Connect value (usually 0) instead of leaving yesterday's count.
+      // (getTodayHealthSteps already recomputes the day window each call.)
+      await _ledger.ensureDayAtLeast(todayKey, fresh);
+      _emit(fresh);
+      return;
+    }
+
+    if (fresh <= 0) return;
     await _ledger.ensureDayAtLeast(todayKey, fresh);
     _emit(fresh);
   }
@@ -448,8 +478,19 @@ class StepCounterService {
   }
 
   void _adoptNativeSteps(int native) {
-    if (native <= 0) return;
+    final rolled = _consumeDayRollover();
     final todayKey = _ledger.dayKey(DateTime.now());
+
+    if (rolled) {
+      // Midnight: the native FG service rebased its baseline, so its
+      // count resets to 0 for the new day. Reset the UI too instead of
+      // leaving yesterday's total on screen.
+      if (native > 0) unawaited(_ledger.ensureDayAtLeast(todayKey, native));
+      _emit(native);
+      return;
+    }
+
+    if (native <= 0) return;
     unawaited(_ledger.ensureDayAtLeast(todayKey, native));
     _emit(native);
   }
@@ -597,19 +638,34 @@ class StepCounterService {
     );
   }
 
-  /// POSTs today's running total to `stepRepo.sendDailyData` on every
-  /// tick. We deliberately do **not** dedupe against the previous
-  /// value — the requirement is "every minute, send the current
-  /// total", so the server gets a fresh write each tick regardless of
-  /// whether the count moved. Skipped only when we have nothing
-  /// meaningful to send (0 steps), to avoid overwriting a real
-  /// value in the day's record with a momentary zero.
+  /// POSTs today's running total to `stepRepo.sendDailyData` — but only
+  /// when it actually moved forward.
+  ///
+  /// Change-aware + monotonic: we POST only if [currentSteps] is
+  /// **strictly greater** than the last value we successfully synced for
+  /// today. This:
+  ///   • eliminates redundant identical writes (no more 60 no-op POSTs/hr
+  ///     while the user stands still), and
+  ///   • prevents "downgrade flapping" — a transient lower reading can no
+  ///     longer overwrite a higher value already on the server.
+  ///
+  /// The per-day high-water mark lives in [StepLedgerStore] (meta box), so
+  /// it survives restarts and resets naturally at midnight (new day key →
+  /// -1 → first real value syncs). The background WorkManager keeps its
+  /// own independent sync tracking and is unchanged.
   Future<void> _pushToBackend() async {
     final steps = currentSteps;
     if (steps <= 0) return;
 
+    final todayKey = _ledger.dayKey(DateTime.now());
+    final lastSynced = _ledger.getLastSyncedBackendTotal(todayKey);
+    if (steps <= lastSynced) return; // unchanged or a lower (stale) reading
+
     try {
       await _stepRepo.sendDailyData(metric: 'Step', value: steps);
+      // Only advance the high-water mark on a confirmed success, so a
+      // failed POST is retried on the next tick.
+      await _ledger.setLastSyncedBackendTotal(todayKey, steps);
     } catch (e) {
       log('Backend sync failed (will retry in 1 min): $e',
           name: 'StepCounterService');

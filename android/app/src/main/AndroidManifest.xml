@@ -22,6 +22,11 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Reset the step notification to 0 at local midnight. Exact where
+         granted (auto on API ≤32; user-grantable on 33+); the code falls
+         back to an inexact while-idle alarm otherwise. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <!-- Notifications (FCM + local notifications) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -92,6 +97,11 @@
             android:name=".StepsFgService"
             android:exported="false"
             android:foregroundServiceType="health" />
+
+        <!-- Midnight step-notification reset (scheduled via AlarmManager). -->
+        <receiver
+            android:name=".MidnightResetReceiver"
+            android:exported="false" />
 
         <!-- Flutter embedding -->
         <meta-data

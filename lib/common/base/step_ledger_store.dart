@@ -87,9 +87,27 @@ class StepLedgerStore {
 
   Future<void> setLastSensorDate(String date) => _meta.put('last_sensor_date', date);
 
-  int getLastSyncedBackendTotal(String key) => (_meta.get('backend_sync_$key') as int?) ?? -1;
+  static const _backendSyncPrefix = 'backend_sync_';
 
-  Future<void> setLastSyncedBackendTotal(String key, int v) => _meta.put('backend_sync_$key', v);
+  int getLastSyncedBackendTotal(String key) => (_meta.get('$_backendSyncPrefix$key') as int?) ?? -1;
+
+  Future<void> setLastSyncedBackendTotal(String key, int v) => _meta.put('$_backendSyncPrefix$key', v);
+
+  /// Removes `backend_sync_<day>` high-water-mark entries older than
+  /// [keepDays] so the meta box doesn't accumulate one int per day
+  /// indefinitely. Safe to call often — it only touches matching keys.
+  Future<void> pruneOldBackendSyncKeys({int keepDays = 30}) async {
+    final cutoff = DateTime.now().subtract(Duration(days: keepDays));
+    final toDelete = <String>[];
+    for (final k in _meta.keys) {
+      if (k is! String || !k.startsWith(_backendSyncPrefix)) continue;
+      final day = DateTime.tryParse(k.substring(_backendSyncPrefix.length));
+      if (day != null && day.isBefore(cutoff)) toDelete.add(k);
+    }
+    for (final k in toDelete) {
+      await _meta.delete(k);
+    }
+  }
 
   // StepLedgerStore classi ichiga:
 

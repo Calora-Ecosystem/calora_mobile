@@ -329,6 +329,29 @@ class TokenInterceptor extends Interceptor {
     _storage.forceLogout();
   }
 
+  /// Forces a token refresh outside the normal 401 flow and updates the
+  /// cached premium flag from the new access token.
+  ///
+  /// Used after an external payment (Click/Payme) completes via webhook,
+  /// so the app picks up the fresh `plan: premium` claim immediately —
+  /// the same effect a cold restart has — instead of waiting for the
+  /// access token to expire. Returns `true` if the user is premium after
+  /// the refresh. Safe against concurrent refreshes (shares the in-flight
+  /// completer in [_performRefresh]).
+  Future<bool> refreshAndCheckPremium() async {
+    try {
+      final ok = await _performRefresh();
+      if (!ok) return false;
+      final tokens = await _storage.token();
+      final premium = isUserPremium(tokens?.accessToken ?? '');
+      await _commonStore.isUserPremium.set(premium);
+      return premium;
+    } catch (e, st) {
+      _log.e('refreshAndCheckPremium failed: $e\n$st');
+      return false;
+    }
+  }
+
   bool isUserPremium(String token) {
     try {
       if (JwtDecoder.isExpired(token)) return false;

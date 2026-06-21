@@ -118,32 +118,36 @@ Future<void> _pedometerBackgroundSync(StepLedgerStore ledger) async {
     }
 
     final currentSensorTotal = await pedometer.getCurrentSteps();
-    final lastSensorTotal = ledger.getLastSensorTotal();
     final todayKey = ledger.dayKey(DateTime.now());
+    final lastSensorTotal = ledger.getLastSensorTotal();
+    final lastSensorDate = ledger.getLastSensorDate();
 
-    if (lastSensorTotal >= 0) {
-      int delta;
-      if (currentSensorTotal < lastSensorTotal) {
-        // Reboot
-        delta = currentSensorTotal;
-        log(
-          'BG reboot detected, sensor reset to $currentSensorTotal',
-          name: 'BackgroundStepsWorker',
-        );
-      } else {
-        delta = currentSensorTotal - lastSensorTotal;
-      }
-
+    if (lastSensorDate != todayKey) {
+      // Midnight rollover since the last background run. Do NOT attribute
+      // the cross-day sensor delta to today — that would dump yesterday
+      // evening's steps onto today. Just re-baseline so today starts
+      // clean. (The native FG service is the authoritative counter; this
+      // worker is the backend backup.)
+      await ledger.setLastSensorTotal(currentSensorTotal);
+      await ledger.setLastSensorDate(todayKey);
+      log('BG day rollover — re-baselined sensor for $todayKey', name: 'BackgroundStepsWorker');
+    } else if (lastSensorTotal >= 0) {
+      final delta = currentSensorTotal < lastSensorTotal
+          ? currentSensorTotal // reboot: counter restarted from 0
+          : currentSensorTotal - lastSensorTotal;
       if (delta > 0) {
         await ledger.addSteps(todayKey, delta);
         log('BG captured $delta steps', name: 'BackgroundStepsWorker');
       }
+      await ledger.setLastSensorTotal(currentSensorTotal);
+      await ledger.setLastSensorDate(todayKey);
+    } else {
+      // First run — just establish the baseline.
+      await ledger.setLastSensorTotal(currentSensorTotal);
+      await ledger.setLastSensorDate(todayKey);
     }
 
-    await ledger.setLastSensorTotal(currentSensorTotal);
-    await ledger.setLastSensorDate(todayKey);
-
-    // Bugungi umumiy qadamni backend'ga yuborish
+    // Push today's running total to the backend (last-write-wins).
     final total = ledger.totalFor(todayKey);
     final synced = ledger.syncedFor(todayKey);
     if (total > synced) {
@@ -159,6 +163,10 @@ Future<void> _pedometerBackgroundSync(StepLedgerStore ledger) async {
 
 Future<void> _syncPendingDays(StepRepo stepRepo, StepLedgerStore ledger) async {
   try {
+    // Keep the meta box tidy — drop backend high-water marks older than
+    // 30 days. Runs every cycle (cheap) regardless of pending days below.
+    await ledger.pruneOldBackendSyncKeys();
+
     final pendingDays = ledger.getAllPendingDays();
     final todayKey = ledger.dayKey(DateTime.now());
     final pastDays = pendingDays.where((k) => k != todayKey).toList();

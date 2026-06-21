@@ -64,6 +64,14 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
-    implementation("androidx.health.connect:connect-client:1.2.0-alpha01")
+    // Pinned to match the version the `health` 13.3.1 plugin requires.
+    // Do NOT change this without reading the note below:
+    //   • stable 1.1.0 → crashes (the plugin references alpha-only Health
+    //     Connect records, e.g. ActivityIntensityRecord).
+    //   • 1.2.0-alpha03 needs compileSdk 36 ext 19; alpha04 needs
+    //     compileSdk 37 + AGP 9.1 — neither builds on this toolchain.
+    // alpha02 is the only version that both satisfies the plugin and
+    // builds on AGP 8.9.1 / compileSdk 36.
+    implementation("androidx.health.connect:connect-client:1.2.0-alpha02")
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
 }

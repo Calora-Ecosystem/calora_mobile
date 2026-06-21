@@ -62,8 +62,90 @@ class StepRepoImpl extends StepRepo {
       to: to,
     );
 
-    return response;
+    return _mergeWithHealthHistory(response, from, to);
   }
+
+  /// Merges the backend daily-step history with Health Connect's per-day
+  /// history, taking `max(health, backend)` for each day — so a day the
+  /// backend missed (e.g. the app was closed) still shows the steps Health
+  /// Connect recorded, and vice-versa. If Health is unavailable (or
+  /// unpermitted on Android) it returns the backend data unchanged. iOS is
+  /// treated as optimistically permitted (HealthKit hides read status).
+  Future<List<StepsWithMetricsRequest>> _mergeWithHealthHistory(
+    List<StepsWithMetricsRequest> backend,
+    DateTime from,
+    DateTime to,
+  ) async {
+    try {
+      if (!await isHealthDataAvailable()) return backend;
+      if (defaultTargetPlatform != TargetPlatform.iOS) {
+        if (!await hasHealthPermission()) return backend;
+      }
+
+      final now = DateTime.now();
+      final startDay = DateTime(from.year, from.month, from.day);
+      final today = DateTime(now.year, now.month, now.day);
+      final tomorrow = today.add(const Duration(days: 1));
+      var endExclusive = DateTime(to.year, to.month, to.day).add(const Duration(days: 1));
+      if (endExclusive.isAfter(tomorrow)) endExclusive = tomorrow; // no future
+      if (!endExclusive.isAfter(startDay)) return backend;
+
+      // ONE bucketed-aggregate call for the whole range instead of up to
+      // 31 sequential reads. `getHealthIntervalDataFromTypes` with a
+      // 1-day (86400s) interval uses Health Connect's
+      // aggregateGroupByDuration — i.e. the AGGREGATE, so Samsung Health
+      // is included (a per-record query would miss it).
+      final hcByDay = <String, int>{};
+      try {
+        final points = await _health.getHealthIntervalDataFromTypes(
+          startDate: startDay,
+          endDate: endExclusive,
+          types: const [HealthDataType.STEPS],
+          interval: 86400,
+        );
+        for (final p in points) {
+          final v = p.value;
+          if (v is! NumericHealthValue) continue;
+          final steps = v.numericValue.round();
+          if (steps <= 0) continue;
+          final key = _dayKeyOf(p.dateFrom.toLocal());
+          if (steps > (hcByDay[key] ?? 0)) hcByDay[key] = steps;
+        }
+      } catch (e) {
+        log('[Health] bucketed aggregate failed, using backend only: $e');
+        return backend;
+      }
+
+      if (hcByDay.isEmpty) return backend;
+
+      // Merge: max(health, backend) per day.
+      final byDay = <String, StepsWithMetricsRequest>{};
+      for (final e in backend) {
+        byDay[_dayKeyOf(e.date)] = e;
+      }
+      hcByDay.forEach((key, hc) {
+        final existing = byDay[key];
+        final backendVal = existing?.value.toInt() ?? 0;
+        if (hc > backendVal) {
+          byDay[key] = (existing ??
+                  StepsWithMetricsRequest(date: DateTime.parse(key), value: 0))
+              .copyWith(value: hc.toDouble());
+        }
+      });
+
+      final merged = byDay.values.toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
+      return merged;
+    } catch (e) {
+      log('[Health] history merge failed, using backend only: $e');
+      return backend;
+    }
+  }
+
+  String _dayKeyOf(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
 
   @override
   Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {

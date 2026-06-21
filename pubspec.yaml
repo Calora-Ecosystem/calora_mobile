@@ -2,7 +2,7 @@ name: calora
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.10+63
+version: 1.0.11+64
 
 environment:
   sdk: ^3.9.2

@@ -1,6 +1,7 @@
 package ai.calora.app
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -35,6 +36,9 @@ class StepsFgService : Service(), SensorEventListener {
         const val ACTION_UPDATE_GOAL = "ai.calora.app.steps.UPDATE_GOAL"
         const val ACTION_SYNC = "ai.calora.app.steps.SYNC"
         const val ACTION_STOP = "ai.calora.app.steps.STOP"
+        const val ACTION_MIDNIGHT_RESET = "ai.calora.app.steps.MIDNIGHT_RESET"
+
+        const val MIDNIGHT_REQUEST_CODE = 2111
 
         const val EXTRA_GOAL = "goal"
         const val EXTRA_STEPS = "steps"
@@ -128,6 +132,7 @@ class StepsFgService : Service(), SensorEventListener {
             ACTION_UPDATE_GOAL -> handleUpdateGoal(intent)
             ACTION_SYNC -> handleSync(intent)
             ACTION_STOP -> handleStop()
+            ACTION_MIDNIGHT_RESET -> handleMidnightReset()
             else -> handleAutoRestart()
         }
         return START_STICKY
@@ -141,6 +146,7 @@ class StepsFgService : Service(), SensorEventListener {
             Log.e("StepsFgService", "Auto-restart startForeground failed", e)
             return
         }
+        scheduleMidnightReset()
         if (!hasActivityPermission()) return
         if (stepCounterSensor == null) {
             stepCounterSensor = resolveStepSensor()
@@ -172,6 +178,8 @@ class StepsFgService : Service(), SensorEventListener {
         } catch (e: Exception) {
             Log.e("StepsFgService", "!!! FAILED to call startForeground !!!", e)
         }
+
+        scheduleMidnightReset()
 
         if (!hasActivityPermission()) {
             Log.w("StepsService", "ACTIVITY_RECOGNITION permission yo'q")
@@ -238,10 +246,100 @@ class StepsFgService : Service(), SensorEventListener {
 
     private fun handleStop() {
         Log.i("StepsService", "Stopping service")
+        cancelMidnightReset()
         releaseWakeLock()
         unregisterStepSensor()
         stopForeground(true)
         stopSelf()
+    }
+
+    // ===== Midnight notification reset =====
+
+    /// Snaps the notification to 0 for the new day. Triggered by the
+    /// AlarmManager at (around) local midnight so the user never sees
+    /// yesterday's count before taking their first step of the day.
+    private fun handleMidnightReset() {
+        // The alarm may have cold-started us — re-assert foreground.
+        try {
+            startForeground(NOTIF_ID, buildNotification(shownSteps))
+        } catch (e: Exception) {
+            Log.e("StepsService", "midnight startForeground failed", e)
+        }
+
+        val sensorNow = lastSensorValue
+        if (sensorNow != null) {
+            // We know the cumulative sensor value — rebase cleanly so the
+            // next sensor event simply continues counting today from 0.
+            syncBaseSensorValue = sensorNow
+            syncBaseSteps = 0
+            pendingSyncSteps = null
+            shownSteps = 0
+            previousShownSteps = 0
+            persistSync(sensorNow, 0)   // writes KEY_DAY = today
+            persistShown(0)
+        } else {
+            // No sensor reading yet — just blank the notification to 0 and
+            // leave the day marker so the next sensor event's handleNewDay
+            // re-establishes the baseline.
+            shownSteps = 0
+            previousShownSteps = 0
+        }
+        updateNotification(force = true)
+
+        // Make sure the sensor is listening (we may have been cold-started).
+        if (hasActivityPermission()) {
+            if (stepCounterSensor == null) stepCounterSensor = resolveStepSensor()
+            registerStepSensor()
+        }
+
+        scheduleMidnightReset() // arm for the next midnight
+        Log.i("StepsService", "Midnight reset fired (sensorNow=$sensorNow)")
+    }
+
+    private fun midnightPendingIntent(): PendingIntent {
+        val intent = Intent(this, MidnightResetReceiver::class.java)
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+        return PendingIntent.getBroadcast(this, MIDNIGHT_REQUEST_CODE, intent, flags)
+    }
+
+    private fun scheduleMidnightReset() {
+        try {
+            val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            // Next local 00:00:05 (a few seconds past midnight so the
+            // device's calendar day has definitely flipped).
+            val next = java.util.Calendar.getInstance().apply {
+                add(java.util.Calendar.DAY_OF_YEAR, 1)
+                set(java.util.Calendar.HOUR_OF_DAY, 0)
+                set(java.util.Calendar.MINUTE, 0)
+                set(java.util.Calendar.SECOND, 5)
+                set(java.util.Calendar.MILLISECOND, 0)
+            }.timeInMillis
+
+            val pi = midnightPendingIntent()
+            val canExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+                am.canScheduleExactAlarms()
+            if (canExact) {
+                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next, pi)
+                Log.i("StepsService", "Midnight reset scheduled (exact) for $next")
+            } else {
+                // No exact-alarm permission — inexact while-idle alarm,
+                // which may fire a few minutes late but still resets.
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next, pi)
+                Log.i("StepsService", "Midnight reset scheduled (inexact) for $next")
+            }
+        } catch (t: Throwable) {
+            Log.w("StepsService", "scheduleMidnightReset failed: ${t.message}")
+        }
+    }
+
+    private fun cancelMidnightReset() {
+        try {
+            val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            am.cancel(midnightPendingIntent())
+        } catch (t: Throwable) {
+            Log.w("StepsService", "cancelMidnightReset failed: ${t.message}")
+        }
     }
 
     override fun onDestroy() {
@@ -363,11 +461,17 @@ class StepsFgService : Service(), SensorEventListener {
             Log.i("StepsService", "Sensor rollback (reboot) detected. rebased base=$currentSensor steps=$shownSteps")
         }
 
+        // Capture the prior reading BEFORE overwriting it — used as the
+        // day-boundary baseline so steps right after midnight aren't lost.
+        val prevSensor = lastSensorValue
+            ?: prefs.getFloat(KEY_LAST_SENSOR, -1f).takeIf { it >= 0f }
+
         lastSensorValue = currentSensor
         persistLastSensor(currentSensor)
 
         if (isNewDay()) {
-            clearSync()
+            handleNewDay(currentSensor, prevSensor)
+            return
         }
 
         val p = pendingSyncSteps
@@ -399,6 +503,37 @@ class StepsFgService : Service(), SensorEventListener {
             persistShown(displayed)
             updateNotification(force = false)
         }
+    }
+
+    /// Midnight rollover. Rebase so today's count starts fresh. The old
+    /// path nulled the baseline (clearSync) and never re-established it in
+    /// SENSOR mode, which is exactly why counting died after midnight.
+    private fun handleNewDay(currentSensor: Float, prevSensor: Float?) {
+        val baseline = prevSensor ?: currentSensor
+        syncBaseSensorValue = baseline
+        syncBaseSteps = 0
+        pendingSyncSteps = null
+
+        if (mode == MODE_MIRROR) {
+            // Health Connect owns the value — reset to 0 and let Flutter
+            // sync the new day's total. Baseline stays warm for a later
+            // switch to SENSOR mode.
+            shownSteps = 0
+            previousShownSteps = 0
+            persistSync(baseline, 0)   // also writes KEY_DAY = today
+            persistShown(0)
+            updateNotification(force = true)
+            Log.i("StepsService", "New-day rollover (mirror): reset to 0")
+            return
+        }
+
+        val displayed = (currentSensor - baseline).roundToInt().coerceAtLeast(0)
+        shownSteps = displayed
+        previousShownSteps = displayed
+        persistSync(baseline, 0)       // also writes KEY_DAY = today
+        persistShown(displayed)
+        updateNotification(force = true)
+        Log.i("StepsService", "New-day rollover (sensor): baseline=$baseline displayed=$displayed")
     }
 
     private fun computeDisplayedSteps(): Int? {
