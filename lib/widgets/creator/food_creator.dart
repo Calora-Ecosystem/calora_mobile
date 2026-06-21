@@ -16,18 +16,48 @@ class FoodCreatorWidget extends StatefulWidget {
   )
   onSubmit;
 
-  const FoodCreatorWidget({super.key, required this.onSubmit});
+  /// When provided, the form is prefilled for editing an existing food.
+  final String? initialName;
+  final int? initialCalories;
+  final double? initialProtein;
+  final double? initialFat;
+  final double? initialCarbs;
+
+  /// Optional overrides for the header title and submit button label.
+  final String? title;
+  final String? submitText;
+
+  const FoodCreatorWidget({
+    super.key,
+    required this.onSubmit,
+    this.initialName,
+    this.initialCalories,
+    this.initialProtein,
+    this.initialFat,
+    this.initialCarbs,
+    this.title,
+    this.submitText,
+  });
 
   @override
   State<FoodCreatorWidget> createState() => _FoodCreatorWidgetState();
 }
 
 class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
-  final _nameController = TextEditingController();
-  final _calorieController = TextEditingController();
-  final _proteinController = TextEditingController();
-  final _fatController = TextEditingController();
-  final _carbController = TextEditingController();
+  late final _nameController = TextEditingController(text: widget.initialName);
+  late final _calorieController =
+      TextEditingController(text: _initText(widget.initialCalories));
+  late final _proteinController =
+      TextEditingController(text: _initText(widget.initialProtein));
+  late final _fatController =
+      TextEditingController(text: _initText(widget.initialFat));
+  late final _carbController =
+      TextEditingController(text: _initText(widget.initialCarbs));
+
+  String? _initText(num? value) {
+    if (value == null || value == 0) return null;
+    return value is int ? value.toString() : value.toStringAsFixed(0);
+  }
 
   @override
   void dispose() {
@@ -49,6 +79,21 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
     );
   }
 
+  Widget _labeledField(
+    BuildContext context, {
+    required String label,
+    required Widget child,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        label.text(13, 16, 500).c(context.colors.textSub),
+        const SizedBox(height: 6),
+        child,
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -60,7 +105,7 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Strings.addYourOwnFood
+                child: (widget.title ?? Strings.addYourOwnFood)
                     .text(20, 24, 700)
                     .c(context.colors.textStrong)
                     .auto(minSize: 18),
@@ -68,44 +113,65 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
               Assets.icons.icCreator.svg(),
             ],
           ),
-          CommonTextField(
-            controller: _nameController,
-            hint: Strings.nameOfTheDish,
+          _labeledField(
+            context,
+            label: Strings.nameOfTheDish,
+            child: CommonTextField(
+              controller: _nameController,
+              hint: '',
+            ),
           ),
-          CommonTextField(
-            controller: _calorieController,
-            hint: Strings.calorieContentKcal,
-            keyboardType: TextInputType.number,
+          _labeledField(
+            context,
+            label: Strings.calorieContentKcal,
+            child: CommonTextField(
+              controller: _calorieController,
+              hint: '',
+              keyboardType: TextInputType.number,
+            ),
           ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16,
             children: [
               Expanded(
-                child: CommonTextField(
-                  controller: _proteinController,
-                  hint: Strings.proteinGr,
-                  keyboardType: TextInputType.number,
+                child: _labeledField(
+                  context,
+                  label: Strings.proteinGr,
+                  child: CommonTextField(
+                    controller: _proteinController,
+                    hint: '',
+                    keyboardType: TextInputType.number,
+                  ),
                 ),
               ),
               Expanded(
-                child: CommonTextField(
-                  controller: _fatController,
-                  hint: Strings.oilGr,
-                  keyboardType: TextInputType.number,
+                child: _labeledField(
+                  context,
+                  label: Strings.oilGr,
+                  child: CommonTextField(
+                    controller: _fatController,
+                    hint: '',
+                    keyboardType: TextInputType.number,
+                  ),
                 ),
               ),
               Expanded(
-                child: CommonTextField(
-                  controller: _carbController,
-                  hint: Strings.carbohydrateGr,
-                  keyboardType: TextInputType.number,
+                child: _labeledField(
+                  context,
+                  label: Strings.carbohydrateGr,
+                  child: CommonTextField(
+                    controller: _carbController,
+                    hint: '',
+                    keyboardType: TextInputType.number,
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(
             width: double.infinity,
-            child: Button(text: Strings.add, onPressed: _onAddPressed),
+            child: Button(text: widget.submitText ?? Strings.add, onPressed: _onAddPressed),
           ),
         ],
       ),

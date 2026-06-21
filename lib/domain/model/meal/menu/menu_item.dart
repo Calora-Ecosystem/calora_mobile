@@ -8,6 +8,7 @@ part 'menu_item.g.dart';
 @freezed
 abstract class MenuItem with _$MenuItem {
   const factory MenuItem({
+    int? id,
     String? menu,
     DateTime? date,
     int? foodId,

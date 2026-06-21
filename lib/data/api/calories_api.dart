@@ -65,6 +65,17 @@ class CaloriesApi {
     return _dio.post('food/menu', data: item.toJson());
   }
 
+  /// Updates a user-owned food (name + metrics). Backend: `PUT /food/{foodId}`.
+  Future<Response> updateFood(int foodId, FoodRequest food) {
+    return _dio.put('food/$foodId', data: food.toJson());
+  }
+
+  /// Removes a single logged entry from the daily menu.
+  /// Backend: `DELETE /food/menu/{itemId}`.
+  Future<void> deleteMenuItem(int itemId) {
+    return _dio.delete('food/menu/$itemId');
+  }
+
   Future<void> addFavourite(int id) {
     return _dio.post('food/favourites/toggle/$id');
   }

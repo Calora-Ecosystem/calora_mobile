@@ -21,6 +21,10 @@ abstract class CaloriesRepo {
 
   Future<void> saveMenuItem(MenuInfo item);
 
+  Future<void> updateFood(int foodId, FoodRequest food);
+
+  Future<void> deleteMenuItem(int itemId);
+
   Future<void> addFavourite(int id);
 
   Future<int> addFood(FoodRequest food);

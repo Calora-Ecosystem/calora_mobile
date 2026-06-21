@@ -250,8 +250,16 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
       child: FoodCreatorWithImage(
         isLoading: manager.state.isLoading,
         name: food.name.localized(Localizations.localeOf(context)),
-        addButton: () async {
-          final success = await manager.addFoodAndMenuWithImage(food, type.name);
+        onAdd: (name, calories, protein, oil, carbs) async {
+          final success = await manager.addCustomFoodAndMenu(
+            name: name,
+            calories: calories,
+            protein: protein,
+            fat: oil,
+            carbs: carbs,
+            menu: type.name,
+            categoryId: food.categoryId,
+          );
           if (context.mounted) context.router.pop();
           if (success) {
             _showInfoDialog(context);
@@ -267,16 +275,34 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
 
   void openCreatorWithSpeech(BuildContext context, AddMealsManager manager, List<ScannerFood> foods) {
     final locale = Localizations.localeOf(context);
+    final editable = foods
+        .map(
+          (e) => EditableFood(
+            name: e.name.localized(locale),
+            calories: MetricsHelper.getMetricValue(e.metrics, MetricType.kcal).round(),
+            protein: MetricsHelper.getMetricValue(e.metrics, MetricType.protein),
+            fat: MetricsHelper.getMetricValue(e.metrics, MetricType.fat),
+            carbs: MetricsHelper.getMetricValue(e.metrics, MetricType.carb),
+            categoryId: e.categoryId,
+          ),
+        )
+        .toList();
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
         isLoading: manager.state.isLoading,
-        meals: foods
-            .map((e) => '${e.name.localized(locale)} - ${MetricsHelper.getMetricValue(e.metrics, MetricType.kcal)} ${Strings.kcal}')
-            .toList(),
-        onAdd: () async {
+        foods: editable,
+        onAdd: (items) async {
           bool allSucceeded = true;
-          for (final food in foods) {
-            final success = await manager.addFoodAndMenuWithImage(food, type.name);
+          for (final food in items) {
+            final success = await manager.addCustomFoodAndMenu(
+              name: food.name,
+              calories: food.calories,
+              protein: food.protein,
+              fat: food.fat,
+              carbs: food.carbs,
+              menu: type.name,
+              categoryId: food.categoryId,
+            );
             if (!success) {
               allSucceeded = false;
             }

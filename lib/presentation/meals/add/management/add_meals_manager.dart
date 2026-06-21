@@ -209,6 +209,44 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     return scannedFood;
   }
 
+  /// Creates a food from explicit (user-edited) values and logs it to the
+  /// menu. Used when the user corrects AI scan/voice results before adding.
+  Future<bool> addCustomFoodAndMenu({
+    required String name,
+    required int calories,
+    required double protein,
+    required double fat,
+    required double carbs,
+    required String menu,
+    int? categoryId,
+  }) async {
+    final userId = await profileStore.getUserId() ?? 0;
+    final request = FoodRequest(
+      categoryId: categoryId,
+      name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
+      coverUrl: abstractImageUrl,
+      metrics: [
+        Metric(userId: 0, metric: MetricType.kcal.name, value: calories),
+        Metric(userId: 0, metric: MetricType.protein.name, value: protein),
+        Metric(userId: 0, metric: MetricType.fat.name, value: fat),
+        Metric(userId: 0, metric: MetricType.carb.name, value: carbs),
+      ],
+      userId: userId,
+    );
+    final addedFoodId = await addFood(request);
+    if (addedFoodId != null) {
+      return saveMenuItem(
+        MenuInfo(
+          menu: menu,
+          date: DateTime.now(),
+          foodId: addedFoodId,
+          weightInGr: 400,
+        ),
+      );
+    }
+    return false;
+  }
+
   Future<bool> addFoodAndMenuWithImage(
     ScannerFood food,
     String menu,

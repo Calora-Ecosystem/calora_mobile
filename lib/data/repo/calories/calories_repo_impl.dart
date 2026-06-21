@@ -94,6 +94,7 @@ class CaloriesRepoImpl extends CaloriesRepo {
       final dateRaw = e['date'];
       final metricsRaw = e['metrics'];
       return MenuItem(
+        id: e['id'] as int?,
         weight: weightRaw is num ? weightRaw.toDouble() : null,
         menu: e['menu'] as String?,
         date: dateRaw is String ? DateTime.tryParse(dateRaw) : null,
@@ -115,6 +116,16 @@ class CaloriesRepoImpl extends CaloriesRepo {
   @override
   Future<void> saveMenuItem(MenuInfo item) async {
     await _api.saveMenuItem(item);
+  }
+
+  @override
+  Future<void> updateFood(int foodId, FoodRequest food) async {
+    await _api.updateFood(foodId, food);
+  }
+
+  @override
+  Future<void> deleteMenuItem(int itemId) async {
+    await _api.deleteMenuItem(itemId);
   }
 
   @override
