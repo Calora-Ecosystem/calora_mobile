@@ -29,4 +29,10 @@ class DashboardEffect with _$DashboardEffect {
   const factory DashboardEffect.requestHealthSyncFix({
     required String detectedApp,
   }) = _RequestHealthSyncFix;
+
+  /// Android only: ask the user for the "Physical activity" permission
+  /// (ACTIVITY_RECOGNITION) that the on-device step sensor needs. Shown as
+  /// a non-cancellable priming screen — counting can't start without it.
+  const factory DashboardEffect.requestActivityPermission() =
+      _RequestActivityPermission;
 }

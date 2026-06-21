@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -11,12 +12,38 @@ class ChartWidget extends StatelessWidget {
   final List<double> primaryValues;
   final double? target;
 
+  /// First calendar day the chart represents — Monday of the week (weekly)
+  /// or the 1st of the month (monthly). Lets each bar map back to a real
+  /// date for localized tooltips. Null falls back to index-only labels.
+  final DateTime? periodStart;
+
   const ChartWidget({
     super.key,
     required this.type,
     required this.primaryValues,
     this.target,
+    this.periodStart,
   });
+
+  // ── Localized short names (intl locale-data free, so they never throw
+  //    on locales without bundled symbols) ──────────────────────────────
+  static const Map<String, List<String>> _weekdayShort = {
+    'uz': ['Du', 'Se', 'Cho', 'Pa', 'Ju', 'Sha', 'Ya'],
+    'ru': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+    'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  };
+
+  static const Map<String, List<String>> _monthShort = {
+    'uz': ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'],
+    'ru': ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+    'en': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  };
+
+  List<String> _weekdays(BuildContext context) =>
+      _weekdayShort[context.locale.languageCode] ?? _weekdayShort['en']!;
+
+  List<String> _months(BuildContext context) =>
+      _monthShort[context.locale.languageCode] ?? _monthShort['en']!;
 
   @override
   Widget build(BuildContext context) {
@@ -91,12 +118,22 @@ class ChartWidget extends StatelessWidget {
                     final double realValue = (x >= 0 && x < values.length) ? values[x] : 0;
 
                     return BarTooltipItem(
-                      realValue.toStringAsFixed(0),
+                      '${_tooltipDateLabel(context, x)}\n',
                       TextStyle(
-                        color: context.colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        color: context.colors.white.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
                       ),
+                      children: [
+                        TextSpan(
+                          text: '${realValue.toStringAsFixed(0)} ${Strings.steps}',
+                          style: TextStyle(
+                            color: context.colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -142,16 +179,36 @@ class ChartWidget extends StatelessWidget {
   Widget _buildBottomTitle(BuildContext context, int index) {
     if (type == ChartType.monthly) {
       final day = index + 1;
-      if ([7, 14, 21, 28].contains(day)) {
-        return day.toString().text(14, 16, 400).c(context.colors.neutralPrimary);
+      if ([1, 7, 14, 21, 28].contains(day)) {
+        return day.toString().text(13, 16, 400).c(context.colors.neutralPrimary);
       }
       return const SizedBox.shrink();
     } else {
-      const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+      final days = _weekdays(context);
       if (index >= 0 && index < days.length) {
-        return days[index].text(14, 16, 400).c(context.colors.neutralPrimary);
+        return days[index].text(13, 16, 400).c(context.colors.neutralPrimary);
       }
       return const SizedBox.shrink();
+    }
+  }
+
+  /// Localized date shown at the top of a bar's tooltip, e.g. "15 Iyn"
+  /// (monthly) or "Du, 22 Iyn" (weekly).
+  String _tooltipDateLabel(BuildContext context, int index) {
+    if (periodStart == null) {
+      // No reference date — fall back to a bare index label.
+      return type == ChartType.weekly
+          ? (_weekdays(context).elementAtOrNull(index) ?? '')
+          : '${index + 1}';
+    }
+    final months = _months(context);
+    if (type == ChartType.monthly) {
+      final date = DateTime(periodStart!.year, periodStart!.month, index + 1);
+      return '${date.day} ${months[date.month - 1]}';
+    } else {
+      final date = periodStart!.add(Duration(days: index));
+      final wd = _weekdays(context).elementAtOrNull(index) ?? '';
+      return '$wd, ${date.day} ${months[date.month - 1]}';
     }
   }
 

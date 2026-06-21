@@ -1,3 +1,4 @@
+import 'package:calora/common/extensions/metrics_extension.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -57,6 +58,20 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
     return formatDateLabel(widget.offset, 'monthly');
   }
 
+  /// Monday of the week being shown (offset 0 = current week).
+  DateTime _weekStart() {
+    final now = DateTime.now();
+    final monday = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    return monday.add(Duration(days: 7 * widget.offset));
+  }
+
+  /// First day of the month being shown (offset 0 = current month).
+  DateTime _monthStart() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month + widget.offset, 1);
+  }
+
   @override
   Widget build(BuildContext context) {
     final tabController = DefaultTabController.of(context);
@@ -66,6 +81,12 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
       animation: tabController,
       builder: (context, _) {
         final index = tabController.index;
+        // Daily (today) metrics are derived live from the step count so
+        // Soat / Km / Kaloriya always match the number on screen and update
+        // in real time — same behaviour as the Steps page. Weekly/monthly
+        // keep their backend-computed totals.
+        final displayMetrics =
+            index == 0 ? deriveMetricsFromSteps(widget.stepCount) : widget.metrics;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -156,12 +177,14 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                 type: ChartType.weekly,
                                 primaryValues: widget.primaryValues,
                                 target: widget.goal.toDouble(),
+                                periodStart: _weekStart(),
                               )
                             else
                               ChartWidget(
                                 type: ChartType.monthly,
                                 primaryValues: widget.primaryValues,
                                 target: widget.goal.toDouble(),
+                                periodStart: _monthStart(),
                               ),
                             const SizedBox(height: 12),
                             Row(
@@ -172,7 +195,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                   children: [
                                     Assets.icons.icStopwatch.svg(),
                                     const SizedBox(height: 4),
-                                    widget.metrics.duration.toString().text(16, 20, 500).c(context.colors.textStrong),
+                                    displayMetrics.duration.toString().text(16, 20, 500).c(context.colors.textStrong),
                                     const SizedBox(height: 2),
                                     Strings.onTime.text(14, 20, 400).c(context.colors.textSub),
                                   ],
@@ -182,7 +205,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                   children: [
                                     Assets.icons.icDistance.svg(),
                                     const SizedBox(height: 4),
-                                    (widget.metrics.distance)
+                                    (displayMetrics.distance)
                                         .asFixedTruncated(2)
                                         .text(16, 20, 500)
                                         .c(context.colors.textStrong),
@@ -195,7 +218,7 @@ class _FitnessTrackWidgetState extends State<FitnessTrackWidget> {
                                   children: [
                                     Assets.icons.icCalorie.svg(),
                                     const SizedBox(height: 4),
-                                    '${widget.metrics.kcal}'.text(16, 20, 500).c(context.colors.textStrong),
+                                    '${displayMetrics.kcal}'.text(16, 20, 500).c(context.colors.textStrong),
                                     const SizedBox(height: 2),
                                     Strings.calorie.text(14, 20, 400).c(context.colors.textSub),
                                   ],

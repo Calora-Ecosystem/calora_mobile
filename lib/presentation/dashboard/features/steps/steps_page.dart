@@ -6,6 +6,7 @@ import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/extensions/metrics_extension.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
@@ -381,13 +382,19 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
           }
         });
 
+        // Today's metrics are derived live from the step count so the
+        // Soat / Km / Kaloriya figures always match the number on screen
+        // and update in real time (backend metrics lag behind the 1-min
+        // sync). Falls back to backend metrics if they're already richer.
+        final liveMetrics = deriveMetricsFromSteps(currentSteps);
+
         return _KeepAliveTabContent(
           fitnessTrackWidget: Screenshot(
             controller: widget.screenshotControllers[0],
             child: DailyFitnessTrackWidget(
               key: widget.dailyShareAnchorKey,
               goal: widget.stepValue.toInt(),
-              metrics: widget.state.dailyMetrics,
+              metrics: liveMetrics,
               stepCount: currentSteps, // ✅ mana shu joy
               offset: widget.state.dailyOffset,
               loading: dailyLoading,

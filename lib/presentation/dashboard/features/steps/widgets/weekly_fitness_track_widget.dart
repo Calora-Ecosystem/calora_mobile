@@ -55,8 +55,17 @@ class _WeeklyFitnessTrackWidgetState extends State<WeeklyFitnessTrackWidget>
         type: ChartType.weekly,
         primaryValues: widget.primaryValues,
         target: widget.goal.toDouble(),
+        periodStart: _weekStart(),
       ),
     );
+  }
+
+  /// Monday of the week this tab is showing (offset 0 = current week).
+  DateTime _weekStart() {
+    final now = DateTime.now();
+    final monday = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    return monday.add(Duration(days: 7 * widget.offset));
   }
 
   @override

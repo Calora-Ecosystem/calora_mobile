@@ -57,15 +57,19 @@ class SettingsCard extends StatelessWidget {
         'title': Strings.settingUpNotification,
         'onTap': onNotificationsTap,
       },
-      {
-        'icon': Icon(
-          Icons.favorite_rounded,
-          size: 20,
-          color: context.colors.accentSub,
-        ),
-        'title': _healthSourceName,
-        'onTap': onHealthTap,
-      },
+      // Health integration is iOS-only (Apple Health). On Android the app
+      // counts steps directly from the device sensor with no Health
+      // Connect connection, so this row is intentionally hidden there.
+      if (Platform.isIOS)
+        {
+          'icon': Icon(
+            Icons.favorite_rounded,
+            size: 20,
+            color: context.colors.accentSub,
+          ),
+          'title': _healthSourceName,
+          'onTap': onHealthTap,
+        },
       {
         'icon': Assets.icons.addTeam.svg(),
         'title': Strings.makeAnOffer,

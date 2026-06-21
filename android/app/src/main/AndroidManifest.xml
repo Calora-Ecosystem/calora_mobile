@@ -1,12 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Health Connect -->
-    <uses-permission android:name="android.permission.health.READ_STEPS" />
-    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
-    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
-    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
-    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
+    <!-- NOTE: Android counts steps purely from the on-device hardware step
+         sensor (TYPE_STEP_COUNTER) via StepsFgService. No Health Connect
+         integration is used on Android, so no android.permission.health.*
+         permissions are declared — this keeps the app out of Google Play's
+         Health-Apps / Health Connect declaration flow. iOS still uses
+         HealthKit (declared in Info.plist, not here). -->
 
     <!-- Step counter (pedometer + StepsFgService) -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
@@ -14,18 +14,12 @@
     <!-- Foreground services -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Let the user whitelist the app from battery optimization so the
          step foreground service isn't killed in the background. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- Reset the step notification to 0 at local midnight. Exact where
-         granted (auto on API ≤32; user-grantable on 33+); the code falls
-         back to an inexact while-idle alarm otherwise. -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <!-- Notifications (FCM + local notifications) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -67,25 +61,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <intent-filter>
-                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-            </intent-filter>
         </activity>
-
-        <activity
-            android:name="com.google.android.apps.healthdata.permissions.api.sdk.HealthConnectPermissionActivity"
-            android:exported="true" />
-
-        <activity-alias
-            android:name=".HealthPermissionActivity"
-            android:exported="true"
-            android:targetActivity=".MainActivity"
-            tools:node="merge">
-            <intent-filter>
-                <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
-            </intent-filter>
-        </activity-alias>
 
         <!-- Foreground services -->
         <service
@@ -93,15 +69,35 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- Step counter foreground service. dataSync (not health) keeps us
+             out of Google Play's Health-Apps declaration flow. The Android
+             14+ 6-hour/day dataSync cap is lifted once the user grants the
+             battery-optimization exemption the app prompts for; and because
+             the hardware TYPE_STEP_COUNTER counts regardless of this
+             process, any pause is recovered as a delta on the next start. -->
         <service
             android:name=".StepsFgService"
             android:exported="false"
-            android:foregroundServiceType="health" />
+            android:foregroundServiceType="dataSync" />
 
         <!-- Midnight step-notification reset (scheduled via AlarmManager). -->
         <receiver
             android:name=".MidnightResetReceiver"
             android:exported="false" />
+
+        <!-- Restarts the step service after reboot, app update, or a
+             low-memory kill (periodic keep-alive alarm). -->
+        <receiver
+            android:name=".StepsRestartReceiver"
+            android:exported="false"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Flutter embedding -->
         <meta-data
@@ -110,29 +106,6 @@
     </application>
 
     <queries>
-        <!-- Health Connect -->
-        <package android:name="com.google.android.apps.healthdata" />
-        <package android:name="com.google.android.apps.healthdata.debug" />
-
-        <!-- ✅ Fitness app'lar shu yerga ko'chdi -->
-        <package android:name="com.sec.android.app.shealth" />
-        <package android:name="com.mi.health" />
-        <package android:name="com.xiaomi.hm.health" />
-
-        <!-- Health Connect intent'lari -->
-        <intent>
-            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-        </intent>
-
-        <intent>
-            <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
-        </intent>
-
-        <intent>
-            <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
-            <data android:scheme="package" />
-        </intent>
-
         <!-- Share intent'lari -->
         <intent>
             <action android:name="android.intent.action.SEND" />

@@ -39,6 +39,13 @@ class StepsFgService : Service(), SensorEventListener {
         const val ACTION_MIDNIGHT_RESET = "ai.calora.app.steps.MIDNIGHT_RESET"
 
         const val MIDNIGHT_REQUEST_CODE = 2111
+        const val KEEPALIVE_REQUEST_CODE = 2112
+
+        /// How often the self-heal keep-alive alarm re-asserts the service.
+        /// Inexact + AllowWhileIdle, so Doze may stretch it, but it keeps
+        /// the foreground service alive across low-memory kills that
+        /// START_STICKY alone doesn't recover.
+        const val KEEPALIVE_INTERVAL_MS = 30L * 60L * 1000L
 
         const val EXTRA_GOAL = "goal"
         const val EXTRA_STEPS = "steps"
@@ -147,6 +154,7 @@ class StepsFgService : Service(), SensorEventListener {
             return
         }
         scheduleMidnightReset()
+        scheduleKeepAlive()
         if (!hasActivityPermission()) return
         if (stepCounterSensor == null) {
             stepCounterSensor = resolveStepSensor()
@@ -180,6 +188,7 @@ class StepsFgService : Service(), SensorEventListener {
         }
 
         scheduleMidnightReset()
+        scheduleKeepAlive()
 
         if (!hasActivityPermission()) {
             Log.w("StepsService", "ACTIVITY_RECOGNITION permission yo'q")
@@ -247,6 +256,7 @@ class StepsFgService : Service(), SensorEventListener {
     private fun handleStop() {
         Log.i("StepsService", "Stopping service")
         cancelMidnightReset()
+        cancelKeepAlive()
         releaseWakeLock()
         unregisterStepSensor()
         stopForeground(true)
@@ -339,6 +349,41 @@ class StepsFgService : Service(), SensorEventListener {
             am.cancel(midnightPendingIntent())
         } catch (t: Throwable) {
             Log.w("StepsService", "cancelMidnightReset failed: ${t.message}")
+        }
+    }
+
+    // ===== Keep-alive self-heal =====
+
+    private fun keepAlivePendingIntent(): PendingIntent {
+        val intent = Intent(this, StepsRestartReceiver::class.java).apply {
+            action = StepsRestartReceiver.ACTION_KEEPALIVE
+        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+        return PendingIntent.getBroadcast(this, KEEPALIVE_REQUEST_CODE, intent, flags)
+    }
+
+    /// Arms a single inexact while-idle alarm ~30 min out. It re-arms
+    /// itself each time it fires (via StepsRestartReceiver → ACTION_START →
+    /// handleStart/handleAutoRestart → here), giving us a periodic
+    /// self-heal without an exact-alarm permission. Inexact + while-idle is
+    /// battery-friendly and survives Doze.
+    private fun scheduleKeepAlive() {
+        try {
+            val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val triggerAt = System.currentTimeMillis() + KEEPALIVE_INTERVAL_MS
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, keepAlivePendingIntent())
+        } catch (t: Throwable) {
+            Log.w("StepsService", "scheduleKeepAlive failed: ${t.message}")
+        }
+    }
+
+    private fun cancelKeepAlive() {
+        try {
+            val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            am.cancel(keepAlivePendingIntent())
+        } catch (t: Throwable) {
+            Log.w("StepsService", "cancelKeepAlive failed: ${t.message}")
         }
     }
 

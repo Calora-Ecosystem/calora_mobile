@@ -526,6 +526,19 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       week[i] = item.value;
     }
 
+    // Current week: today's bar must reflect the live step count even
+    // before the backend has received the latest 1-min sync — otherwise
+    // today (e.g. Monday) shows empty while the daily view already counts.
+    if (offset == 0) {
+      final today = DateTime(now.year, now.month, now.day);
+      final idx = today.difference(
+        DateTime(targetWeekStart.year, targetWeekStart.month, targetWeekStart.day),
+      ).inDays;
+      if (idx >= 0 && idx < 7) {
+        week[idx] = week[idx] > state.stepCount ? week[idx] : state.stepCount.toDouble();
+      }
+    }
+
     return week;
   }
 
@@ -539,6 +552,14 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       if (step.date.year == targetMonth.year && step.date.month == targetMonth.month) {
         final dayIndex = step.date.day - 1;
         if (dayIndex >= 0 && dayIndex < daysInMonth) month[dayIndex] = step.value;
+      }
+    }
+
+    // Current month: reflect today's live count immediately.
+    if (offset == 0 && targetMonth.year == now.year && targetMonth.month == now.month) {
+      final dayIndex = now.day - 1;
+      if (dayIndex >= 0 && dayIndex < daysInMonth) {
+        month[dayIndex] = month[dayIndex] > state.stepCount ? month[dayIndex] : state.stepCount.toDouble();
       }
     }
 

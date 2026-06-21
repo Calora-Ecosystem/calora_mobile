@@ -55,8 +55,15 @@ class _MonthlyFitnessTrackWidgetState extends State<MonthlyFitnessTrackWidget>
         type: ChartType.monthly,
         primaryValues: widget.primaryValues,
         target: widget.goal.toDouble(),
+        periodStart: _monthStart(),
       ),
     );
+  }
+
+  /// First day of the month this tab is showing (offset 0 = current month).
+  DateTime _monthStart() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month + widget.offset, 1);
   }
 
   @override

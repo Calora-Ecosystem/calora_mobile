@@ -72,33 +72,12 @@ void callbackDispatcher() {
       final stepRepo = GetIt.I<StepRepo>();
       final ledger = StepLedgerStore();
 
-      // Oldingi kunlarning pending sync'ini bajarish (har ikki rejimda ham)
+      // Oldingi kunlarning pending sync'ini bajarish
       await _syncPendingDays(stepRepo, ledger);
 
-      // 1. Health rejimini urinib ko'ramiz (faqat ruxsat allaqachon
-      //    berilgan bo'lsa — background isolate'da UI yo'q, prompt qila olmaymiz)
-      final healthAvailable = await stepRepo.isHealthDataAvailable();
-      if (healthAvailable) {
-        final authorized = await stepRepo.hasHealthPermission();
-        if (authorized) {
-          try {
-            final steps = await stepRepo.getTodayHealthSteps();
-            if (steps > 0) {
-              await stepRepo.sendDailyData(metric: 'Step', value: steps);
-              final todayKey = ledger.dayKey(DateTime.now());
-              await ledger.ensureDayAtLeast(todayKey, steps, minSynced: steps);
-              log('BG Health sync: $steps steps', name: 'BackgroundStepsWorker');
-              return true;
-            }
-            log('BG Health: 0 steps — falling back to pedometer',
-                name: 'BackgroundStepsWorker');
-          } catch (e) {
-            log('BG Health sync failed: $e', name: 'BackgroundStepsWorker');
-          }
-        }
-      }
-
-      // 2. Pedometer fallback (faqat Android)
+      // Android'da qadamlar faqat qurilma sensoridan olinadi (Health
+      // Connect ishlatilmaydi). Shu sababli to'g'ridan-to'g'ri pedometer
+      // (TYPE_STEP_COUNTER) orqali sinxronlaymiz.
       await _pedometerBackgroundSync(ledger);
       return true;
     } catch (e, s) {

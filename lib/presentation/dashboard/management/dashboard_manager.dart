@@ -115,10 +115,43 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   }
 
   // ─────────────────────────────────────────────────────────────────────
+  // Android "Physical activity" permission (drives the priming screen)
+  // ─────────────────────────────────────────────────────────────────────
+
+  Future<bool> hasActivityPermission() => _stepCounter.hasActivityPermission();
+
+  Future<bool> requestActivityPermission() =>
+      _stepCounter.requestActivityPermission();
+
+  Future<bool> isActivityPermanentlyDenied() =>
+      _stepCounter.isActivityPermissionPermanentlyDenied();
+
+  Future<void> openActivitySettings() =>
+      _stepCounter.openAppSettingsForPermission();
+
+  /// Called once the permission is granted (from the priming screen or on
+  /// app-resume after the user enabled it in settings): begin counting.
+  Future<void> onActivityPermissionGranted() => _stepCounter.start();
+
+  // ─────────────────────────────────────────────────────────────────────
   // Permission rationale flow (UI concern — kept here)
   // ─────────────────────────────────────────────────────────────────────
 
   Future<void> _decideStepCounterStart() async {
+    // Android: count straight from the device step sensor — no Health
+    // Connect. We only need the one-time "Physical activity" permission.
+    // If it's missing, show the non-cancellable priming screen; otherwise
+    // start counting immediately.
+    if (Platform.isAndroid) {
+      if (await _stepCounter.hasActivityPermission()) {
+        await _stepCounter.start();
+      } else {
+        publish(const DashboardEffect.requestActivityPermission());
+      }
+      return;
+    }
+
+    // iOS: HealthKit flow (Apple Health).
     final healthAvailable = await _stepRepo.isHealthDataAvailable();
     if (!healthAvailable) {
       await _stepCounter.start();

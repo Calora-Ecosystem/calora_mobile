@@ -9,6 +9,7 @@ import 'package:calora/common/service/course_tab_signal.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
+import 'package:calora/presentation/dashboard/widgets/activity_permission_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/battery_optimization_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_connect_hint_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_sync_fix_dialog.dart';
@@ -62,6 +63,16 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
           onOpenSourceApp: () => manager.onOpenHealthApp(detectedApp),
           onUseSensorInstead: () => manager.onUseSensorInstead(),
           onDismiss: () {},
+        );
+      },
+      requestActivityPermission: () {
+        ActivityPermissionDialog.show(
+          context: context,
+          onRequest: () => manager.requestActivityPermission(),
+          onCheckGranted: () => manager.hasActivityPermission(),
+          onIsPermanentlyDenied: () => manager.isActivityPermanentlyDenied(),
+          onOpenSettings: () => manager.openActivitySettings(),
+          onGranted: () => manager.onActivityPermissionGranted(),
         );
       },
     );

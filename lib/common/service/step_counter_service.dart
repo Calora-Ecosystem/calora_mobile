@@ -8,6 +8,7 @@ import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:injectable/injectable.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// Which local source the service is reading from.
@@ -172,7 +173,15 @@ class StepCounterService {
     final cached = _ledger.totalFor(_ledger.dayKey(DateTime.now()));
     if (cached > 0) _emit(cached);
 
-    if (await _useHealthIfAvailable()) {
+    // Android: count steps straight from the device's hardware step
+    // sensor (TYPE_STEP_COUNTER) via the native foreground service — NO
+    // Health Connect or third-party fitness-app connection required. The
+    // user just installs the app, grants the one-time "Physical activity"
+    // permission, and steps are counted automatically.
+    //
+    // iOS keeps using HealthKit, which likewise counts automatically with
+    // no integration the user has to set up.
+    if (Platform.isIOS && await _useHealthIfAvailable()) {
       _source = StepSource.health;
       _scheduleStuckHealthCheck();
       // Backfill: server only has today's writes from the 1-min sync.
@@ -208,6 +217,9 @@ class StepCounterService {
   /// us knowing), so we can switch from pedometer → health without an
   /// app restart.
   Future<void> retryHealth() async {
+    // Android counts from the native hardware sensor only — never promote
+    // to Health Connect (that's the integration we deliberately avoid).
+    if (Platform.isAndroid) return;
     if (_source == StepSource.health) return;
     try {
       if (!await _stepRepo.isHealthDataAvailable()) return;
@@ -244,6 +256,39 @@ class StepCounterService {
       log('retryHealth failed: $e',
           name: 'StepCounterService', stackTrace: s);
     }
+  }
+
+  // ── Android "Physical activity" permission (sensor counting) ─────────
+  //
+  // On Android, step counting needs only the ACTIVITY_RECOGNITION runtime
+  // permission — no Health Connect. These helpers let the UI drive a
+  // pre-permission priming screen and recover from a permanent denial.
+
+  /// Whether we already hold the permission needed to count steps. Always
+  /// true off Android (iOS uses HealthKit, gated elsewhere).
+  Future<bool> hasActivityPermission() async {
+    if (!Platform.isAndroid) return true;
+    return _pedometer.hasPermission();
+  }
+
+  /// Triggers the system ACTIVITY_RECOGNITION permission prompt and
+  /// returns whether it ended up granted.
+  Future<bool> requestActivityPermission() async {
+    if (!Platform.isAndroid) return true;
+    return _pedometer.ensurePermissionGranted();
+  }
+
+  /// True when the user has selected "Don't ask again" — the system prompt
+  /// will no longer appear and we must send them to app settings.
+  Future<bool> isActivityPermissionPermanentlyDenied() async {
+    if (!Platform.isAndroid) return false;
+    return Permission.activityRecognition.isPermanentlyDenied;
+  }
+
+  /// Opens this app's system settings page so the user can grant the
+  /// permission after a permanent denial.
+  Future<void> openAppSettingsForPermission() async {
+    await openAppSettings();
   }
 
   /// Force the pedometer fallback path. Used when the stuck-Health
