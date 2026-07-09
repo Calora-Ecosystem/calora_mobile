@@ -62,7 +62,7 @@ class CourseQuestionsPage
                           ProgressRoute(
                             key: UniqueKey(),
                             nextRoute: LessonsRoute(courseId: courseId, imageUrl: imageUrl),
-                            apiCall: () => manager.finish(),
+                            apiCall: () => manager.finish(courseId: courseId),
                             title: Strings.weWillMakeDailyPlan,
                             analyzeItems: [
                               ProgressAnalyzeItem(

@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/base/profile_store.dart';
-import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/base/course_intro_store.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -116,21 +115,28 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                                 context.router.push(VideoCourseBodyWidgetRoute(course: course));
                                 return;
                               }
-                              final profile = await getIt<ProfileStore>().getProfile();
-                              final physicalActivity = profile.physicalActivity;
-                              final needsQuestions =
-                                  physicalActivity == null || physicalActivity.trim().isEmpty;
-                              if (needsQuestions) {
+                              // Per-course gate: show the 3-step intro
+                              // + progress screen the first time a user
+                              // opens this specific workout course, then
+                              // skip to LessonsRoute on every later tap.
+                              // (Previously gated on `profile.physicalActivity`,
+                              // which the main onboarding hardcodes to
+                              // 'Healthy' — so the questionnaire never
+                              // fired for anyone.)
+                              final courseId = course.id ?? 0;
+                              final alreadyDone =
+                                  await CourseIntroStore().isCompleted(courseId);
+                              if (!alreadyDone) {
                                 context.router.push(
                                   CourseQuestionsRoute(
-                                    courseId: course.id ?? 0,
+                                    courseId: courseId,
                                     imageUrl: course.subCoverImage ?? '',
                                   ),
                                 );
                               } else {
                                 context.router.push(
                                   LessonsRoute(
-                                    courseId: course.id ?? 0,
+                                    courseId: courseId,
                                     imageUrl: course.subCoverImage ?? '',
                                   ),
                                 );

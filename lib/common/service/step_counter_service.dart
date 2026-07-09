@@ -167,6 +167,13 @@ class StepCounterService {
     if (_initialized) return;
     _initialized = true;
 
+    // Hydrate the ledger from the native FG service's per-day history
+    // FIRST — if the app has been closed across one or more midnights,
+    // yesterday's (and older) totals live in native SharedPrefs but not
+    // yet in Hive. `ensureDayAtLeast` never lowers an existing day, so
+    // this is safe to run every start.
+    await _hydrateLedgerFromNative();
+
     // INSTANT — paint the cached value from the ledger so the UI never
     // flashes 0 while we wait on Health / sensor.
     final cached = _ledger.totalFor(_ledger.dayKey(DateTime.now()));
@@ -260,6 +267,26 @@ class StepCounterService {
     await stop();
     await _subject.close();
     await _events.close();
+  }
+
+  // ── Native history hydration (rolling 30-day) ───────────────────────
+
+  /// Copy the FG service's `hist_yyyymmdd` daily totals into the ledger.
+  /// This is the "user hasn't opened the app for a week" recovery path
+  /// — those days were counted natively, but the ledger only advances
+  /// while the Dart process is alive. Runs once per `start()`.
+  Future<void> _hydrateLedgerFromNative() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final native = await StepsForegroundService.instance.getNativeHistory();
+      if (native.isEmpty) return;
+      await _ledger.hydrateFromNativeHistory(native);
+      log('Hydrated ${native.length} native history day(s) into ledger',
+          name: 'StepCounterService');
+    } catch (e) {
+      log('Native history hydration failed: $e',
+          name: 'StepCounterService');
+    }
   }
 
   // ── Health primary path ─────────────────────────────────────────────

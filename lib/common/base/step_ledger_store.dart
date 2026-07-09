@@ -75,6 +75,52 @@ class StepLedgerStore {
     return allKeys.where(isPending).toList();
   }
 
+  /// Rolling 30-day view of daily step totals from the local ledger,
+  /// oldest-first, one entry per calendar day. Days with no entry are
+  /// included with 0 so the caller can chart a continuous window
+  /// without stitching. Fast — O(30) prefs reads.
+  List<MapEntry<DateTime, int>> getLast30Days({int days = 30}) {
+    final out = <MapEntry<DateTime, int>>[];
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    for (var i = days - 1; i >= 0; i--) {
+      final d = today.subtract(Duration(days: i));
+      final key = dayKey(d);
+      out.add(MapEntry(d, totalFor(key)));
+    }
+    return out;
+  }
+
+  /// Merge historical daily totals from the native FG service prefs into
+  /// the ledger. Only ever advances a day's `total` upward — never
+  /// downgrades a day that already has a higher value in the ledger
+  /// (e.g. because a Health Connect read filled it in more accurately).
+  /// The `synced` field is left untouched so [getAllPendingDays] will
+  /// pick up newly-imported days for backend sync on the next tick.
+  Future<void> hydrateFromNativeHistory(Map<String, int> nativeByIsoDate) async {
+    if (nativeByIsoDate.isEmpty) return;
+    for (final entry in nativeByIsoDate.entries) {
+      if (entry.value <= 0) continue;
+      await ensureDayAtLeast(entry.key, entry.value);
+    }
+  }
+
+  /// Trim the ledger down to a rolling window. Prevents unbounded growth
+  /// after long-running installs. Called from the periodic sync worker.
+  Future<void> pruneOldLedgerDays({int keepDays = 30}) async {
+    final cutoff = DateTime.now().subtract(Duration(days: keepDays));
+    final cutoffKey = dayKey(cutoff);
+    final toDelete = <String>[];
+    for (final k in _ledger.keys) {
+      if (k is! String) continue;
+      // Lexicographic compare works because `dayKey` is zero-padded ISO.
+      if (k.compareTo(cutoffKey) < 0) toDelete.add(k);
+    }
+    for (final k in toDelete) {
+      await _ledger.delete(k);
+    }
+  }
+
   int getLastSensorTotal() => (_meta.get('last_sensor_total') as int?) ?? -1;
 
   Future<void> setLastSensorTotal(int v) => _meta.put('last_sensor_total', v);

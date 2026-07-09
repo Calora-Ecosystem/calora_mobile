@@ -50,6 +50,12 @@ abstract class StepRepo {
   /// Health is unavailable, unpermitted, or has no data for that day.
   Future<int> getHealthStepsForDay(DateTime day);
 
+  /// Rolling 30-day daily step totals from the LOCAL ledger (Hive +
+  /// native FG service history merged). Returns oldest-first, one
+  /// entry per calendar day, with 0 for days that have no record.
+  /// Fast + offline — no network round-trip.
+  List<StepsWithMetricsRequest> getLast30DaysLocal();
+
   Future<bool> isHealthDataAvailable();
 
   Future<bool> deleteUserDailyData({required String date});

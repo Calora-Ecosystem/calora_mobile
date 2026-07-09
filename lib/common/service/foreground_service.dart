@@ -61,6 +61,36 @@ class StepsForegroundService {
     }
   }
 
+  /// Last 30 days of daily step totals the native FG service persisted
+  /// on each midnight rollover, keyed by ISO date (`yyyy-MM-dd`).
+  /// Empty on iOS. Empty on Android if the service has never run
+  /// through a midnight — that's fine, the caller merges with the
+  /// existing ledger.
+  Future<Map<String, int>> getNativeHistory() async {
+    if (!Platform.isAndroid) return const {};
+    try {
+      final res = await _ch.invokeMethod<Map<dynamic, dynamic>>('getStepsHistory');
+      if (res == null) return const {};
+      return res.map((k, v) => MapEntry(k as String, (v as num).toInt()));
+    } catch (e) {
+      log('getStepsHistory failed: $e', name: 'StepsForegroundService');
+      return const {};
+    }
+  }
+
+  /// Idempotent nudge: starts the FG service if not already running.
+  /// Used by the periodic WorkManager sync as a watchdog so an OEM
+  /// service-kill is recovered from within 15 min at worst.
+  Future<void> ensureRunning() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final res = await _ch.invokeMethod<bool>('ensureRunning');
+      if (res == true) _started = true;
+    } catch (e) {
+      log('ensureRunning failed: $e', name: 'StepsForegroundService');
+    }
+  }
+
   Future<void> updateGoal(int goal) async {
     if (!Platform.isAndroid) return;
 

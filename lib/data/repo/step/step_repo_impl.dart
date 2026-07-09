@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/data/api/steps_api.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
@@ -342,6 +343,18 @@ class StepRepoImpl extends StepRepo {
     } catch (e) {
       log('Error sending health data: $e');
     }
+  }
+
+  @override
+  List<StepsWithMetricsRequest> getLast30DaysLocal() {
+    final ledger = StepLedgerStore();
+    return ledger
+        .getLast30Days()
+        .map((e) => StepsWithMetricsRequest(
+              date: e.key,
+              value: e.value.toDouble(),
+            ))
+        .toList();
   }
 
   @override

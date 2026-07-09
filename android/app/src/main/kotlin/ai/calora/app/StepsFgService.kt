@@ -104,6 +104,14 @@ class StepsFgService : Service(), SensorEventListener {
     private val KEY_GOAL = "goal"
     private val KEY_MODE = "mode"
 
+    /// Per-day historical totals: keyed `hist_<yyyymmdd>`, value = final
+    /// displayed step total for that day. Written on rollover, pruned to a
+    /// rolling 30-day window. This is what makes the "user hasn't opened
+    /// the app for a week" case survive locally — MainActivity exposes it
+    /// via `getStepsHistory` for Flutter to hydrate the ledger on resume.
+    private val KEY_HISTORY_PREFIX = "hist_"
+    private val HISTORY_KEEP_DAYS = 30
+
     override fun onCreate() {
         super.onCreate()
         Log.d("StepsFgService", "onCreate")
@@ -111,6 +119,13 @@ class StepsFgService : Service(), SensorEventListener {
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepCounterSensor = resolveStepSensor()
+
+        // The service may have been dead across one or more midnight
+        // rollovers (device reboot, OEM kill, long idle). The KEY_DAY in
+        // prefs still holds the last day we counted for — if that's not
+        // today, snapshot its final total into the history log before any
+        // other init runs.
+        persistYesterdayIfNeeded()
 
         restoreSyncIfSameDay()
         restoreShownStateIfSameDay()
@@ -265,6 +280,10 @@ class StepsFgService : Service(), SensorEventListener {
         } catch (e: Exception) {
             Log.e("StepsService", "midnight startForeground failed", e)
         }
+
+        // Persist yesterday's final total BEFORE we zero the counters —
+        // shownSteps still holds it at this point (the alarm just fired).
+        persistYesterdayIfNeeded()
 
         val sensorNow = lastSensorValue
         if (sensorNow != null) {
@@ -509,6 +528,12 @@ class StepsFgService : Service(), SensorEventListener {
     /// path nulled the baseline (clearSync) and never re-established it in
     /// SENSOR mode, which is exactly why counting died after midnight.
     private fun handleNewDay(currentSensor: Float, prevSensor: Float?) {
+        // Snapshot yesterday's final into the history log first — this
+        // path is what runs when the alarm was missed (e.g. the service
+        // was killed / device Doze-frozen across midnight) and the day
+        // rolled over via a sensor event instead.
+        persistYesterdayIfNeeded()
+
         val baseline = prevSensor ?: currentSensor
         syncBaseSensorValue = baseline
         syncBaseSteps = 0
@@ -695,5 +720,66 @@ class StepsFgService : Service(), SensorEventListener {
         shownSteps = 0
         previousShownSteps = -1
         updateNotification(force = true)
+    }
+
+    // ===== Historical daily totals (30-day rolling) =====
+
+    /// If the persisted KEY_DAY is not today, snapshot its final
+    /// `shown_steps` value into the history log (`hist_<yyyymmdd>`).
+    /// Idempotent: same-day calls are cheap no-ops; already-logged days
+    /// overwrite with the same value.
+    ///
+    /// Called from three places:
+    ///   • onCreate — after long idle / reboot when we come back to life
+    ///     for the first time in a new day.
+    ///   • handleMidnightReset — the alarm fires while we're alive, so
+    ///     shownSteps still holds yesterday's final at that moment.
+    ///   • handleNewDay — the sensor event, not the alarm, was what
+    ///     detected the rollover (rare, but happens on OEMs that Doze
+    ///     alarms out).
+    private fun persistYesterdayIfNeeded() {
+        val savedDay = prefs.getInt(KEY_DAY, 0)
+        val today = yyyymmdd()
+        if (savedDay == 0 || savedDay == today) return
+
+        val prevShown = prefs.getInt(KEY_SHOWN_STEPS, 0).coerceAtLeast(0)
+        if (prevShown > 0) {
+            prefs.edit()
+                .putInt("$KEY_HISTORY_PREFIX$savedDay", prevShown)
+                .apply()
+            Log.i("StepsService", "History: $savedDay = $prevShown steps")
+        }
+        pruneOldHistory()
+    }
+
+    /// Trim `hist_*` entries older than [HISTORY_KEEP_DAYS] so the prefs
+    /// file doesn't accumulate one entry per day indefinitely. Cheap —
+    /// runs on rollover only, at most once per day.
+    private fun pruneOldHistory() {
+        try {
+            val cutoff = java.util.Calendar.getInstance().apply {
+                add(java.util.Calendar.DAY_OF_YEAR, -HISTORY_KEEP_DAYS)
+            }
+            val cutoffKey = cutoff.get(java.util.Calendar.YEAR) * 10000 +
+                (cutoff.get(java.util.Calendar.MONTH) + 1) * 100 +
+                cutoff.get(java.util.Calendar.DAY_OF_MONTH)
+
+            val editor = prefs.edit()
+            var removed = 0
+            for (k in prefs.all.keys) {
+                if (k == null || !k.startsWith(KEY_HISTORY_PREFIX)) continue
+                val dayKey = k.substring(KEY_HISTORY_PREFIX.length).toIntOrNull() ?: continue
+                if (dayKey < cutoffKey) {
+                    editor.remove(k)
+                    removed++
+                }
+            }
+            if (removed > 0) {
+                editor.apply()
+                Log.i("StepsService", "Pruned $removed history entries (>$HISTORY_KEEP_DAYS days old)")
+            }
+        } catch (t: Throwable) {
+            Log.w("StepsService", "History prune failed: ${t.message}")
+        }
     }
 }

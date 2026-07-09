@@ -3,6 +3,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/service/pedometer_service.dart';
@@ -72,8 +73,17 @@ void callbackDispatcher() {
       final stepRepo = GetIt.I<StepRepo>();
       final ledger = StepLedgerStore();
 
+      // Watchdog: nudge the native FG service back up if the OEM killed
+      // it. Cheap send-broadcast — the service's own onCreate handles
+      // state restore, so this never disturbs a live service.
+      await _ensureFgServiceRunning();
+
       // Oldingi kunlarning pending sync'ini bajarish (har ikki rejimda ham)
       await _syncPendingDays(stepRepo, ledger);
+
+      // Prune the local ledger to a 30-day rolling window so it doesn't
+      // grow unbounded over long installs.
+      await ledger.pruneOldLedgerDays();
 
       // 1. Health rejimini urinib ko'ramiz (faqat ruxsat allaqachon
       //    berilgan bo'lsa — background isolate'da UI yo'q, prompt qila olmaymiz)
@@ -182,11 +192,36 @@ Future<void> _syncPendingDays(StepRepo stepRepo, StepLedgerStore ledger) async {
 
     await stepRepo.sendStepDataDateRange(steps: payload);
 
+    // Mark each day as fully synced BUT KEEP THE ENTRY. Deleting here
+    // would erase the local 30-day history — the ledger is the source
+    // of truth for the offline chart. `pruneOldLedgerDays` handles the
+    // rolling window instead.
     for (final key in pastDays) {
-      await ledger.deleteDay(key);
+      await ledger.setSynced(key, ledger.totalFor(key));
     }
     log('BG synced ${pastDays.length} past days', name: 'BackgroundStepsWorker');
   } catch (e) {
     log('BG pending days sync error: $e', name: 'BackgroundStepsWorker');
+  }
+}
+
+/// Kicks the `StepsWatchdogReceiver`, which starts the FG service if
+/// it isn't already running. Idempotent — the service's
+/// `handleAutoRestart` just re-asserts foreground when it's alive.
+///
+/// We can't use the `ai.calora.app/steps_native_fgs` MethodChannel from
+/// this isolate — MainActivity is where the channel is registered, and
+/// the WM plugin runs on a separate headless Flutter engine. A same-app
+/// broadcast reaches the receiver from any isolate in the process.
+Future<void> _ensureFgServiceRunning() async {
+  try {
+    await const AndroidIntent(
+      action: 'ai.calora.app.steps.WATCHDOG_KICK',
+      package: 'ai.calora.app',
+    ).sendBroadcast();
+  } catch (e) {
+    log('Watchdog kick failed: $e', name: 'BackgroundStepsWorker');
+    // Non-fatal — the next WM cycle retries. The BootReceiver and
+    // midnight AlarmManager are the other resurrection paths.
   }
 }

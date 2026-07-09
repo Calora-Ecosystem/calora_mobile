@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:calora/common/base/course_intro_store.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -56,7 +57,12 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
     }
   }
 
-  Future<void> finish() async {
+  /// [courseId] is the workout course the user just answered the intro
+  /// for. On success we mark it in [CourseIntroStore] so the guard in
+  /// `course_page.dart` skips the questionnaire on future taps of the
+  /// SAME course, but still shows it the first time on any OTHER
+  /// workout course.
+  Future<void> finish({int? courseId}) async {
     final info = state.courseQuestionsInfo;
 
     emit(state.copyWith());
@@ -108,6 +114,15 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
       print('DEBUG: Error sending answers: $e');
     }
     updateNotification(_formatTimeToApi(state.courseQuestionsInfo.trainingTime) ?? '00:00:00');
+
+    // Mark this course as intro-completed AFTER the profile write —
+    // even if `sendAnswers` failed, the local profile store is updated
+    // and the notification is scheduled, so the user shouldn't be
+    // forced through the same 3 steps again. `markCompleted` is a
+    // no-op when courseId <= 0.
+    if (courseId != null) {
+      await CourseIntroStore().markCompleted(courseId);
+    }
   }
 
   void updateNotification(String time) {

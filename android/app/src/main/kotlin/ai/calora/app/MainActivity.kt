@@ -87,6 +87,33 @@ class MainActivity : FlutterFragmentActivity() {
                         result.success(readNativeStepsForToday())
                     }
 
+                    "getStepsHistory" -> {
+                        // Return the map of persisted daily totals (last
+                        // 30 days). Used by Flutter on resume/start to
+                        // hydrate the Hive ledger with any days that
+                        // passed while the app was closed.
+                        result.success(readStepsHistory())
+                    }
+
+                    "ensureRunning" -> {
+                        // Idempotent nudge — starts StepsFgService if not
+                        // already running. Send-no-action → handleAutoRestart
+                        // path re-asserts foreground without disturbing the
+                        // sensor baseline.
+                        try {
+                            val i = Intent(this, StepsFgService::class.java)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                ContextCompat.startForegroundService(this, i)
+                            } else {
+                                startService(i)
+                            }
+                            result.success(true)
+                        } catch (e: Exception) {
+                            Log.w("MainActivity", "ensureRunning failed: ${e.message}")
+                            result.success(false)
+                        }
+                    }
+
                     "stop" -> {
                         val i = Intent(this, StepsFgService::class.java).apply {
                             action = StepsFgService.ACTION_STOP
@@ -141,6 +168,50 @@ class MainActivity : FlutterFragmentActivity() {
         } catch (e: Exception) {
             Log.e("MainActivity", "readNativeStepsForToday failed", e)
             0
+        }
+    }
+
+    /// Returns the last-30-day historical totals the FG service wrote to
+    /// SharedPrefs (`hist_yyyymmdd = final_shown_steps`), plus today's
+    /// in-progress total under today's ISO key. Keys are `yyyy-MM-dd`
+    /// so Dart can parse them directly with `DateTime.parse`.
+    private fun readStepsHistory(): Map<String, Int> {
+        return try {
+            val prefs = getSharedPreferences("calora_steps_native", MODE_PRIVATE)
+            val out = LinkedHashMap<String, Int>()
+
+            for ((rawKey, rawValue) in prefs.all) {
+                if (rawKey == null || !rawKey.startsWith("hist_")) continue
+                val dayInt = rawKey.substring(5) // "hist_".length
+                if (dayInt.length != 8) continue
+                val steps = when (rawValue) {
+                    is Int -> rawValue
+                    is Long -> rawValue.toInt()
+                    else -> continue
+                }
+                if (steps <= 0) continue
+                val iso = "${dayInt.substring(0, 4)}-${dayInt.substring(4, 6)}-${dayInt.substring(6, 8)}"
+                out[iso] = steps
+            }
+
+            // Include today's in-progress total (only if KEY_DAY == today).
+            val cal = java.util.Calendar.getInstance()
+            val todayInt = cal.get(java.util.Calendar.YEAR) * 10000 +
+                (cal.get(java.util.Calendar.MONTH) + 1) * 100 +
+                cal.get(java.util.Calendar.DAY_OF_MONTH)
+            if (prefs.getInt("day_yyyymmdd", 0) == todayInt) {
+                val today = "%04d-%02d-%02d".format(
+                    cal.get(java.util.Calendar.YEAR),
+                    cal.get(java.util.Calendar.MONTH) + 1,
+                    cal.get(java.util.Calendar.DAY_OF_MONTH),
+                )
+                val todaySteps = prefs.getInt("shown_steps", 0).coerceAtLeast(0)
+                if (todaySteps > 0) out[today] = todaySteps
+            }
+            out
+        } catch (e: Exception) {
+            Log.e("MainActivity", "readStepsHistory failed", e)
+            emptyMap()
         }
     }
 

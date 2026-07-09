@@ -90,5 +90,7 @@
       <string>tg</string>
       <string>https</string>
     </array>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>

@@ -103,6 +103,34 @@
             android:name=".MidnightResetReceiver"
             android:exported="false" />
 
+        <!-- Bring StepsFgService back up after reboot / app-update so
+             daily counting resumes without needing the user to open the app. -->
+        <receiver
+            android:name=".StepsBootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Watchdog kick from the periodic WorkManager sync — restarts
+             StepsFgService if an aggressive OEM killed it between the
+             midnight-alarm resurrection points. -->
+        <receiver
+            android:name=".StepsWatchdogReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ai.calora.app.steps.WATCHDOG_KICK" />
+            </intent-filter>
+        </receiver>
+
         <!-- Flutter embedding -->
         <meta-data
             android:name="flutterEmbedding"
