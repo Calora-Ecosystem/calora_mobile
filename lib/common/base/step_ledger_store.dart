@@ -172,4 +172,15 @@ class StepLedgerStore {
   bool isBatteryHintShown() => (_meta.get('battery_hint_shown') as bool?) ?? false;
 
   Future<void> setBatteryHintShown() => _meta.put('battery_hint_shown', true);
+
+  /// Whether a one-time coach-mark tour with the given [id] has already been
+  /// completed/skipped. `id` distinguishes the dashboard walkthrough from the
+  /// per-page button tours (e.g. `add_food`, `steps`).
+  bool isTourShown(String id) => (_meta.get('tour_shown_$id') as bool?) ?? false;
+
+  Future<void> setTourShown(String id) => _meta.put('tour_shown_$id', true);
+
+  /// Convenience for the dashboard walkthrough (also read by the battery
+  /// prompt to avoid stacking dialogs on top of the tour).
+  bool isFeatureTourShown() => isTourShown('dashboard');
 }

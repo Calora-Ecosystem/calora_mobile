@@ -16,6 +16,10 @@ class DailyFeedRateWidget extends StatelessWidget {
   final VoidCallback onAddFoodTap;
   final bool loading;
 
+  /// Optional spotlight anchor for the first-run feature tour — attached to
+  /// the "Add food" button so the walkthrough can highlight the real control.
+  final Key? addFoodButtonKey;
+
   const DailyFeedRateWidget({
     super.key,
     required this.normCalories,
@@ -24,6 +28,7 @@ class DailyFeedRateWidget extends StatelessWidget {
     required this.nutrients,
     required this.onAddFoodTap,
     required this.loading,
+    this.addFoodButtonKey,
   });
 
   @override
@@ -120,6 +125,7 @@ class DailyFeedRateWidget extends StatelessWidget {
               GestureDetector(
                 onTap: onAddFoodTap,
                 child: Container(
+                  key: addFoodButtonKey,
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   decoration: BoxDecoration(color: context.colors.accentSub, borderRadius: BorderRadius.circular(16)),

@@ -9,6 +9,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
@@ -302,6 +303,7 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
               ),
               const SizedBox(height: 12),
               Container(
+                key: TourAnchors.stepsPeriod,
                 height: 40,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),

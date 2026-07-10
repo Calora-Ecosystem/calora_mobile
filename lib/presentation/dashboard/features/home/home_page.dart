@@ -8,6 +8,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/calendar_selector_widget.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -170,6 +171,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   ),
                                 ),
                                 DailyFeedRateWidget(
+                                  addFoodButtonKey: TourAnchors.homeAddFood,
                                   onAddFoodTap: () => openCaloriesPage(context),
                                   normCalories: (state.summary?.kcalNorm.value ?? 0)
                                       .asFixedTruncated(0)

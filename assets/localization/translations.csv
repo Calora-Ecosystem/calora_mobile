@@ -445,3 +445,195 @@ no_food_found_in_voice,No food found in the recording,Yozuvdan taom topilmadi,В
 error_view_message,Something went wrong. Please try again.,Xatolik yuz berdi. Qayta urinib koʻring.,Произошла ошибка. Попробуйте снова.
 please_enter_food_name,"Please, enter food name","Iltimos, taom nomini kiriting","Пожалуйста, введите название продукта"
 please_enter_food_metrics,"Please, enter food metrics","Iltimos, taom metrikalarini kiriting","Пожалуйста, введите показатели качества продуктов питания"
+battery_hint_title,Keep step tracking running,Qadam hisoblashni faol saqlang,Не выключайте подсчёт шагов
+battery_hint_body,"Allow background activity and turn off battery optimization so steps are counted while the app is closed.","Ilova yopiq bo'lganda qadamlar hisoblanishi uchun fonda ishlashga ruxsat bering va batareya optimizatsiyasini o'chiring.","Разрешите работу в фоне и отключите оптимизацию батареи чтобы шаги считались при закрытом приложении."
+battery_hint_allow,Allow background activity,Fonda ishlashga ruxsat berish,Разрешить работу в фоне
+battery_hint_autostart,Open autostart settings,Avto-ishga tushirish sozlamalari,Открыть настройки автозапуска
+ob_skip,Skip,O'tkazib yuborish,Пропустить
+ob_next,Next,Keyingisi,Далее
+ob_start,Get started,Boshlash,Начать
+ob_tag_1,New lifestyle,Yangi hayot tarzi,Новый образ жизни
+ob_tag_2,Smart tracking,Aqlli hisob,Умный учёт
+ob_tag_3,Daily activity,Kunlik faollik,Ежедневная активность
+ob_tag_4,Water balance,Suv balansi,Водный баланс
+ob_stat_1,Healthy habits,Sog'lom odatlar,Здоровые привычки
+ob_stat_2,kcal tracked,kkal hisoblandi,ккал учтено
+ob_stat_3,steps a day,qadam kuniga,шагов в день
+ob_stat_4,glasses a day,stakan kuniga,стаканов в день
+ob_energy,Energy,Energiya,Энергия
+pw_hero_badge,PREMIUM,PREMIUM,PREMIUM
+pw_hero_title,Become your best self in 90 days,90 kunda eng yaxshi holatingizga yeting,Стань лучшей версией себя за 90 дней
+pw_hero_subtitle,"AI, personal plan and habits that actually work","AI, shaxsiy reja va haqiqatan ishlaydigan odatlar","ИИ, персональный план и работающие привычки"
+pw_limited_offer,Limited offer,Cheklangan taklif,Ограниченное предложение
+pw_discount,-50% today,Bugun -50%,-50% сегодня
+pw_off,OFF,CHEGIRMA,СКИДКА
+pw_offer_ends,50% off ends in,50% chegirma tugashiga,Скидка 50% истекает через
+pw_journey_title,Your 90-day transformation,Sizning 90 kunlik o'zgarishingiz,Ваша трансформация за 90 дней
+pw_journey_subtitle,Three phases that rebuild your body and habits,Tanangiz va odatlaringizni qayta quradigan uch bosqich,"Три этапа, которые перестроят тело и привычки"
+pw_phase_1_range,Weeks 1–3,1–3 hafta,1–3 недели
+pw_phase_1_title,Foundation,Poydevor,Фундамент
+pw_phase_1_desc,Habits click into place — tracking becomes effortless and automatic.,Odatlar shakllanadi — kuzatuv oson va avtomatik bo'lib qoladi.,Формируются привычки — отслеживание становится лёгким и автоматическим.
+pw_phase_2_range,Weeks 4–8,4–8 hafta,4–8 недели
+pw_phase_2_title,Momentum,Sur'at,Импульс
+pw_phase_2_desc,Real energy returns and the routine finally feels natural.,Energiya qaytadi va tartib nihoyat tabiiy his qilinadi.,"Возвращается энергия, и режим наконец входит в привычку."
+pw_phase_3_range,Weeks 9–12,9–12 hafta,9–12 недели
+pw_phase_3_title,Transformation,Natija,Результат
+pw_phase_3_desc,"A stronger, lighter, more confident you — the new normal.","Kuchliroq, yengilroq va ishonchli siz — yangi normal holat.","Сильнее, легче и увереннее — это ваша новая норма."
+pw_point_a,Today,Bugun,Сегодня
+pw_point_b,In 90 days,90 kundan keyin,Через 90 дней
+pw_now_state,"Low energy, no plan","Kam energiya, rejasiz","Мало энергии, без плана"
+pw_goal_state,"Goal weight, full energy","Maqsad vazni, to'liq energiya","Целевой вес, полон сил"
+pw_weight_unit,kg,kg,кг
+pw_chart_title,Projected weight change,Vazn o'zgarishi bashorati,Прогноз изменения веса
+pw_chart_note,Based on average results of Calora Premium users,Calora Premium foydalanuvchilarining o'rtacha natijasiga asosan,На основе средних результатов пользователей Calora Premium
+pw_with_calora,With Calora,Calora bilan,С Calora
+pw_without_calora,Without Calora,Calorasiz,Без Calora
+pw_proof_success,reached their goal,maqsadiga erishdi,достигли цели
+pw_proof_loss,avg. result,o'rtacha natija,средний результат
+pw_proof_rating,app rating,ilova reytingi,рейтинг приложения
+pw_proof_users,happy users,mamnun foydalanuvchi,довольных пользователей
+pw_milestones_title,What you'll achieve,Nimalarga erishasiz,Чего вы достигнете
+pw_ms_1_day,Week 1,1-hafta,1-я неделя
+pw_ms_1_text,"Habits form, cravings drop, energy rises","Odatlar shakllanadi, energiya oshadi","Формируются привычки, растёт энергия"
+pw_ms_2_day,Day 30,30 kun,30 дней
+pw_ms_2_text,"First -3 kg, clothes fit better","Birinchi -3 kg, kiyimlar bemalol","Первые -3 кг, одежда сидит лучше"
+pw_ms_3_day,Day 60,60 kun,60 дней
+pw_ms_3_text,"-6 kg, stable routine and better sleep","-6 kg, barqaror tartib va yaxshi uyqu","-6 кг, стабильный режим и крепкий сон"
+pw_ms_4_day,Day 90,90 kun,90 дней
+pw_ms_4_text,Goal weight reached — new you!,Maqsad vazniga yetdingiz — yangi siz!,Цель достигнута — новый вы!
+pw_compare_title,The Calora difference,Calora farqi,Разница с Calora
+pw_compare_subtitle,See exactly why Calora works when other apps don't,Nega Calora ishlaydi-yu boshqa ilovalar yo'q — ko'ring,Почему Calora работает там где другие — нет
+pw_compare_footer,Everything you need to succeed — in one app,Muvaffaqiyat uchun barchasi — bitta ilovada,Всё для результата — в одном приложении
+pw_compare_col_without,Without,Calorasiz,Без Calora
+pw_compare_col_with,With Calora,Calora bilan,С Calora
+pw_cmp_1,Guessing calories,Kaloriyani chamalab,Считаете калории на глаз
+pw_cmp_2,No clear plan,Aniq rejasiz,Без чёткого плана
+pw_cmp_3,Give up in a week,Bir haftada tashlab,Бросаете через неделю
+pw_cmp_4,Manual food logging,Qo'lda taom kiritish,Ручной ввод еды
+pw_cmp_1b,AI counts for you,AI siz uchun hisoblaydi,ИИ считает за вас
+pw_cmp_2b,Personal 90-day plan,Shaxsiy 90 kunlik reja,Личный план на 90 дней
+pw_cmp_3b,Motivation every day,Har kuni motivatsiya,Мотивация каждый день
+pw_cmp_4b,Photo & voice in seconds,Rasm va ovoz bilan bir zumda,Фото и голос за секунды
+pw_features_title,Everything in Premium,Premium ichidagi hamma narsa,Всё в Premium
+pw_testimonials_title,"Real people, real results","Haqiqiy odamlar, haqiqiy natijalar","Реальные люди, реальные результаты"
+pw_tst_1_name,"Dilnoza, 28","Dilnoza, 28","Дилноза, 28"
+pw_tst_1_text,Lost 9 kg in 3 months. The AI scan is magic!,3 oyda 9 kg tashladim. AI skaner — mo'jiza!,Похудела на 9 кг за 3 месяца. AI-сканер — волшебство!
+pw_tst_1_result,-9 kg,-9 kg,-9 кг
+pw_tst_2_name,"Jasur, 34","Jasur, 34","Жасур, 34"
+pw_tst_2_text,Finally kept a routine. Energy is on another level.,Nihoyat tartibga keldim. Energiya boshqa darajada.,Наконец-то держу режим. Энергии стало в разы больше.
+pw_tst_2_result,-7 kg,-7 kg,-7 кг
+pw_cta_title,Start your transformation today,O'zgarishni bugun boshlang,Начните трансформацию сегодня
+pw_cta_subtitle,Cancel anytime. No hidden fees.,Istalgan vaqt bekor qilinadi. Yashirin to'lovsiz.,Отмена в любой момент. Без скрытых платежей.
+pw_cta_button,Unlock Premium,Premiumni ochish,Открыть Premium
+pw_guarantee,Secure payment • Cancel anytime,Xavfsiz to'lov • Istalgan vaqt bekor qilish,Безопасная оплата • Отмена в любой момент
+pw_spots_left,Only a few spots left at this price,Bu narxda faqat bir nechta joy qoldi,По этой цене осталось всего несколько мест
+pw_week,wk,hafta,нед
+pw_trust,"4.9★ • 50,000+ users trust Calora",4.9★ • 50 000+ foydalanuvchi ishonadi,4.9★ • 50 000+ пользователей доверяют
+pw_value_hook,You're not buying an app — you're buying results,Siz ilova emas — natija sotib olasiz,Вы покупаете не приложение — вы покупаете результат
+pw_eco_title,One subscription — a whole ecosystem,Bitta obuna — butun ekotizim,Одна подписка — целая экосистема
+pw_eco_subtitle,Calora isn't just a calorie counter. It's a complete system for your health.,Calora shunchaki kaloriya sanagich emas. Sog'ligingiz uchun to'liq tizim.,Calora — это не просто счётчик калорий. Это целая система для вашего здоровья.
+pw_eco_1_t,AI food scanner,AI ovqat skaneri,AI-сканер еды
+pw_eco_1_d,Photo & voice in seconds,Rasm va ovoz orqali soniyalarda,Фото и голос за секунды
+pw_eco_2_t,Video lessons,Video darsliklar,Видеоуроки
+pw_eco_2_d,100+ classes from experts,Mutaxassislardan 100+ dars,100+ уроков от экспертов
+pw_eco_3_t,Daily steps,Kunlik qadamlar,Ежедневные шаги
+pw_eco_3_d,Auto tracking & goals,Avtomatik hisob va maqsadlar,Автоучёт и цели
+pw_eco_4_t,Water balance,Suv balansi,Водный баланс
+pw_eco_4_d,Smart daily reminders,Aqlli kunlik eslatmalar,Умные напоминания
+pw_eco_5_t,Workout programs,Mashq dasturlari,Программы тренировок
+pw_eco_5_d,30-day plans for men & women,Erkak va ayollar uchun 30 kunlik,30-дневные планы для всех
+pw_eco_6_t,Health analysis,Sog'liq tahlili,Анализ здоровья
+pw_eco_6_d,Personal AI insights,Shaxsiy AI ko'rsatkichlar,Персональная AI-аналитика
+pw_vs_title,What would it cost separately?,Alohida olsangiz qancha bo'lardi?,Сколько бы это стоило отдельно?
+pw_vs_nutritionist,Personal nutritionist,Shaxsiy nutritsiolog,Личный нутрициолог
+pw_vs_nutritionist_p,300 000,300 000,300 000
+pw_vs_trainer,Fitness trainer,Fitnes murabbiy,Фитнес-тренер
+pw_vs_trainer_p,400 000,400 000,400 000
+pw_vs_courses,Video courses,Video kurslar,Видеокурсы
+pw_vs_courses_p,150 000,150 000,150 000
+pw_vs_apps,Calorie & water apps,Kaloriya va suv ilovalari,Приложения для калорий и воды
+pw_vs_apps_p,80 000,80 000,80 000
+pw_vs_total,Total value per month,Oyiga jami qiymat,Общая ценность в месяц
+pw_vs_total_p,930 000+ so'm,930 000+ so'm,930 000+ сум
+pw_vs_calora,With Calora Premium — everything included,Calora Premium bilan — hammasi,С Calora Premium — всё включено
+pw_vs_coffee,Less than a cup of coffee a day ☕,Kuniga bir chashka qahvadan arzon ☕,Дешевле чашки кофе в день ☕
+pw_tst_verified,Verified,Tasdiqlangan,Проверено
+pw_tst_1_meta,Tashkent • 3 months with Calora,Toshkent • 3 oy Calora bilan,Ташкент • 3 месяца с Calora
+pw_tst_2_meta,Samarkand • 4 months with Calora,Samarqand • 4 oy Calora bilan,Самарканд • 4 месяца с Calora
+pw_tst_3_name,"Malika, 41","Malika, 41","Малика, 41"
+pw_tst_3_text,The video lessons and water reminders changed my life. I feel young and strong again.,Video darslar va suv eslatmalari hayotimni o'zgartirdi. O'zimni yosh va kuchli his qilaman.,Видеоуроки и напоминания о воде изменили мою жизнь. Снова чувствую себя молодой и сильной.
+pw_tst_3_result,−11 kg,−11 kg,−11 кг
+pw_tst_3_meta,Fergana • 5 months with Calora,Farg'ona • 5 oy Calora bilan,Фергана • 5 месяцев с Calora
+pw_faq_title,Frequently asked,Ko'p so'raladigan savollar,Частые вопросы
+pw_faq_1_q,Can I cancel anytime?,Istalgan vaqt bekor qila olamanmi?,Можно отменить в любой момент?
+pw_faq_1_a,"Yes, in one tap. No penalties, no questions.","Ha, bir marta bosish bilan. Hech qanday jarima yo'q.","Да, в один клик. Без штрафов и вопросов."
+pw_faq_2_q,What if I don't see results?,Natija bo'lmasa-chi?,А если не будет результата?
+pw_faq_2_a,Follow the plan and results are guaranteed — 94% of users reach their goal.,"Rejaga amal qilsangiz, natija kafolatlangan — 94% foydalanuvchi maqsadiga yetadi.",Следуйте плану — результат гарантирован: 94% пользователей достигают цели.
+pw_faq_3_q,Is payment secure?,To'lov xavfsizmi?,Оплата безопасна?
+pw_faq_3_a,All payments are encrypted and secure. Your data stays private.,To'lovlar shifrlangan va xavfsiz. Ma'lumotlaringiz himoyalangan.,Все платежи зашифрованы и безопасны. Ваши данные защищены.
+pw_final_title,Start today — your future self will thank you,Bugun boshlang — ertaga o'zingizga rahmat aytasiz,Начните сегодня — вы скажете себе спасибо
+pw_join,"Join 50,000+ users",50 000+ foydalanuvchiga qo'shiling,Присоединяйтесь к 50 000+ пользователей
+pw_final_cta,Start now,Hoziroq boshlash,Начать сейчас
+pw_video_badge,FREE LESSON,BEPUL DARS,БЕСПЛАТНЫЙ УРОК
+pw_video_title,Watch a real expert lesson — free,Mutaxassisdan bitta darsni bepul ko'ring,Посмотрите урок от эксперта — бесплатно
+pw_video_subtitle,Expert-led lessons waiting for you in Premium,Premium'da mutaxassis darslari sizni kutmoqda,В Premium вас ждут уроки от экспертов
+pw_video_watch,Watch free,Bepul ko'rish,Смотреть бесплатно
+pw_video_sample,Free preview,Bepul namuna,Бесплатный фрагмент
+pw_workout_title,Guided workouts — a new one every day,Grafik mashqlar — har kuni yangisi,Тренировки — новая каждый день
+pw_workout_subtitle,30-day programs for men and women,Erkak va ayollar uchun 30 kunlik dasturlar,30-дневные программы для мужчин и женщин
+pw_workout_locked,Premium,Premium,Premium
+pw_wk_1_name,Fat burn — 12 min,Yog' yoqish — 12 daqiqa,Жиросжигание — 12 мин
+pw_wk_1_meta,8 exercises • Beginner,8 mashq • Boshlang'ich,8 упражнений • Начальный
+pw_wk_2_name,Flat belly,Yassi qorin,Плоский живот
+pw_wk_2_meta,10 exercises • Medium,10 mashq • O'rta,10 упражнений • Средний
+pw_wk_3_name,Full body,Butun tana,Всё тело
+pw_wk_3_meta,12 exercises • Advanced,12 mashq • Yuqori,12 упражнений • Продвинутый
+pw_wk_4_name,Healthy mass gain,Sog'lom massa olish,Здоровый набор массы
+pw_wk_4_meta,9 exercises • Medium,9 mashq • O'rta,9 упражнений • Средний
+pw_showcase_title,See what's waiting inside,Ilova ichida sizni nima kutmoqda,"Посмотрите, что вас ждёт внутри"
+pw_showcase_subtitle,Not just words — real content you get,Faqat gap emas — mana real kontent,Не просто слова — реальный контент
+pw_sc_meals,Food database,Ovqatlar bazasi,База продуктов
+pw_sc_ai,AI analysis,AI tahlil,AI-анализ
+pw_sc_courses,Video courses,Video kurslar,Видеокурсы
+pw_sc_workouts,Workouts,Mashqlar,Тренировки
+pw_sc_progress,Progress tracking,Natija kuzatuvi,Отслеживание прогресса
+pw_dur_unit,min,daqiqa,мин
+pw_count_unit,reps,marta,раз
+pw_for_you,Picked for your profile,Profilingizga mos tanlangan,Подобрано под ваш профиль
+pw_lesson_free,Free lesson,Bepul dars,Бесплатный урок
+pw_tap_sound,Tap for sound,Ovoz uchun bosing,Нажмите для звука
+pw_exercise_free,Free exercise,Bepul mashq,Бесплатное упражнение
+ft_next,Next,Keyingi,Далее
+ft_skip,Skip,O'tkazib yuborish,Пропустить
+ft_done,Get started,Boshlash,Начать
+ft_home_title,Home,Bosh sahifa,Главная
+ft_home_desc,Your daily plan lives here — each card controls one metric:,Kunlik rejangiz shu yerda — har bir karta bitta ko'rsatkichni boshqaradi:,Ваш дневной план здесь — каждая карточка отвечает за свой показатель:
+ft_home_b1,Calorie ring — eaten today and what's left,Kaloriya halqasi — bugun yegan va qolgani,Кольцо калорий — съедено и осталось
+ft_home_b2,Water — each tap adds one glass,Suv — har bosishda bitta stakan,Вода — каждое нажатие добавляет стакан
+ft_home_b3,Step card — today's activity,Qadam kartasi — bugungi faollik,Карточка шагов — активность за день
+ft_food_title,Add food,Ovqat qo'shish,Добавить еду
+ft_food_desc,Tap this green button to add a meal — three ways to do it:,Ovqat qo'shish uchun shu yashil tugmani bosing — uch xil usul bor:,Нажмите эту зелёную кнопку — три способа добавить приём пищи:
+ft_food_b1,«Create» — enter the food by hand,«Yaratish» — taomni qo'lda kiriting,«Создать» — введите блюдо вручную
+ft_food_b2,«Scan» — snap a photo and AI counts it,«Skan» — rasmga oling va AI hisoblaydi,«Скан» — сфотографируйте и ИИ посчитает
+ft_food_b3,«Voice» — say it and AI detects the food,«Ovoz» — gapiring va AI taomni aniqlaydi,«Голос» — скажите и ИИ определит блюдо
+ft_course_title,Video lessons,Video darsliklar,Видеоуроки
+ft_course_desc,Browse lessons and tap one to watch:,Darslarni ko'ring va bosib oching:,Просматривайте уроки и открывайте нажатием:
+ft_course_b1,Tap a lesson — the video opens,Darsni bosing — video ochiladi,Нажмите урок — откроется видео
+ft_course_b2,Free lessons are marked «Free»,Bepul darslar «Bepul» belgisi bilan,Бесплатные уроки помечены «Бесплатно»
+ft_course_b3,Workouts matched to your level,Darajangizga mos mashqlar,Тренировки под ваш уровень
+ft_steps_title,Steps & stats,Qadamlar va statistika,Шаги и статистика
+ft_steps_desc,Switch the period with the top toggle:,Yuqoridagi tugma bilan davrni almashtiring:,Переключайте период кнопками сверху:
+ft_steps_b1,«Daily» — today's steps and chart,«Kunlik» — bugungi qadam va grafik,«Дневной» — шаги и график за сегодня
+ft_steps_b2,«Weekly» — 7-day bar chart,«Haftalik» — 7 kunlik ustunli grafik,«Недельный» — график за 7 дней
+ft_steps_b3,«Monthly» — long-term trend,«Oylik» — uzoq muddatli tendensiya,«Месячный» — тренд за месяц
+ft_profile_title,Profile,Profil,Профиль
+ft_profile_desc,Everything about you and your settings:,Siz va sozlamalaringiz haqida barchasi:,Всё о вас и ваших настройках:
+ft_profile_b1,Goal and body measurements,Maqsad va tana o'lchovlari,Цель и параметры тела
+ft_profile_b2,Language and notifications,Til va bildirishnomalar,Язык и уведомления
+ft_profile_b3,Premium and achievements,Premium va yutuqlar,Премиум и достижения
+ft_af_scan_t,Scan,Skan qilish,Скан
+ft_af_scan_d,Tap this button to snap your food — AI reads the calories and macros for you.,Bu tugma orqali taomni rasmga oling — AI kaloriya va nutrientlarni o'zi hisoblaydi.,Нажмите эту кнопку и сфотографируйте еду — ИИ сам посчитает калории и БЖУ.
+ft_af_voice_t,Voice,Ovoz orqali,Голос
+ft_af_voice_d,Tap here and just say what you ate — AI turns your words into a meal.,Bu yerni bosib nima yeganingizni ayting — AI so'zlaringizni taomga aylantiradi.,Нажмите здесь и скажите что съели — ИИ превратит слова в приём пищи.
+ft_af_create_t,Create manually,Qo'lda yaratish,Вручную
+ft_af_create_d,Add a food by hand — type its name and calories yourself.,Taomni qo'lda qo'shing — nomi va kaloriyani o'zingiz kiriting.,Добавьте блюдо вручную — впишите название и калории сами.

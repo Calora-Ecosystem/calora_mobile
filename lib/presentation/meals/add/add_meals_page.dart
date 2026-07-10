@@ -9,6 +9,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/button/toggle_buttons.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
@@ -27,6 +28,7 @@ import 'package:calora/widgets/creator/food_creator_with_speech.dart';
 import 'package:calora/widgets/info/dish_info_page.dart';
 import 'package:calora/widgets/meals/meals_type_widget.dart';
 import 'package:calora/widgets/meals/paginated_food_grid.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -48,6 +50,12 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   });
 
   late final TextEditingController _searchController;
+
+  // Spotlight anchors for the first-visit coach-mark tour of the three
+  // food-adding buttons.
+  final GlobalKey _createKey = GlobalKey();
+  final GlobalKey _scanKey = GlobalKey();
+  final GlobalKey _voiceKey = GlobalKey();
 
   @override
   void init(BuildContext context, AddMealsManager manager) {
@@ -81,7 +89,11 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
 
   @override
   Widget builder(BuildContext context, AddMealsManager manager, AddMealsState state) {
-    return PopScope(
+    return FeatureTourHost(
+      tourId: 'add_food',
+      delay: const Duration(milliseconds: 700),
+      steps: _addFoodTourSteps(context),
+      child: PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
@@ -107,6 +119,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   Row(
                     children: [
                       buildActionCard(
+                        spotlightKey: _createKey,
                         onTap: () => openCreatePage(context, manager),
                         context: context,
                         text: Strings.creation,
@@ -116,6 +129,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                       ),
                       const SizedBox(width: 8),
                       buildActionCard(
+                        spotlightKey: _scanKey,
                         onTap: () => openCameraPage(context, manager),
                         context: context,
                         icon: Assets.icons.icScan.svg(),
@@ -124,6 +138,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                         useGradient: true,
                       ),
                       buildActionCard(
+                        spotlightKey: _voiceKey,
                         onTap: () => openSpeechPage(context, manager),
                         context: context,
                         icon: Assets.icons.icChat.svg(),
@@ -148,8 +163,32 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           ),
         ),
       ),
+      ),
     );
   }
+
+  /// First-visit coach-mark steps pointing at the three real food-adding
+  /// buttons, explaining exactly what each one does.
+  List<FeatureTourStep> _addFoodTourSteps(BuildContext context) => [
+        FeatureTourStep(
+          targetKey: _scanKey,
+          icon: Icons.center_focus_strong_rounded,
+          title: 'ft_af_scan_t'.tr(),
+          description: 'ft_af_scan_d'.tr(),
+        ),
+        FeatureTourStep(
+          targetKey: _voiceKey,
+          icon: Icons.mic_rounded,
+          title: 'ft_af_voice_t'.tr(),
+          description: 'ft_af_voice_d'.tr(),
+        ),
+        FeatureTourStep(
+          targetKey: _createKey,
+          icon: Icons.edit_rounded,
+          title: 'ft_af_create_t'.tr(),
+          description: 'ft_af_create_d'.tr(),
+        ),
+      ];
 
   Widget _buildBody(
     BuildContext context,
@@ -399,6 +438,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     VoidCallback? onTap,
     bool useGradient = false,
     bool isPremiumFeature = true,
+    Key? spotlightKey,
   }) {
     final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
     return Expanded(
@@ -414,6 +454,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   ? onTap
                   : () => context.router.push(const PremiumFeaturesRoute()),
               child: Container(
+                key: spotlightKey,
                 height: 72,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(

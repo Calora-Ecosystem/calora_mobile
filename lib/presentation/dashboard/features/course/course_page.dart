@@ -5,6 +5,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/course/course_request.dart';
@@ -99,7 +100,7 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                       separatorBuilder: (_, __) => const SizedBox(height: 20),
                       itemBuilder: (context, index) {
                         final course = state.isLoading ? CourseRequest() : state.courses[index];
-                        return ShimmerWrapper(
+                        final card = ShimmerWrapper(
                           loading: state.isLoading,
                           type: ShimmerType.backgroundElevation,
                           radius: 12,
@@ -144,6 +145,10 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                             },
                           ),
                         );
+                        // Anchor the first card for the first-run feature tour.
+                        return index == 0
+                            ? KeyedSubtree(key: TourAnchors.courseFirst, child: card)
+                            : card;
                       },
                     ),
                   ),

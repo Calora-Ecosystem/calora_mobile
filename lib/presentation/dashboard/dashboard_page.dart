@@ -1,12 +1,15 @@
 import 'dart:ui';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/course_tab_signal.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
 import 'package:calora/presentation/dashboard/widgets/battery_optimization_dialog.dart';
@@ -36,6 +39,9 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
     DashboardManager manager,
   ) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Don't stack the battery dialog on top of the first-run feature
+      // tour — defer it until a later launch once the tour is done.
+      if (!StepLedgerStore().isFeatureTourShown()) return;
       if (!await manager.shouldPromptBatteryWhitelist()) return;
       await manager.markBatteryHintShown();
       if (!context.mounted) return;
@@ -69,10 +75,16 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
 
   @override
   Widget builder(context, manager, state) {
-    return AutoTabsScaffold(
+    return FeatureTourHost(
+      tourId: 'dashboard',
+      switchTabs: true,
+      steps: _featureTourSteps(context),
+      child: AutoTabsScaffold(
       routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
       bottomNavigationBuilder: (context, tabRouter) {
         final tabsRouter = AutoTabsRouter.of(context);
+        // Let the feature tour drive the active tab as it walks sections.
+        DashboardTabAccess.router = tabsRouter;
         return ClipRRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -179,6 +191,7 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
           ),
         );
       },
+      ),
     );
   }
 
@@ -187,5 +200,75 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
     required String title,
   }) {
     return BottomNavigationBarItem(icon: icon, label: title);
+  }
+
+  /// The first-run coach-mark tour. Each step switches to its tab and
+  /// spotlights the **real** control the user will tap (via [TourAnchors]),
+  /// so it teaches the actual app — not the bottom-nav icons.
+  ///
+  /// Order is intentional: adding food comes first (the core action), then a
+  /// brief base intro of Course, Steps and Profile.
+  List<FeatureTourStep> _featureTourSteps(BuildContext context) {
+    final accent = context.colors.accentSub;
+    Widget mi(IconData i) => Icon(i, size: 16, color: accent);
+    Widget si(SvgGenImage a) => a.svg(
+          width: 16,
+          height: 16,
+          colorFilter: ColorFilter.mode(accent, BlendMode.srcIn),
+        );
+
+    return [
+      // 1) FOOD — the most important action. Spotlight the real green
+      // "Add food" button on Home and explain the three ways to add a meal,
+      // scanning first.
+      FeatureTourStep(
+        navIndex: 0,
+        targetKey: TourAnchors.homeAddFood,
+        icon: Icons.restaurant_rounded,
+        title: 'ft_food_title'.tr(),
+        description: 'ft_food_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(si(Assets.icons.icScan), 'ft_food_b2'.tr()),
+          FeatureTourBullet(si(Assets.icons.icChat), 'ft_food_b3'.tr()),
+          FeatureTourBullet(si(Assets.icons.icPlusCircle), 'ft_food_b1'.tr()),
+        ],
+      ),
+      // 2) COURSE — base intro, spotlighting the first real lesson card.
+      FeatureTourStep(
+        navIndex: 2,
+        targetKey: TourAnchors.courseFirst,
+        icon: Icons.play_circle_fill_rounded,
+        title: 'ft_course_title'.tr(),
+        description: 'ft_course_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(mi(Icons.play_circle_fill_rounded), 'ft_course_b1'.tr()),
+          FeatureTourBullet(mi(Icons.lock_open_rounded), 'ft_course_b2'.tr()),
+        ],
+      ),
+      // 3) STEPS — base intro, spotlighting the period selector.
+      FeatureTourStep(
+        navIndex: 3,
+        targetKey: TourAnchors.stepsPeriod,
+        icon: Icons.directions_walk_rounded,
+        title: 'ft_steps_title'.tr(),
+        description: 'ft_steps_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(mi(Icons.today_rounded), 'ft_steps_b1'.tr()),
+          FeatureTourBullet(
+              mi(Icons.calendar_view_week_rounded), 'ft_steps_b2'.tr()),
+        ],
+      ),
+      // 4) PROFILE — base intro only (nav cell).
+      FeatureTourStep(
+        navIndex: 4,
+        icon: Icons.person_rounded,
+        title: 'ft_profile_title'.tr(),
+        description: 'ft_profile_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(mi(Icons.flag_rounded), 'ft_profile_b1'.tr()),
+          FeatureTourBullet(mi(Icons.tune_rounded), 'ft_profile_b2'.tr()),
+        ],
+      ),
+    ];
   }
 }
