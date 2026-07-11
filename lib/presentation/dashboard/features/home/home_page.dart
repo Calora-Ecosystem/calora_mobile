@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/base/profile_store.dart';
@@ -16,6 +18,8 @@ import 'package:calora/presentation/dashboard/features/home/management/home_mana
 import 'package:calora/presentation/dashboard/features/home/management/home_manager.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
+import 'package:calora/widgets/meals/meal_time_picker_sheet.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/widgets/app_bar/home_app_bar.dart' show HomeAppBar;
 import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
 import 'package:calora/widgets/plan/daily_plan_widget.dart';
@@ -132,9 +136,9 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   steps: state.targetSteps.toString(),
                                 ),
                                 GestureDetector(
-                                  onTap: () => openCaloraAi(context),
+                                  onTap: () => _onScanTap(context, manager),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
@@ -145,27 +149,55 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             spacing: 8,
                                             children: [
-                                              Strings.caloraAi
-                                                  .text(24, 30, 700)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                  vertical: 5,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: context.colors.white
+                                                      .withValues(alpha: 0.22),
+                                                  borderRadius:
+                                                      BorderRadius.circular(100),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  spacing: 6,
+                                                  children: [
+                                                    Assets.icons.icScan.svg(
+                                                      width: 14,
+                                                      height: 14,
+                                                      colorFilter: ColorFilter.mode(
+                                                        context.colors.white,
+                                                        BlendMode.srcIn,
+                                                      ),
+                                                    ),
+                                                    'home_scan_badge'
+                                                        .tr()
+                                                        .text(12, 14, 600)
+                                                        .c(context.colors.white),
+                                                  ],
+                                                ),
+                                              ),
+                                              'home_scan_title'
+                                                  .tr()
+                                                  .text(22, 28, 700)
                                                   .c(context.colors.white),
-                                              Strings.tryItForFree
-                                                  .text(16, 20, 500)
+                                              'home_scan_subtitle'
+                                                  .tr()
+                                                  .text(14, 18, 500)
                                                   .c(context.colors.white),
                                             ],
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 100,
-                                          width: 100,
-                                          child: Assets.images.ai.image(),
-                                        ),
+                                        const SizedBox(width: 12),
+                                        const _ScanBannerArt(),
                                       ],
                                     ),
                                   ),
@@ -261,6 +293,14 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     return now.year == day.year && now.month == day.month && now.day == day.day;
   }
 
+  /// Home "Scan food / calculate calories" banner tap. Opens the meal sheet —
+  /// the same daily-plan + per-meal cards (with consumed kcal) from the
+  /// Calories page. Tapping a meal there opens the shared add-food screen; when
+  /// food is logged the Home totals refresh so it shows immediately.
+  Future<void> _onScanTap(BuildContext context, HomeManager manager) {
+    return showMealTimePicker(context, onLogged: manager.refreshAll);
+  }
+
   void openCalendar(BuildContext context, HomeManager manager) {
     context.showAppBottomSheet(
       child: CalendarSelectorWidget(
@@ -286,4 +326,213 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     context.router.navigate(const InboxRoute());
     final token = await FirebaseMessaging.instance.getToken();
   }
+}
+
+/// The Home "Scan food" banner artwork: a real dish photo with a live scan
+/// overlay. A glowing green beam sweeps across the food and the corner
+/// brackets breathe, so it reads instantly as "this meal is being scanned" —
+/// no device frame needed. Uses an existing food asset (no external downloads),
+/// framed cleanly to sit on the green banner.
+class _ScanBannerArt extends StatefulWidget {
+  const _ScanBannerArt();
+
+  @override
+  State<_ScanBannerArt> createState() => _ScanBannerArtState();
+}
+
+class _ScanBannerArtState extends State<_ScanBannerArt>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  static const double _size = 104;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = context.colors.accentSub;
+
+    return SizedBox(
+      width: _size,
+      height: _size,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final t = _controller.value;
+          final wave = (1 - math.cos(t * 2 * math.pi)) / 2; // 0 → 1 → 0
+          final floatY = math.sin(t * 2 * math.pi) * 1.5;
+          // Scan sweeps top → bottom → top through the centre of the dish.
+          final scanCenter = 10 + (_size - 20) * wave;
+
+          return Transform.translate(
+            offset: Offset(0, floatY),
+            child: SizedBox(
+              width: _size,
+              height: _size,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // The salad plate, cut out onto a transparent background so
+                  // the green banner shows straight through behind it. A soft
+                  // shadow lifts the dish off the banner.
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.18),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/images/scan_food.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  // Scan beam is clipped to the round plate so it only sweeps
+                  // across the food, never the empty banner around it.
+                  ClipOval(
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Soft scanning band sweeping top → bottom → top.
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: scanCenter - 11,
+                          child: Container(
+                            height: 22,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  accent.withValues(alpha: 0),
+                                  accent.withValues(alpha: 0.28),
+                                  accent.withValues(alpha: 0),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Bright scan line: white core with a green glow.
+                        Positioned(
+                          left: 4,
+                          right: 4,
+                          top: scanCenter - 1.5,
+                          child: Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(3),
+                              gradient: LinearGradient(
+                                colors: [
+                                  accent.withValues(alpha: 0),
+                                  Colors.white,
+                                  accent.withValues(alpha: 0),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accent.withValues(alpha: 0.8),
+                                  blurRadius: 10,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Viewfinder corner brackets framing the dish as a live scan
+                  // target. They breathe in sync with the sweeping beam so the
+                  // frame reads as "locking on" without covering the food.
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _ScanBracketsPainter(
+                        color: Colors.white,
+                        glow: accent,
+                        pulse: wave,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Draws four L-shaped viewfinder brackets, one per corner, with rounded
+/// elbows and a soft accent glow. [pulse] (0→1→0) gently eases the brackets
+/// inward and lifts their opacity so the frame "breathes" with the scan beam.
+class _ScanBracketsPainter extends CustomPainter {
+  const _ScanBracketsPainter({
+    required this.color,
+    required this.glow,
+    required this.pulse,
+  });
+
+  final Color color;
+  final Color glow;
+  final double pulse;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const arm = 17.0; // length of each bracket leg
+    const stroke = 2.5;
+    final inset = 2.0 + pulse * 3.5; // breathe inward as the beam passes
+    final opacity = 0.7 + pulse * 0.3;
+
+    final glowPaint = Paint()
+      ..color = glow.withValues(alpha: 0.5 * opacity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke + 1
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+
+    final paint = Paint()
+      ..color = color.withValues(alpha: opacity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    void corner(double cx, double cy, double sx, double sy) {
+      final path = Path()
+        ..moveTo(cx + sx * arm, cy)
+        ..lineTo(cx, cy)
+        ..lineTo(cx, cy + sy * arm);
+      canvas.drawPath(path, glowPaint);
+      canvas.drawPath(path, paint);
+    }
+
+    corner(inset, inset, 1, 1); // top-left
+    corner(size.width - inset, inset, -1, 1); // top-right
+    corner(inset, size.height - inset, 1, -1); // bottom-left
+    corner(size.width - inset, size.height - inset, -1, -1); // bottom-right
+  }
+
+  @override
+  bool shouldRepaint(_ScanBracketsPainter old) =>
+      old.pulse != pulse || old.color != color || old.glow != glow;
 }

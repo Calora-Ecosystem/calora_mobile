@@ -637,3 +637,8 @@ ft_af_voice_t,Voice,Ovoz orqali,Голос
 ft_af_voice_d,Tap here and just say what you ate — AI turns your words into a meal.,Bu yerni bosib nima yeganingizni ayting — AI so'zlaringizni taomga aylantiradi.,Нажмите здесь и скажите что съели — ИИ превратит слова в приём пищи.
 ft_af_create_t,Create manually,Qo'lda yaratish,Вручную
 ft_af_create_d,Add a food by hand — type its name and calories yourself.,Taomni qo'lda qo'shing — nomi va kaloriyani o'zingiz kiriting.,Добавьте блюдо вручную — впишите название и калории сами.
+home_scan_badge,AI scan,AI skaner,AI-сканер
+home_scan_title,Scan your food,Taomni suratga oling,Сканируйте еду
+home_scan_subtitle,Detect its calories,Kaloriyani aniqlang,Определите калории
+pick_meal_title,Choose meal time,Ovqat vaqtini tanlang,Выберите приём пищи
+pick_meal_subtitle,Which meal is this food for?,Bu taom qaysi ovqat vaqti uchun?,К какому приёму пищи добавить?
