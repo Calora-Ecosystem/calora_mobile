@@ -10,6 +10,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
@@ -84,7 +85,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
     final pedometerService = getIt<PedometerService>();
 
-    return Scaffold(
+    return FeatureTourHost(
+      tourId: 'tour_steps',
+      steps: _stepsTourSteps(context),
+      child: Scaffold(
       backgroundColor: context.colors.softGray,
       body: DefaultRefreshIndicator(
         notificationPredicate: (notification) => notification.depth == 1,
@@ -103,7 +107,25 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
           onShowEditStepGoalSheet: () => _showEditStepGoalSheet(context, manager),
         ),
       ),
+      ),
     );
+  }
+
+  /// First-visit coach-mark for the Steps tab, spotlighting the period toggle.
+  List<FeatureTourStep> _stepsTourSteps(BuildContext context) {
+    Widget mi(IconData i) => Icon(i, size: 16, color: context.colors.accentSub);
+    return [
+      FeatureTourStep(
+        targetKey: TourAnchors.stepsPeriod,
+        icon: Icons.directions_walk_rounded,
+        title: 'ft_steps_title'.tr(),
+        description: 'ft_steps_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(mi(Icons.today_rounded), 'ft_steps_b1'.tr()),
+          FeatureTourBullet(mi(Icons.calendar_view_week_rounded), 'ft_steps_b2'.tr()),
+        ],
+      ),
+    ];
   }
 
   void _showConfirmDialog(BuildContext context, StepsManager manager) {

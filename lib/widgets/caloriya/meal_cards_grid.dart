@@ -10,10 +10,15 @@ class MealCardsGrid extends StatelessWidget {
   final List<MealInfo> meals;
   final bool isLoading;
 
+  /// Optional per-card spotlight anchors, applied by index. Used by the
+  /// meal-time sheet so a coach-mark tour can highlight each meal card.
+  final List<GlobalKey>? spotlightKeys;
+
   const MealCardsGrid({
     super.key,
     required this.meals,
     required this.isLoading,
+    this.spotlightKeys,
   });
 
   @override
@@ -39,19 +44,26 @@ class MealCardsGrid extends StatelessWidget {
                 image: SizedBox(),
                 onTap: null,
               );
+        final spotlightKey =
+            (!isLoading && spotlightKeys != null && index < spotlightKeys!.length)
+                ? spotlightKeys![index]
+                : null;
         return ShimmerWrapper(
           loading: isLoading,
           type: ShimmerType.backgroundElevation,
           shimmerChild: const ShimmerChild(height: 120, radius: 12),
           child: isLoading
               ? const SizedBox(height: 120)
-              : _mealCard(
-                  context,
-                  title: meal.title,
-                  value: meal.value,
-                  max: meal.max,
-                  image: meal.image,
-                  onTap: meal.onTap ?? () {},
+              : KeyedSubtree(
+                  key: spotlightKey,
+                  child: _mealCard(
+                    context,
+                    title: meal.title,
+                    value: meal.value,
+                    max: meal.max,
+                    image: meal.image,
+                    onTap: meal.onTap ?? () {},
+                  ),
                 ),
         );
       },

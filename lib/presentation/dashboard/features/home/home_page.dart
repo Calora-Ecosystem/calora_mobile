@@ -70,10 +70,13 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
 
   @override
   Widget builder(BuildContext context, HomeManager manager, HomeState state) {
-    return StreamBuilder<ProfileRequest>(
-      stream: profileStore.watch(),
-      builder: (context, snapshot) {
-        return Scaffold(
+    return FeatureTourHost(
+      tourId: 'tour_home',
+      steps: _homeTourSteps(context),
+      child: StreamBuilder<ProfileRequest>(
+        stream: profileStore.watch(),
+        builder: (context, snapshot) {
+          return Scaffold(
           body: Stack(
             children: [
               Positioned.fill(
@@ -138,6 +141,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                 GestureDetector(
                                   onTap: () => _onScanTap(context, manager),
                                   child: Container(
+                                    key: TourAnchors.homeScanBanner,
                                     padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
@@ -245,8 +249,39 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
             ],
           ),
         );
-      },
+        },
+      ),
     );
+  }
+
+  /// First-visit coach-mark for the Home tab: explains the scan banner (and
+  /// the meal-time sheet it opens) and the green add-food button.
+  List<FeatureTourStep> _homeTourSteps(BuildContext context) {
+    final accent = context.colors.accentSub;
+    Widget si(SvgGenImage a) => a.svg(
+          width: 16,
+          height: 16,
+          colorFilter: ColorFilter.mode(accent, BlendMode.srcIn),
+        );
+    return [
+      FeatureTourStep(
+        targetKey: TourAnchors.homeScanBanner,
+        icon: Icons.center_focus_strong_rounded,
+        title: 'ft_banner_t'.tr(),
+        description: 'ft_banner_d'.tr(),
+      ),
+      FeatureTourStep(
+        targetKey: TourAnchors.homeAddFood,
+        icon: Icons.restaurant_rounded,
+        title: 'ft_food_title'.tr(),
+        description: 'ft_food_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(si(Assets.icons.icScan), 'ft_food_b2'.tr()),
+          FeatureTourBullet(si(Assets.icons.icChat), 'ft_food_b3'.tr()),
+          FeatureTourBullet(si(Assets.icons.icPlusCircle), 'ft_food_b1'.tr()),
+        ],
+      ),
+    ];
   }
 
   /// Step card — `DashboardManager.todaySteps`'dan ko'rsatadi (Health/Pedometer farqi

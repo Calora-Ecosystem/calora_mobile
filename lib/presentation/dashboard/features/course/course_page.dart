@@ -13,6 +13,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/course/management/course_management.dart';
 import 'package:calora/presentation/dashboard/features/course/management/course_manager.dart';
 import 'package:calora/widgets/course/course_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -57,7 +58,10 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
     CourseState state,
   ) {
     final itemCount = state.isLoading ? 3 : state.courses.length;
-    return Scaffold(
+    return FeatureTourHost(
+      tourId: 'tour_course',
+      steps: _courseTourSteps(context),
+      child: Scaffold(
       body: Stack(
         children: [
           Positioned.fill(
@@ -159,6 +163,24 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
           ),
         ],
       ),
+      ),
     );
+  }
+
+  /// First-visit coach-mark for the Course tab, spotlighting the first lesson.
+  List<FeatureTourStep> _courseTourSteps(BuildContext context) {
+    Widget mi(IconData i) => Icon(i, size: 16, color: context.colors.accentSub);
+    return [
+      FeatureTourStep(
+        targetKey: TourAnchors.courseFirst,
+        icon: Icons.play_circle_fill_rounded,
+        title: 'ft_course_title'.tr(),
+        description: 'ft_course_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(mi(Icons.play_circle_fill_rounded), 'ft_course_b1'.tr()),
+          FeatureTourBullet(mi(Icons.lock_open_rounded), 'ft_course_b2'.tr()),
+        ],
+      ),
+    ];
   }
 }

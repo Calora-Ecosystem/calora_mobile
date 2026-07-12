@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
 import 'package:calora/presentation/dashboard/features/calories/management/calories_manager.dart';
@@ -42,6 +43,12 @@ class _MealCaloriesSheetState extends State<_MealCaloriesSheet> {
   late final CaloriesManager _manager;
   StreamSubscription<CaloriesEffect>? _effectSub;
 
+  // Per-card spotlight anchors + the first-open coach-mark that walks the four
+  // meal categories.
+  final List<GlobalKey> _cardKeys = List.generate(4, (_) => GlobalKey());
+  FeatureTourOverlayHandle? _tourHandle;
+  bool _tourTriggered = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +56,41 @@ class _MealCaloriesSheetState extends State<_MealCaloriesSheet> {
     _manager.dateTime(DateTime.now());
     _manager.fetchCaloriesAndMeals(DateTime.now());
     _effectSub = _manager.effectSubject.listen(_onEffect);
+  }
+
+  /// After the meal cards render for the first time, spotlight each category
+  /// (breakfast / lunch / snack / dinner) so the user learns to tap a card to
+  /// log food to that meal. Shown once, via the root overlay so the spotlight
+  /// aligns over the full screen rather than just the sheet.
+  void _maybeShowCategoryTour() {
+    if (_tourTriggered || !mounted) return;
+    _tourTriggered = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 350), () {
+        if (!mounted) return;
+        final meals = _manager.meals;
+        final icons = [
+          Icons.free_breakfast_rounded,
+          Icons.lunch_dining_rounded,
+          Icons.bakery_dining_rounded,
+          Icons.dinner_dining_rounded,
+        ];
+        final steps = [
+          for (int i = 0; i < _cardKeys.length && i < meals.length; i++)
+            FeatureTourStep(
+              targetKey: _cardKeys[i],
+              icon: icons[i],
+              title: meals[i].title,
+              description: 'ft_mealcat_d'.tr(),
+            ),
+        ];
+        _tourHandle = showFeatureTourOverlay(
+          context,
+          tourId: 'tour_meal_categories',
+          steps: steps,
+        );
+      });
+    });
   }
 
   void _onEffect(CaloriesEffect effect) {
@@ -74,6 +116,7 @@ class _MealCaloriesSheetState extends State<_MealCaloriesSheet> {
 
   @override
   void dispose() {
+    _tourHandle?.dismiss();
     _effectSub?.cancel();
     _manager.close();
     super.dispose();
@@ -123,9 +166,11 @@ class _MealCaloriesSheetState extends State<_MealCaloriesSheet> {
                   manager: _manager,
                   properties: (s) => [s.isLoading, s.meals],
                   builder: (context, state) {
+                    if (!state.isLoading) _maybeShowCategoryTour();
                     return MealCardsGrid(
                       meals: _manager.meals,
                       isLoading: state.isLoading,
+                      spotlightKeys: _cardKeys,
                     );
                   },
                 ),

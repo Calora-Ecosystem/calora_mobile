@@ -92,7 +92,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
           final success = await manager.saveMenuItem(
             MenuInfo(
               menu: type.name,
-              date: DateTime.now(),
+              date: dateTime,
               foodId: food.id ?? 0,
               weightInGr: value == 0 ? 100 : value.toInt(),
             ),

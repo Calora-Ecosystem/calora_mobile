@@ -2,7 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/presentation/about/about_page.dart' show AboutPage;
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
@@ -31,7 +33,10 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
   @override
   Widget builder(BuildContext context, ProfileManager manager, ProfileState state) {
     final profile = state.profile ?? const ProfileRequest();
-    return Scaffold(
+    return FeatureTourHost(
+      tourId: 'tour_profile',
+      steps: _profileTourSteps(context),
+      child: Scaffold(
       body: Stack(
         children: [
           Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
@@ -41,13 +46,16 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Column(
                   children: [
-                    ProfileCard(
-                      surname: profile.name ?? '',
-                      name: profile.name ?? '',
-                      email: profile.email ?? '',
-                      onEdit: () => _openProfileDetailPage(
-                        context,
-                        profile.userId?.toString() ?? '',
+                    KeyedSubtree(
+                      key: TourAnchors.profileMain,
+                      child: ProfileCard(
+                        surname: profile.name ?? '',
+                        name: profile.name ?? '',
+                        email: profile.email ?? '',
+                        onEdit: () => _openProfileDetailPage(
+                          context,
+                          profile.userId?.toString() ?? '',
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -81,7 +89,25 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
           ),
         ],
       ),
+      ),
     );
+  }
+
+  /// First-visit coach-mark for the Profile tab.
+  List<FeatureTourStep> _profileTourSteps(BuildContext context) {
+    Widget mi(IconData i) => Icon(i, size: 16, color: context.colors.accentSub);
+    return [
+      FeatureTourStep(
+        targetKey: TourAnchors.profileMain,
+        icon: Icons.person_rounded,
+        title: 'ft_profile_title'.tr(),
+        description: 'ft_profile_desc'.tr(),
+        bullets: [
+          FeatureTourBullet(mi(Icons.flag_rounded), 'ft_profile_b1'.tr()),
+          FeatureTourBullet(mi(Icons.tune_rounded), 'ft_profile_b2'.tr()),
+        ],
+      ),
+    ];
   }
 
   void _openAccountDetailPage(BuildContext context) async {

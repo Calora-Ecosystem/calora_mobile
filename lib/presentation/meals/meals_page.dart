@@ -278,7 +278,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
             ],
           ),
         ),
-        bottomNavigationBar: _isToday(dateTime)
+        bottomNavigationBar: !_isFuture(dateTime)
             ? SafeArea(
                 top: false,
                 child: Padding(
@@ -477,9 +477,13 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
     return percent.clamp(0.0, 1.0);
   }
 
-  bool _isToday(DateTime date) {
+  /// Only future days block food logging. Today and any past day can be
+  /// edited so users can back-fill meals they forgot to record.
+  bool _isFuture(DateTime date) {
     final now = DateTime.now();
-    return now.year == date.year && now.month == date.month && now.day == date.day;
+    final today = DateTime(now.year, now.month, now.day);
+    final check = DateTime(date.year, date.month, date.day);
+    return check.isAfter(today);
   }
 
   Widget mealInfoCard(BuildContext context, {required String title, required double value, String unit = 'gr'}) {

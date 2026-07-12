@@ -642,3 +642,10 @@ home_scan_title,Scan your food,Taomni suratga oling,Сканируйте еду
 home_scan_subtitle,Detect its calories,Kaloriyani aniqlang,Определите калории
 pick_meal_title,Choose meal time,Ovqat vaqtini tanlang,Выберите приём пищи
 pick_meal_subtitle,Which meal is this food for?,Bu taom qaysi ovqat vaqti uchun?,К какому приёму пищи добавить?
+ft_banner_t,Scan your food,Taomni skanerlang,Сканируйте еду
+ft_banner_d,Tap the banner — pick a meal time and snap a photo so AI logs the calories.,Bannerni bosing — ovqat vaqtini tanlang va suratga oling. AI kaloriyani hisoblaydi.,Нажмите баннер — выберите приём пищи и сфотографируйте. ИИ посчитает калории.
+ft_cal_date_t,Any day you like,Istalgan kun,Любой день
+ft_cal_date_d,Swipe the week sideways to reach earlier days — you can log meals for past dates too.,Haftani yon tomonga suring va oldingi kunlarni oching — o'tgan sanalarga ham ovqat qo'shsa bo'ladi.,Листайте неделю в сторону к прошлым дням — за них тоже можно добавлять еду.
+ft_cal_meals_t,Your meals,Ovqatlaringiz,Ваши приёмы пищи
+ft_cal_meals_d,Tap a meal card to add the food you ate for it.,Ovqat kartasini bosib o'sha payt yegan taomingizni qo'shing.,Нажмите карточку приёма пищи и добавьте съеденное.
+ft_mealcat_d,Tap this card to add food to this meal.,Bu kartani bosib shu ovqatga taom qo'shing.,Нажмите эту карточку чтобы добавить еду в этот приём.

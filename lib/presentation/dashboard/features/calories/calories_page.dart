@@ -4,8 +4,10 @@ import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/week_day_selector.dart';
+import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
 import 'package:calora/presentation/dashboard/features/calories/management/calories_manager.dart';
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
@@ -47,7 +49,10 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
 
   @override
   Widget builder(context, manager, state) {
-    return Scaffold(
+    return FeatureTourHost(
+      tourId: 'tour_calories',
+      steps: _caloriesTourSteps(),
+      child: Scaffold(
       body: DefaultRefreshIndicator(
         edgeOffset: context.topPadding + kToolbarHeight,
         onRefresh: () async {
@@ -78,12 +83,15 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                         const SizedBox(height: 40),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: WeekDaysSelector(
-                            onDaySelected: (value) {
-                              manager.fetchCaloriesAndMeals(value);
-                              manager.getSummary(value);
-                              manager.dateTime(value);
-                            },
+                          child: KeyedSubtree(
+                            key: TourAnchors.caloriesCalendar,
+                            child: WeekDaysSelector(
+                              onDaySelected: (value) {
+                                manager.fetchCaloriesAndMeals(value);
+                                manager.getSummary(value);
+                                manager.dateTime(value);
+                              },
+                            ),
                           ),
                         ),
                         Container(
@@ -103,9 +111,12 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                                 leftover: state.leftover.asFixedTruncated(0),
                                 loading: state.isLoading,
                               ),
-                              MealCardsGrid(
-                                meals: manager.meals,
-                                isLoading: state.isLoading,
+                              KeyedSubtree(
+                                key: TourAnchors.caloriesMeals,
+                                child: MealCardsGrid(
+                                  meals: manager.meals,
+                                  isLoading: state.isLoading,
+                                ),
                               ),
                               CaloryNotificationSettings(),
                             ],
@@ -120,6 +131,24 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
           ],
         ),
       ),
+      ),
     );
   }
+
+  /// First-visit coach-mark for the Calories tab: the swipeable calendar
+  /// (reach any past day) and the four meal cards.
+  List<FeatureTourStep> _caloriesTourSteps() => [
+        FeatureTourStep(
+          targetKey: TourAnchors.caloriesCalendar,
+          icon: Icons.calendar_month_rounded,
+          title: 'ft_cal_date_t'.tr(),
+          description: 'ft_cal_date_d'.tr(),
+        ),
+        FeatureTourStep(
+          targetKey: TourAnchors.caloriesMeals,
+          icon: Icons.restaurant_menu_rounded,
+          title: 'ft_cal_meals_t'.tr(),
+          description: 'ft_cal_meals_d'.tr(),
+        ),
+      ];
 }

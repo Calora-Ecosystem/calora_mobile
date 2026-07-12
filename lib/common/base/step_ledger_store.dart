@@ -180,7 +180,8 @@ class StepLedgerStore {
 
   Future<void> setTourShown(String id) => _meta.put('tour_shown_$id', true);
 
-  /// Convenience for the dashboard walkthrough (also read by the battery
-  /// prompt to avoid stacking dialogs on top of the tour).
-  bool isFeatureTourShown() => isTourShown('dashboard');
+  /// Convenience for the first-run walkthrough (also read by the battery
+  /// prompt to avoid stacking dialogs on top of the tour). The Home tab is the
+  /// first tour a user sees, so its completion marks the walkthrough as begun.
+  bool isFeatureTourShown() => isTourShown('tour_home');
 }

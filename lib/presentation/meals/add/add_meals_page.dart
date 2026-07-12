@@ -227,7 +227,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           final success = await manager.saveMenuItem(
             MenuInfo(
               menu: type.name,
-              date: DateTime.now(),
+              date: dateTime,
               foodId: food.id ?? 0,
               weightInGr: value == 0 ? 100 : value.toInt(),
             ),
@@ -271,7 +271,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           bool success = false;
           if (addedFoodId != null) {
             success = await manager.saveMenuItem(
-              MenuInfo(menu: type.name, date: DateTime.now(), foodId: addedFoodId, weightInGr: 400),
+              MenuInfo(menu: type.name, date: dateTime, foodId: addedFoodId, weightInGr: 400),
             );
           }
           if (context.mounted) context.router.pop();
@@ -297,6 +297,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             fat: oil,
             carbs: carbs,
             menu: type.name,
+            date: dateTime,
             categoryId: food.categoryId,
           );
           if (context.mounted) context.router.pop();
@@ -340,6 +341,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               fat: food.fat,
               carbs: food.carbs,
               menu: type.name,
+              date: dateTime,
               categoryId: food.categoryId,
             );
             if (!success) {

@@ -31,6 +31,68 @@ class TourAnchors {
 
   /// The Daily/Weekly/Monthly period selector on the Steps tab.
   static final GlobalKey stepsPeriod = GlobalKey(debugLabel: 'tour_steps_period');
+
+  /// The green "Scan your food" banner on the Home tab.
+  static final GlobalKey homeScanBanner = GlobalKey(debugLabel: 'tour_home_banner');
+
+  /// The swipeable week calendar at the top of the Calories tab.
+  static final GlobalKey caloriesCalendar = GlobalKey(debugLabel: 'tour_calories_calendar');
+
+  /// The four meal cards (breakfast/lunch/snack/dinner) on the Calories tab.
+  static final GlobalKey caloriesMeals = GlobalKey(debugLabel: 'tour_calories_meals');
+
+  /// The profile header card on the Profile tab.
+  static final GlobalKey profileMain = GlobalKey(debugLabel: 'tour_profile_main');
+}
+
+/// Handle to a running overlay tour so the caller can dismiss it early — e.g.
+/// if the host sheet is closed before the tour finishes.
+class FeatureTourOverlayHandle {
+  OverlayEntry? _entry;
+  bool _dismissed = false;
+
+  void _bind(OverlayEntry e) => _entry = e;
+
+  void dismiss() {
+    if (_dismissed) return;
+    _dismissed = true;
+    _entry?.remove();
+    _entry = null;
+  }
+}
+
+/// Runs a coach-mark tour in the **root overlay** (full-screen) instead of
+/// inside a single page. Use this for tours that must spotlight widgets living
+/// inside a modal bottom sheet, where a page-local [FeatureTourHost] would
+/// mis-align its spotlight (its scrim would only cover the sheet, not the whole
+/// screen the target coordinates are measured against).
+///
+/// Shows at most once per [tourId]. Returns a handle to dismiss it early, or
+/// null if it was already shown / there are no steps.
+FeatureTourOverlayHandle? showFeatureTourOverlay(
+  BuildContext context, {
+  required String tourId,
+  required List<FeatureTourStep> steps,
+}) {
+  if (StepLedgerStore().isTourShown(tourId) || steps.isEmpty) return null;
+  final overlay = Overlay.maybeOf(context, rootOverlay: true);
+  if (overlay == null) return null;
+
+  final handle = FeatureTourOverlayHandle();
+  final entry = OverlayEntry(
+    builder: (_) => _FeatureTourView(
+      steps: steps,
+      itemCount: 5,
+      switchTabs: false,
+      onClose: () {
+        StepLedgerStore().setTourShown(tourId);
+        handle.dismiss();
+      },
+    ),
+  );
+  handle._bind(entry);
+  overlay.insert(entry);
+  return handle;
 }
 
 /// A detail bullet shown inside a tour card. [icon] is a pre-sized (~16px)

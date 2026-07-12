@@ -218,6 +218,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     required double fat,
     required double carbs,
     required String menu,
+    required DateTime date,
     int? categoryId,
   }) async {
     final userId = await profileStore.getUserId() ?? 0;
@@ -238,7 +239,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
       return saveMenuItem(
         MenuInfo(
           menu: menu,
-          date: DateTime.now(),
+          date: date,
           foodId: addedFoodId,
           weightInGr: 400,
         ),
@@ -250,6 +251,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
   Future<bool> addFoodAndMenuWithImage(
     ScannerFood food,
     String menu,
+    DateTime date,
   ) async {
     final userId = await profileStore.getUserId() ?? 0;
     final foodRequest = food.toFoodRequest(
@@ -261,7 +263,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
       return saveMenuItem(
         MenuInfo(
           menu: menu,
-          date: DateTime.now(),
+          date: date,
           foodId: addedFoodId,
           weightInGr: 100,
         ),
@@ -270,7 +272,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     return false;
   }
 
-  Future<bool> addFoodAndMenuWithVoice(String menu) async {
+  Future<bool> addFoodAndMenuWithVoice(String menu, DateTime date) async {
     final userId = await profileStore.getUserId();
     final List<FoodRequest> foodRequests = state.scannedFoodsByVoice
         .map(
@@ -286,7 +288,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
       final success = await saveMenuItem(
         MenuInfo(
           menu: menu,
-          date: DateTime.now(),
+          date: date,
           foodId: addedFoodId,
           weightInGr: 100,
         ),
