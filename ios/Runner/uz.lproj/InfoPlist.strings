@@ -1,0 +1,6 @@
+/* Permission usage descriptions (Uzbek) */
+"NSCameraUsageDescription" = "Calora taomlaringizni skanerlab, suratdan kaloriyani hisoblash uchun kameraga ruxsat soʻraydi.";
+"NSMicrophoneUsageDescription" = "Ovqatingizni ovoz orqali aytishingiz va sunʼiy intellekt kaloriyani hisoblashi uchun mikrofonga ruxsat kerak.";
+"NSHealthShareUsageDescription" = "Faollik va natijalarni aniq koʻrsatish uchun Calora Apple Healthʼdan qadamlar va vaznni oʻqiydi.";
+"NSHealthUpdateUsageDescription" = "Maʼlumotlaringiz sinxron boʻlishi uchun Calora qadamlar va vaznni Apple Healthʼga yozadi.";
+"NSMotionUsageDescription" = "Calora kunlik qadamlaringizni sanash uchun harakat va fitnes maʼlumotlaridan foydalanadi.";

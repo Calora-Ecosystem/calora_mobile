@@ -31,15 +31,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app requires camera access to scan food barcodes and take photos of your meals for calorie tracking</string>
+	<string>Calora needs camera access to scan your meals and log calories from photos.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>We will sync your data with the Apple Health app to give you better insights</string>
+	<string>Calora reads your steps and weight from Apple Health to show accurate activity and progress.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>We will sync your data with the Apple Health app to give you better insights</string>
+	<string>Calora writes your steps and weight to Apple Health to keep your data in sync.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Permission required for recording, please give permission</string>
+	<string>Calora needs microphone access so you can describe your meal by voice and let AI log the calories.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>This app needs access to motion and fitness data to track your steps</string>
+	<string>Calora uses motion and fitness data to count your daily steps.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

@@ -1,0 +1,6 @@
+/* Permission usage descriptions (Russian) */
+"NSCameraUsageDescription" = "Calora использует камеру, чтобы сканировать блюда и считать калории по фото.";
+"NSMicrophoneUsageDescription" = "Микрофон нужен, чтобы вы могли описать приём пищи голосом, а ИИ посчитал калории.";
+"NSHealthShareUsageDescription" = "Calora читает шаги и вес из Apple Health, чтобы точно показывать активность и прогресс.";
+"NSHealthUpdateUsageDescription" = "Calora записывает шаги и вес в Apple Health, чтобы данные оставались синхронными.";
+"NSMotionUsageDescription" = "Calora использует данные движения и фитнеса для подсчёта ежедневных шагов.";

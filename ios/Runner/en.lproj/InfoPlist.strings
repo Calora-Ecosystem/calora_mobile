@@ -1,0 +1,6 @@
+/* Permission usage descriptions (English) */
+"NSCameraUsageDescription" = "Calora needs camera access to scan your meals and log calories from photos.";
+"NSMicrophoneUsageDescription" = "Calora needs microphone access so you can describe your meal by voice and let AI log the calories.";
+"NSHealthShareUsageDescription" = "Calora reads your steps and weight from Apple Health to show accurate activity and progress.";
+"NSHealthUpdateUsageDescription" = "Calora writes your steps and weight to Apple Health to keep your data in sync.";
+"NSMotionUsageDescription" = "Calora uses motion and fitness data to count your daily steps.";

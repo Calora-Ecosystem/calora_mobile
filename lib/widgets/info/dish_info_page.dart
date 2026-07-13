@@ -8,6 +8,7 @@ import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart' hide StepperType;
 import 'package:flutter/services.dart';
 
@@ -88,7 +89,8 @@ class _DishInfoPageState extends State<DishInfoPage> {
                       ),
                     ],
                   ),
-                  '400 grammdagi ozuqaviyligi'
+                  'nutrition_per_400g'
+                      .tr()
                       .text(16, 20, 400)
                       .c(context.colors.textSub),
                   Row(
