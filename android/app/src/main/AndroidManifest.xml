@@ -36,6 +36,10 @@
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Google Advertising ID — required by the Meta SDK to attribute app
+         events / installs to ads on Android 13+ (API 33+). -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove" />
@@ -130,6 +134,14 @@
                 <action android:name="ai.calora.app.steps.WATCHDOG_KICK" />
             </intent-filter>
         </receiver>
+
+        <!-- Facebook / Meta SDK (App Events for ad targeting & attribution) -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
 
         <!-- Flutter embedding -->
         <meta-data

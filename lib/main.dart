@@ -7,6 +7,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/localization/safe_csv_asset_loader.dart';
 import 'package:calora/common/service/background_steps_worker.dart';
+import 'package:calora/common/service/facebook_events_service.dart';
 import 'package:calora/common/service/notification_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/domain/model/language/language.dart';
@@ -97,6 +98,8 @@ Future<void> main() async {
 
       await getIt<RevenueCatService>().init();
 
+      await FacebookEventsService.instance.init();
+
       runApp(
         EasyLocalization(
           supportedLocales: Strings.supportedLocales,
@@ -107,6 +110,12 @@ Future<void> main() async {
           child: App(),
         ),
       );
+
+      // iOS App Tracking Transparency prompt — must run once the app is
+      // active so the Meta SDK can use the IDFA for ad attribution.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FacebookEventsService.instance.requestTracking();
+      });
     },
   );
 }

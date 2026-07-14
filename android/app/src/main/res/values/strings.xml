@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Facebook / Meta SDK credentials (from the Meta App Dashboard →
+         Settings → Basic). The login scheme is "fb" + the App ID. -->
+    <string name="facebook_app_id">27478591275141844</string>
+    <string name="facebook_client_token">05da90b7e4916a595a6ed98a3e6e4600</string>
+    <string name="fb_login_protocol_scheme">fb27478591275141844</string>
+</resources>
