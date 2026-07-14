@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
+import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/calories/management/calories_management.dart';
 import 'package:calora/presentation/dashboard/features/calories/management/calories_manager.dart';
@@ -13,27 +12,25 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+/// Meal picked from the Home scan-banner sheet, returned to the caller.
+typedef MealPick = ({MealType type, DateTime date});
+
 /// Bottom sheet opened from the Home scan banner. It reuses the exact meal
 /// section from the Calories page — the daily-plan summary plus the per-meal
-/// cards that show consumed kcal (not clock times). Tapping a meal opens the
-/// same add-food screen the Calories page uses; when food is logged the kcal
-/// refresh live in the sheet and [onLogged] lets Home update its totals.
-Future<void> showMealTimePicker(
-  BuildContext context, {
-  VoidCallback? onLogged,
-}) {
-  return showModalBottomSheet<void>(
+/// cards that show consumed kcal (not clock times). Tapping a meal closes the
+/// sheet and returns the chosen [MealPick]; the caller (Home) then switches to
+/// the Calories tab and opens the add-food flow there.
+Future<MealPick?> showMealTimePicker(BuildContext context) {
+  return showModalBottomSheet<MealPick>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => _MealCaloriesSheet(onLogged: onLogged),
+    builder: (_) => const _MealCaloriesSheet(),
   );
 }
 
 class _MealCaloriesSheet extends StatefulWidget {
-  final VoidCallback? onLogged;
-
-  const _MealCaloriesSheet({this.onLogged});
+  const _MealCaloriesSheet();
 
   @override
   State<_MealCaloriesSheet> createState() => _MealCaloriesSheetState();
@@ -95,21 +92,11 @@ class _MealCaloriesSheetState extends State<_MealCaloriesSheet> {
 
   void _onEffect(CaloriesEffect effect) {
     effect.when(
-      openMealPage: (type, meals, date) async {
-        // Skip the intermediate meal-list screen — open the scan / manual /
-        // voice add-food page directly for the chosen meal.
-        final result = await context.pushRoute<bool>(
-          AddMealsRoute(
-            type: type,
-            meals: const [],
-            dateTime: date,
-            categoryId: 1,
-          ),
-        );
-        if (result == true && mounted) {
-          widget.onLogged?.call();
-          _manager.fetchCaloriesAndMeals(date);
-        }
+      openMealPage: (type, meals, date) {
+        // Return the picked meal to Home, which switches to the Calories tab
+        // and opens the add-food flow so back-navigation lands on Calories.
+        if (!mounted) return;
+        Navigator.of(context).pop((type: type, date: date));
       },
     );
   }

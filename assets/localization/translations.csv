@@ -294,6 +294,7 @@ add,Add,Qoʻshish,Добавлять
 more_details,More details,Batafsill,Более подробная информация
 add_a_specific_amount,Add a specific amount,Aniq miqdor qoʻshish,Добавить определённое количество
 enter_the_amount_of_food_gr,"Enter the amount of food, gr.","Ovqat miqdorini kiriting, gr","Введите количество еды, гр."
+food_amount,Amount of food,Ovqatning miqdori,Количество еды
 make_your_own_food,Make your own food,Oʻzingizni ovqatingizni yarating,Готовьте еду сами
 name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
 calorie_content_kcal,"Calorie content, kcal","Kaloriya tarkibi, kkal","Калорийность, ккал"

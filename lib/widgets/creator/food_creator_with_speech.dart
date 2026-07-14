@@ -18,6 +18,10 @@ class EditableFood {
   double carbs;
   final int categoryId;
 
+  /// AI-estimated portion weight (grams); editable so the menu item is logged
+  /// against the real weight instead of a fixed 400g.
+  int weight;
+
   EditableFood({
     required this.name,
     required this.calories,
@@ -25,6 +29,7 @@ class EditableFood {
     required this.fat,
     required this.carbs,
     required this.categoryId,
+    required this.weight,
   });
 }
 
@@ -58,13 +63,15 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
         initialProtein: food.protein,
         initialFat: food.fat,
         initialCarbs: food.carbs,
-        onSubmit: (name, calories, protein, fat, carbs) {
+        initialWeight: food.weight,
+        onSubmit: (name, calories, protein, fat, carbs, weight) {
           setState(() {
             food.name = name.isEmpty ? food.name : name;
             food.calories = calories;
             food.protein = protein;
             food.fat = fat;
             food.carbs = carbs;
+            food.weight = weight;
           });
           context.router.pop();
         },
@@ -174,6 +181,12 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                     ),
                   ],
                 ),
+                if (item.weight > 0) ...[
+                  const SizedBox(height: 4),
+                  '${item.weight} gr'
+                      .text(12, 16, 500)
+                      .c(context.colors.textSub),
+                ],
                 const SizedBox(height: 8),
                 Row(
                   children: [

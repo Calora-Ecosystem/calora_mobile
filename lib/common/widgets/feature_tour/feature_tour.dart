@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/service/permission_bootstrap.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -172,8 +173,14 @@ class _FeatureTourHostState extends State<FeatureTourHost> {
     if (StepLedgerStore().isTourShown(widget.tourId) || widget.steps.isEmpty) {
       return;
     }
-    Future.delayed(widget.delay, () {
-      if (mounted) setState(() => _visible = true);
+    // Hold the tour until every first-run system prompt has been handled
+    // (notification / activity permissions plus the health & battery dialogs
+    // the dashboard drives), so the walkthrough never starts underneath one.
+    PermissionBootstrap.instance.firstRunPromptsDone.then((_) {
+      if (!mounted) return;
+      Future.delayed(widget.delay, () {
+        if (mounted) setState(() => _visible = true);
+      });
     });
   }
 

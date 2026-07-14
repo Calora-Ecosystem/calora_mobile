@@ -46,7 +46,13 @@ extension ScannerFoodMapper on ScannerFood {
       categoryId: categoryId,
       name: name,
       coverUrl: coverUrl,
-      metrics: metrics,
+      // Persist the AI-estimated portion weight alongside the nutrition so
+      // the backend scales the logged menu item against the real base
+      // weight instead of a hard-coded 400g.
+      metrics: [
+        ...metrics,
+        Metric(userId: 0, metric: MetricType.weight.name, value: weight),
+      ],
       userId: userId,
     );
   }

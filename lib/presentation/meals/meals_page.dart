@@ -29,11 +29,17 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
   final DateTime dateTime;
   final int categoryId;
 
+  /// When true (Home scan-banner flow), the add-food screen opens immediately
+  /// on entering this page, so the user lands straight on manual/scan/voice.
+  /// Backing out of the add screen returns here to the logged-foods list.
+  final bool openAddOnEnter;
+
   const MealsPage({
     required this.type,
     super.key,
     required this.dateTime,
     required this.categoryId,
+    this.openAddOnEnter = false,
   });
 
   @override
@@ -41,6 +47,12 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
     manager.fetchMenuItem(dateTime, type);
     manager.fetchSummary(dateTime, type);
     super.init(context, manager);
+
+    if (openAddOnEnter) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        manager.openAddMealPage();
+      });
+    }
   }
 
   @override
@@ -387,7 +399,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
         initialProtein: item.proteins,
         initialFat: item.fats,
         initialCarbs: item.carbohydrates,
-        onSubmit: (name, calories, protein, fat, carbs) {
+        onSubmit: (name, calories, protein, fat, carbs, weight) {
           if (name.isEmpty) {
             CustomSnackBar.show(context, Strings.pleaseEnterFoodName);
             return;

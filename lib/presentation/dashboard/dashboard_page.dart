@@ -1,12 +1,12 @@
 import 'dart:ui';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/course_tab_signal.dart';
+import 'package:calora/common/service/permission_bootstrap.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
@@ -23,28 +23,43 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
 
   @override
   void init(BuildContext context, DashboardManager manager) {
-    manager.initialize();
     super.init(context, manager);
-    _maybePromptBatteryWhitelist(context, manager);
+    _runFirstRunPermissionFlow(context, manager);
   }
 
-  /// After the dashboard is up, if the app isn't exempt from battery
-  /// optimization (and we haven't asked before), guide the user to
-  /// whitelist it so the step foreground service survives in the
-  /// background.
-  void _maybePromptBatteryWhitelist(
+  /// Front-loads the system permissions before the feature tour, in order:
+  ///   1. notification + activity/motion (system dialogs, via the bootstrap)
+  ///   2. step tracking + Health Connect permission (kicked off by `initialize`)
+  ///   3. battery-optimization whitelist prompt
+  /// Only once these are handled does the tour unblock — it awaits
+  /// [PermissionBootstrap.firstRunPromptsDone]. Feature permissions (camera /
+  /// microphone) stay on-demand.
+  Future<void> _runFirstRunPermissionFlow(
     BuildContext context,
     DashboardManager manager,
-  ) {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Don't stack the battery dialog on top of the first-run feature
-      // tour — defer it until a later launch once the tour is done.
-      if (!StepLedgerStore().isFeatureTourShown()) return;
-      if (!await manager.shouldPromptBatteryWhitelist()) return;
-      await manager.markBatteryHintShown();
-      if (!context.mounted) return;
-      await BatteryOptimizationDialog.show(context);
-    });
+  ) async {
+    try {
+      await PermissionBootstrap.instance.ensureRequested();
+      // Activity permission is granted by now, so this won't re-prompt; it
+      // also starts the Health Connect permission flow when applicable.
+      manager.initialize();
+      if (context.mounted) await _promptBatteryWhitelist(context, manager);
+    } finally {
+      // Always unblock the tour, even if a prompt threw.
+      PermissionBootstrap.instance.markFirstRunPromptsDone();
+    }
+  }
+
+  /// Battery-optimization whitelist prompt (Android, first run only) so the
+  /// step foreground service survives in the background.
+  Future<void> _promptBatteryWhitelist(
+    BuildContext context,
+    DashboardManager manager,
+  ) async {
+    if (!await manager.shouldPromptBatteryWhitelist()) return;
+    await manager.markBatteryHintShown();
+    if (!context.mounted) return;
+    await BatteryOptimizationDialog.show(context);
   }
 
   @override

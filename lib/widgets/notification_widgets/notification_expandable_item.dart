@@ -26,8 +26,11 @@ class NotificationExpandableItem extends StatefulWidget {
 
 class _NotificationExpandableItemState
     extends State<NotificationExpandableItem> {
-  String get currentTime =>
-      '${DateTime.now().hour.toString().padLeft(2, '0')}:00';
+  String get currentTime {
+    final now = DateTime.now();
+    return '${now.hour.toString().padLeft(2, '0')}:'
+        '${now.minute.toString().padLeft(2, '0')}';
+  }
 
   late String selectedTime;
   bool isEnabled = false;

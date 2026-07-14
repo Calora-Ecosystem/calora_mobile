@@ -244,7 +244,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   void openCreatePage(BuildContext context, AddMealsManager manager) {
     context.showAppBottomSheet(
       child: FoodCreatorWidget(
-        onSubmit: (name, calories, protein, fat, carbs) async {
+        onSubmit: (name, calories, protein, fat, carbs, weight) async {
           if (name.isEmpty) {
             CustomSnackBar.show(context, Strings.pleaseEnterFoodName);
             return;
@@ -289,13 +289,14 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
       child: FoodCreatorWithImage(
         isLoading: manager.state.isLoading,
         name: food.name.localized(Localizations.localeOf(context)),
-        onAdd: (name, calories, protein, oil, carbs) async {
+        onAdd: (name, calories, protein, oil, carbs, weight) async {
           final success = await manager.addCustomFoodAndMenu(
             name: name,
             calories: calories,
             protein: protein,
             fat: oil,
             carbs: carbs,
+            weightInGr: weight,
             menu: type.name,
             date: dateTime,
             categoryId: food.categoryId,
@@ -309,6 +310,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         oil: MetricsHelper.getMetricValue(metrics, MetricType.fat),
         carbohydrates: MetricsHelper.getMetricValue(metrics, MetricType.carb),
         calories: MetricsHelper.getMetricValue(metrics, MetricType.kcal),
+        weight: food.weight,
       ),
     );
   }
@@ -324,6 +326,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             fat: MetricsHelper.getMetricValue(e.metrics, MetricType.fat),
             carbs: MetricsHelper.getMetricValue(e.metrics, MetricType.carb),
             categoryId: e.categoryId,
+            weight: e.weight,
           ),
         )
         .toList();
@@ -340,6 +343,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               protein: food.protein,
               fat: food.fat,
               carbs: food.carbs,
+              weightInGr: food.weight,
               menu: type.name,
               date: dateTime,
               categoryId: food.categoryId,

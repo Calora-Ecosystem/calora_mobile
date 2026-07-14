@@ -217,11 +217,16 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     required double protein,
     required double fat,
     required double carbs,
+    required int weightInGr,
     required String menu,
     required DateTime date,
     int? categoryId,
   }) async {
     final userId = await profileStore.getUserId() ?? 0;
+    // The nutrition above describes this exact portion, so the food's base
+    // weight and the logged amount are both the AI-estimated weight. Fall
+    // back to the 400g neutral base only when the AI gave no weight.
+    final resolvedWeight = weightInGr > 0 ? weightInGr : 400;
     final request = FoodRequest(
       categoryId: categoryId,
       name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
@@ -231,6 +236,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         Metric(userId: 0, metric: MetricType.protein.name, value: protein),
         Metric(userId: 0, metric: MetricType.fat.name, value: fat),
         Metric(userId: 0, metric: MetricType.carb.name, value: carbs),
+        Metric(userId: 0, metric: MetricType.weight.name, value: resolvedWeight),
       ],
       userId: userId,
     );
@@ -241,7 +247,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           menu: menu,
           date: date,
           foodId: addedFoodId,
-          weightInGr: 400,
+          weightInGr: resolvedWeight,
         ),
       );
     }
@@ -265,7 +271,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           menu: menu,
           date: date,
           foodId: addedFoodId,
-          weightInGr: 100,
+          weightInGr: food.weight > 0 ? food.weight : 400,
         ),
       );
     }
@@ -274,23 +280,18 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
 
   Future<bool> addFoodAndMenuWithVoice(String menu, DateTime date) async {
     final userId = await profileStore.getUserId();
-    final List<FoodRequest> foodRequests = state.scannedFoodsByVoice
-        .map(
-          (e) => e.toFoodRequest(
-            userId: userId ?? 0,
-            coverUrl: abstractImageUrl,
-          ),
-        )
-        .toList();
-    for (int i = 0; i < foodRequests.length; i++) {
-      final addedFoodId = await addFood(foodRequests[i]);
+    final List<ScannerFood> foods = state.scannedFoodsByVoice;
+    for (final food in foods) {
+      final addedFoodId = await addFood(
+        food.toFoodRequest(userId: userId ?? 0, coverUrl: abstractImageUrl),
+      );
       if (addedFoodId == null) return false;
       final success = await saveMenuItem(
         MenuInfo(
           menu: menu,
           date: date,
           foodId: addedFoodId,
-          weightInGr: 100,
+          weightInGr: food.weight > 0 ? food.weight : 400,
         ),
       );
       if (!success) return false;

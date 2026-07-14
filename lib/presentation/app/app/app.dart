@@ -45,9 +45,13 @@ class App extends Managed<AppManager, AppState, AppEffect> {
           child: ConnectivityOverlay(
             child: MediaQuery(
               data: mediaQuery.copyWith(
+                // Cap font scaling so devices set to very large system fonts
+                // don't overflow fixed-height layouts (buttons / content
+                // getting pushed off-screen). 1.1 keeps a little accessibility
+                // headroom while staying within the app's layouts.
                 textScaler: mediaQuery.textScaler.clamp(
                   minScaleFactor: 0.8,
-                  maxScaleFactor: 1.2,
+                  maxScaleFactor: 1.1,
                 ),
               ),
               child: RemoveStatusBarBackground(

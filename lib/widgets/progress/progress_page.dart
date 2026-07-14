@@ -137,6 +137,14 @@ class ProgressPage extends Managed<CalculateManager, CalculateState, CalculateEf
                       ),
                       const SizedBox(height: 20),
                       Center(
+                        child: SizedBox(
+                          height: 96,
+                          width: 96,
+                          child: Assets.images.ai.image(fit: BoxFit.contain),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
                         child: CircularPercentIndicator(
                           radius: 80,
                           lineWidth: 16,

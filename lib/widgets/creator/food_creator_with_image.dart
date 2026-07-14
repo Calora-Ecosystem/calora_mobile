@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -14,6 +15,9 @@ class FoodCreatorWithImage extends StatefulWidget {
   final double calories;
   final String name;
 
+  /// AI-estimated portion weight (grams). Editing it rescales the macros.
+  final int weight;
+
   /// Returns the (possibly edited) values so the AI result can be corrected
   /// before it is added to the menu.
   final void Function(
@@ -22,6 +26,7 @@ class FoodCreatorWithImage extends StatefulWidget {
     double protein,
     double oil,
     double carbs,
+    int weight,
   )
   onAdd;
   final bool isLoading;
@@ -34,6 +39,7 @@ class FoodCreatorWithImage extends StatefulWidget {
     required this.oil,
     required this.carbohydrates,
     required this.calories,
+    required this.weight,
     required this.isLoading,
   });
 
@@ -50,27 +56,80 @@ class _FoodCreatorWithImageState extends State<FoodCreatorWithImage> {
   late final _oilController = TextEditingController(text: _initText(widget.oil));
   late final _carbController =
       TextEditingController(text: _initText(widget.carbohydrates));
+  late final _weightController =
+      TextEditingController(text: widget.weight > 0 ? '${widget.weight}' : '');
+
+  /// Immutable AI baseline. Macros are always rescaled from this so
+  /// intermediate keystrokes in the weight field never lose precision.
+  late double _baseWeight = widget.weight.toDouble();
+  late double _baseCalories = widget.calories;
+  late double _baseProtein = widget.protein;
+  late double _baseOil = widget.oil;
+  late double _baseCarb = widget.carbohydrates;
 
   String _initText(double value) =>
       value == 0 ? '' : value.asFixedTruncated(0);
 
   @override
+  void initState() {
+    super.initState();
+    _weightController.addListener(_onWeightChanged);
+  }
+
+  /// Rescales the macros proportionally to the edited weight. Always scales
+  /// from the AI baseline (not the previous field value) so partial input
+  /// like 2 → 25 → 250 self-corrects to the exact final ratio.
+  void _onWeightChanged() {
+    final newWeight = double.tryParse(_weightController.text.trim());
+    if (newWeight == null || newWeight <= 0) return;
+
+    if (_baseWeight <= 0) {
+      // AI returned no weight — adopt the first entered value as the base
+      // without touching the macros the user already sees.
+      _baseWeight = newWeight;
+      _baseCalories = double.tryParse(_calorieController.text) ?? 0;
+      _baseProtein = double.tryParse(_proteinController.text) ?? 0;
+      _baseOil = double.tryParse(_oilController.text) ?? 0;
+      _baseCarb = double.tryParse(_carbController.text) ?? 0;
+      return;
+    }
+
+    final factor = newWeight / _baseWeight;
+    _setText(_calorieController, (_baseCalories * factor).asFixedTruncated(0));
+    _setText(_proteinController, (_baseProtein * factor).asFixedTruncated(0));
+    _setText(_oilController, (_baseOil * factor).asFixedTruncated(0));
+    _setText(_carbController, (_baseCarb * factor).asFixedTruncated(0));
+  }
+
+  void _setText(TextEditingController controller, String text) {
+    if (controller.text == text) return;
+    controller.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  @override
   void dispose() {
+    _weightController.removeListener(_onWeightChanged);
     _nameController.dispose();
     _calorieController.dispose();
     _proteinController.dispose();
     _oilController.dispose();
     _carbController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
   void _onAddPressed() {
+    final weight = int.tryParse(_weightController.text.trim()) ?? 0;
     widget.onAdd(
       _nameController.text.trim(),
       int.tryParse(_calorieController.text) ?? 0,
       double.tryParse(_proteinController.text) ?? 0,
       double.tryParse(_oilController.text) ?? 0,
       double.tryParse(_carbController.text) ?? 0,
+      weight,
     );
   }
 
@@ -107,6 +166,15 @@ class _FoodCreatorWithImageState extends State<FoodCreatorWithImage> {
             child: CommonTextField(
               hint: '',
               controller: _nameController,
+            ),
+          ),
+          _labeledField(
+            context,
+            label: 'food_amount'.tr(),
+            child: CommonTextField(
+              hint: Strings.enterTheAmountOfFoodGr,
+              controller: _weightController,
+              keyboardType: TextInputType.number,
             ),
           ),
           Strings.nutritionalValueOfFood

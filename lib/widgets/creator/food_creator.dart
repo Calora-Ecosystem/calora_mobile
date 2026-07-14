@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -13,6 +14,7 @@ class FoodCreatorWidget extends StatefulWidget {
     double protein,
     double fat,
     double carbs,
+    int weight,
   )
   onSubmit;
 
@@ -22,6 +24,10 @@ class FoodCreatorWidget extends StatefulWidget {
   final double? initialProtein;
   final double? initialFat;
   final double? initialCarbs;
+
+  /// Portion weight (grams). Editing it rescales the macros proportionally.
+  /// `null`/`0` hides the field (e.g. manual "add your own food").
+  final int? initialWeight;
 
   /// Optional overrides for the header title and submit button label.
   final String? title;
@@ -35,6 +41,7 @@ class FoodCreatorWidget extends StatefulWidget {
     this.initialProtein,
     this.initialFat,
     this.initialCarbs,
+    this.initialWeight,
     this.title,
     this.submitText,
   });
@@ -53,6 +60,20 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
       TextEditingController(text: _initText(widget.initialFat));
   late final _carbController =
       TextEditingController(text: _initText(widget.initialCarbs));
+  late final _weightController = TextEditingController(
+    text: (widget.initialWeight ?? 0) > 0 ? '${widget.initialWeight}' : '',
+  );
+
+  /// Whether the portion-weight field is shown (AI-scan flow only).
+  bool get _hasWeight => widget.initialWeight != null;
+
+  /// Immutable baseline used to rescale macros from the weight field without
+  /// compounding rounding errors across keystrokes.
+  late double _baseWeight = (widget.initialWeight ?? 0).toDouble();
+  late double _baseCalories = (widget.initialCalories ?? 0).toDouble();
+  late double _baseProtein = widget.initialProtein ?? 0;
+  late double _baseFat = widget.initialFat ?? 0;
+  late double _baseCarb = widget.initialCarbs ?? 0;
 
   String? _initText(num? value) {
     if (value == null || value == 0) return null;
@@ -60,12 +81,48 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (_hasWeight) _weightController.addListener(_onWeightChanged);
+  }
+
+  void _onWeightChanged() {
+    final newWeight = double.tryParse(_weightController.text.trim());
+    if (newWeight == null || newWeight <= 0) return;
+
+    if (_baseWeight <= 0) {
+      _baseWeight = newWeight;
+      _baseCalories = double.tryParse(_calorieController.text) ?? 0;
+      _baseProtein = double.tryParse(_proteinController.text) ?? 0;
+      _baseFat = double.tryParse(_fatController.text) ?? 0;
+      _baseCarb = double.tryParse(_carbController.text) ?? 0;
+      return;
+    }
+
+    final factor = newWeight / _baseWeight;
+    _setText(_calorieController, (_baseCalories * factor).toStringAsFixed(0));
+    _setText(_proteinController, (_baseProtein * factor).toStringAsFixed(0));
+    _setText(_fatController, (_baseFat * factor).toStringAsFixed(0));
+    _setText(_carbController, (_baseCarb * factor).toStringAsFixed(0));
+  }
+
+  void _setText(TextEditingController controller, String text) {
+    if (controller.text == text) return;
+    controller.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  @override
   void dispose() {
+    _weightController.removeListener(_onWeightChanged);
     _nameController.dispose();
     _calorieController.dispose();
     _proteinController.dispose();
     _fatController.dispose();
     _carbController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
@@ -76,6 +133,7 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
       double.tryParse(_proteinController.text) ?? 0,
       double.tryParse(_fatController.text) ?? 0,
       double.tryParse(_carbController.text) ?? 0,
+      int.tryParse(_weightController.text.trim()) ?? 0,
     );
   }
 
@@ -121,6 +179,16 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
               hint: '',
             ),
           ),
+          if (_hasWeight)
+            _labeledField(
+              context,
+              label: 'food_amount'.tr(),
+              child: CommonTextField(
+                controller: _weightController,
+                hint: Strings.enterTheAmountOfFoodGr,
+                keyboardType: TextInputType.number,
+              ),
+            ),
           _labeledField(
             context,
             label: Strings.calorieContentKcal,

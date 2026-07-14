@@ -42,13 +42,8 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
   void init(BuildContext context, HomeManager manager) {
     manager.updateDay(DateTime.now());
     manager.refreshAll();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final dashManager = context.read<DashboardManager>();
-      dashManager.initialize();
-    });
-    Future.microtask(() {
-      manager.requestNotificationPermission();
-    });
+    // Permissions and step-tracking init are front-loaded by DashboardPage via
+    // PermissionBootstrap (all permission dialogs first, then the tour).
     _tabsRouter = AutoTabsRouter.of(context);
     _lastIndex = _tabsRouter!.activeIndex;
     _tabsRouter!.addListener(() {
@@ -254,32 +249,16 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     );
   }
 
-  /// First-visit coach-mark for the Home tab: explains the scan banner (and
-  /// the meal-time sheet it opens) and the green add-food button.
+  /// First-visit coach-mark for the Home tab: explains only the scan banner
+  /// (and the meal-time sheet it opens). The add-food button is intentionally
+  /// not spotlighted here.
   List<FeatureTourStep> _homeTourSteps(BuildContext context) {
-    final accent = context.colors.accentSub;
-    Widget si(SvgGenImage a) => a.svg(
-          width: 16,
-          height: 16,
-          colorFilter: ColorFilter.mode(accent, BlendMode.srcIn),
-        );
     return [
       FeatureTourStep(
         targetKey: TourAnchors.homeScanBanner,
         icon: Icons.center_focus_strong_rounded,
         title: 'ft_banner_t'.tr(),
         description: 'ft_banner_d'.tr(),
-      ),
-      FeatureTourStep(
-        targetKey: TourAnchors.homeAddFood,
-        icon: Icons.restaurant_rounded,
-        title: 'ft_food_title'.tr(),
-        description: 'ft_food_desc'.tr(),
-        bullets: [
-          FeatureTourBullet(si(Assets.icons.icScan), 'ft_food_b2'.tr()),
-          FeatureTourBullet(si(Assets.icons.icChat), 'ft_food_b3'.tr()),
-          FeatureTourBullet(si(Assets.icons.icPlusCircle), 'ft_food_b1'.tr()),
-        ],
       ),
     ];
   }
@@ -328,12 +307,24 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
     return now.year == day.year && now.month == day.month && now.day == day.day;
   }
 
-  /// Home "Scan food / calculate calories" banner tap. Opens the meal sheet —
-  /// the same daily-plan + per-meal cards (with consumed kcal) from the
-  /// Calories page. Tapping a meal there opens the shared add-food screen; when
-  /// food is logged the Home totals refresh so it shows immediately.
-  Future<void> _onScanTap(BuildContext context, HomeManager manager) {
-    return showMealTimePicker(context, onLogged: manager.refreshAll);
+  /// Home "Scan food / calculate calories" banner tap. Opens the meal sheet
+  /// (per-meal cards with consumed kcal). Picking a meal opens that meal's
+  /// detail page with the add-food screen on top — so adding food success
+  /// returns to the meal's logged-foods list, and backing out of that list
+  /// lands back here on Home.
+  Future<void> _onScanTap(BuildContext context, HomeManager manager) async {
+    final pick = await showMealTimePicker(context);
+    if (pick == null || !context.mounted) return;
+
+    await context.router.push(
+      MealsRoute(
+        type: pick.type,
+        dateTime: pick.date,
+        categoryId: 1,
+        openAddOnEnter: true,
+      ),
+    );
+    manager.refreshAll();
   }
 
   void openCalendar(BuildContext context, HomeManager manager) {

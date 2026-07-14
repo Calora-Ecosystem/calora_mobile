@@ -67,35 +67,53 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
   void startProgressWithApi({
     required Future<void> Function() apiCall,
     VoidCallback? onComplete,
-  }) async {
+  }) {
     _apiProgressTimer?.cancel();
-
     emit(state.copyWith(progressPercent: 0));
 
-    _apiProgressTimer = Timer.periodic(const Duration(milliseconds: 80), (_) {
-      final p = state.progressPercent;
+    // Keep the "preparing your program" loader on screen for at least this
+    // long, even when the API responds almost instantly, so it doesn't flash
+    // past the user. The ring completes only once BOTH the minimum time has
+    // elapsed and the API has returned.
+    const minDuration = Duration(seconds: _animationDurationSeconds);
+    final startedAt = DateTime.now();
 
-      if (p < 0.95) {
-        final inc = (0.95 - p) * 0.08;
-        final next = (p + inc).clamp(0.0, 0.95);
-        emit(state.copyWith(progressPercent: next));
-      }
+    bool apiCompleted = false;
+    Object? apiError;
+    apiCall().then((_) {
+      apiCompleted = true;
+    }).catchError((Object e) {
+      apiError = e;
     });
 
-    try {
-      await apiCall();
+    _apiProgressTimer = Timer.periodic(
+      Duration(milliseconds: 1000 ~/ _ticksPerSecond),
+      (timer) {
+        if (apiError != null) {
+          timer.cancel();
+          publish(CalculateEffect.error(apiError.toString()));
+          return;
+        }
 
-      _apiProgressTimer?.cancel();
+        final elapsedMs = DateTime.now().difference(startedAt).inMilliseconds;
+        final timeFraction =
+            (elapsedMs / minDuration.inMilliseconds).clamp(0.0, 1.0);
 
-      emit(state.copyWith(progressPercent: 1.0));
+        if (timeFraction >= 1.0 && apiCompleted) {
+          timer.cancel();
+          emit(state.copyWith(progressPercent: 1.0));
+          onComplete?.call();
+          publish(const CalculateEffect.navigateNext());
+          return;
+        }
 
-      onComplete?.call();
-      publish(const CalculateEffect.navigateNext());
-    } catch (e) {
-      _apiProgressTimer?.cancel();
-
-      publish(CalculateEffect.error(e.toString()));
-    }
+        // Ease toward 100% once the API is done; otherwise hold below 95% so
+        // the ring keeps spinning until the response arrives.
+        final progress =
+            apiCompleted ? timeFraction : (timeFraction * 0.95);
+        emit(state.copyWith(progressPercent: progress));
+      },
+    );
   }
 
   @override
