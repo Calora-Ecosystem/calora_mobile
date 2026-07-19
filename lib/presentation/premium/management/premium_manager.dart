@@ -6,12 +6,14 @@ import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
+import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 import 'package:management/management.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,6 +21,9 @@ import 'package:url_launcher/url_launcher.dart';
 class PremiumManager extends Manager<PremiumState, PremiumEffect>
     with WidgetsBindingObserver {
   final PremiumRepo _premiumRepo;
+  final CommonRepo _commonRepo;
+
+  StreamSubscription<bool>? _countrySubscription;
 
   // ── External-payment (Click/Payme) result watching ──────────────────
   // Click/Payme open externally and complete via a backend webhook, so
@@ -31,7 +36,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   static const Duration _paymentPollInterval = Duration(seconds: 5);
   static const int _paymentPollMaxTicks = 24; // ~2 min foreground backstop
 
-  PremiumManager(this._premiumRepo) : super(const PremiumState()) {
+  PremiumManager(this._premiumRepo, this._commonRepo)
+    : super(const PremiumState()) {
     WidgetsBinding.instance.addObserver(this);
     _init();
   }
@@ -39,25 +45,47 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   @override
   void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
     // Primary trigger: user returns from the Click/Payme app/page.
-    if (lifecycleState == AppLifecycleState.resumed && _awaitingExternalPayment) {
+    if (lifecycleState == AppLifecycleState.resumed &&
+        _awaitingExternalPayment) {
       unawaited(_checkExternalPayment());
     }
   }
 
-  Future<void> _init() async {
-    final isUzbekistan = await _premiumRepo.isUzbekistan;
-    emit(state.copyWith(isUzbekistan: isUzbekistan));
+  void _init() {
+    _countrySubscription = _commonRepo.getIsUzbekistan().cacheAndNetwork.listen(
+      _applyIsUzbekistan,
+      onError: (e, st) => getIt<Logger>().e(e.toString(), stackTrace: st),
+    );
     getPremiumPlans();
     getMyOrders();
+  }
+
+  void _applyIsUzbekistan(bool isUzbekistan) {
     final iap = PaymentMethod(icon: Assets.icons.apple, code: 'Iap');
     final payme = PaymentMethod(icon: Assets.icons.payme, code: 'Payme');
     final click = PaymentMethod(icon: Assets.icons.click, code: 'Click');
     if (kDebugMode) {
-      emit(state.copyWith(paymentMethods: [iap, click, payme]));
+      emit(
+        state.copyWith(
+          isUzbekistan: isUzbekistan,
+          paymentMethods: [iap, click, payme],
+        ),
+      );
     } else if (isUzbekistan) {
-      emit(state.copyWith(paymentMethods: [payme, click]));
+      emit(
+        state.copyWith(
+          isUzbekistan: isUzbekistan,
+          paymentMethods: [payme, click],
+        ),
+      );
     } else {
-      emit(state.copyWith(paymentMethods: [iap], selectedPaymentMethod: iap));
+      emit(
+        state.copyWith(
+          isUzbekistan: isUzbekistan,
+          paymentMethods: [iap],
+          selectedPaymentMethod: iap,
+        ),
+      );
     }
   }
 
@@ -66,46 +94,47 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   void selectPaymentMethod(PaymentMethod method) =>
       emit(state.copyWith(selectedPaymentMethod: method));
 
-  Future<void> getPremiumPlans() async => await _premiumRepo.getPremiumPlans().handle(
-    onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
-    onData: (data) {
-      final plans = data.map((e) {
-        if (e.duration == 1) {
-          return PlanModel(
-            id: e.id ?? 0,
-            title: Strings.monthlyPremium,
-            price: e.fee ?? 0,
-            originalFee: e.originalFee ?? 0,
-            packageMonth: e.duration ?? 0,
-            isMostPopular: e.isPopular ?? false,
-          );
-        }
-        return PlanModel(
-          id: e.id ?? 0,
-          title: Strings.nMothPremium(month: e.duration ?? 0),
-          price: e.fee ?? 0,
-          originalFee: e.originalFee ?? 0,
-          packageMonth: e.duration ?? 0,
-          isMostPopular: e.isPopular ?? false,
-        );
-      }).toList();
+  Future<void> getPremiumPlans() async =>
+      await _premiumRepo.getPremiumPlans().handle(
+        onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
+        onData: (data) {
+          final plans = data.map((e) {
+            if (e.duration == 1) {
+              return PlanModel(
+                id: e.id ?? 0,
+                title: Strings.monthlyPremium,
+                price: e.fee ?? 0,
+                originalFee: e.originalFee ?? 0,
+                packageMonth: e.duration ?? 0,
+                isMostPopular: e.isPopular ?? false,
+              );
+            }
+            return PlanModel(
+              id: e.id ?? 0,
+              title: Strings.nMothPremium(month: e.duration ?? 0),
+              price: e.fee ?? 0,
+              originalFee: e.originalFee ?? 0,
+              packageMonth: e.duration ?? 0,
+              isMostPopular: e.isPopular ?? false,
+            );
+          }).toList();
 
-      PlanModel? initialPlan;
-      try {
-        initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
-      } catch (e) {
-        initialPlan = plans.isNotEmpty ? plans.first : null;
-      }
-      emit(
-        state.copyWith(
-          isGettingPremiumPlans: false,
-          plans: plans,
-          selectedPlan: initialPlan,
-        ),
+          PlanModel? initialPlan;
+          try {
+            initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
+          } catch (e) {
+            initialPlan = plans.isNotEmpty ? plans.first : null;
+          }
+          emit(
+            state.copyWith(
+              isGettingPremiumPlans: false,
+              plans: plans,
+              selectedPlan: initialPlan,
+            ),
+          );
+        },
+        onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
       );
-    },
-    onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
-  );
 
   Future<void> getMyOrders() async => await _premiumRepo.getMyOrders().handle(
     onStart: () => emit(state.copyWith(isGettingOrders: true)),
@@ -198,7 +227,9 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
                   (plan) => plan.isMostPopular,
                 );
               } catch (e) {
-                newSelectedPlan = discountedPlans.isNotEmpty ? discountedPlans.first : null;
+                newSelectedPlan = discountedPlans.isNotEmpty
+                    ? discountedPlans.first
+                    : null;
               }
 
               // When the promo zeroes-out the selected plan and the
@@ -243,7 +274,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     // still reply `paymentRequired: false` so the value is effectively
     // ignored — we just need the field to validate.
     final isFreePlan = state.selectedPlan?.isFree ?? false;
-    final providerCode = state.selectedPaymentMethod?.code ??
+    final providerCode =
+        state.selectedPaymentMethod?.code ??
         (isFreePlan && state.paymentMethods.isNotEmpty
             ? state.paymentMethods.first.code
             : '');
@@ -302,9 +334,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
         onData: (_) {
           // User abandoned the pending order — stop watching for a result.
           _stopPaymentPolling();
-          emit(
-            state.copyWith(isDeletingOrder: false, isPaymentPending: false),
-          );
+          emit(state.copyWith(isDeletingOrder: false, isPaymentPending: false));
         },
         onError: (_) => emit(state.copyWith(isDeletingOrder: false)),
       );
@@ -434,6 +464,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   Future<void> close() {
     WidgetsBinding.instance.removeObserver(this);
     _paymentPollTimer?.cancel();
+    _countrySubscription?.cancel();
     return super.close();
   }
 }

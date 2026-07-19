@@ -4,8 +4,6 @@ import 'package:calora/domain/model/premium/promo_code_model.dart';
 import 'package:calora/domain/model/premium/subscription_response_model.dart';
 
 abstract class PremiumRepo {
-  Future<bool> get isUzbekistan;
-
   Future<SubscriptionResponseModel> orderSubscription({
     required String provider,
     required String plan,

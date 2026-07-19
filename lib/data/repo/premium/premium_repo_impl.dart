@@ -1,5 +1,4 @@
 import 'package:calora/data/api/premium_api.dart';
-import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
@@ -11,13 +10,8 @@ import 'package:injectable/injectable.dart';
 @Injectable(as: PremiumRepo)
 class PremiumRepoImpl implements PremiumRepo {
   final PremiumApi _api;
-  final AuthStore _authStore;
 
-  PremiumRepoImpl(this._api, this._authStore);
-
-  @override
-  Future<bool> get isUzbekistan async =>
-      await _authStore.isCountryUzbekistan() ?? false;
+  PremiumRepoImpl(this._api);
 
   @override
   Future<void> deleteOrder({required int orderId}) async =>
