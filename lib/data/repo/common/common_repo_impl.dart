@@ -7,6 +7,7 @@ import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:country_detector/country_detector.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
@@ -17,6 +18,7 @@ class CommonRepoImpl extends CommonRepo {
   final CommonApi _commonApi;
   final RevenueCatService _revenueCatService;
   final Connectivity _connectivity;
+  final CountryDetector _countryDetector;
 
   CommonRepoImpl(
     this._commonStore,
@@ -24,6 +26,7 @@ class CommonRepoImpl extends CommonRepo {
     this._commonApi,
     this._revenueCatService,
     this._connectivity,
+    this._countryDetector,
   );
 
   @override
@@ -33,10 +36,22 @@ class CommonRepoImpl extends CommonRepo {
   );
 
   Future<bool> _resolveIsUzbekistan() async {
-    if (await _isUzbekistanByIp()) return true;
-    if (await _isUzbekistanByStorefront()) return true;
+    if (await _isUzbekistanBySim()) return true;
     if (await _isUzbekistanByPhone()) return true;
+    if (await _isUzbekistanByStorefront()) return true;
+    if (await _isUzbekistanByIp()) return true;
     return _isUsingVpn();
+  }
+
+  Future<bool> _isUzbekistanBySim() async {
+    try {
+      final countries = await _countryDetector.detectAll();
+      return countries.sim.toUpperCase() == 'UZ' ||
+          countries.network.toUpperCase() == 'UZ';
+    } catch (e, st) {
+      getIt<Logger>().e('SIM country lookup failed: $e', stackTrace: st);
+      return false;
+    }
   }
 
   Future<bool> _isUzbekistanByIp() async {

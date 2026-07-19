@@ -4,6 +4,7 @@ import 'package:alice_dio/alice_dio_adapter.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/router/app_router.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:country_detector/country_detector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
@@ -16,6 +17,9 @@ abstract class AppModule {
 
   @lazySingleton
   Connectivity get connectivity => Connectivity();
+
+  @lazySingleton
+  CountryDetector get countryDetector => CountryDetector();
 
   @lazySingleton
   Alice getAlice(AppRouter appRouter, AliceDioAdapter aliceDioAdapter) {
