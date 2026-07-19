@@ -1,3 +1,5 @@
+import 'package:calora/common/util/cached.dart';
+import 'package:calora/data/api/common_api.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/language/language.dart';
@@ -8,8 +10,15 @@ import 'package:injectable/injectable.dart';
 class CommonRepoImpl extends CommonRepo {
   final CommonStore _commonStore;
   final AuthStore _store;
+  final CommonApi _commonApi;
 
-  CommonRepoImpl(this._commonStore, this._store);
+  CommonRepoImpl(this._commonStore, this._store, this._commonApi);
+
+  @override
+  Cached<bool> getIsUzbekistan() => Cached(
+    store: _store.isCountryUzbekistan,
+    fetch: _commonApi.getCurrentCountry,
+  );
 
   @override
   Future<void> setSelectedLanguage(Language language) {

@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
-import 'package:calora/domain/repo/country/country_repo.dart';
+import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/presentation/auth/auth/management/auth_management.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,7 +17,7 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl, LaunchMode;
 @injectable
 class AuthManager extends Manager<AuthState, AuthEffect> {
   final AuthRepo _repo;
-  final CountryRepo _countryRepo;
+  final CommonRepo _commonRepo;
 
   static const String _serverClientId =
       '638398407864-kt5orfc7nipvl9trmcvt0mlrrfc7k2tg.apps.googleusercontent.com';
@@ -25,7 +25,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   late final Future<void> _googleInitFuture;
 
-  AuthManager(this._repo, this._countryRepo) : super(const AuthState()) {
+  AuthManager(this._repo, this._commonRepo) : super(const AuthState()) {
     termsRecognizer.onTap = _openTermsOfUse;
     _googleInitFuture = _googleSignIn.initialize(
       serverClientId: _serverClientId,
@@ -101,15 +101,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   Future<void> loadCountry() async {
     emit(state.copyWith(countryLoading: true, countryError: false));
 
-    final bool? cached = await _countryRepo.getCachedIsUzbekistan();
-    if (cached != null) {
-      emit(state.copyWith(isUzbekistan: cached, countryLoading: false));
-      return;
-    }
-
     try {
-      final bool fetched = await _countryRepo.fetchIsUzbekistan();
-      emit(state.copyWith(isUzbekistan: fetched, countryLoading: false));
+      final bool isUzbekistan = await _commonRepo
+          .getIsUzbekistan()
+          .cacheOrNetwork;
+      emit(state.copyWith(isUzbekistan: isUzbekistan, countryLoading: false));
     } catch (e) {
       log('Country lookup failed: $e');
       emit(state.copyWith(countryLoading: false, countryError: true));

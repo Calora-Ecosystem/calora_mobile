@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
-class CountryApi {
+class CommonApi {
   final Dio _dio;
 
-  CountryApi(@Named('country') this._dio);
+  CommonApi(@Named('country') this._dio);
 
   Future<bool> getCurrentCountry() async {
     final response = await _dio.get('/');

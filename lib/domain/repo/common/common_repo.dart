@@ -1,6 +1,9 @@
+import 'package:calora/common/util/cached.dart';
 import 'package:calora/domain/model/language/language.dart';
 
 abstract class CommonRepo {
+  Cached<bool> getIsUzbekistan();
+
   /// Persists the selected language and resolves only after the underlying
   /// SharedPreferences write completes. Callers that immediately fire a
   /// network request rely on this — the TokenInterceptor reads the same
