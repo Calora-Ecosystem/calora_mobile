@@ -54,6 +54,17 @@ class RevenueCatService {
     }
   }
 
+  Future<String?> storefrontCountryCode() async {
+    if (kIsWeb) return null;
+    try {
+      final storefront = await Purchases.storefront;
+      return storefront?.countryCode.toUpperCase();
+    } catch (e, st) {
+      getIt<Logger>().e('Storefront lookup failed: $e', stackTrace: st);
+      return null;
+    }
+  }
+
   Future<void> login(ProfileRequest? user) async {
     if (user == null) return;
     await Purchases.logIn(user.userId!.toString());

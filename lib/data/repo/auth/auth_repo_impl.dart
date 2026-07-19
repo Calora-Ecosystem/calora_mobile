@@ -45,6 +45,11 @@ class AuthRepoImpl extends AuthRepo {
       fcmToken: device.fcmToken,
     );
 
+    final phone = verification.phone;
+    if (phone != null && phone.isNotEmpty) {
+      await _store.phone.set(phone);
+    }
+
     return await _saveAuthAndReturnHasNewUser(response.data);
   }
 
