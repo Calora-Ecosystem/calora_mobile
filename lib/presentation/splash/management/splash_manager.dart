@@ -6,9 +6,7 @@ import 'package:calora/common/flavor/flavor_config.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/token/token.dart';
-import 'package:calora/domain/repo/splash/splash_repo.dart';
 import 'package:calora/presentation/splash/management/splash_management.dart';
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -19,14 +17,9 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
   final AuthStore _authStore;
   final CommonStore _commonStore;
   final ProfileStore _profileStore;
-  final SplashRepo _splashRepo;
 
-  SplashManager(
-    this._authStore,
-    this._commonStore,
-    this._profileStore,
-    this._splashRepo,
-  ) : super(const SplashState()) {
+  SplashManager(this._authStore, this._commonStore, this._profileStore)
+    : super(const SplashState()) {
     initializeAndCheckAuth();
   }
 
@@ -61,24 +54,13 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
         publish(const SplashEffect.questionary());
       }
     } else {
-      final isUzbekistan = await getCurrentCountry();
       if (!isLanguageSelected) {
         publish(const SplashEffect.language());
       } else if (!isOnboardingCompleted) {
         publish(const SplashEffect.onboarding());
       } else {
-        publish(SplashEffect.auth(isUzbekistan));
+        publish(const SplashEffect.auth());
       }
-    }
-  }
-
-  Future<bool> getCurrentCountry() async {
-    try {
-      return await _splashRepo.getCurrentCountry();
-    } on DioException catch (e) {
-      return true;
-    } catch (e) {
-      return true;
     }
   }
 }

@@ -16,7 +16,8 @@ class PremiumRepoImpl implements PremiumRepo {
   PremiumRepoImpl(this._api, this._authStore);
 
   @override
-  Future<bool> get isUzbekistan async => await _authStore.isCountryUzbekistan();
+  Future<bool> get isUzbekistan async =>
+      await _authStore.isCountryUzbekistan() ?? false;
 
   @override
   Future<void> deleteOrder({required int orderId}) async =>

@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
+import 'package:calora/domain/repo/country/country_repo.dart';
 import 'package:calora/presentation/auth/auth/management/auth_management.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,7 +17,7 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl, LaunchMode;
 @injectable
 class AuthManager extends Manager<AuthState, AuthEffect> {
   final AuthRepo _repo;
-  final AuthStore _authStore;
+  final CountryRepo _countryRepo;
 
   static const String _serverClientId =
       '638398407864-kt5orfc7nipvl9trmcvt0mlrrfc7k2tg.apps.googleusercontent.com';
@@ -25,7 +25,7 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   late final Future<void> _googleInitFuture;
 
-  AuthManager(this._repo, this._authStore) : super(const AuthState()) {
+  AuthManager(this._repo, this._countryRepo) : super(const AuthState()) {
     termsRecognizer.onTap = _openTermsOfUse;
     _googleInitFuture = _googleSignIn.initialize(
       serverClientId: _serverClientId,
@@ -98,13 +98,22 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
     return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  Future<void> setIsUzbekistan({bool? value}) async {
-    if (value == null) {
-      final bool response = await _authStore.isCountryUzbekistan.call();
-      emit(state.copyWith(isUzbekistan: response));
+  Future<void> loadCountry() async {
+    emit(state.copyWith(countryLoading: true, countryError: false));
+
+    final bool? cached = await _countryRepo.getCachedIsUzbekistan();
+    if (cached != null) {
+      emit(state.copyWith(isUzbekistan: cached, countryLoading: false));
       return;
     }
-    emit(state.copyWith(isUzbekistan: value));
+
+    try {
+      final bool fetched = await _countryRepo.fetchIsUzbekistan();
+      emit(state.copyWith(isUzbekistan: fetched, countryLoading: false));
+    } catch (e) {
+      log('Country lookup failed: $e');
+      emit(state.copyWith(countryLoading: false, countryError: true));
+    }
   }
 
   Future<void> loginWithGoogle() async {
@@ -123,7 +132,8 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
         scopeHint: ['email', 'profile'],
       );
 
-      final GoogleSignInAuthentication authentication = await account.authentication;
+      final GoogleSignInAuthentication authentication =
+          await account.authentication;
       final String? idToken = authentication.idToken;
 
       if (idToken == null || idToken.isEmpty) {
@@ -172,10 +182,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       final bool hasNewUser = await _repo.signInApple(ssoToken);
 
       if (hasNewUser) {
-        final fullName = [
-          credential.givenName,
-          credential.familyName,
-        ].whereType<String>().where((s) => s.trim().isNotEmpty).join(' ').trim();
+        final fullName = [credential.givenName, credential.familyName]
+            .whereType<String>()
+            .where((s) => s.trim().isNotEmpty)
+            .join(' ')
+            .trim();
         if (fullName.isNotEmpty || (credential.email ?? '').isNotEmpty) {
           await profileStore.updateProfile(
             name: fullName.isEmpty ? null : fullName,

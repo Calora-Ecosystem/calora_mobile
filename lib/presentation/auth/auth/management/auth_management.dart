@@ -9,6 +9,8 @@ abstract class AuthState with _$AuthState {
     @Default(false) bool loading,
     @Default(false) bool checked,
     @Default(false) bool isUzbekistan,
+    @Default(true) bool countryLoading,
+    @Default(false) bool countryError,
   }) = _AuthState;
 }
 
