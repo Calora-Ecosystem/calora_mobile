@@ -63,8 +63,17 @@ class CommonRepoImpl extends CommonRepo {
     }
   }
 
-  Future<bool> _isUzbekistanByStorefront() async =>
-      await _revenueCatService.storefrontCountryCode() == 'UZ';
+  Future<bool> _isUzbekistanByStorefront() async {
+    try {
+      return await _revenueCatService.storefrontCountryCode() == 'UZ';
+    } catch (e, st) {
+      // Never let one signal's failure abort the whole resolution chain
+      // (this was the only unguarded check — a RevenueCat hiccup used to
+      // throw out of _resolveIsUzbekistan entirely).
+      getIt<Logger>().e('Storefront country lookup failed: $e', stackTrace: st);
+      return false;
+    }
+  }
 
   Future<bool> _isUzbekistanByPhone() async {
     final phone = await _store.phone();

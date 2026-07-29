@@ -132,7 +132,10 @@ class PremiumSheet
                           ),
                       ],
                     ),
-                    if (!state.isPaymentPending && state.isUzbekistan) ...[
+                    // Promo code is visible for EVERYONE — never gate it
+                    // on region/IP: a VPN flips isUzbekistan to false and
+                    // used to hide the field from legitimate users.
+                    if (!state.isPaymentPending) ...[
                       const SizedBox(height: 16),
                       PromoCodeWidget(),
                     ],

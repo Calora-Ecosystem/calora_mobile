@@ -98,17 +98,50 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
     return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  /// Decides which auth form to show: phone (+998 OTP) when the user is
+  /// in Uzbekistan, email/Google/Apple otherwise.
+  ///
+  /// Cache-first for an instant page, but ALWAYS re-verified with a
+  /// fresh resolution. The old `cacheOrNetwork` made the first-ever
+  /// answer permanent — one launch behind a VPN (or offline) cached
+  /// `false` and locked the user onto the email page forever. Now the
+  /// fresh result overwrites the cache on every visit, so a wrong answer
+  /// self-heals the next time the page opens.
   Future<void> loadCountry() async {
-    emit(state.copyWith(countryLoading: true, countryError: false));
+    bool? cached;
+    try {
+      cached = await _commonRepo.getIsUzbekistan().cache;
+    } catch (e) {
+      log('Country cache read failed: $e');
+    }
+
+    if (cached != null) {
+      // Paint the page immediately from the last known answer.
+      emit(state.copyWith(
+        isUzbekistan: cached,
+        countryLoading: false,
+        countryError: false,
+      ));
+    } else {
+      emit(state.copyWith(countryLoading: true, countryError: false));
+    }
 
     try {
-      final bool isUzbekistan = await _commonRepo
-          .getIsUzbekistan()
-          .cacheOrNetwork;
-      emit(state.copyWith(isUzbekistan: isUzbekistan, countryLoading: false));
+      final fresh = await _commonRepo.getIsUzbekistan().network;
+      // Don't switch the form under the user's fingers: if they already
+      // started typing, keep the current form — the corrected value is
+      // cached and applies on the next visit.
+      if (fresh != state.isUzbekistan && controller.text.trim().isNotEmpty) {
+        return;
+      }
+      emit(state.copyWith(isUzbekistan: fresh, countryLoading: false));
     } catch (e) {
       log('Country lookup failed: $e');
-      emit(state.copyWith(countryLoading: false, countryError: true));
+      // Only surface the error screen when we had nothing to show at
+      // all; with a cached answer the page is already usable.
+      if (cached == null) {
+        emit(state.copyWith(countryLoading: false, countryError: true));
+      }
     }
   }
 

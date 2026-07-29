@@ -7,13 +7,17 @@
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
+    <!-- Newer Health Connect blocks reads from background workers unless
+         this separate permission is also granted (requested at runtime
+         together with the Steps read permission). Without it the 15-min /
+         4-min background sync gets SecurityException'd on Android 14+. -->
+    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
 
     <!-- Step counter (pedometer + StepsFgService) -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
-    <!-- Foreground services -->
+    <!-- Foreground service (StepsFgService, health type) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -91,12 +95,8 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Foreground services -->
-        <service
-            android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
+        <!-- Step-counting foreground service (the only FGS in the app —
+             flutter_foreground_task was removed as unused). -->
         <service
             android:name=".StepsFgService"
             android:exported="false"

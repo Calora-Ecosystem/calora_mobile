@@ -5,6 +5,9 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.calora.processing</string>
+		<!-- BGAppRefresh step sync — must match BackgroundStepsWorker.iosRefreshTask
+		     and the WorkmanagerPlugin.registerPeriodicTask call in AppDelegate. -->
+		<string>com.calora.stepsync</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>

@@ -50,11 +50,11 @@ abstract class StepRepo {
   /// Health is unavailable, unpermitted, or has no data for that day.
   Future<int> getHealthStepsForDay(DateTime day);
 
-  /// Rolling 30-day daily step totals from the LOCAL ledger (Hive +
-  /// native FG service history merged). Returns oldest-first, one
+  /// Rolling 30-day daily step totals from the LOCAL ledger (SQLite,
+  /// native FG service history merged in). Returns oldest-first, one
   /// entry per calendar day, with 0 for days that have no record.
   /// Fast + offline — no network round-trip.
-  List<StepsWithMetricsRequest> getLast30DaysLocal();
+  Future<List<StepsWithMetricsRequest>> getLast30DaysLocal();
 
   Future<bool> isHealthDataAvailable();
 
@@ -67,6 +67,15 @@ abstract class StepRepo {
   Future<bool> hasHealthPermission();
 
   Future<bool> requestHealthPermission();
+
+  /// Android only (no-op elsewhere): makes sure the separate Health
+  /// Connect background-read permission
+  /// (`android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND`) is
+  /// granted, prompting at most once per install. Without it, newer
+  /// Health Connect builds reject the WorkManager isolate's step reads
+  /// with a SecurityException and background sync silently dies.
+  /// Call from FOREGROUND code paths only — it may show a system dialog.
+  Future<void> ensureBackgroundReadAuthorized();
 
   Future<void> openHealthSettings();
 }

@@ -59,20 +59,20 @@ class HealthConnectHintDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: Colors.green.shade50,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.favorite, color: Colors.green, size: 32),
+            child: const Icon(Icons.favorite, color: Colors.green, size: 24),
           ),
-          const SizedBox(height: 16),
           Text(
             Strings.healthHintTitle,
             textAlign: TextAlign.center,
+            textScaler: TextScaler.linear(1.0),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
@@ -82,7 +82,8 @@ class HealthConnectHintDialog extends StatelessWidget {
               repo: _repoName,
             ),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            textScaler: TextScaler.linear(1.0),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 12),
           _BenefitRow(text: Strings.healthHintBenefitAccuracy),
@@ -109,7 +110,7 @@ class HealthConnectHintDialog extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -124,11 +125,17 @@ class HealthConnectHintDialog extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
+                  style: ButtonStyle(
+                    padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                  ),
                   onPressed: () {
                     Navigator.pop(context);
                     onAccept();
                   },
-                  child: Text(Strings.doContinue),
+                  child: Text(
+                    Strings.doContinue,
+                    maxLines: 1,
+                  ),
                 ),
               ),
             ],
@@ -153,7 +160,11 @@ class _BenefitRow extends StatelessWidget {
           const Icon(Icons.check_circle, size: 18, color: Colors.green),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 14)),
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 12, height: 1),
+              textScaler: TextScaler.linear(1),
+            ),
           ),
         ],
       ),

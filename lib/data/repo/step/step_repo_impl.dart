@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:calora/common/base/step_ledger_db.dart';
 import 'package:calora/common/base/step_ledger_store.dart';
 import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/data/api/steps_api.dart';
@@ -242,10 +243,42 @@ class StepRepoImpl extends StepRepo {
 
       final granted = await _health.requestAuthorization(types, permissions: permissions);
       _stepsAuthorized = granted;
+      if (granted) await ensureBackgroundReadAuthorized();
       return granted;
     } catch (e) {
       log('[Health] requestHealthPermission error: $e');
       return false;
+    }
+  }
+
+  /// Guards [ensureBackgroundReadAuthorized] against re-running its
+  /// channel round-trips on every health-mode activation in one process.
+  bool _bgReadChecked = false;
+
+  @override
+  Future<void> ensureBackgroundReadAuthorized() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    if (_bgReadChecked) return;
+    _bgReadChecked = true;
+
+    try {
+      // Older Health Connect builds don't have the feature — nothing to do.
+      if (!await _health.isHealthDataInBackgroundAvailable()) return;
+      if (await _health.isHealthDataInBackgroundAuthorized()) return;
+
+      // Prompt at most once per install: the request pops the system
+      // Health Connect dialog, and a user who declined shouldn't see it
+      // again on every launch. (Hive flag — main isolate only; in the
+      // background isolate the box isn't open and we bail above anyway
+      // because this method is only called from foreground paths.)
+      final flags = StepLedgerStore();
+      if (flags.isBgReadPromptShown()) return;
+      await flags.setBgReadPromptShown();
+
+      final ok = await _health.requestHealthDataInBackgroundAuthorization();
+      log('[Health] background-read authorization: $ok');
+    } catch (e) {
+      log('[Health] background-read authorization failed: $e');
     }
   }
 
@@ -346,10 +379,9 @@ class StepRepoImpl extends StepRepo {
   }
 
   @override
-  List<StepsWithMetricsRequest> getLast30DaysLocal() {
-    final ledger = StepLedgerStore();
-    return ledger
-        .getLast30Days()
+  Future<List<StepsWithMetricsRequest>> getLast30DaysLocal() async {
+    final days = await StepLedgerDb.instance.getLast30Days();
+    return days
         .map((e) => StepsWithMetricsRequest(
               date: e.key,
               value: e.value.toDouble(),

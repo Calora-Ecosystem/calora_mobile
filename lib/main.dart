@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:alice/alice.dart';
+import 'package:calora/common/base/step_ledger_db.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -20,7 +21,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -58,8 +58,11 @@ Future<void> main() async {
       );
 
       await Hive.initFlutter();
+      // steps_meta holds main-isolate-only UI flags; steps_ledger is kept
+      // open only so the one-time Hive → SQLite migration can read it.
       await Hive.openBox('steps_ledger');
       await Hive.openBox('steps_meta');
+      await StepLedgerDb.instance.migrateFromHiveIfNeeded();
 
       await configureDependencies();
 
@@ -67,20 +70,6 @@ Future<void> main() async {
 
       FirebaseMessaging.onBackgroundMessage(
         _firebaseMessagingBackgroundHandler,
-      );
-
-      FlutterForegroundTask.init(
-        androidNotificationOptions: AndroidNotificationOptions(
-          channelId: 'steps_fgs',
-          channelName: 'Steps tracking',
-          channelDescription: 'Shows steps in a persistent notification',
-        ),
-        iosNotificationOptions: const IOSNotificationOptions(
-          showNotification: false,
-        ),
-        foregroundTaskOptions: ForegroundTaskOptions(
-          eventAction: ForegroundTaskEventAction.repeat(5000),
-        ),
       );
 
       await BackgroundStepsWorker.initialize();

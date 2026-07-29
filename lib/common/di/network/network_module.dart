@@ -13,11 +13,15 @@ abstract class NetworkModule {
   @lazySingleton
   @Named('country')
   Dio countryDio() {
+    // Short timeouts on purpose: this Dio backs the auth-page country
+    // check. If the geo service is blocked or slow, the user should fall
+    // through to the fallback provider / other detection signals within
+    // seconds — not stare at a spinner for 50 s.
     final options = BaseOptions(
       baseUrl: 'https://api.country.is/',
-      connectTimeout: const Duration(seconds: 50),
-      receiveTimeout: const Duration(seconds: 50),
-      sendTimeout: const Duration(seconds: 50),
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
+      sendTimeout: const Duration(seconds: 5),
     );
     final dio = Dio(options);
     // _allowBadCertificates(dio);

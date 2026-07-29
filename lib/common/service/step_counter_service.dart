@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:calora/common/base/step_ledger_store.dart';
+import 'package:calora/common/base/step_ledger_db.dart';
 import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
+import 'package:calora/common/service/step_sync_service.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
@@ -67,19 +68,26 @@ class HealthDataNotSyncing extends StepCounterEvent {
 /// detect such an app, the service raises [HealthDataNotSyncing] on
 /// [events]. Fires at most once per process.
 ///
-/// The Android `BackgroundStepsWorker` runs in a separate isolate and
-/// cannot read this stream. It writes directly to the same
-/// `StepLedgerStore` (every 15 min via Workmanager) and also POSTs to
-/// the same backend endpoint — overlapping writes are safe since the
-/// endpoint is last-write-wins.
+/// The `BackgroundStepsWorker` runs in a separate isolate and cannot
+/// read this stream. It merges the native FG service's persisted totals
+/// and the Health aggregate into the same `StepLedgerStore` with
+/// max-semantics (never delta-accumulation — that's what used to double
+/// count) and POSTs to the same backend endpoint every ~4 min on
+/// Android — overlapping writes are safe since both sides only ever
+/// push a day's value forward.
 @lazySingleton
 class StepCounterService {
   final StepRepo _stepRepo;
   final PedometerService _pedometer;
-  final StepLedgerStore _ledger;
 
-  StepCounterService(this._stepRepo, this._pedometer)
-      : _ledger = StepLedgerStore();
+  /// Isolate-safe SQLite ledger — shared with the background worker.
+  final StepLedgerDb _db = StepLedgerDb.instance;
+
+  /// Single ledger→backend pipeline, shared design with the background
+  /// worker (each isolate constructs its own instance).
+  late final StepSyncService _syncService = StepSyncService(_stepRepo);
+
+  StepCounterService(this._stepRepo, this._pedometer);
 
   // ── Public surface ──────────────────────────────────────────────────
 
@@ -124,7 +132,7 @@ class StepCounterService {
   /// Returns `true` exactly once when the calendar day changes (and
   /// records the new day). The first call just records today.
   bool _consumeDayRollover() {
-    final todayKey = _ledger.dayKey(DateTime.now());
+    final todayKey = StepLedgerDb.dayKey(DateTime.now());
     if (_activeDayKey.isEmpty) {
       _activeDayKey = todayKey;
       return false;
@@ -176,7 +184,7 @@ class StepCounterService {
 
     // INSTANT — paint the cached value from the ledger so the UI never
     // flashes 0 while we wait on Health / sensor.
-    final cached = _ledger.totalFor(_ledger.dayKey(DateTime.now()));
+    final cached = await _db.totalFor(StepLedgerDb.dayKey(DateTime.now()));
     if (cached > 0) _emit(cached);
 
     if (await _useHealthIfAvailable()) {
@@ -189,6 +197,11 @@ class StepCounterService {
       unawaited(_backfillHistoricalDays());
     } else {
       await _useSensor();
+      // Pedometer-mode launch backfill: the native hydration above may
+      // have imported days that never reached the backend (e.g. the
+      // background chain was throttled). Push them now instead of
+      // waiting for WorkManager.
+      unawaited(_syncService.syncPendingToBackend());
     }
 
     _startBackendSync();
@@ -239,14 +252,15 @@ class StepCounterService {
       _stuckHealthRaised = false;
 
       if (initial > 0) {
-        final todayKey = _ledger.dayKey(DateTime.now());
-        await _ledger.ensureDayAtLeast(todayKey, initial);
+        final todayKey = StepLedgerDb.dayKey(DateTime.now());
+        await _db.ensureDayAtLeast(todayKey, initial);
         _emit(initial);
       }
 
       _startHealthPolling();
       await _startNativeMirror();
       _scheduleStuckHealthCheck();
+      unawaited(_stepRepo.ensureBackgroundReadAuthorized());
     } catch (e, s) {
       log('retryHealth failed: $e',
           name: 'StepCounterService', stackTrace: s);
@@ -280,7 +294,7 @@ class StepCounterService {
     try {
       final native = await StepsForegroundService.instance.getNativeHistory();
       if (native.isEmpty) return;
-      await _ledger.hydrateFromNativeHistory(native);
+      await _db.hydrateFromNativeHistory(native);
       log('Hydrated ${native.length} native history day(s) into ledger',
           name: 'StepCounterService');
     } catch (e) {
@@ -319,13 +333,14 @@ class StepCounterService {
       }
 
       if (initial > 0) {
-        final todayKey = _ledger.dayKey(DateTime.now());
-        await _ledger.ensureDayAtLeast(todayKey, initial);
+        final todayKey = StepLedgerDb.dayKey(DateTime.now());
+        await _db.ensureDayAtLeast(todayKey, initial);
         _emit(initial);
       }
 
       _startHealthPolling();
       await _startNativeMirror();
+      unawaited(_stepRepo.ensureBackgroundReadAuthorized());
       return true;
     } catch (e, s) {
       log('Health activation failed: $e',
@@ -337,19 +352,19 @@ class StepCounterService {
   Future<void> _refreshFromHealth() async {
     final rolled = _consumeDayRollover();
     final fresh = await _stepRepo.getTodayHealthSteps();
-    final todayKey = _ledger.dayKey(DateTime.now());
+    final todayKey = StepLedgerDb.dayKey(DateTime.now());
 
     if (rolled) {
       // Midnight: reset the on-screen total to the new day's Health
       // Connect value (usually 0) instead of leaving yesterday's count.
       // (getTodayHealthSteps already recomputes the day window each call.)
-      await _ledger.ensureDayAtLeast(todayKey, fresh);
+      await _db.ensureDayAtLeast(todayKey, fresh);
       _emit(fresh);
       return;
     }
 
     if (fresh <= 0) return;
-    await _ledger.ensureDayAtLeast(todayKey, fresh);
+    await _db.ensureDayAtLeast(todayKey, fresh);
     _emit(fresh);
   }
 
@@ -453,7 +468,7 @@ class StepCounterService {
       log('Pedometer fallback: ACTIVITY_RECOGNITION not granted — '
           'cannot count steps until the user grants it.',
           name: 'StepCounterService');
-      _emit(_ledger.totalFor(_ledger.dayKey(DateTime.now())));
+      _emit(await _db.totalFor(StepLedgerDb.dayKey(DateTime.now())));
       return;
     }
 
@@ -468,7 +483,7 @@ class StepCounterService {
     // blindly pushing a stale cached value (e.g. 13) down and wiping the
     // steps counted in the background.
     final native = await fg.currentNativeSteps();
-    final cached = _ledger.totalFor(_ledger.dayKey(DateTime.now()));
+    final cached = await _db.totalFor(StepLedgerDb.dayKey(DateTime.now()));
     final seed = native > cached ? native : cached;
 
     // (Re)attach the service if the Dart binding lost its state across
@@ -506,19 +521,19 @@ class StepCounterService {
 
   void _adoptNativeSteps(int native) {
     final rolled = _consumeDayRollover();
-    final todayKey = _ledger.dayKey(DateTime.now());
+    final todayKey = StepLedgerDb.dayKey(DateTime.now());
 
     if (rolled) {
       // Midnight: the native FG service rebased its baseline, so its
       // count resets to 0 for the new day. Reset the UI too instead of
       // leaving yesterday's total on screen.
-      if (native > 0) unawaited(_ledger.ensureDayAtLeast(todayKey, native));
+      if (native > 0) unawaited(_db.ensureDayAtLeast(todayKey, native));
       _emit(native);
       return;
     }
 
     if (native <= 0) return;
-    unawaited(_ledger.ensureDayAtLeast(todayKey, native));
+    unawaited(_db.ensureDayAtLeast(todayKey, native));
     _emit(native);
   }
 
@@ -526,17 +541,28 @@ class StepCounterService {
     await _pedometer.initialize();
     if (!_pedometer.isInitialized) {
       _source = StepSource.none;
-      _emit(_ledger.totalFor(_ledger.dayKey(DateTime.now())));
+      _emit(await _db.totalFor(StepLedgerDb.dayKey(DateTime.now())));
       return;
     }
     _source = StepSource.pedometer;
     _listenToSensor();
   }
 
+  /// Sensor ticks are processed strictly one at a time: the handler does
+  /// several async DB reads/writes, and letting a second tick start
+  /// before the first finished its baseline write would double-apply the
+  /// same delta. The queue chains each tick onto the previous one.
+  Future<void> _sensorTickQueue = Future.value();
+
   void _listenToSensor() {
     _sensorSub?.cancel();
     _sensorSub = _pedometer.stepCountStream.listen(
-      _onSensorTick,
+      (sensorTotal) {
+        _sensorTickQueue = _sensorTickQueue.then(
+          (_) => _onSensorTick(sensorTotal),
+          onError: (_) => _onSensorTick(sensorTotal),
+        );
+      },
       onError: (e) =>
           log('Pedometer error: $e', name: 'StepCounterService'),
     );
@@ -544,24 +570,24 @@ class StepCounterService {
 
   Future<void> _onSensorTick(int sensorTotal) async {
     final now = DateTime.now();
-    final todayKey = _ledger.dayKey(now);
-    final lastSavedDate = _ledger.getLastSensorDate();
-    final lastSensorTotal = _ledger.getLastSensorTotal();
+    final todayKey = StepLedgerDb.dayKey(now);
+    final lastSavedDate = await _db.getLastSensorDate();
+    final lastSensorTotal = await _db.getLastSensorTotal();
 
     // Day rollover — close out yesterday, reset baseline, start fresh.
     if (lastSavedDate != todayKey) {
       if (lastSensorTotal >= 0 && sensorTotal > lastSensorTotal) {
-        await _ledger.addSteps(lastSavedDate, sensorTotal - lastSensorTotal);
+        await _db.addSteps(lastSavedDate, sensorTotal - lastSensorTotal);
       }
-      await _ledger.setLastSensorDate(todayKey);
-      await _ledger.setLastSensorTotal(sensorTotal);
+      await _db.setLastSensorDate(todayKey);
+      await _db.setLastSensorTotal(sensorTotal);
       _emit(0);
       return;
     }
 
     // First read after install / reset — establish baseline only.
     if (lastSensorTotal < 0) {
-      await _ledger.setLastSensorTotal(sensorTotal);
+      await _db.setLastSensorTotal(sensorTotal);
       return;
     }
 
@@ -570,89 +596,35 @@ class StepCounterService {
     final delta = sensorTotal < lastSensorTotal
         ? sensorTotal
         : sensorTotal - lastSensorTotal;
-    await _ledger.setLastSensorTotal(sensorTotal);
+    await _db.setLastSensorTotal(sensorTotal);
     if (delta <= 0) return;
 
-    await _ledger.addSteps(todayKey, delta);
-    _emit(_ledger.totalFor(todayKey));
+    await _db.addSteps(todayKey, delta);
+    _emit(await _db.totalFor(todayKey));
   }
 
   // ── Backend backfill (one-shot on startup) ──────────────────────────
 
-  /// Pushes the last [_backfillDays] of Health daily totals to the
-  /// backend. Tries the batch endpoint first (`POST
-  /// /users/dailies/batch`) and falls back to per-day single POSTs
-  /// (`POST /users/dailies`) if the batch call throws — that way the
-  /// historical sync still completes even if the server hasn't
-  /// shipped the batch endpoint yet.
+  /// Health-mode startup backfill: hydrate the last [_backfillDays] of
+  /// Health daily totals into the LEDGER (max-merge), then push every
+  /// pending day through the single sync pipeline.
   ///
-  /// Runs once per service startup in the background — `unawaited`
-  /// from the caller, so it never blocks the UI paint. Re-running on
-  /// every cold start is intentional: the endpoints are upsert-by-date
-  /// on the server, so re-POSTing yesterday with its finalized count
-  /// (after midnight passes and Health settles) corrects any value
-  /// the 1-min sync wrote earlier while the day was still in progress.
+  /// Routing through the ledger — instead of POSTing Health values
+  /// directly, as this used to — is what makes the backfill safe: the
+  /// ledger records exactly what was synced, so the background worker
+  /// can never later re-POST a lower value for the same day and
+  /// downgrade the server's weekly/monthly data.
+  ///
+  /// Runs once per service startup, `unawaited` so it never blocks the
+  /// UI paint. Re-running on every cold start is intentional: Health
+  /// data for recent days can settle late (a tracker syncing last
+  /// night's walk this morning), and the max-merge + pending check turn
+  /// an already-correct backfill into a no-op.
   Future<void> _backfillHistoricalDays() async {
-    final now = DateTime.now();
-    final from = now.subtract(const Duration(days: _backfillDays));
-
     log('Backfill starting ($_backfillDays days)…',
         name: 'StepCounterService');
-
-    // 1) Build the list of non-zero day totals from Health.
-    final totals = <DateTime, int>{};
-    for (var i = 0; i <= _backfillDays; i++) {
-      final day = DateTime(from.year, from.month, from.day)
-          .add(Duration(days: i));
-      try {
-        final steps = await _stepRepo.getHealthStepsForDay(day);
-        if (steps > 0) totals[day] = steps;
-      } catch (e) {
-        log('Backfill: Health read failed for $day: $e',
-            name: 'StepCounterService');
-      }
-    }
-
-    if (totals.isEmpty) {
-      log('Backfill: nothing to send (all days returned 0).',
-          name: 'StepCounterService');
-      return;
-    }
-    log('Backfill: ${totals.length} non-zero day(s) to POST: '
-        '${totals.entries.map((e) => "${e.key.toIso8601String().substring(0, 10)}=${e.value}").join(", ")}',
-        name: 'StepCounterService');
-
-    // 2) Try the batch endpoint.
-    try {
-      await _stepRepo.sendHealthData(from: from, to: now);
-      log('Backfill: batch POST succeeded.', name: 'StepCounterService');
-      return;
-    } catch (e) {
-      log('Backfill: batch POST failed ($e) — falling back to per-day '
-          'single POSTs.',
-          name: 'StepCounterService');
-    }
-
-    // 3) Fallback — per-day POSTs via the same endpoint the 1-min
-    //    sync already uses, with explicit `date` so we don't all
-    //    collapse onto today. Sequential so we don't spam the auth
-    //    interceptor in parallel and trip rate-limits.
-    int sent = 0;
-    for (final entry in totals.entries) {
-      try {
-        await _stepRepo.sendDailyData(
-          metric: 'Step',
-          value: entry.value,
-          date: entry.key,
-        );
-        sent++;
-      } catch (e) {
-        log('Backfill: single POST for ${entry.key} failed: $e',
-            name: 'StepCounterService');
-      }
-    }
-    log('Backfill: $sent / ${totals.length} day(s) POSTed via fallback.',
-        name: 'StepCounterService');
+    await _syncService.hydrateHealthHistory(days: _backfillDays);
+    await _syncService.syncPendingToBackend();
   }
 
   // ── Backend sync (1 min) ────────────────────────────────────────────
@@ -665,38 +637,26 @@ class StepCounterService {
     );
   }
 
-  /// POSTs today's running total to `stepRepo.sendDailyData` — but only
-  /// when it actually moved forward.
+  /// One tick of the 1-min foreground sync: fold the live count into
+  /// the ledger, then run the shared pipeline.
   ///
-  /// Change-aware + monotonic: we POST only if [currentSteps] is
-  /// **strictly greater** than the last value we successfully synced for
-  /// today. This:
-  ///   • eliminates redundant identical writes (no more 60 no-op POSTs/hr
-  ///     while the user stands still), and
-  ///   • prevents "downgrade flapping" — a transient lower reading can no
-  ///     longer overwrite a higher value already on the server.
+  /// Change-aware + monotonic for free: `syncPendingToBackend` POSTs a
+  /// day only while `total > synced`, and both columns only move up
+  /// within a day — so standing still produces zero POSTs, a transient
+  /// lower reading can never overwrite a higher server value, and the
+  /// high-water mark is THE SAME ONE the background worker advances
+  /// (`step_days.synced`), so the two sides never re-send what the
+  /// other already delivered.
   ///
-  /// The per-day high-water mark lives in [StepLedgerStore] (meta box), so
-  /// it survives restarts and resets naturally at midnight (new day key →
-  /// -1 → first real value syncs). The background WorkManager keeps its
-  /// own independent sync tracking and is unchanged.
+  /// Bonus over the old today-only push: any pending PAST day (e.g. the
+  /// user crossed midnight with the app open, or the background chain
+  /// was down for a stretch) rides along on the next tick.
   Future<void> _pushToBackend() async {
     final steps = currentSteps;
-    if (steps <= 0) return;
-
-    final todayKey = _ledger.dayKey(DateTime.now());
-    final lastSynced = _ledger.getLastSyncedBackendTotal(todayKey);
-    if (steps <= lastSynced) return; // unchanged or a lower (stale) reading
-
-    try {
-      await _stepRepo.sendDailyData(metric: 'Step', value: steps);
-      // Only advance the high-water mark on a confirmed success, so a
-      // failed POST is retried on the next tick.
-      await _ledger.setLastSyncedBackendTotal(todayKey, steps);
-    } catch (e) {
-      log('Backend sync failed (will retry in 1 min): $e',
-          name: 'StepCounterService');
+    if (steps > 0) {
+      await _db.ensureDayAtLeast(StepLedgerDb.dayKey(DateTime.now()), steps);
     }
+    await _syncService.syncPendingToBackend();
   }
 
   // ── Emission ────────────────────────────────────────────────────────
