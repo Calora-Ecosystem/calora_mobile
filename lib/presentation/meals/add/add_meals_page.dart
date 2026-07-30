@@ -283,11 +283,18 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
   }
 
-  void openCreatorWithImage(BuildContext context, AddMealsManager manager, ScannerFood food) {
+  void openCreatorWithImage(
+    BuildContext context,
+    AddMealsManager manager,
+    ScannerFood food, {
+    String? imagePath,
+    String? coverUrl,
+  }) {
     final metrics = food.metrics;
     context.showAppBottomSheet(
       child: FoodCreatorWithImage(
         isLoading: manager.state.isLoading,
+        imagePath: imagePath,
         name: food.name.localized(Localizations.localeOf(context)),
         onAdd: (name, calories, protein, oil, carbs, weight) async {
           final success = await manager.addCustomFoodAndMenu(
@@ -300,6 +307,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             menu: type.name,
             date: dateTime,
             categoryId: food.categoryId,
+            coverUrl: coverUrl,
           );
           if (context.mounted) context.router.pop();
           if (success) {
@@ -315,7 +323,13 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
   }
 
-  void openCreatorWithSpeech(BuildContext context, AddMealsManager manager, List<ScannerFood> foods) {
+  void openCreatorWithSpeech(
+    BuildContext context,
+    AddMealsManager manager,
+    List<ScannerFood> foods, {
+    String? imagePath,
+    String? coverUrl,
+  }) {
     final locale = Localizations.localeOf(context);
     final editable = foods
         .map(
@@ -333,6 +347,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
         isLoading: manager.state.isLoading,
+        imagePath: imagePath,
         foods: editable,
         onAdd: (items) async {
           bool allSucceeded = true;
@@ -347,6 +362,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               menu: type.name,
               date: dateTime,
               categoryId: food.categoryId,
+              coverUrl: coverUrl,
             );
             if (!success) {
               allSucceeded = false;
@@ -375,6 +391,11 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
     if (imagePath == null || !context.mounted) return;
 
+    // Persist the captured photo in parallel with recognition so it's ready
+    // to attach as the food's cover by the time the user taps Add. A failed
+    // upload resolves to null and simply falls back to the placeholder.
+    final coverUrlFuture = manager.uploadFoodImage(imagePath);
+
     await context.pushRoute<bool>(
       UniversalProgressRoute(
         title: Strings.caloraAi,
@@ -388,6 +409,8 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
       ),
     );
 
+    final coverUrl = await coverUrlFuture;
+
     if (context.mounted) {
       final scannedFoods = manager.state.scannedFoods;
       if (scannedFoods.isEmpty) {
@@ -395,9 +418,21 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         return;
       }
       if (scannedFoods.length == 1) {
-        openCreatorWithImage(context, manager, scannedFoods.first);
+        openCreatorWithImage(
+          context,
+          manager,
+          scannedFoods.first,
+          imagePath: imagePath,
+          coverUrl: coverUrl,
+        );
       } else {
-        openCreatorWithSpeech(context, manager, scannedFoods);
+        openCreatorWithSpeech(
+          context,
+          manager,
+          scannedFoods,
+          imagePath: imagePath,
+          coverUrl: coverUrl,
+        );
       }
     }
   }

@@ -33,6 +33,10 @@ abstract class CaloriesRepo {
 
   Future<List<ScannerFood>> getScannerFoodByVoice(String filePath);
 
+  /// Uploads a scanned food photo and returns its persisted relative
+  /// URL (used as the food's `coverUrl`), or `null` if the upload failed.
+  Future<String?> uploadFoodImage(String filePath);
+
   /// Paginated food listing. Pass any of [latest], [isUserFood],
   /// [isFavourite] to scope the result; pass `categoryId==<id>` or
   /// `name$$<query>` strings through [PaginationQuery.filteringExpression]

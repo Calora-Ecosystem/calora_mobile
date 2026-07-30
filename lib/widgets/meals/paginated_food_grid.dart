@@ -81,15 +81,17 @@ class _FoodCard extends StatelessWidget {
           color: context.colors.backgroundElevation,
           borderRadius: BorderRadius.circular(16),
         ),
+        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: CustomCachedNetworkImage.banner(
-                radius: 16,
-                height: 120,
-                imageUrl: food.coverUrl,
-              ),
+            // Full-bleed cover so every dish — wide opensource photos and
+            // tall user-captured shots alike — fills the card identically
+            // instead of portrait images rendering as a narrow strip.
+            CustomCachedNetworkImage.banner(
+              height: 120,
+              width: double.infinity,
+              imageUrl: food.coverUrl,
             ),
             Padding(
               padding: const EdgeInsets.all(8),

@@ -8,6 +8,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
@@ -212,10 +213,11 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                       itemCount: state.menuItems.length,
                       itemBuilder: (context, index) {
                         final item = state.menuItems[index];
+                        final hasCover = (item.coverUrl ?? '').isNotEmpty;
                         return Container(
                           width: double.infinity,
                           margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
+                          clipBehavior: Clip.antiAlias,
                           decoration: BoxDecoration(
                             color: context.colors.backgroundElevation,
                             borderRadius: BorderRadius.circular(16),
@@ -223,61 +225,78 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Column(
+                              // Prominent cover photo of the dish (the user's
+                              // own shot for scanned foods) so it reads at a
+                              // glance without opening the item.
+                              if (hasCover)
+                                CustomCachedNetworkImage.banner(
+                                  imageUrl: item.coverUrl,
+                                  width: double.infinity,
+                                  height: 140,
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        (item.foodName ?? '')
-                                            .text(16, 20, 600)
-                                            .c(context.colors.textStrong)
-                                            .auto(minSize: 13),
-                                        const SizedBox(height: 2),
-                                        '${(item.weight ?? 0).asFixedTruncated(0)} gr'
-                                            .text(12, 16, 400)
-                                            .c(context.colors.textSub),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              (item.foodName ?? '')
+                                                  .text(16, 20, 600)
+                                                  .c(context.colors.textStrong)
+                                                  .auto(minSize: 13),
+                                              const SizedBox(height: 2),
+                                              '${(item.weight ?? 0).asFixedTruncated(0)} gr'
+                                                  .text(12, 16, 400)
+                                                  .c(context.colors.textSub),
+                                            ],
+                                          ),
+                                        ),
+                                        // Edit any logged food; delete any logged entry.
+                                        if (item.foodId != null)
+                                          _actionIcon(
+                                            context,
+                                            icon: Icons.edit_outlined,
+                                            color: context.colors.textSub,
+                                            background: context.colors.white,
+                                            onTap: () => _openEditSheet(context, manager, item),
+                                          ),
+                                        if (item.id != null) ...[
+                                          const SizedBox(width: 6),
+                                          _actionIcon(
+                                            context,
+                                            icon: Icons.delete_outline,
+                                            color: context.colors.errorBase,
+                                            background: context.colors.errorLighter,
+                                            onTap: () => _confirmDelete(context, manager, item),
+                                          ),
+                                        ],
                                       ],
                                     ),
-                                  ),
-                                  // Edit any logged food; delete any logged entry.
-                                  if (item.foodId != null)
-                                    _actionIcon(
-                                      context,
-                                      icon: Icons.edit_outlined,
-                                      color: context.colors.textSub,
-                                      background: context.colors.white,
-                                      onTap: () => _openEditSheet(context, manager, item),
-                                    ),
-                                  if (item.id != null) ...[
-                                    const SizedBox(width: 6),
-                                    _actionIcon(
-                                      context,
-                                      icon: Icons.delete_outline,
-                                      color: context.colors.errorBase,
-                                      background: context.colors.errorLighter,
-                                      onTap: () => _confirmDelete(context, manager, item),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        _metricChip(
+                                          context,
+                                          label: Strings.kcal,
+                                          value: item.calories,
+                                          highlight: true,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        _metricChip(context, label: Strings.oils, value: item.fats),
+                                        const SizedBox(width: 8),
+                                        _metricChip(context, label: Strings.proteins, value: item.proteins),
+                                        const SizedBox(width: 8),
+                                        _metricChip(context, label: Strings.carbohydrates, value: item.carbohydrates),
+                                      ],
                                     ),
                                   ],
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  _metricChip(
-                                    context,
-                                    label: Strings.kcal,
-                                    value: item.calories,
-                                    highlight: true,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _metricChip(context, label: Strings.oils, value: item.fats),
-                                  const SizedBox(width: 8),
-                                  _metricChip(context, label: Strings.proteins, value: item.proteins),
-                                  const SizedBox(width: 8),
-                                  _metricChip(context, label: Strings.carbohydrates, value: item.carbohydrates),
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -394,6 +413,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
       child: FoodCreatorWidget(
         title: _editTitle(context),
         submitText: Strings.save,
+        imageUrl: item.coverUrl,
         initialName: item.foodName,
         initialCalories: item.calories.round(),
         initialProtein: item.proteins,

@@ -6,6 +6,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/creator/food_creator.dart';
+import 'package:calora/widgets/creator/scanned_photo_hero.dart';
 import 'package:flutter/material.dart';
 
 /// Mutable holder for an AI-detected food so the user can correct its values
@@ -38,11 +39,16 @@ class FoodCreatorWithSpeech extends StatefulWidget {
   final void Function(List<EditableFood> foods) onAdd;
   final bool isLoading;
 
+  /// Local path of the captured photo when this batch came from a food scan.
+  /// Null for the voice flow, where no photo exists.
+  final String? imagePath;
+
   const FoodCreatorWithSpeech({
     super.key,
     required this.foods,
     required this.onAdd,
     required this.isLoading,
+    this.imagePath,
   });
 
   @override
@@ -101,6 +107,14 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                 ],
               ),
             ),
+            if (widget.imagePath != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: ScannedPhotoHero(
+                  imagePath: widget.imagePath,
+                  height: 150,
+                ),
+              ),
             Expanded(
               child: _foods.isEmpty
                   ? Center(

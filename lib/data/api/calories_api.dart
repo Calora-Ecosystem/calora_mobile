@@ -80,6 +80,34 @@ class CaloriesApi {
     return _dio.post('food/favourites/toggle/$id');
   }
 
+  /// Uploads a captured food photo to the shared file server
+  /// (`POST /file`) and returns the stored **relative** path
+  /// (e.g. `images/food_1699999999.jpg`) so it can be persisted as a
+  /// food's `coverUrl`. A unique filename is sent because the backend
+  /// keeps the original name verbatim (no server-side GUID), so a shared
+  /// name would let one user's photo overwrite another's.
+  Future<String?> uploadFoodImage(String filePath) async {
+    final ext = _fileExtension(filePath);
+    final uniqueName = 'food_${DateTime.now().microsecondsSinceEpoch}$ext';
+
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath, filename: uniqueName),
+    });
+
+    final response = await _dio.post('file', data: formData);
+    final content = response.data['content'];
+    return content is String && content.isNotEmpty ? content : null;
+  }
+
+  /// Lower-cased extension (with dot) of [path], defaulting to `.jpg`
+  /// so the file lands in the server's image folder.
+  String _fileExtension(String path) {
+    final name = path.split(RegExp(r'[\\/]')).last;
+    final dot = name.lastIndexOf('.');
+    if (dot <= 0 || dot == name.length - 1) return '.jpg';
+    return name.substring(dot).toLowerCase();
+  }
+
   Future<List<ScannerFood>> getScannerFood(String filePath) async {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(

@@ -209,8 +209,23 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     return scannedFood;
   }
 
+  /// Uploads a scanned food photo so it can be persisted as the food's
+  /// cover. Returns the stored relative URL, or `null` on failure — the
+  /// caller then falls back to the abstract placeholder. Never throws, so
+  /// a flaky upload can't block the scan-to-log flow.
+  Future<String?> uploadFoodImage(String filePath) async {
+    try {
+      return await _repo.uploadFoodImage(filePath);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Creates a food from explicit (user-edited) values and logs it to the
   /// menu. Used when the user corrects AI scan/voice results before adding.
+  ///
+  /// [coverUrl] is the persisted photo of the scanned dish; when null (e.g.
+  /// the voice flow) the neutral abstract placeholder is used instead.
   Future<bool> addCustomFoodAndMenu({
     required String name,
     required int calories,
@@ -221,6 +236,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     required String menu,
     required DateTime date,
     int? categoryId,
+    String? coverUrl,
   }) async {
     final userId = await profileStore.getUserId() ?? 0;
     // The nutrition above describes this exact portion, so the food's base
@@ -230,7 +246,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     final request = FoodRequest(
       categoryId: categoryId,
       name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
-      coverUrl: abstractImageUrl,
+      coverUrl: coverUrl ?? abstractImageUrl,
       metrics: [
         Metric(userId: 0, metric: MetricType.kcal.name, value: calories),
         Metric(userId: 0, metric: MetricType.protein.name, value: protein),

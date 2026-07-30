@@ -131,11 +131,6 @@ class CustomCachedNetworkImage extends StatelessWidget {
         customBorderRadius ??
         (shape == BoxShape.rectangle ? BorderRadius.circular(radius) : null);
 
-    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-
-    final memHeight = width != null ? (height * pixelRatio).toInt() : null;
-    final memWidth = width != null ? (width! * pixelRatio).toInt() : null;
-
     return Container(
       height: height,
       width: width,

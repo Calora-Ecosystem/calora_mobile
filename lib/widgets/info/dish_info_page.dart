@@ -60,6 +60,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
               borderRadius: BorderRadius.circular(12),
               child: CustomCachedNetworkImage.banner(
                 imageUrl: widget.foodItem.coverUrl,
+                width: double.infinity,
                 height: 160,
               ),
             ),

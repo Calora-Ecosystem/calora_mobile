@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
@@ -6,6 +8,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/creator/scanned_photo_hero.dart';
 import 'package:flutter/material.dart';
 
 class FoodCreatorWithImage extends StatefulWidget {
@@ -31,6 +34,10 @@ class FoodCreatorWithImage extends StatefulWidget {
   onAdd;
   final bool isLoading;
 
+  /// Local path of the photo the user just captured. Shown as a hero at the
+  /// top of the sheet so the result is tied to the exact dish they scanned.
+  final String? imagePath;
+
   const FoodCreatorWithImage({
     super.key,
     required this.name,
@@ -41,6 +48,7 @@ class FoodCreatorWithImage extends StatefulWidget {
     required this.calories,
     required this.weight,
     required this.isLoading,
+    this.imagePath,
   });
 
   @override
@@ -157,6 +165,8 @@ class _FoodCreatorWithImageState extends State<FoodCreatorWithImage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 16,
         children: [
+          if (widget.imagePath != null)
+            ScannedPhotoHero(imagePath: widget.imagePath),
           Strings.theValueOfTheFoodDetermined
               .text(20, 24, 700)
               .c(context.colors.textStrong),
