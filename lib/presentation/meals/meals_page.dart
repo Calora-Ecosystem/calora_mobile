@@ -217,7 +217,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                         return Container(
                           width: double.infinity,
                           margin: const EdgeInsets.only(bottom: 12),
-                          clipBehavior: Clip.antiAlias,
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: context.colors.backgroundElevation,
                             borderRadius: BorderRadius.circular(16),
@@ -225,78 +225,95 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Prominent cover photo of the dish (the user's
-                              // own shot for scanned foods) so it reads at a
-                              // glance without opening the item.
-                              if (hasCover)
-                                CustomCachedNetworkImage.banner(
-                                  imageUrl: item.coverUrl,
-                                  width: double.infinity,
-                                  height: 140,
-                                ),
-                              Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                              // Top: dish photo on the left, this food's
+                              // nutrition on the right (kcal + macros).
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (hasCover) ...[
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: CustomCachedNetworkImage.thumbnail(
+                                        imageUrl: item.coverUrl,
+                                        height: 88,
+                                        width: 88,
+                                        radius: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                  ],
+                                  Expanded(
+                                    child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              (item.foodName ?? '')
-                                                  .text(16, 20, 600)
-                                                  .c(context.colors.textStrong)
-                                                  .auto(minSize: 13),
-                                              const SizedBox(height: 2),
-                                              '${(item.weight ?? 0).asFixedTruncated(0)} gr'
-                                                  .text(12, 16, 400)
-                                                  .c(context.colors.textSub),
-                                            ],
-                                          ),
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                                          textBaseline: TextBaseline.alphabetic,
+                                          children: [
+                                            item.calories
+                                                .asFixedTruncated(0)
+                                                .text(24, 28, 700)
+                                                .c(context.colors.textStrong),
+                                            const SizedBox(width: 4),
+                                            Strings.kcal
+                                                .text(13, 16, 500)
+                                                .c(context.colors.textSub),
+                                          ],
                                         ),
-                                        // Edit any logged food; delete any logged entry.
-                                        if (item.foodId != null)
-                                          _actionIcon(
-                                            context,
-                                            icon: Icons.edit_outlined,
-                                            color: context.colors.textSub,
-                                            background: context.colors.white,
-                                            onTap: () => _openEditSheet(context, manager, item),
-                                          ),
-                                        if (item.id != null) ...[
-                                          const SizedBox(width: 6),
-                                          _actionIcon(
-                                            context,
-                                            icon: Icons.delete_outline,
-                                            color: context.colors.errorBase,
-                                            background: context.colors.errorLighter,
-                                            onTap: () => _confirmDelete(context, manager, item),
-                                          ),
-                                        ],
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            _metricChip(context, label: Strings.oils, value: item.fats),
+                                            const SizedBox(width: 8),
+                                            _metricChip(context, label: Strings.proteins, value: item.proteins),
+                                            const SizedBox(width: 8),
+                                            _metricChip(context, label: Strings.carbohydrates, value: item.carbohydrates),
+                                          ],
+                                        ),
                                       ],
                                     ),
-                                    const SizedBox(height: 12),
-                                    Row(
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              // Bottom: name + weight, with edit / delete.
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        _metricChip(
-                                          context,
-                                          label: Strings.kcal,
-                                          value: item.calories,
-                                          highlight: true,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        _metricChip(context, label: Strings.oils, value: item.fats),
-                                        const SizedBox(width: 8),
-                                        _metricChip(context, label: Strings.proteins, value: item.proteins),
-                                        const SizedBox(width: 8),
-                                        _metricChip(context, label: Strings.carbohydrates, value: item.carbohydrates),
+                                        (item.foodName ?? '')
+                                            .text(16, 20, 600)
+                                            .c(context.colors.textStrong)
+                                            .auto(minSize: 13),
+                                        const SizedBox(height: 2),
+                                        '${(item.weight ?? 0).asFixedTruncated(0)} gr'
+                                            .text(12, 16, 400)
+                                            .c(context.colors.textSub),
                                       ],
+                                    ),
+                                  ),
+                                  // Edit any logged food; delete any logged entry.
+                                  if (item.foodId != null)
+                                    _actionIcon(
+                                      context,
+                                      icon: Icons.edit_outlined,
+                                      color: context.colors.textSub,
+                                      background: context.colors.white,
+                                      onTap: () => _openEditSheet(context, manager, item),
+                                    ),
+                                  if (item.id != null) ...[
+                                    const SizedBox(width: 6),
+                                    _actionIcon(
+                                      context,
+                                      icon: Icons.delete_outline,
+                                      color: context.colors.errorBase,
+                                      background: context.colors.errorLighter,
+                                      onTap: () => _confirmDelete(context, manager, item),
                                     ),
                                   ],
-                                ),
+                                ],
                               ),
                             ],
                           ),

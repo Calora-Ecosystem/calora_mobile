@@ -23,7 +23,6 @@ import 'package:calora/presentation/meals/add/management/add_meals_manager.dart'
 import 'package:calora/presentation/speech/speech_page.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/creator/food_creator.dart';
-import 'package:calora/widgets/creator/food_creator_with_image.dart';
 import 'package:calora/widgets/creator/food_creator_with_speech.dart';
 import 'package:calora/widgets/info/dish_info_page.dart';
 import 'package:calora/widgets/meals/meals_type_widget.dart';
@@ -283,46 +282,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
   }
 
-  void openCreatorWithImage(
-    BuildContext context,
-    AddMealsManager manager,
-    ScannerFood food, {
-    String? imagePath,
-    String? coverUrl,
-  }) {
-    final metrics = food.metrics;
-    context.showAppBottomSheet(
-      child: FoodCreatorWithImage(
-        isLoading: manager.state.isLoading,
-        imagePath: imagePath,
-        name: food.name.localized(Localizations.localeOf(context)),
-        onAdd: (name, calories, protein, oil, carbs, weight) async {
-          final success = await manager.addCustomFoodAndMenu(
-            name: name,
-            calories: calories,
-            protein: protein,
-            fat: oil,
-            carbs: carbs,
-            weightInGr: weight,
-            menu: type.name,
-            date: dateTime,
-            categoryId: food.categoryId,
-            coverUrl: coverUrl,
-          );
-          if (context.mounted) context.router.pop();
-          if (success) {
-            _showInfoDialog(context);
-          }
-        },
-        protein: MetricsHelper.getMetricValue(metrics, MetricType.protein),
-        oil: MetricsHelper.getMetricValue(metrics, MetricType.fat),
-        carbohydrates: MetricsHelper.getMetricValue(metrics, MetricType.carb),
-        calories: MetricsHelper.getMetricValue(metrics, MetricType.kcal),
-        weight: food.weight,
-      ),
-    );
-  }
-
   void openCreatorWithSpeech(
     BuildContext context,
     AddMealsManager manager,
@@ -417,23 +376,13 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         CustomSnackBar.show(context, Strings.noFoodFoundInImage);
         return;
       }
-      if (scannedFoods.length == 1) {
-        openCreatorWithImage(
-          context,
-          manager,
-          scannedFoods.first,
-          imagePath: imagePath,
-          coverUrl: coverUrl,
-        );
-      } else {
-        openCreatorWithSpeech(
-          context,
-          manager,
-          scannedFoods,
-          imagePath: imagePath,
-          coverUrl: coverUrl,
-        );
-      }
+      openCreatorWithSpeech(
+        context,
+        manager,
+        scannedFoods,
+        imagePath: imagePath,
+        coverUrl: coverUrl,
+      );
     }
   }
 
@@ -460,11 +409,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               CustomSnackBar.show(context, Strings.noFoodFoundInVoice);
               return;
             }
-            if (scannedFoods.length == 1) {
-              openCreatorWithImage(context, manager, scannedFoods.first);
-            } else {
-              openCreatorWithSpeech(context, manager, scannedFoods);
-            }
+            openCreatorWithSpeech(context, manager, scannedFoods);
           }
         },
       ),
