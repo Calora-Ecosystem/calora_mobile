@@ -225,60 +225,22 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Top: dish photo on the left, this food's
-                              // nutrition on the right (kcal + macros).
+                              // Header: dish photo on the left, name + weight,
+                              // and the edit / delete actions.
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (hasCover) ...[
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
                                       child: CustomCachedNetworkImage.thumbnail(
                                         imageUrl: item.coverUrl,
-                                        height: 88,
-                                        width: 88,
+                                        height: 56,
+                                        width: 56,
                                         radius: 12,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                   ],
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                                          textBaseline: TextBaseline.alphabetic,
-                                          children: [
-                                            item.calories
-                                                .asFixedTruncated(0)
-                                                .text(24, 28, 700)
-                                                .c(context.colors.textStrong),
-                                            const SizedBox(width: 4),
-                                            Strings.kcal
-                                                .text(13, 16, 500)
-                                                .c(context.colors.textSub),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            _metricChip(context, label: Strings.oils, value: item.fats),
-                                            const SizedBox(width: 8),
-                                            _metricChip(context, label: Strings.proteins, value: item.proteins),
-                                            const SizedBox(width: 8),
-                                            _metricChip(context, label: Strings.carbohydrates, value: item.carbohydrates),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              // Bottom: name + weight, with edit / delete.
-                              Row(
-                                children: [
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,6 +275,24 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                                       onTap: () => _confirmDelete(context, manager, item),
                                     ),
                                   ],
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              // Nutrition chips — original full-width layout.
+                              Row(
+                                children: [
+                                  _metricChip(
+                                    context,
+                                    label: Strings.kcal,
+                                    value: item.calories,
+                                    highlight: true,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _metricChip(context, label: Strings.oils, value: item.fats),
+                                  const SizedBox(width: 8),
+                                  _metricChip(context, label: Strings.proteins, value: item.proteins),
+                                  const SizedBox(width: 8),
+                                  _metricChip(context, label: Strings.carbohydrates, value: item.carbohydrates),
                                 ],
                               ),
                             ],

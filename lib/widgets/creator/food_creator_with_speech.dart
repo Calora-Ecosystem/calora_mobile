@@ -267,11 +267,11 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        _summaryMacro(context, Strings.proteins, _totalProtein),
+                        _metricChip(context, label: Strings.proteins, value: _totalProtein),
                         const SizedBox(width: 8),
-                        _summaryMacro(context, Strings.oils, _totalFat),
+                        _metricChip(context, label: Strings.oils, value: _totalFat),
                         const SizedBox(width: 8),
-                        _summaryMacro(context, Strings.carbohydrates, _totalCarbs),
+                        _metricChip(context, label: Strings.carbohydrates, value: _totalCarbs),
                       ],
                     ),
                   ],
@@ -295,12 +295,19 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
         ),
       );
 
-  Widget _summaryMacro(BuildContext context, String label, double value) {
+  /// Design-system metric chip, identical to the logged-meal cards so the
+  /// scan result reads as part of the same app. kcal is highlighted green.
+  Widget _metricChip(
+    BuildContext context, {
+    required String label,
+    required double value,
+    bool highlight = false,
+  }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         decoration: BoxDecoration(
-          color: context.colors.white,
+          color: highlight ? context.colors.accentGreenWhite : context.colors.white,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -308,9 +315,10 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
           children: [
             label.text(10, 12, 500).c(context.colors.textSub).auto(minSize: 8),
             const SizedBox(height: 4),
-            '${value.asFixedTruncated(0)} gr'
-                .text(14, 16, 700)
-                .c(context.colors.textStrong)
+            value
+                .asFixedTruncated(0)
+                .text(15, 18, 700)
+                .c(highlight ? context.colors.accentSub : context.colors.textStrong)
                 .auto(minSize: 11),
           ],
         ),
@@ -327,56 +335,29 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
         color: context.colors.backgroundElevation,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: item.name
-                          .text(15, 20, 600)
-                          .c(context.colors.textStrong)
-                          .auto(minSize: 12),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: context.colors.accentGreenWhite,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: '${item.calories} ${Strings.kcal}'
-                          .text(12, 14, 600)
-                          .c(context.colors.accentSub),
-                    ),
-                  ],
-                ),
-                if (item.weight > 0) ...[
-                  const SizedBox(height: 4),
-                  '${item.weight} gr'
-                      .text(12, 16, 500)
-                      .c(context.colors.textSub),
-                ],
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _macro(context, Strings.oils, item.fat),
-                    const SizedBox(width: 8),
-                    _macro(context, Strings.proteins, item.protein),
-                    const SizedBox(width: 8),
-                    _macro(context, Strings.carbohydrates, item.carbs),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Column(
+          // Header: name + weight, with edit / delete.
+          Row(
             children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    item.name
+                        .text(16, 20, 600)
+                        .c(context.colors.textStrong)
+                        .auto(minSize: 13),
+                    if (item.weight > 0) ...[
+                      const SizedBox(height: 2),
+                      '${item.weight} gr'
+                          .text(12, 16, 400)
+                          .c(context.colors.textSub),
+                    ],
+                  ],
+                ),
+              ),
               _circleBtn(
                 context,
                 icon: Icons.edit_outlined,
@@ -384,7 +365,7 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                 background: context.colors.white,
                 onTap: () => _editFood(index),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(width: 8),
               _circleBtn(
                 context,
                 icon: Icons.close_rounded,
@@ -394,31 +375,25 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          // Nutrition chips — same layout as the logged-meal cards.
+          Row(
+            children: [
+              _metricChip(
+                context,
+                label: Strings.kcal,
+                value: item.calories.toDouble(),
+                highlight: true,
+              ),
+              const SizedBox(width: 8),
+              _metricChip(context, label: Strings.oils, value: item.fat),
+              const SizedBox(width: 8),
+              _metricChip(context, label: Strings.proteins, value: item.protein),
+              const SizedBox(width: 8),
+              _metricChip(context, label: Strings.carbohydrates, value: item.carbs),
+            ],
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget _macro(BuildContext context, String label, double value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        decoration: BoxDecoration(
-          color: context.colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            label.text(10, 12, 500).c(context.colors.textSub).auto(minSize: 8),
-            const SizedBox(height: 4),
-            value
-                .asFixedTruncated(0)
-                .text(14, 16, 700)
-                .c(context.colors.textStrong)
-                .auto(minSize: 11),
-          ],
-        ),
       ),
     );
   }
