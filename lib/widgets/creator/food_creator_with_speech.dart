@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/number_extension/truncate.dart';
@@ -6,6 +8,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/creator/food_creator.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Mutable holder for an AI-detected food so the user can correct its values
@@ -35,16 +38,26 @@ class EditableFood {
 
 class FoodCreatorWithSpeech extends StatefulWidget {
   final List<EditableFood> foods;
+  final void Function(List<EditableFood> foods) onAdd;
+  final bool isLoading;
 
-  /// Adds [foods] and returns the items that FAILED to add (empty when every
-  /// food was logged). The sheet then keeps only the failed items so tapping
-  /// "Add" again retries just those instead of duplicating ones already saved.
-  final Future<List<EditableFood>> Function(List<EditableFood> foods) onAdd;
+  /// Local path of the captured photo when this batch came from a food scan.
+  /// Null for the voice flow, where no photo exists.
+  final String? imagePath;
+
+  /// Sheet header. Defaults keep the original voice-flow copy so existing
+  /// callers are unaffected; the scan flow passes photo-appropriate text.
+  final String? title;
+  final String? subtitle;
 
   const FoodCreatorWithSpeech({
     super.key,
     required this.foods,
     required this.onAdd,
+    required this.isLoading,
+    this.imagePath,
+    this.title,
+    this.subtitle,
   });
 
   @override
@@ -83,28 +96,51 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
 
   void _removeFood(int index) => setState(() => _foods.removeAt(index));
 
-  bool _submitting = false;
-
-  Future<void> _onAddPressed() async {
-    if (_submitting || _foods.isEmpty) return;
-    setState(() => _submitting = true);
-    final failed = await widget.onAdd(List.of(_foods));
-    if (!mounted) return;
-    // Drop the foods that were logged successfully; only the failures remain
-    // so a retry can't duplicate an already-saved food.
-    setState(() {
-      _foods
-        ..clear()
-        ..addAll(failed);
-      _submitting = false;
-    });
+  /// Subtitle that matches the source of the batch: an explicit override, a
+  /// photo-scan message when a captured photo is present, or the voice-flow
+  /// default otherwise.
+  String _resolvedSubtitle(BuildContext context) {
+    if (widget.subtitle != null) return widget.subtitle!;
+    if (widget.imagePath != null) {
+      switch (context.locale.languageCode) {
+        case 'ru':
+          return 'Продукты, распознанные по фото';
+        case 'en':
+          return 'Foods detected from the photo';
+        case 'uz':
+        default:
+          return 'Rasm orqali aniqlangan ovqatlar';
+      }
+    }
+    return Strings.foodsIdentifiedByVoiceMessage;
   }
+
+  /// Localized "total weight" label. Inlined (rather than a generated string)
+  /// to match the existing locale-switch pattern used elsewhere in the app.
+  String _weightLabel(BuildContext context) {
+    switch (context.locale.languageCode) {
+      case 'ru':
+        return 'Общий вес';
+      case 'en':
+        return 'Total weight';
+      case 'uz':
+      default:
+        return 'Umumiy vazn';
+    }
+  }
+
+  // ── Live totals across all (still-listed, possibly edited) foods ──────
+  int get _totalKcal => _foods.fold(0, (s, f) => s + f.calories);
+  double get _totalProtein => _foods.fold(0.0, (s, f) => s + f.protein);
+  double get _totalFat => _foods.fold(0.0, (s, f) => s + f.fat);
+  double get _totalCarbs => _foods.fold(0.0, (s, f) => s + f.carbs);
+  int get _totalWeight => _foods.fold(0, (s, f) => s + f.weight);
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.6,
+        height: MediaQuery.of(context).size.height * 0.72,
         child: Column(
           children: [
             Padding(
@@ -112,9 +148,11 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Strings.meals.text(20, 24, 700).c(context.colors.textStrong),
+                  (widget.title ?? Strings.meals)
+                      .text(20, 24, 700)
+                      .c(context.colors.textStrong),
                   const SizedBox(height: 6),
-                  Strings.foodsIdentifiedByVoiceMessage
+                  _resolvedSubtitle(context)
                       .text(14, 18, 400)
                       .c(context.colors.textSub),
                 ],
@@ -127,10 +165,20 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                           .text(14, 18, 400)
                           .c(context.colors.textSub),
                     )
-                  : ListView.builder(
+                  : ListView(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      itemCount: _foods.length,
-                      itemBuilder: (context, index) => _foodCard(context, index),
+                      children: [
+                        _summaryCard(context),
+                        const SizedBox(height: 16),
+                        Strings.meals
+                            .text(16, 20, 600)
+                            .c(context.colors.textStrong),
+                        const SizedBox(height: 8),
+                        ...List.generate(
+                          _foods.length,
+                          (index) => _foodCard(context, index),
+                        ),
+                      ],
                     ),
             ),
             Padding(
@@ -148,15 +196,130 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                   ),
                   Expanded(
                     child: Button(
-                      loading: _submitting,
+                      loading: widget.isLoading,
                       enabled: _foods.isNotEmpty,
-                      onPressed: _onAddPressed,
+                      onPressed: () => widget.onAdd(_foods),
                       text: Strings.add,
                     ),
                   ),
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Hero summary: dish photo on the left, the combined nutrition of every
+  /// detected food on the right (total kcal + protein/fat/carb + weight).
+  Widget _summaryCard(BuildContext context) {
+    final path = widget.imagePath;
+    final hasPhoto =
+        path != null && path.isNotEmpty && File(path).existsSync();
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.colors.backgroundElevation,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (hasPhoto) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(path),
+                    width: 96,
+                    height: 96,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _photoFallback(context),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        '$_totalKcal'
+                            .text(28, 32, 700)
+                            .c(context.colors.textStrong),
+                        const SizedBox(width: 4),
+                        Strings.kcal.text(14, 18, 500).c(context.colors.textSub),
+                      ],
+                    ),
+                    if (_totalWeight > 0) ...[
+                      const SizedBox(height: 2),
+                      '${_weightLabel(context)}: $_totalWeight gr'
+                          .text(12, 16, 400)
+                          .c(context.colors.textSub),
+                    ],
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _metricChip(context, label: Strings.proteins, value: _totalProtein),
+                        const SizedBox(width: 8),
+                        _metricChip(context, label: Strings.oils, value: _totalFat),
+                        const SizedBox(width: 8),
+                        _metricChip(context, label: Strings.carbohydrates, value: _totalCarbs),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _photoFallback(BuildContext context) => Container(
+        width: 96,
+        height: 96,
+        color: context.colors.white,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.restaurant_menu_rounded,
+          color: context.colors.textSub,
+        ),
+      );
+
+  /// Design-system metric chip, identical to the logged-meal cards so the
+  /// scan result reads as part of the same app. kcal is highlighted green.
+  Widget _metricChip(
+    BuildContext context, {
+    required String label,
+    required double value,
+    bool highlight = false,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: highlight ? context.colors.accentGreenWhite : context.colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            label.text(10, 12, 500).c(context.colors.textSub).auto(minSize: 8),
+            const SizedBox(height: 4),
+            value
+                .asFixedTruncated(0)
+                .text(15, 18, 700)
+                .c(highlight ? context.colors.accentSub : context.colors.textStrong)
+                .auto(minSize: 11),
           ],
         ),
       ),
@@ -172,56 +335,29 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
         color: context.colors.backgroundElevation,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: item.name
-                          .text(15, 20, 600)
-                          .c(context.colors.textStrong)
-                          .auto(minSize: 12),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: context.colors.accentGreenWhite,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: '${item.calories} ${Strings.kcal}'
-                          .text(12, 14, 600)
-                          .c(context.colors.accentSub),
-                    ),
-                  ],
-                ),
-                if (item.weight > 0) ...[
-                  const SizedBox(height: 4),
-                  '${item.weight} gr'
-                      .text(12, 16, 500)
-                      .c(context.colors.textSub),
-                ],
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _macro(context, Strings.oils, item.fat),
-                    const SizedBox(width: 8),
-                    _macro(context, Strings.proteins, item.protein),
-                    const SizedBox(width: 8),
-                    _macro(context, Strings.carbohydrates, item.carbs),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Column(
+          // Header: name + weight, with edit / delete.
+          Row(
             children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    item.name
+                        .text(16, 20, 600)
+                        .c(context.colors.textStrong)
+                        .auto(minSize: 13),
+                    if (item.weight > 0) ...[
+                      const SizedBox(height: 2),
+                      '${item.weight} gr'
+                          .text(12, 16, 400)
+                          .c(context.colors.textSub),
+                    ],
+                  ],
+                ),
+              ),
               _circleBtn(
                 context,
                 icon: Icons.edit_outlined,
@@ -229,7 +365,7 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                 background: context.colors.white,
                 onTap: () => _editFood(index),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(width: 8),
               _circleBtn(
                 context,
                 icon: Icons.close_rounded,
@@ -239,31 +375,25 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          // Nutrition chips — same layout as the logged-meal cards.
+          Row(
+            children: [
+              _metricChip(
+                context,
+                label: Strings.kcal,
+                value: item.calories.toDouble(),
+                highlight: true,
+              ),
+              const SizedBox(width: 8),
+              _metricChip(context, label: Strings.oils, value: item.fat),
+              const SizedBox(width: 8),
+              _metricChip(context, label: Strings.proteins, value: item.protein),
+              const SizedBox(width: 8),
+              _metricChip(context, label: Strings.carbohydrates, value: item.carbs),
+            ],
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget _macro(BuildContext context, String label, double value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        decoration: BoxDecoration(
-          color: context.colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            label.text(10, 12, 500).c(context.colors.textSub).auto(minSize: 8),
-            const SizedBox(height: 4),
-            value
-                .asFixedTruncated(0)
-                .text(14, 16, 700)
-                .c(context.colors.textStrong)
-                .auto(minSize: 11),
-          ],
-        ),
       ),
     );
   }

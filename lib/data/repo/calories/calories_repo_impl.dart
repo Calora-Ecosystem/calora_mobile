@@ -154,6 +154,11 @@ class CaloriesRepoImpl extends CaloriesRepo {
   }
 
   @override
+  Future<String?> uploadFoodImage(String filePath) async {
+    return _api.uploadFoodImage(filePath);
+  }
+
+  @override
   Future<SummaryRequest> getSummary(DateTime date) async {
     final response = await _api.getSummary(date);
     return SummaryRequest.fromJson(response.data['content']);

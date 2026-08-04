@@ -23,7 +23,6 @@ import 'package:calora/presentation/meals/add/management/add_meals_manager.dart'
 import 'package:calora/presentation/speech/speech_page.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/creator/food_creator.dart';
-import 'package:calora/widgets/creator/food_creator_with_image.dart';
 import 'package:calora/widgets/creator/food_creator_with_speech.dart';
 import 'package:calora/widgets/info/dish_info_page.dart';
 import 'package:calora/widgets/meals/meals_type_widget.dart';
@@ -94,75 +93,75 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
       delay: const Duration(milliseconds: 700),
       steps: _addFoodTourSteps(context),
       child: PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        context.router.pop(true);
-      },
-      child: Scaffold(
-        backgroundColor: context.colors.white,
-        appBar: CustomAppBar(
-          title: Strings.add,
-          onBack: () => context.router.pop(true),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              children: [
-                CommonTextField(
-                  hint: Strings.searchForFoodOrProduct,
-                  controller: _searchController,
-                ),
-                if (context.read<AppManager>().state.isUserPremium) const SizedBox(height: 12),
-                if (state.activeTab != FoodTab.search) ...[
-                  Row(
-                    children: [
-                      buildActionCard(
-                        spotlightKey: _createKey,
-                        onTap: () => openCreatePage(context, manager),
-                        context: context,
-                        text: Strings.creation,
-                        isPremiumFeature: false,
-                        textColor: context.colors.textStrong,
-                        icon: Assets.icons.icPlusCircle.svg(),
-                      ),
-                      const SizedBox(width: 8),
-                      buildActionCard(
-                        spotlightKey: _scanKey,
-                        onTap: () => openCameraPage(context, manager),
-                        context: context,
-                        icon: Assets.icons.icScan.svg(),
-                        text: Strings.scanning,
-                        textColor: context.colors.textWhite,
-                        useGradient: true,
-                      ),
-                      buildActionCard(
-                        spotlightKey: _voiceKey,
-                        onTap: () => openSpeechPage(context, manager),
-                        context: context,
-                        icon: Assets.icons.icChat.svg(),
-                        text: Strings.byVoice,
-                        textColor: context.colors.textWhite,
-                        useGradient: true,
-                      ),
-                    ],
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          context.router.pop(true);
+        },
+        child: Scaffold(
+          backgroundColor: context.colors.white,
+          appBar: CustomAppBar(
+            title: Strings.add,
+            onBack: () => context.router.pop(true),
+          ),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                children: [
+                  CommonTextField(
+                    hint: Strings.searchForFoodOrProduct,
+                    controller: _searchController,
                   ),
-                  const SizedBox(height: 12),
-                  ToggleButtonsWidget(
-                    onChanged: manager.onToggleChanged,
-                    titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
+                  if (context.read<AppManager>().state.isUserPremium) const SizedBox(height: 12),
+                  if (state.activeTab != FoodTab.search) ...[
+                    Row(
+                      children: [
+                        buildActionCard(
+                          spotlightKey: _createKey,
+                          onTap: () => openCreatePage(context, manager),
+                          context: context,
+                          text: Strings.creation,
+                          isPremiumFeature: false,
+                          textColor: context.colors.textStrong,
+                          icon: Assets.icons.icPlusCircle.svg(),
+                        ),
+                        const SizedBox(width: 8),
+                        buildActionCard(
+                          spotlightKey: _scanKey,
+                          onTap: () => openCameraPage(context, manager),
+                          context: context,
+                          icon: Assets.icons.icScan.svg(),
+                          text: Strings.scanning,
+                          textColor: context.colors.textWhite,
+                          useGradient: true,
+                        ),
+                        buildActionCard(
+                          spotlightKey: _voiceKey,
+                          onTap: () => openSpeechPage(context, manager),
+                          context: context,
+                          icon: Assets.icons.icChat.svg(),
+                          text: Strings.byVoice,
+                          textColor: context.colors.textWhite,
+                          useGradient: true,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ToggleButtonsWidget(
+                      onChanged: manager.onToggleChanged,
+                      titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  Expanded(
+                    child: _buildBody(context, manager, state),
                   ),
-                  const SizedBox(height: 12),
                 ],
-                Expanded(
-                  child: _buildBody(context, manager, state),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -170,31 +169,31 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   /// First-visit coach-mark steps pointing at the three real food-adding
   /// buttons, explaining exactly what each one does.
   List<FeatureTourStep> _addFoodTourSteps(BuildContext context) => [
-        FeatureTourStep(
-          targetKey: _scanKey,
-          icon: Icons.center_focus_strong_rounded,
-          title: 'ft_af_scan_t'.tr(),
-          description: 'ft_af_scan_d'.tr(),
-        ),
-        FeatureTourStep(
-          targetKey: _voiceKey,
-          icon: Icons.mic_rounded,
-          title: 'ft_af_voice_t'.tr(),
-          description: 'ft_af_voice_d'.tr(),
-        ),
-        FeatureTourStep(
-          targetKey: _createKey,
-          icon: Icons.edit_rounded,
-          title: 'ft_af_create_t'.tr(),
-          description: 'ft_af_create_d'.tr(),
-        ),
-      ];
+    FeatureTourStep(
+      targetKey: _scanKey,
+      icon: Icons.center_focus_strong_rounded,
+      title: 'ft_af_scan_t'.tr(),
+      description: 'ft_af_scan_d'.tr(),
+    ),
+    FeatureTourStep(
+      targetKey: _voiceKey,
+      icon: Icons.mic_rounded,
+      title: 'ft_af_voice_t'.tr(),
+      description: 'ft_af_voice_d'.tr(),
+    ),
+    FeatureTourStep(
+      targetKey: _createKey,
+      icon: Icons.edit_rounded,
+      title: 'ft_af_create_t'.tr(),
+      description: 'ft_af_create_d'.tr(),
+    ),
+  ];
 
   Widget _buildBody(
-    BuildContext context,
-    AddMealsManager manager,
-    AddMealsState state,
-  ) {
+      BuildContext context,
+      AddMealsManager manager,
+      AddMealsState state,
+      ) {
     if (state.activeTab == FoodTab.categories) {
       return RepaintBoundary(
         child: MealTypeGrid(
@@ -274,86 +273,43 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               MenuInfo(menu: type.name, date: dateTime, foodId: addedFoodId, weightInGr: 400),
             );
           }
-          if (!context.mounted) return;
-          // Close the sheet only when the food was actually logged. On failure
-          // keep it open and surface the error so the user can retry, instead
-          // of silently dismissing a sheet whose food was never added.
+          if (context.mounted) context.router.pop();
           if (success) {
-            context.router.pop();
             _showInfoDialog(context);
-          } else {
-            CustomSnackBar.show(
-              context,
-              manager.state.addErrorMessage ?? Strings.somethingWentWrong,
-            );
           }
         },
       ),
     );
   }
 
-  void openCreatorWithImage(BuildContext context, AddMealsManager manager, ScannerFood food) {
-    final metrics = food.metrics;
-    context.showAppBottomSheet(
-      child: FoodCreatorWithImage(
-        isLoading: manager.state.isLoading,
-        name: food.name.localized(Localizations.localeOf(context)),
-        onAdd: (name, calories, protein, oil, carbs, weight) async {
-          final success = await manager.addCustomFoodAndMenu(
-            name: name,
-            calories: calories,
-            protein: protein,
-            fat: oil,
-            carbs: carbs,
-            weightInGr: weight,
-            menu: type.name,
-            date: dateTime,
-            categoryId: food.categoryId,
-          );
-          if (!context.mounted) return;
-          // Close the sheet only when the food was actually logged. On failure
-          // keep it open and surface the error so the user can retry, instead
-          // of silently dismissing a sheet whose food was never added.
-          if (success) {
-            context.router.pop();
-            _showInfoDialog(context);
-          } else {
-            CustomSnackBar.show(
-              context,
-              manager.state.addErrorMessage ?? Strings.somethingWentWrong,
-            );
-          }
-        },
-        protein: MetricsHelper.getMetricValue(metrics, MetricType.protein),
-        oil: MetricsHelper.getMetricValue(metrics, MetricType.fat),
-        carbohydrates: MetricsHelper.getMetricValue(metrics, MetricType.carb),
-        calories: MetricsHelper.getMetricValue(metrics, MetricType.kcal),
-        weight: food.weight,
-      ),
-    );
-  }
-
-  void openCreatorWithSpeech(BuildContext context, AddMealsManager manager, List<ScannerFood> foods) {
+  void openCreatorWithSpeech(
+      BuildContext context,
+      AddMealsManager manager,
+      List<ScannerFood> foods, {
+        String? imagePath,
+        String? coverUrl,
+      }) {
     final locale = Localizations.localeOf(context);
     final editable = foods
         .map(
           (e) => EditableFood(
-            name: e.name.localized(locale),
-            calories: MetricsHelper.getMetricValue(e.metrics, MetricType.kcal).round(),
-            protein: MetricsHelper.getMetricValue(e.metrics, MetricType.protein),
-            fat: MetricsHelper.getMetricValue(e.metrics, MetricType.fat),
-            carbs: MetricsHelper.getMetricValue(e.metrics, MetricType.carb),
-            categoryId: e.categoryId,
-            weight: e.weight,
-          ),
-        )
+        name: e.name.localized(locale),
+        calories: MetricsHelper.getMetricValue(e.metrics, MetricType.kcal).round(),
+        protein: MetricsHelper.getMetricValue(e.metrics, MetricType.protein),
+        fat: MetricsHelper.getMetricValue(e.metrics, MetricType.fat),
+        carbs: MetricsHelper.getMetricValue(e.metrics, MetricType.carb),
+        categoryId: e.categoryId,
+        weight: e.weight,
+      ),
+    )
         .toList();
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
+        isLoading: manager.state.isLoading,
+        imagePath: imagePath,
         foods: editable,
         onAdd: (items) async {
-          final failed = <EditableFood>[];
-          String? errorMessage;
+          bool allSucceeded = true;
           for (final food in items) {
             final success = await manager.addCustomFoodAndMenu(
               name: food.name,
@@ -365,29 +321,18 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               menu: type.name,
               date: dateTime,
               categoryId: food.categoryId,
+              coverUrl: coverUrl,
             );
             if (!success) {
-              failed.add(food);
-              // Capture the first failure's backend message before a later
-              // food's attempt can overwrite it in state.
-              errorMessage ??= manager.state.addErrorMessage;
+              allSucceeded = false;
             }
           }
           if (context.mounted) {
-            // Close the sheet only when every food was logged. On any failure
-            // keep it open (with just the failed foods) and surface the error
-            // so the user can retry without duplicating what already saved.
-            if (failed.isEmpty) {
-              context.router.pop();
+            context.router.pop();
+            if (allSucceeded) {
               _showInfoDialog(context);
-            } else {
-              CustomSnackBar.show(
-                context,
-                errorMessage ?? Strings.somethingWentWrong,
-              );
             }
           }
-          return failed;
         },
       ),
     );
@@ -405,6 +350,11 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
     if (imagePath == null || !context.mounted) return;
 
+    // Persist the captured photo in parallel with recognition so it's ready
+    // to attach as the food's cover by the time the user taps Add. A failed
+    // upload resolves to null and simply falls back to the placeholder.
+    final coverUrlFuture = manager.uploadFoodImage(imagePath);
+
     await context.pushRoute<bool>(
       UniversalProgressRoute(
         title: Strings.caloraAi,
@@ -418,17 +368,21 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
       ),
     );
 
+    final coverUrl = await coverUrlFuture;
+
     if (context.mounted) {
       final scannedFoods = manager.state.scannedFoods;
       if (scannedFoods.isEmpty) {
         CustomSnackBar.show(context, Strings.noFoodFoundInImage);
         return;
       }
-      if (scannedFoods.length == 1) {
-        openCreatorWithImage(context, manager, scannedFoods.first);
-      } else {
-        openCreatorWithSpeech(context, manager, scannedFoods);
-      }
+      openCreatorWithSpeech(
+        context,
+        manager,
+        scannedFoods,
+        imagePath: imagePath,
+        coverUrl: coverUrl,
+      );
     }
   }
 
@@ -455,11 +409,7 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               CustomSnackBar.show(context, Strings.noFoodFoundInVoice);
               return;
             }
-            if (scannedFoods.length == 1) {
-              openCreatorWithImage(context, manager, scannedFoods.first);
-            } else {
-              openCreatorWithSpeech(context, manager, scannedFoods);
-            }
+            openCreatorWithSpeech(context, manager, scannedFoods);
           }
         },
       ),
@@ -498,11 +448,11 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   color: useGradient ? null : context.colors.backgroundElevation,
                   gradient: useGradient
                       ? RadialGradient(
-                          center: const Alignment(1.2, 0.5),
-                          radius: 1.3,
-                          colors: [context.colors.honeydew, context.colors.mintGreen],
-                          stops: const [0.0, 1.0],
-                        )
+                    center: const Alignment(1.2, 0.5),
+                    radius: 1.3,
+                    colors: [context.colors.honeydew, context.colors.mintGreen],
+                    stops: const [0.0, 1.0],
+                  )
                       : null,
                 ),
                 child: Column(

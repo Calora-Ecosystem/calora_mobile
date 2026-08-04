@@ -3,6 +3,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,11 @@ class FoodCreatorWidget extends StatefulWidget {
   final String? title;
   final String? submitText;
 
+  /// Cover photo (relative `coverUrl`) of the food being edited. Shown as a
+  /// banner at the top so the dish — including a user's scanned photo — is
+  /// visible while editing. Null/empty hides it (e.g. "add your own food").
+  final String? imageUrl;
+
   const FoodCreatorWidget({
     super.key,
     required this.onSubmit,
@@ -44,6 +50,7 @@ class FoodCreatorWidget extends StatefulWidget {
     this.initialWeight,
     this.title,
     this.submitText,
+    this.imageUrl,
   });
 
   @override
@@ -159,6 +166,15 @@ class _FoodCreatorWidgetState extends State<FoodCreatorWidget> {
       child: Column(
         spacing: 16,
         children: [
+          if ((widget.imageUrl ?? '').isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CustomCachedNetworkImage.banner(
+                imageUrl: widget.imageUrl,
+                width: double.infinity,
+                height: 150,
+              ),
+            ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

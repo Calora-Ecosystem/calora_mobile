@@ -8,6 +8,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/image/custom_cached_network_image.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
@@ -212,6 +213,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                       itemCount: state.menuItems.length,
                       itemBuilder: (context, index) {
                         final item = state.menuItems[index];
+                        final hasCover = (item.coverUrl ?? '').isNotEmpty;
                         return Container(
                           width: double.infinity,
                           margin: const EdgeInsets.only(bottom: 12),
@@ -223,9 +225,22 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Header: dish photo on the left, name + weight,
+                              // and the edit / delete actions.
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  if (hasCover) ...[
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: CustomCachedNetworkImage.thumbnail(
+                                        imageUrl: item.coverUrl,
+                                        height: 56,
+                                        width: 56,
+                                        radius: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                  ],
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,6 +278,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                                 ],
                               ),
                               const SizedBox(height: 12),
+                              // Nutrition chips — original full-width layout.
                               Row(
                                 children: [
                                   _metricChip(
@@ -394,6 +410,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
       child: FoodCreatorWidget(
         title: _editTitle(context),
         submitText: Strings.save,
+        imageUrl: item.coverUrl,
         initialName: item.foodName,
         initialCalories: item.calories.round(),
         initialProtein: item.proteins,
