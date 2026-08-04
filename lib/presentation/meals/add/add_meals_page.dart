@@ -274,9 +274,18 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               MenuInfo(menu: type.name, date: dateTime, foodId: addedFoodId, weightInGr: 400),
             );
           }
-          if (context.mounted) context.router.pop();
+          if (!context.mounted) return;
+          // Close the sheet only when the food was actually logged. On failure
+          // keep it open and surface the error so the user can retry, instead
+          // of silently dismissing a sheet whose food was never added.
           if (success) {
+            context.router.pop();
             _showInfoDialog(context);
+          } else {
+            CustomSnackBar.show(
+              context,
+              manager.state.addErrorMessage ?? Strings.somethingWentWrong,
+            );
           }
         },
       ),
@@ -301,9 +310,18 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             date: dateTime,
             categoryId: food.categoryId,
           );
-          if (context.mounted) context.router.pop();
+          if (!context.mounted) return;
+          // Close the sheet only when the food was actually logged. On failure
+          // keep it open and surface the error so the user can retry, instead
+          // of silently dismissing a sheet whose food was never added.
           if (success) {
+            context.router.pop();
             _showInfoDialog(context);
+          } else {
+            CustomSnackBar.show(
+              context,
+              manager.state.addErrorMessage ?? Strings.somethingWentWrong,
+            );
           }
         },
         protein: MetricsHelper.getMetricValue(metrics, MetricType.protein),
@@ -332,10 +350,10 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
         .toList();
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
-        isLoading: manager.state.isLoading,
         foods: editable,
         onAdd: (items) async {
-          bool allSucceeded = true;
+          final failed = <EditableFood>[];
+          String? errorMessage;
           for (final food in items) {
             final success = await manager.addCustomFoodAndMenu(
               name: food.name,
@@ -349,15 +367,27 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               categoryId: food.categoryId,
             );
             if (!success) {
-              allSucceeded = false;
+              failed.add(food);
+              // Capture the first failure's backend message before a later
+              // food's attempt can overwrite it in state.
+              errorMessage ??= manager.state.addErrorMessage;
             }
           }
           if (context.mounted) {
-            context.router.pop();
-            if (allSucceeded) {
+            // Close the sheet only when every food was logged. On any failure
+            // keep it open (with just the failed foods) and surface the error
+            // so the user can retry without duplicating what already saved.
+            if (failed.isEmpty) {
+              context.router.pop();
               _showInfoDialog(context);
+            } else {
+              CustomSnackBar.show(
+                context,
+                errorMessage ?? Strings.somethingWentWrong,
+              );
             }
           }
+          return failed;
         },
       ),
     );

@@ -35,14 +35,16 @@ class EditableFood {
 
 class FoodCreatorWithSpeech extends StatefulWidget {
   final List<EditableFood> foods;
-  final void Function(List<EditableFood> foods) onAdd;
-  final bool isLoading;
+
+  /// Adds [foods] and returns the items that FAILED to add (empty when every
+  /// food was logged). The sheet then keeps only the failed items so tapping
+  /// "Add" again retries just those instead of duplicating ones already saved.
+  final Future<List<EditableFood>> Function(List<EditableFood> foods) onAdd;
 
   const FoodCreatorWithSpeech({
     super.key,
     required this.foods,
     required this.onAdd,
-    required this.isLoading,
   });
 
   @override
@@ -80,6 +82,23 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
   }
 
   void _removeFood(int index) => setState(() => _foods.removeAt(index));
+
+  bool _submitting = false;
+
+  Future<void> _onAddPressed() async {
+    if (_submitting || _foods.isEmpty) return;
+    setState(() => _submitting = true);
+    final failed = await widget.onAdd(List.of(_foods));
+    if (!mounted) return;
+    // Drop the foods that were logged successfully; only the failures remain
+    // so a retry can't duplicate an already-saved food.
+    setState(() {
+      _foods
+        ..clear()
+        ..addAll(failed);
+      _submitting = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,9 +148,9 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                   ),
                   Expanded(
                     child: Button(
-                      loading: widget.isLoading,
+                      loading: _submitting,
                       enabled: _foods.isNotEmpty,
-                      onPressed: () => widget.onAdd(_foods),
+                      onPressed: _onAddPressed,
                       text: Strings.add,
                     ),
                   ),

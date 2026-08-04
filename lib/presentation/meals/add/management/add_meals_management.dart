@@ -36,6 +36,10 @@ abstract class AddMealsState with _$AddMealsState {
     @Default(false) bool isLoading,
     @Default(false) bool isMealCategory,
     @Default('') String searchQuery,
+
+    /// Backend error message from the most recent failed add (food or menu
+    /// item). Read by the confirmation handlers when an add returns false.
+    String? addErrorMessage,
   }) = _AddMealsState;
 }
 

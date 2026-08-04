@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/util/api_error.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/domain/model/questions/questions.dart';
@@ -119,7 +120,12 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
           },
           onError: (error) {
             emit(state.copyWith(isLoading: false));
-            publish(const QuestionsEffect.withType(QuestionsEffectType.error));
+            publish(
+              QuestionsEffect.withType(
+                QuestionsEffectType.error,
+                message: apiErrorMessage(error),
+              ),
+            );
           },
           onDone: () {},
         );
@@ -132,14 +138,22 @@ class QuestionsManager extends Manager<QuestionsState, QuestionsEffect> {
           },
           onData: (_) {
             emit(state.copyWith(isLoading: false));
+            // Navigate forward ONLY on a successful submit. handle()'s `onDone`
+            // runs inside a `finally`, so it fires on failure too — publishing
+            // success there would push the user to Home even when the request
+            // failed and isQuestionaryFinished was never persisted, bouncing
+            // them back to the questionary on the next cold start.
+            publish(
+              const QuestionsEffect.withType(QuestionsEffectType.success),
+            );
           },
           onError: (error) {
             emit(state.copyWith(isLoading: false));
-            publish(const QuestionsEffect.withType(QuestionsEffectType.error));
-          },
-          onDone: () {
             publish(
-              const QuestionsEffect.withType(QuestionsEffectType.success),
+              QuestionsEffect.withType(
+                QuestionsEffectType.error,
+                message: apiErrorMessage(error),
+              ),
             );
           },
         );

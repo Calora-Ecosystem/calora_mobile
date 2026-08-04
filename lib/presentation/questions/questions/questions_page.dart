@@ -3,6 +3,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/navigation_button.dart';
+import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/questions/questions/management/questions_management.dart';
 import 'package:calora/presentation/questions/questions/management/questions_manager.dart';
@@ -29,6 +30,10 @@ class QuestionsPage extends Managed<QuestionsManager, QuestionsState, QuestionsE
             pushProgressPage(context, manager.state.answers!.weight ?? 0, manager.state.answers!.targetWeight ?? 0);
             break;
           case QuestionsEffectType.error:
+            CustomSnackBar.show(
+              context,
+              e.message ?? Strings.somethingWentWrong,
+            );
             break;
           case QuestionsEffectType.empty:
             break;

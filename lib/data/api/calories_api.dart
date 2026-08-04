@@ -1,3 +1,4 @@
+import 'package:calora/common/constants/request_extras.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart'
     show ScannerFood;
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
@@ -12,6 +13,11 @@ class CaloriesApi {
   final Dio _dio;
 
   CaloriesApi(this._dio);
+
+  // The add-food confirmation sheets surface their own error SnackBar, so
+  // these requests opt out of the interceptor's app-wide error display.
+  static final _selfHandledErrors =
+      Options(extra: {kSkipGlobalErrorDisplay: true});
 
   Future<Response> getSummary(DateTime date) {
     return _dio.get(
@@ -47,7 +53,7 @@ class CaloriesApi {
   }
 
   Future<Response> addFood(FoodRequest food) {
-    return _dio.post('food', data: food.toJson());
+    return _dio.post('food', data: food.toJson(), options: _selfHandledErrors);
   }
 
   Future<Response> fetchFoodById(int id) {
@@ -62,7 +68,11 @@ class CaloriesApi {
   }
 
   Future<void> saveMenuItem(MenuInfo item) {
-    return _dio.post('food/menu', data: item.toJson());
+    return _dio.post(
+      'food/menu',
+      data: item.toJson(),
+      options: _selfHandledErrors,
+    );
   }
 
   /// Updates a user-owned food (name + metrics). Backend: `PUT /food/{foodId}`.

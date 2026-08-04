@@ -4,6 +4,7 @@ import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
 import 'package:calora/common/service/pagination_service.dart';
+import 'package:calora/common/util/api_error.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
 import 'package:calora/domain/model/meal/meal_type_data.dart';
@@ -153,7 +154,12 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) {
             success = false;
-            emit(state.copyWith(isLoading: false));
+            emit(
+              state.copyWith(
+                isLoading: false,
+                addErrorMessage: apiErrorMessage(error),
+              ),
+            );
           },
         );
     return success;
@@ -311,7 +317,12 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) {
-            emit(state.copyWith(isLoading: false));
+            emit(
+              state.copyWith(
+                isLoading: false,
+                addErrorMessage: apiErrorMessage(error),
+              ),
+            );
             foodId = null;
           },
         );

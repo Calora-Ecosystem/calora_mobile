@@ -28,7 +28,12 @@ class VideoCourseBodyManager extends Manager<VideoCourseBodyState, VideoCourseBo
         .updateVideoCourseFinished(lessonId)
         .handle(
           onStart: () {},
-          onDone: () {
+          // Mark the lesson finished ONLY when the request actually succeeds.
+          // handle()'s `onDone` runs in a `finally` (fires on error too), so
+          // doing this there would optimistically unlock the next lesson even
+          // when the backend never recorded completion — leaving local state
+          // out of sync with the server after a refetch.
+          onData: (_) {
             final updated = state.lessons.map((l) {
               if (l.id == lessonId) return l.copyWith(isFinished: true);
               return l;
