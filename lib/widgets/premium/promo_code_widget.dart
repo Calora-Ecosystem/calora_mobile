@@ -31,6 +31,57 @@ class _PromoCodeWidgetState extends State<PromoCodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    return ManagerBuilder<PremiumState, PremiumEffect>(
+      manager: context.read<PremiumManager>(),
+      properties: (state) => [state.isIap],
+      builder: (context, state) =>
+          state.isIap ? _offerCodeButton(context) : _couponField(context),
+    );
+  }
+
+  /// IAP flow: Apple offer codes are redeemed in a native StoreKit sheet,
+  /// so there is nothing to type here — the whole row is a button. The
+  /// backend coupon endpoint is deliberately not reachable from this
+  /// branch; it discounts a UZS fee the App Store will never charge.
+  Widget _offerCodeButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.read<PremiumManager>().redeemOfferCode(),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.only(left: 16, right: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.colors.strokeSoft, width: 1.5),
+        ),
+        child: Row(
+          children: [
+            Strings.promokod.text(16, 20, 400).c(context.colors.textSub),
+            const Spacer(),
+            Container(
+              height: 32,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: context.colors.accentSub,
+              ),
+              // Reuses the coupon field's own label. `translations.csv`
+              // is generated from the Google Sheet in `strings.dart`, so
+              // a dedicated "Redeem" string has to be added there and the
+              // `version:` bumped — it can't be introduced from code.
+              child: Strings.apply.text(12, 14, 400).c(context.colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Payme / Click flow: backend coupon codes, applied server-side.
+  Widget _couponField(BuildContext context) {
     return SizedBox(
       height: 48,
       child: Stack(

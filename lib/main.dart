@@ -11,6 +11,7 @@ import 'package:calora/common/service/background_steps_worker.dart';
 import 'package:calora/common/service/facebook_events_service.dart';
 import 'package:calora/common/service/notification_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
+import 'package:calora/common/service/sentry_config.dart';
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/firebase_options.dart';
 import 'package:calora/presentation/app/app/app.dart';
@@ -23,9 +24,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-
-const _sentryDsn =
-    'https://eb9278a9d051a5569640077a8fe6eb23@o4510963491536896.ingest.us.sentry.io/4511376801923072';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -41,12 +39,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   await SentryFlutter.init(
-    (options) {
-      options.dsn = _sentryDsn;
-      options.debug = kDebugMode;
-      options.environment = kReleaseMode ? 'production' : 'debug';
-      options.tracesSampleRate = 0.0;
-    },
+    configureSentry,
     appRunner: () async {
       WidgetsFlutterBinding.ensureInitialized();
 

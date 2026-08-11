@@ -85,12 +85,15 @@ class PremiumSheet
                       children: [
                         Column(
                           children: List.generate(
-                            state.isGettingOrders || state.isGettingPremiumPlans
+                            state.isGettingOrders ||
+                                    state.isGettingPremiumPlans ||
+                                    (state.isIap && state.isLoadingIapPrices)
                                 ? 3
-                                : state.plans.length,
+                                : state.purchasablePlans.length,
                             (index) {
                               if (state.isGettingOrders ||
-                                  state.isGettingPremiumPlans) {
+                                  state.isGettingPremiumPlans ||
+                                  state.isLoadingIapPrices) {
                                 return ShimmerWrapper(
                                   loading: true,
                                   type: ShimmerType.backgroundElevation,
@@ -103,12 +106,25 @@ class PremiumSheet
                                   child: const SizedBox.shrink(),
                                 );
                               }
-                              final plan = state.plans[index];
+                              final plan = state.purchasablePlans[index];
                               return _planCard(
                                 context: context,
                                 plan: plan,
                                 isSelected: state.selectedPlan == plan,
                                 onTap: () => manager.selectPlan(plan),
+                                // On IAP the store's own localized string
+                                // is the only price we may show — never
+                                // the backend UZS fee.
+                                priceLabel: state.isIap
+                                    ? state.iapPrices[plan.id] ?? ''
+                                    : '${plan.price.formatPrice()} UZS',
+                                // App Review 2.3.1: `originalFee` is a
+                                // backend marketing price with no App
+                                // Store counterpart, so it must not sit
+                                // next to a StoreKit price.
+                                strikethroughLabel: state.isIap
+                                    ? null
+                                    : _strikethroughLabel(plan),
                               );
                             },
                           ),
@@ -305,11 +321,20 @@ class PremiumSheet
     return null;
   }
 
+  /// Formatted strikethrough for the Payme / Click flow, or null when
+  /// there's nothing to cross out. Never used on the IAP flow.
+  String? _strikethroughLabel(PlanModel plan) {
+    final price = _strikethroughPrice(plan);
+    return price == null ? null : '${price.formatPrice()} UZS';
+  }
+
   Widget _planCard({
     required BuildContext context,
     required PlanModel plan,
     required bool isSelected,
     required VoidCallback onTap,
+    required String priceLabel,
+    String? strikethroughLabel,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
@@ -373,12 +398,12 @@ class PremiumSheet
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        '${plan.price.formatPrice()} UZS'
+                        priceLabel
                             .text(14, 18, 500)
                             .c(context.colors.textPrimary),
-                        if (_strikethroughPrice(plan) != null)
+                        if (strikethroughLabel != null)
                           Text(
-                            '${_strikethroughPrice(plan)!.formatPrice()} UZS',
+                            strikethroughLabel,
                             style: TextStyle(
                               color: context.colors.textSub,
                               decoration: TextDecoration.lineThrough,

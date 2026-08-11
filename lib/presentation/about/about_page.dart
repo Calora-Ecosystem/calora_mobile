@@ -1,5 +1,6 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/disclaimer/medical_disclaimer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -55,6 +56,7 @@ class AboutPage extends StatelessWidget {
               ],
             ),
           ),
+          const MedicalDisclaimer(margin: EdgeInsets.only(top: 16)),
         ],
       ),
     );

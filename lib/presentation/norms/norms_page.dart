@@ -1,6 +1,7 @@
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/widgets/disclaimer/medical_disclaimer.dart';
 import 'package:calora/common/widgets/loadable/loadable.dart';
 import 'package:calora/domain/model/detail/detail_info.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -43,23 +44,32 @@ class NormsPage extends Managed<NormsManager, NormsState, NormsEffect> {
         },
       );
     } else {
-      return ListView.separated(
-        separatorBuilder: (_, __) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Divider(height: 1, color: context.colors.strokeSoft),
-        ),
-        physics: const BouncingScrollPhysics(),
-        itemCount: state.dailyNormsList.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          final detailsInfo = state.dailyNormsList[index];
-          return DetailInfoItemBuilder(
-            detailInfo: detailsInfo,
-            onClickItem: (data) {
-              _openInputPage(data, context, manager);
-            },
-          );
-        },
+      return Column(
+        children: [
+          Expanded(
+            child: ListView.separated(
+              separatorBuilder: (_, __) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Divider(height: 1, color: context.colors.strokeSoft),
+              ),
+              physics: const BouncingScrollPhysics(),
+              itemCount: state.dailyNormsList.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                final detailsInfo = state.dailyNormsList[index];
+                return DetailInfoItemBuilder(
+                  detailInfo: detailsInfo,
+                  onClickItem: (data) {
+                    _openInputPage(data, context, manager);
+                  },
+                );
+              },
+            ),
+          ),
+          const MedicalDisclaimer(
+            margin: EdgeInsets.fromLTRB(20, 12, 20, 20),
+          ),
+        ],
       );
     }
   }

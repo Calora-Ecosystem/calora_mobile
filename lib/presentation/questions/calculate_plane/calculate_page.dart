@@ -7,6 +7,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/common/widgets/disclaimer/medical_disclaimer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_management.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_manager.dart';
@@ -60,71 +61,82 @@ class CalculatePage extends Managed<CalculateManager, CalculateState, CalculateE
             child: Assets.icons.background.image(fit: BoxFit.fill),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+            child: Column(
+              children: [
+                // Scrolls: the goal card grows with the localized
+                // disclaimer (4 lines in uz) and with the user's font
+                // scale, which previously pushed the CTA off-screen.
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Strings.yourProgramIsReady.text(16, 20, 500).c(context.colors.textStrong),
-                        SizedBox(height: 20),
-                        _buildIconTextRow(
-                          context,
-                          icon: Assets.icons.vegetarianFood.svg(),
-                          count: '${state.dailyGoals[0].toDouble().asFixedTruncated(0)} ${Strings.kcal}',
-                          title: Strings.mealPlan,
-                          subtitle: Strings.dailyGoal,
-                        ),
-                        SizedBox(height: 20),
-                        _buildIconTextRow(
-                          context,
-                          icon: Assets.icons.workoutSport.svg(),
-                          count: '${state.dailyGoals[1].toInt()} ${Strings.step}',
-                          title: Strings.steps,
-                          subtitle: Strings.dailyGoal,
-                        ),
-                        SizedBox(height: 20),
-                        _buildIconTextRow(
-                          context,
-                          icon: Assets.icons.water.svg(),
-                          count: '${state.dailyGoals[2].toInt()} ml',
-                          title: Strings.water,
-                          subtitle: Strings.dailyGoal,
-                        ),
-                        SizedBox(height: 20),
                         Container(
-                          padding: EdgeInsets.all(8),
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: context.colors.backgroundElevation,
-                            borderRadius: BorderRadius.circular(8),
+                            color: context.colors.white,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Strings.beforeStartingAnyDiet.text(12, 14, 400).c(context.colors.textStrong),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Strings.yourProgramIsReady
+                                  .text(16, 20, 500)
+                                  .c(context.colors.textStrong),
+                              SizedBox(height: 16),
+                              _buildIconTextRow(
+                                context,
+                                icon: Assets.icons.vegetarianFood.svg(),
+                                count:
+                                    '${state.dailyGoals[0].toDouble().asFixedTruncated(0)} ${Strings.kcal}',
+                                title: Strings.mealPlan,
+                                subtitle: Strings.dailyGoal,
+                              ),
+                              SizedBox(height: 16),
+                              _buildIconTextRow(
+                                context,
+                                icon: Assets.icons.workoutSport.svg(),
+                                count:
+                                    '${state.dailyGoals[1].toInt()} ${Strings.step}',
+                                title: Strings.steps,
+                                subtitle: Strings.dailyGoal,
+                              ),
+                              SizedBox(height: 16),
+                              _buildIconTextRow(
+                                context,
+                                icon: Assets.icons.water.svg(),
+                                count: '${state.dailyGoals[2].toInt()} ml',
+                                title: Strings.water,
+                                subtitle: Strings.dailyGoal,
+                              ),
+                              SizedBox(height: 16),
+                              const MedicalDisclaimer(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        WeightProgressChart(
+                          startValue: startValue,
+                          endValue: endValue,
                         ),
                       ],
                     ),
                   ),
-                  WeightProgressChart(
-                    startValue: startValue,
-                    endValue: endValue,
-                  ),
-                  SizedBox(
+                ),
+                // Pinned outside the scroll view so it stays visible at
+                // any content height.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                  child: SizedBox(
                     width: double.infinity,
                     child: Button(
                       onPressed: () => goToNextPage(context),
                       text: Strings.start,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

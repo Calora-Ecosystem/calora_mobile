@@ -7,6 +7,8 @@ part 'premium_management.freezed.dart';
 
 @freezed
 abstract class PremiumState with _$PremiumState {
+  const PremiumState._();
+
   const factory PremiumState({
     @Default([]) List<PlanModel> plans,
     @Default([]) List<PaymentMethod> paymentMethods,
@@ -24,7 +26,28 @@ abstract class PremiumState with _$PremiumState {
     @Default(const []) List<MySubscriptionOrderModel> myOrders,
     @Default('') String paymentLink,
     PromoCodeModel? promoCodeValue,
+
+    /// Store-localized IAP prices (`StoreProduct.priceString`) keyed by
+    /// plan id — e.g. `{12: '$29.99'}`. Populated only on the IAP flow.
+    ///
+    /// A plan missing from this map has no matching store product and is
+    /// therefore not purchasable through IAP, so the sheet hides it
+    /// rather than showing the backend UZS fee the store won't charge.
+    @Default(<int, String>{}) Map<int, String> iapPrices,
+    @Default(false) bool isLoadingIapPrices,
   }) = _PremiumState;
+
+  /// Whether the active payment method is store billing (Apple / Google)
+  /// rather than Payme / Click. Drives price source, strikethrough
+  /// suppression and which promo-code system the sheet offers.
+  bool get isIap => selectedPaymentMethod?.code == 'Iap';
+
+  /// Plans the user can actually buy right now. Identical to [plans]
+  /// off the IAP flow; on it, restricted to plans backed by a real store
+  /// product (see [iapPrices]).
+  List<PlanModel> get purchasablePlans => isIap
+      ? plans.where((plan) => iapPrices.containsKey(plan.id)).toList()
+      : plans;
 }
 
 @freezed

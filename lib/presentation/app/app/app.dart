@@ -10,6 +10,7 @@ import 'package:calora/common/widgets/system_ui/remove_status_bar_background.dar
 import 'package:calora/presentation/app/app/management/app_management.dart';
 import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/connectivity/connectivity_overlay.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,15 @@ class App extends Managed<AppManager, AppState, AppEffect> {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       theme: context.theme,
-      routerConfig: appRouter.config(navigatorObservers: () => [CustomNavigatorObserver()]),
+      // SentryNavigatorObserver feeds navigation breadcrumbs and screen
+      // names into every event and replay — without it a replay is a video
+      // with no idea which screen it is showing.
+      routerConfig: appRouter.config(
+        navigatorObservers: () => [
+          CustomNavigatorObserver(),
+          SentryNavigatorObserver(),
+        ],
+      ),
       builder: (context, child) {
         final mediaQuery = MediaQuery.of(context);
         return KeyboardDismisser(

@@ -36,6 +36,17 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   static const Duration _paymentPollInterval = Duration(seconds: 5);
   static const int _paymentPollMaxTicks = 24; // ~2 min foreground backstop
 
+  /// Set while an Apple offer-code redemption is outstanding, so
+  /// [_checkExternalPayment] also consults RevenueCat directly — StoreKit
+  /// knows about the redemption before our backend webhook does.
+  bool _awaitingOfferCode = false;
+
+  /// Google Play has no in-app redemption sheet; codes are entered in the
+  /// Play Store itself.
+  static const String _playRedeemUrl = 'https://play.google.com/redeem';
+
+  bool _iapPricesRequested = false;
+
   PremiumManager(this._premiumRepo, this._commonRepo)
     : super(const PremiumState()) {
     WidgetsBinding.instance.addObserver(this);
@@ -87,6 +98,102 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
         ),
       );
     }
+
+    unawaited(_loadIapPrices());
+  }
+
+  /// Pulls store-localized prices for the IAP flow.
+  ///
+  /// These fully replace the backend UZS fees on that flow: App Review
+  /// guideline 2.3.1 requires the displayed price to be what the store
+  /// actually charges, and the two numbers are unrelated.
+  ///
+  /// Runs once per manager — `_applyIsUzbekistan` fires twice (cache then
+  /// network) and the offering doesn't change in between.
+  Future<void> _loadIapPrices() async {
+    if (_iapPricesRequested) return;
+    // Matching is per-plan now, so plans and payment methods both have to
+    // be in before this can run. Whichever arrives last triggers it.
+    if (state.plans.isEmpty) return;
+    if (!state.paymentMethods.any((method) => method.code == 'Iap')) return;
+    _iapPricesRequested = true;
+
+    emit(state.copyWith(isLoadingIapPrices: true));
+    final products = await getIt<RevenueCatService>().planProducts(state.plans);
+    emit(
+      state.copyWith(
+        isLoadingIapPrices: false,
+        iapPrices: {
+          for (final entry in products.entries)
+            entry.key: entry.value.priceString,
+        },
+      ),
+    );
+    _ensureSelectedPlanIsPurchasable();
+  }
+
+  /// Keeps [PremiumState.selectedPlan] pointing at something the user can
+  /// actually buy. On IAP a plan with no store product is hidden by the
+  /// sheet and would throw in `RevenueCatService.purchase`, so if the
+  /// pre-selected "most popular" plan isn't backed by one, fall through to
+  /// the first plan that is.
+  /// Reports plans hidden from the IAP sheet because no store product
+  /// carries their id. Logged rather than silently dropped: a plan
+  /// vanishing from the sheet otherwise looks like a UI bug, when it
+  /// really means the product is missing from the RevenueCat offering or
+  /// its identifier suffix doesn't match the backend plan id.
+  void _logUnmatchedPlans() {
+    if (!state.isIap || state.isLoadingIapPrices || state.plans.isEmpty) return;
+
+    final unmatched = state.plans
+        .where((plan) => !state.iapPrices.containsKey(plan.id))
+        .map((plan) => '${plan.id}("${plan.title}", ${plan.packageMonth}mo)')
+        .toList();
+    if (unmatched.isEmpty) return;
+
+    getIt<Logger>().e(
+      'IAP: ${unmatched.length} backend plan(s) have no store product and are '
+      'hidden from the sheet: ${unmatched.join(', ')}. '
+      'Store products resolved: ${state.iapPrices.keys.toList()}',
+    );
+  }
+
+  void _ensureSelectedPlanIsPurchasable() {
+    _logUnmatchedPlans();
+    if (!state.isIap || state.isLoadingIapPrices) return;
+
+    final selected = state.selectedPlan;
+    if (selected != null && state.iapPrices.containsKey(selected.id)) return;
+
+    final fallback = state.purchasablePlans.firstOrNull;
+    if (fallback != null) emit(state.copyWith(selectedPlan: fallback));
+  }
+
+  /// Promo-code entry point for the IAP flow.
+  ///
+  /// Apple offer codes are redeemed in a native StoreKit sheet and are a
+  /// completely separate system from the backend coupon endpoint — a
+  /// backend coupon cannot discount an App Store price, so the two never
+  /// mix. Redemption completes outside the app, so this reuses the same
+  /// resume + poll machinery as Click/Payme to notice the result.
+  Future<void> redeemOfferCode() async {
+    try {
+      final presented = await getIt<RevenueCatService>()
+          .presentOfferCodeRedemption();
+      _awaitingOfferCode = true;
+
+      if (!presented) {
+        // Android (and iOS < 14): no in-app sheet, redeem in the store.
+        // `_openPaymentUrl` starts the resume + poll watch itself.
+        _openPaymentUrl(_playRedeemUrl);
+        return;
+      }
+
+      _awaitingExternalPayment = true;
+      _startPaymentPolling();
+    } catch (e) {
+      publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
+    }
   }
 
   void selectPlan(PlanModel plan) => emit(state.copyWith(selectedPlan: plan));
@@ -132,6 +239,11 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
               selectedPlan: initialPlan,
             ),
           );
+          // IAP prices are matched per-plan, so they can only be fetched
+          // once plans exist; this is the other half of the rendezvous
+          // in `_applyIsUzbekistan`.
+          unawaited(_loadIapPrices());
+          _ensureSelectedPlanIsPurchasable();
         },
         onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
       );
@@ -412,6 +524,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     _paymentPollTimer?.cancel();
     _paymentPollTimer = null;
     _awaitingExternalPayment = false;
+    _awaitingOfferCode = false;
   }
 
   /// Authoritative check after an external payment: force a token refresh
@@ -421,6 +534,17 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   /// watches reactively. We also refresh the sheet's order/pending state.
   Future<void> _checkExternalPayment() async {
     if (!_awaitingExternalPayment) return;
+
+    // An offer code is redeemed entirely inside StoreKit, so RevenueCat
+    // reflects it before the backend webhook lands. Check the entitlement
+    // first so the UI doesn't sit spinning through the whole poll window.
+    if (_awaitingOfferCode &&
+        await getIt<RevenueCatService>().hasActiveEntitlement()) {
+      _stopPaymentPolling();
+      await getMyOrders();
+      publish(const PremiumEffect.subscriptionSuccess());
+      return;
+    }
 
     final premium = await getIt<TokenInterceptor>().refreshAndCheckPremium();
     await getMyOrders(); // keep the pending/plan UI in sync either way
