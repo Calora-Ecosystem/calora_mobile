@@ -48,6 +48,9 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
                 key: ValueKey('preview-${exercise.id}'),
                 url: previewUrl,
                 height: 220,
+                // Opens over the exercise list, whose thumbnails still
+                // hold decoders — this is the one the user is looking at.
+                priority: true,
               )
             else
               YoutubeInlinePlayer(youtubeUrl: youtubeUrl),

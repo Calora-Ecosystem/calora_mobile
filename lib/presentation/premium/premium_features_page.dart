@@ -2142,6 +2142,7 @@ class _LessonShowcase extends StatelessWidget {
                           url: video,
                           height: 200,
                           borderRadius: 0,
+                          priority: true,
                         )
                       : (cover != null && cover.isNotEmpty)
                           ? CachedNetworkImage(
@@ -2356,7 +2357,12 @@ class _ExerciseShowcase extends StatelessWidget {
           Stack(
             children: [
               (preview != null && preview.isNotEmpty)
-                  ? AnimatedAssetView(url: preview, height: 210, borderRadius: 0)
+                  ? AnimatedAssetView(
+                      url: preview,
+                      height: 210,
+                      borderRadius: 0,
+                      priority: true,
+                    )
                   : SizedBox(
                       height: 210,
                       width: double.infinity,

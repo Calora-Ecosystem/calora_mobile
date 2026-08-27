@@ -30,24 +30,33 @@ class TasksCards extends StatelessWidget {
     required this.onLevelChanged,
   });
 
+  /// Scrolls itself: the exercise rows are a [SliverList] so only the
+  /// cards near the viewport are built.
+  ///
+  /// This used to be a `shrinkWrap`ped `ListView` inside the page's
+  /// `SingleChildScrollView`, which forced *every* exercise to build at
+  /// once — and with it every card's auto-playing MP4 preview. A dozen
+  /// simultaneous video decoders is more than Android hands out, and the
+  /// process died on entering the screen.
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TaskParametersWidget(
-          title: Strings.discoverWorkoutExercises(workoutTitle: workout.title).text(20, 24, 600),
-          parameters: [
-            ParameterItem(name: Strings.degree, value: _levelLabel(level)),
-            ParameterItem(name: Strings.kcal, value: '${workout.kcal}'),
-            ParameterItem(name: Strings.duration, value: '${workout.totalDurationInMin}'),
-          ],
-          bottomLabel: Strings.exercises,
-          bottomCount: exercises.length,
-          onChangePressed: () => _openSettings(context, level.index),
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: TaskParametersWidget(
+            title: Strings.discoverWorkoutExercises(workoutTitle: workout.title).text(20, 24, 600),
+            parameters: [
+              ParameterItem(name: Strings.degree, value: _levelLabel(level)),
+              ParameterItem(name: Strings.kcal, value: '${workout.kcal}'),
+              ParameterItem(name: Strings.duration, value: '${workout.totalDurationInMin}'),
+            ],
+            bottomLabel: Strings.exercises,
+            bottomCount: exercises.length,
+            onChangePressed: () => _openSettings(context, level.index),
+          ),
         ),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+        SliverList.separated(
           itemCount: exercises.length,
           itemBuilder: (context, index) {
             return _ExerciseCard(
@@ -125,9 +134,10 @@ class _ExerciseCard extends StatelessWidget {
             children: [
               // Backend's `Default` asset is either a `.gif` (rendered
               // via CachedNetworkImage) or a `.mp4` (looping muted
-              // video). AnimatedAssetView branches on the extension
-              // and manages controller lifecycle so cards scrolling
-              // past `cacheExtent` release their resources.
+              // video). AnimatedAssetView branches on the extension and
+              // manages controller lifecycle, so cards scrolling past
+              // the sliver's `cacheExtent` release both their decoder
+              // and their slot in the global video budget.
               SizedBox(
                 width: 64,
                 height: 64,

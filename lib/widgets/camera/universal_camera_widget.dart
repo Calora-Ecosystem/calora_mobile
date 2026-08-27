@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/painter/dashed_border_painter.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 @RoutePage()
 class UniversalCameraPage extends StatefulWidget {
@@ -24,44 +26,122 @@ class UniversalCameraPage extends StatefulWidget {
   State<UniversalCameraPage> createState() => _UniversalCameraPageState();
 }
 
-class _UniversalCameraPageState extends State<UniversalCameraPage> {
+/// Why the camera could not be opened. Drives which recovery action the
+/// error state offers.
+enum _CameraError { permissionDenied, permissionPermanentlyDenied, unavailable }
+
+class _UniversalCameraPageState extends State<UniversalCameraPage> with WidgetsBindingObserver {
   CameraController? _controller;
   bool isLoading = true;
   bool isReady = false;
   bool isTaking = false;
+  _CameraError? _error;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initCamera();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state != AppLifecycleState.resumed) return;
+    // Coming back from the system settings page: the user may have just
+    // granted access, so try again instead of leaving them on the error
+    // screen.
+    if (!isReady && !isLoading) _initCamera();
+  }
+
+  /// Initializes the preview, turning *every* failure into a visible state.
+  /// A thrown [availableCameras] / [CameraController.initialize] used to
+  /// leave `isLoading` stuck at true, which showed an endless spinner on a
+  /// black screen with no way back.
   Future<void> _initCamera() async {
-    final cameras = await availableCameras();
-
-    final selectedCamera = widget.useFrontCamera
-        ? cameras.firstWhere(
-            (c) => c.lensDirection == CameraLensDirection.front,
-            orElse: () => cameras.first,
-          )
-        : cameras.firstWhere(
-            (c) => c.lensDirection == CameraLensDirection.back,
-            orElse: () => cameras.first,
-          );
-
-    _controller = CameraController(
-      selectedCamera,
-      ResolutionPreset.high,
-      enableAudio: false,
-    );
-
-    await _controller!.initialize();
-
     if (!mounted) return;
+    setState(() {
+      isLoading = true;
+      isReady = false;
+      _error = null;
+    });
 
+    // Release a controller left over from a previous failed attempt before
+    // creating a new one.
+    final previous = _controller;
+    _controller = null;
+    await previous?.dispose();
+
+    var status = await Permission.camera.status;
+    if (!status.isGranted) {
+      status = await Permission.camera.request();
+    }
+    if (!mounted) return;
+    if (!status.isGranted) {
+      _failWith(
+        status.isPermanentlyDenied || status.isRestricted
+            ? _CameraError.permissionPermanentlyDenied
+            : _CameraError.permissionDenied,
+      );
+      return;
+    }
+
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        _failWith(_CameraError.unavailable);
+        return;
+      }
+
+      final selectedCamera = widget.useFrontCamera
+          ? cameras.firstWhere(
+              (c) => c.lensDirection == CameraLensDirection.front,
+              orElse: () => cameras.first,
+            )
+          : cameras.firstWhere(
+              (c) => c.lensDirection == CameraLensDirection.back,
+              orElse: () => cameras.first,
+            );
+
+      final controller = CameraController(
+        selectedCamera,
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+
+      await controller.initialize();
+
+      if (!mounted) {
+        await controller.dispose();
+        return;
+      }
+
+      _controller = controller;
+      setState(() {
+        isLoading = false;
+        isReady = true;
+      });
+    } on CameraException catch (e, s) {
+      debugPrint('Camera init failed: ${e.code} ${e.description}\n$s');
+      _failWith(
+        // iOS/Android report a denied or restricted permission through the
+        // plugin as well when the OS-level check above raced with a change.
+        e.code == 'CameraAccessDenied' || e.code == 'CameraAccessDeniedWithoutPrompt' || e.code == 'CameraAccessRestricted'
+            ? _CameraError.permissionPermanentlyDenied
+            : _CameraError.unavailable,
+      );
+    } catch (e, s) {
+      debugPrint('Camera init failed: $e\n$s');
+      _failWith(_CameraError.unavailable);
+    }
+  }
+
+  void _failWith(_CameraError error) {
+    if (!mounted) return;
     setState(() {
       isLoading = false;
-      isReady = true;
+      isReady = false;
+      _error = error;
     });
   }
 
@@ -74,22 +154,87 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> {
     } catch (e) {
       debugPrint('Foto olishda xatolik: $e');
     } finally {
-      setState(() => isTaking = false);
+      // onImageCaptured usually pops this route, so the state may be gone.
+      if (mounted) setState(() => isTaking = false);
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     super.dispose();
   }
 
+  /// Black full-screen shell with a back button, so a stuck or failed camera
+  /// never traps the user on a dead screen.
+  Widget _blackScaffold(Widget body) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Positioned.fill(child: body),
+          Positioned(
+            top: 48,
+            left: 8,
+            child: SafeArea(
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => context.router.maybePop(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorScaffold(BuildContext context, _CameraError error) {
+    final isPermission = error != _CameraError.unavailable;
+    final message = isPermission ? Strings.allowAccessToYourCamera : Strings.errorViewMessage;
+    final actionText = error == _CameraError.permissionPermanentlyDenied ? Strings.goToSettings : Strings.tryAgain;
+
+    return _blackScaffold(
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isPermission ? Icons.no_photography_outlined : Icons.videocam_off_outlined,
+              color: Colors.white70,
+              size: 56,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () {
+                if (error == _CameraError.permissionPermanentlyDenied) {
+                  openAppSettings();
+                } else {
+                  _initCamera();
+                }
+              },
+              child: Text(actionText),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_error != null) return _buildErrorScaffold(context, _error!);
+
     if (isLoading || _controller == null || !_controller!.value.isInitialized) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      return _blackScaffold(
+        const Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
 

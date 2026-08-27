@@ -31,11 +31,17 @@ class AnimatedAssetView extends StatelessWidget {
   /// Corner radius for the clip mask.
   final double borderRadius;
 
+  /// Set for a single prominent preview so it can claim a video decoder
+  /// from the list thumbnails mounted behind it. See
+  /// [LoopingMutedVideoPlayer.priority]. Leave false for per-row use.
+  final bool priority;
+
   const AnimatedAssetView({
     super.key,
     required this.url,
     this.height = 120,
     this.borderRadius = 16,
+    this.priority = false,
   });
 
   @override
@@ -66,6 +72,7 @@ class AnimatedAssetView extends StatelessWidget {
       url: resolved,
       height: height,
       borderRadius: borderRadius,
+      priority: priority,
     );
   }
 

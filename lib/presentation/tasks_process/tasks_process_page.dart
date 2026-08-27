@@ -107,6 +107,7 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
                   key: ValueKey('process-${ex.id}'),
                   url: ex.previewAssetUrl,
                   height: 200,
+                  priority: true,
                 ),
                 const SizedBox(height: 12),
                 ex.title.text(20, 24, 700).c(context.colors.textStrong),

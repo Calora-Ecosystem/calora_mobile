@@ -77,17 +77,18 @@ class TasksPage extends Managed<TasksManager, TasksState, TasksEffect> {
                       color: context.colors.white,
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                     ),
+                    // TasksCards scrolls itself (lazy SliverList) so that
+                    // off-screen exercise cards unmount and release their
+                    // video decoders — do not wrap it in another scroll
+                    // view, which would force every card to build at once.
                     child: currentWorkout.hasRest
                         ? const OffDayWidget()
-                        : SingleChildScrollView(
-                            physics: AlwaysScrollableScrollPhysics(),
-                            child: TasksCards(
-                              level: Level.values[state.levelIndex],
-                              loading: state.isLoading,
-                              exercises: state.exercises,
-                              workout: currentWorkout,
-                              onLevelChanged: (value) => manager.changeActivityLevel(currentWorkout.courseId, value, currentWorkout.order),
-                            ),
+                        : TasksCards(
+                            level: Level.values[state.levelIndex],
+                            loading: state.isLoading,
+                            exercises: state.exercises,
+                            workout: currentWorkout,
+                            onLevelChanged: (value) => manager.changeActivityLevel(currentWorkout.courseId, value, currentWorkout.order),
                           ),
                   ),
                 ),
