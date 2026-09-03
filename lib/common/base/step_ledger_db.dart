@@ -12,8 +12,8 @@ import 'package:sqflite/sqflite.dart';
 ///    per database file, so concurrent access from multiple isolates in
 ///    the same process is safe — unlike Hive, whose box file corrupts
 ///    under multi-isolate writes.
-///  • Every mutation here is a single atomic SQL statement (UPSERT with
-///    MAX, incremental UPDATE), so even interleaved read-modify-write
+///  • Every mutation here is a single atomic SQL statement (max-merge
+///    insert, incremental add), so even interleaved read-modify-write
 ///    sequences from two isolates can never lose the higher value. A
 ///    key-value store can't express "set to max(current, x)" atomically;
 ///    SQLite can, which is what makes the max-merge semantics genuinely
@@ -44,16 +44,34 @@ class StepLedgerDb {
   static const _kLastSensorTotal = 'last_sensor_total';
   static const _kLastSensorDate = 'last_sensor_date';
 
+  /// Max-merge write for one day.
+  ///
+  /// Deliberately NOT written as `INSERT … ON CONFLICT … DO UPDATE`:
+  /// UPSERT needs SQLite >= 3.24 and, on Android, sqflite runs against
+  /// the SQLite that ships with the ROM — several older/OEM builds
+  /// predate it and fail to even compile the statement (fatal
+  /// `near "ON": syntax error`). `INSERT OR REPLACE` plus scalar
+  /// subqueries is understood by every SQLite version and is still one
+  /// atomic statement, so the cross-isolate guarantee above is intact.
+  ///
+  /// Bind with [_upsertDayArgs] — the day key appears three times.
   static const _upsertDaySql = '''
-    INSERT INTO step_days(day, total, synced) VALUES(?, ?, ?)
-    ON CONFLICT(day) DO UPDATE SET
-      total  = MAX(step_days.total, excluded.total, excluded.synced),
-      synced = MAX(step_days.synced, excluded.synced)
+    INSERT OR REPLACE INTO step_days(day, total, synced) VALUES(
+      ?,
+      MAX(?, COALESCE((SELECT total  FROM step_days WHERE day = ?), 0)),
+      MAX(?, COALESCE((SELECT synced FROM step_days WHERE day = ?), 0))
+    )
   ''';
 
+  /// Callers must pass `total >= synced`; the SQL no longer re-clamps it
+  /// the way the old `MAX(…, excluded.synced)` did.
+  static List<Object?> _upsertDayArgs(String day, int total, int synced) =>
+      [day, total, day, synced, day];
+
+  /// Same portability constraint as [_upsertDaySql]. With `key` the only
+  /// other column, REPLACE is exactly `DO UPDATE SET value = excluded.value`.
   static const _upsertMetaSql = '''
-    INSERT INTO step_meta(key, value) VALUES(?, ?)
-    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    INSERT OR REPLACE INTO step_meta(key, value) VALUES(?, ?)
   ''';
 
   Future<Database>? _opening;
@@ -134,7 +152,8 @@ class StepLedgerDb {
     if (safeSynced > safeTotal) safeTotal = safeSynced;
     if (safeTotal == 0 && safeSynced == 0) return;
     final db = await _db;
-    await db.rawInsert(_upsertDaySql, [day, safeTotal, safeSynced]);
+    await db.rawInsert(
+        _upsertDaySql, _upsertDayArgs(day, safeTotal, safeSynced));
   }
 
   /// Atomic increment — used only by the in-process pedometer path
@@ -144,9 +163,12 @@ class StepLedgerDb {
     if (steps <= 0) return;
     final db = await _db;
     await db.rawInsert('''
-      INSERT INTO step_days(day, total, synced) VALUES(?, ?, 0)
-      ON CONFLICT(day) DO UPDATE SET total = step_days.total + excluded.total
-    ''', [day, steps]);
+      INSERT OR REPLACE INTO step_days(day, total, synced) VALUES(
+        ?,
+        COALESCE((SELECT total  FROM step_days WHERE day = ?), 0) + ?,
+        COALESCE((SELECT synced FROM step_days WHERE day = ?), 0)
+      )
+    ''', [day, day, steps, day]);
   }
 
   /// Advance the backend high-water mark. Monotonic (never lowers) and
@@ -217,7 +239,7 @@ class StepLedgerDb {
     final batch = db.batch();
     for (final entry in nativeByIsoDate.entries) {
       if (entry.value <= 0) continue;
-      batch.rawInsert(_upsertDaySql, [entry.key, entry.value, 0]);
+      batch.rawInsert(_upsertDaySql, _upsertDayArgs(entry.key, entry.value, 0));
     }
     await batch.commit(noResult: true);
   }
@@ -321,7 +343,7 @@ class StepLedgerDb {
         var synced = (raw['synced'] as int?) ?? 0;
         if (synced < 0) synced = 0;
         if (synced > total) synced = total;
-        batch.rawInsert(_upsertDaySql, [k, total, synced]);
+        batch.rawInsert(_upsertDaySql, _upsertDayArgs(k, total, synced));
         migratedDays++;
       }
 
