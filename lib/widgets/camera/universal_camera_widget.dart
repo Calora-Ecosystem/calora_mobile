@@ -3,6 +3,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/painter/dashed_border_painter.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 @RoutePage()
@@ -11,6 +12,12 @@ class UniversalCameraPage extends StatefulWidget {
   final String subtitle;
   final String bottomText;
   final bool useFrontCamera;
+
+  /// Whether to offer picking an existing photo from the gallery next to the
+  /// shutter. Enabled for food scanning (a photo of a past meal works just as
+  /// well as a live shot); left off for flows that need a live capture, such
+  /// as the face scan.
+  final bool allowGallery;
   final Future<void> Function(String image)? onImageCaptured;
 
   const UniversalCameraPage({
@@ -20,6 +27,7 @@ class UniversalCameraPage extends StatefulWidget {
     required this.bottomText,
     required this.onImageCaptured,
     this.useFrontCamera = true,
+    this.allowGallery = false,
   });
 
   @override
@@ -36,6 +44,7 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> with WidgetsB
   bool isReady = false;
   bool isTaking = false;
   _CameraError? _error;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -159,11 +168,110 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> with WidgetsB
     }
   }
 
+  /// Lets the user hand an existing photo to the same pipeline as a live
+  /// capture. Uses the system photo picker, which needs no gallery permission
+  /// on modern Android/iOS, so it works even though the app deliberately drops
+  /// the media-read permissions.
+  Future<void> _pickFromGallery() async {
+    if (isTaking) return;
+    try {
+      final XFile? file = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 90,
+      );
+      if (file == null || !mounted) return;
+      setState(() => isTaking = true);
+      await widget.onImageCaptured?.call(file.path);
+    } catch (e) {
+      debugPrint('Galereyadan rasm tanlashda xatolik: $e');
+    } finally {
+      // onImageCaptured usually pops this route, so the state may be gone.
+      if (mounted) setState(() => isTaking = false);
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     super.dispose();
+  }
+
+  /// Translucent circular control used for the overlay back button. Kept in
+  /// the camera's white-on-dark language so it reads on any preview frame.
+  Widget _overlayCircleButton({
+    required IconData icon,
+    required VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.white.withAlpha(38),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, color: Colors.white, size: 24),
+        ),
+      ),
+    );
+  }
+
+  /// The capture shutter, extracted so the bottom bar can center it while the
+  /// gallery button sits to its side.
+  Widget _shutterButton() {
+    return GestureDetector(
+      onTap: isTaking ? null : _takePhoto,
+      child: Opacity(
+        opacity: isTaking ? 0.5 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 4),
+          ),
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+            ),
+            child: isTaking
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 4,
+                      color: Colors.black,
+                    ),
+                  )
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Rounded, translucent tile that opens the system photo picker, echoing the
+  /// shutter's white-on-dark styling so the two controls read as a set. Icon
+  /// only, so it needs no new localized label to stay clear in every language.
+  Widget _galleryButton() {
+    return GestureDetector(
+      onTap: isTaking ? null : _pickFromGallery,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.white.withAlpha(38),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withAlpha(140), width: 1.5),
+        ),
+        child: const Icon(
+          Icons.photo_library_outlined,
+          color: Colors.white,
+          size: 28,
+        ),
+      ),
+    );
   }
 
   /// Black full-screen shell with a back button, so a stuck or failed camera
@@ -257,11 +365,21 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> with WidgetsB
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.only(top: 60, left: 20, bottom: 12),
+                padding: const EdgeInsets.only(
+                  top: 60,
+                  left: 20,
+                  right: 20,
+                  bottom: 12,
+                ),
                 color: Colors.black.withAlpha(72),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _overlayCircleButton(
+                      icon: Icons.arrow_back,
+                      onTap: () => context.router.maybePop(),
+                    ),
+                    const SizedBox(height: 16),
                     Text(
                       widget.title,
                       style: const TextStyle(
@@ -337,33 +455,25 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> with WidgetsB
                       ),
                     ),
                     const SizedBox(height: 20),
-                    GestureDetector(
-                      onTap: isTaking ? null : _takePhoto,
-                      child: Opacity(
-                        opacity: isTaking ? 0.5 : 1.0,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 4),
-                          ),
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 36),
+                      child: Row(
+                        children: [
+                          // Left slot: gallery shortcut when allowed, otherwise
+                          // an empty spacer so the shutter stays centered.
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: widget.allowGallery
+                                  ? _galleryButton()
+                                  : const SizedBox.shrink(),
                             ),
-                            child: isTaking
-                                ? const Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 4,
-                                      color: Colors.black,
-                                    ),
-                                  )
-                                : null,
                           ),
-                        ),
+                          _shutterButton(),
+                          // Right slot mirrors the left one to keep the shutter
+                          // optically centered.
+                          const Expanded(child: SizedBox.shrink()),
+                        ],
                       ),
                     ),
                   ],
