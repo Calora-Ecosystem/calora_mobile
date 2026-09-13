@@ -104,6 +104,14 @@
     <string>05da90b7e4916a595a6ed98a3e6e4600</string>
     <key>FacebookDisplayName</key>
     <string>Calora</string>
+    <!-- Install / app-open / session events, logged natively from launch —
+         before Dart runs — so the very first launch is attributable. -->
+    <key>FacebookAutoLogAppEventsEnabled</key>
+    <true/>
+    <!-- Permits IDFA collection. Still gated by the ATT prompt below: iOS
+         hands back a zeroed IDFA until the user authorizes tracking. -->
+    <key>FacebookAdvertiserIDCollectionEnabled</key>
+    <true/>
     <key>LSApplicationQueriesSchemes</key>
     <array>
       <string>mailto</string>

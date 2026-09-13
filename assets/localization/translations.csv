@@ -331,7 +331,7 @@ number_of_lessons,Number of lessons,Darslar soni,Количество уроко
 price,Price,Narxi,Цена
 snack,snack,gazak,перекус
 try_again,Try again,Qayta urunish,Попробуйте еще раз
-snack_time_reminder,snack time reminder,gazak vaqtini eslatish,напоминание о перекусе
+snack_time_reminder,snack time reminder,gazak vaqtini eslatish,напоминание о времени перекуса
 minute,minute,minut,минута
 yourDataHasBeenSuccessfullySaved,You data has been saved successfully,Ma'lumotlaringiz muaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 limited_internet_title,Internet is unavailable.,Internet mavjud emas,Интернет недоступен
@@ -651,8 +651,3 @@ ft_cal_meals_t,Your meals,Ovqatlaringiz,Ваши приёмы пищи
 ft_cal_meals_d,Tap a meal card to add the food you ate for it.,Ovqat kartasini bosib oʻsha payt yegan taomingizni qoʻshing.,Нажмите карточку приёма пищи и добавьте съеденное.
 ft_mealcat_d,Tap this card to add food to this meal.,Bu kartani bosib shu ovqatga taom qoʻshing.,Нажмите эту карточку чтобы добавить еду в этот приём.
 nutrition_per_400g,Nutritional value per 400 g,400 grammdagi ozuqaviyligi,Пищевая ценность на 400 г
-cal_ready_subtitle,"Based on your answers, we've built a plan made just for you.","Javoblaringizga asoslanib, faqat siz uchun maxsus reja tuzdik.","На основе ваших ответов мы составили план специально для вас."
-cal_daily_targets,Your daily targets,Kunlik maqsadlaringiz,Ваши ежедневные цели
-cal_weight_journey,Your weight journey,Vazn yoʻlingiz,Ваш путь к весу
-cal_now,Now,Hozir,Сейчас
-cal_target,Target,Maqsad,Цель

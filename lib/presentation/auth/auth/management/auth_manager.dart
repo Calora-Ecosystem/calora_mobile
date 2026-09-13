@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/presentation/auth/auth/management/auth_management.dart';
@@ -98,15 +100,6 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
     return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  /// Decides which auth form to show: phone (+998 OTP) when the user is
-  /// in Uzbekistan, email/Google/Apple otherwise.
-  ///
-  /// Cache-first for an instant page, but ALWAYS re-verified with a
-  /// fresh resolution. The old `cacheOrNetwork` made the first-ever
-  /// answer permanent — one launch behind a VPN (or offline) cached
-  /// `false` and locked the user onto the email page forever. Now the
-  /// fresh result overwrites the cache on every visit, so a wrong answer
-  /// self-heals the next time the page opens.
   Future<void> loadCountry() async {
     bool? cached;
     try {
@@ -116,7 +109,6 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
     }
 
     if (cached != null) {
-      // Paint the page immediately from the last known answer.
       emit(state.copyWith(
         isUzbekistan: cached,
         countryLoading: false,
@@ -128,17 +120,12 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
 
     try {
       final fresh = await _commonRepo.getIsUzbekistan().network;
-      // Don't switch the form under the user's fingers: if they already
-      // started typing, keep the current form — the corrected value is
-      // cached and applies on the next visit.
       if (fresh != state.isUzbekistan && controller.text.trim().isNotEmpty) {
         return;
       }
       emit(state.copyWith(isUzbekistan: fresh, countryLoading: false));
     } catch (e) {
       log('Country lookup failed: $e');
-      // Only surface the error screen when we had nothing to show at
-      // all; with a cached answer the page is already usable.
       if (cached == null) {
         emit(state.copyWith(countryLoading: false, countryError: true));
       }
@@ -173,6 +160,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       final bool hasNewUser = await _repo.signInGoogle(idToken);
 
       if (hasNewUser) {
+        unawaited(
+          FacebookAnalyticsService.instance.logCompleteRegistration(
+            method: 'google',
+          ),
+        );
         publish(AuthEffect.openQuestions(account.email));
         return;
       }
@@ -222,6 +214,11 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
             email: credential.email,
           );
         }
+        unawaited(
+          FacebookAnalyticsService.instance.logCompleteRegistration(
+            method: 'apple',
+          ),
+        );
         publish(AuthEffect.openQuestions(credential.email ?? ''));
         return;
       }

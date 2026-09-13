@@ -1,49 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Health Connect -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.WRITE_STEPS" />
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
-    <!-- Newer Health Connect blocks reads from background workers unless
-         this separate permission is also granted (requested at runtime
-         together with the Steps read permission). Without it the 15-min /
-         4-min background sync gets SecurityException'd on Android 14+. -->
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
-
-    <!-- Step counter (pedometer + StepsFgService) -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-
-    <!-- Foreground service (StepsFgService, health type) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!-- Let the user whitelist the app from battery optimization so the
-         step foreground service isn't killed in the background. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- Reset the step notification to 0 at local midnight. Exact where
-         granted (auto on API ≤32; user-grantable on 33+); the code falls
-         back to an inexact while-idle alarm otherwise. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-
-    <!-- Notifications (FCM + local notifications) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Audio recording (speech page) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Google Advertising ID — required by the Meta SDK to attribute app
-         events / installs to ads on Android 13+ (API 33+). -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
-
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove" />
@@ -95,20 +69,14 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Step-counting foreground service (the only FGS in the app —
-             flutter_foreground_task was removed as unused). -->
         <service
             android:name=".StepsFgService"
             android:exported="false"
             android:foregroundServiceType="health" />
-
-        <!-- Midnight step-notification reset (scheduled via AlarmManager). -->
         <receiver
             android:name=".MidnightResetReceiver"
             android:exported="false" />
 
-        <!-- Bring StepsFgService back up after reboot / app-update so
-             daily counting resumes without needing the user to open the app. -->
         <receiver
             android:name=".StepsBootReceiver"
             android:enabled="true"
@@ -123,9 +91,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Watchdog kick from the periodic WorkManager sync — restarts
-             StepsFgService if an aggressive OEM killed it between the
-             midnight-alarm resurrection points. -->
         <receiver
             android:name=".StepsWatchdogReceiver"
             android:enabled="true"
@@ -135,13 +100,22 @@
             </intent-filter>
         </receiver>
 
-        <!-- Facebook / Meta SDK (App Events for ad targeting & attribution) -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
+        <!-- Install / app-open / session events, logged natively from launch —
+             before Dart runs — so the very first launch is attributable. -->
+        <meta-data
+            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="true" />
+        <!-- Attaches the Google Advertising ID to events; needs the
+             com.google.android.gms.permission.AD_ID permission declared above. -->
+        <meta-data
+            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
+            android:value="true" />
 
         <!-- Flutter embedding -->
         <meta-data

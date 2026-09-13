@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/domain/model/verification/verification.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/presentation/auth/verify/management/verify_management.dart';
@@ -74,6 +76,16 @@ class VerifyManager extends Manager<VerifyState, VerifyEffect> {
           onStart: () => emit(state.copyWith(loading: true)),
           onData: (hasNewUser) {
             if (hasNewUser) {
+              // Meta CompleteRegistration. Lives in `onData`, not `onDone` —
+              // `onDone` also runs on failure, which would report a
+              // registration that never happened.
+              unawaited(
+                FacebookAnalyticsService.instance.logCompleteRegistration(
+                  method: currentVerification.email == null
+                      ? 'phone'
+                      : 'email',
+                ),
+              );
               publish(VerifyEffect.openQuestions(currentVerification.email ?? ''));
             } else {
               publish(VerifyEffect.openDashboard());

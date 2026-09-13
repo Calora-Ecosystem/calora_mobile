@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/common/widgets/display/display.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
@@ -239,8 +241,13 @@ class RevenueCatService {
       }
 
       final result = await Purchases.purchase(PurchaseParams.package(package));
-      return result.customerInfo.entitlements.all[_entitlementId]?.isActive ==
+      final isActive =
+          result.customerInfo.entitlements.all[_entitlementId]?.isActive ==
           true;
+
+      if (isActive) _reportPurchaseToMeta(package, order);
+
+      return isActive;
     } on PlatformException catch (e, st) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       getIt<Logger>().e('IAP PlatformException $errorCode: $e', stackTrace: st);
@@ -250,4 +257,67 @@ class RevenueCatService {
       throw IapException(Strings.errorViewMessage);
     }
   }
+
+  /// Reports a completed store purchase to Meta App Events.
+  ///
+  /// [StoreProduct] is the only trustworthy source for the pair Meta needs:
+  /// `price` is what the store actually charged and `currencyCode` is the
+  /// buyer's storefront currency. The backend `fee` is a UZS figure for
+  /// Payme/Click and would be the wrong number in both fields.
+  ///
+  /// Event choice follows Meta's subscription guidance:
+  ///   • free trial  → `StartTrial` only (no money moved yet; `value` is what
+  ///     the trial converts to, so Meta can still value the conversion);
+  ///   • paid start  → `Subscribe` **and** `Purchase`, the latter being the
+  ///     revenue event Meta's value optimization bids against.
+  ///
+  /// Fire-and-forget: a failed analytics call must not fail a real purchase.
+  void _reportPurchaseToMeta(Package package, MySubscriptionOrderModel? order) {
+    final product = package.storeProduct;
+    final meta = FacebookAnalyticsService.instance;
+
+    // An introductory offer priced at 0 is a free trial; a discounted (but
+    // non-zero) intro price is still a paid start.
+    final intro = product.introductoryPrice;
+    final isFreeTrial = intro != null && intro.price == 0;
+
+    // Prefer our own order id so the event can be reconciled with the
+    // backend; the immutable store product id is a stable fallback.
+    final orderId = order?.id?.toString() ?? product.identifier;
+
+    final parameters = <String, dynamic>{
+      'product_id': product.identifier,
+      'package_type': package.packageType.name,
+    };
+
+    if (isFreeTrial) {
+      unawaited(
+        meta.logStartTrial(
+          orderId: orderId,
+          value: product.price,
+          currency: product.currencyCode,
+          parameters: parameters,
+        ),
+      );
+      return;
+    }
+
+    unawaited(
+      meta.logSubscribe(
+        orderId: orderId,
+        value: product.price,
+        currency: product.currencyCode,
+        parameters: parameters,
+      ),
+    );
+    unawaited(
+      meta.logPurchase(
+        value: product.price,
+        currency: product.currencyCode,
+        transactionId: orderId,
+        parameters: parameters,
+      ),
+    );
+  }
+
 }
