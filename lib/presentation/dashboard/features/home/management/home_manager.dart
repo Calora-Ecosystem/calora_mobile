@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/common/service/step_counter_service.dart';
@@ -67,6 +68,12 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
       profileStore.clear();
       profileStore.set(profile);
       getIt<RevenueCatService>().login(profile);
+      final userId = profile.userId;
+      if (userId != null) {
+        unawaited(
+          FacebookAnalyticsService.instance.setUserId(userId.toString()),
+        );
+      }
       final w = (profile.weight ?? 0).toDouble();
       if (w > 0) StepsForegroundService.instance.setUserWeight(w);
     },
@@ -149,24 +156,27 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
     try {
       final healthSteps = await _stepRepo.getHealthStepsForDay(day);
       if (healthSteps > 0) {
-        emit(state.copyWith(
-          currentSteps: healthSteps,
-          isMetricsLoading: false,
-        ));
+        emit(
+          state.copyWith(currentSteps: healthSteps, isMetricsLoading: false),
+        );
         return;
       }
     } catch (_) {
       // Swallow and fall through to the backend.
     }
 
-    await _homeRepo.getDailiesSteps(day).handle(
-      onData: (data) => emit(state.copyWith(
-        currentSteps: data.value.toInt(),
-        isMetricsLoading: false,
-      )),
-      onDone: () => emit(state.copyWith(isMetricsLoading: false)),
-      onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
-    );
+    await _homeRepo
+        .getDailiesSteps(day)
+        .handle(
+          onData: (data) => emit(
+            state.copyWith(
+              currentSteps: data.value.toInt(),
+              isMetricsLoading: false,
+            ),
+          ),
+          onDone: () => emit(state.copyWith(isMetricsLoading: false)),
+          onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
+        );
   }
 
   void getWater() {
@@ -175,10 +185,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         .handle(
           onStart: () => emit(state.copyWith(isWaterLoading: true)),
           onData: (data) => emit(
-            state.copyWith(
-              waterIntake: data.value,
-              isWaterLoading: false,
-            ),
+            state.copyWith(waterIntake: data.value, isWaterLoading: false),
           ),
           onError: (_) => emit(state.copyWith(isWaterLoading: false)),
         );
@@ -260,7 +267,9 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         if (newTargetSteps > 0) {
           StepsForegroundService.instance.setGoalSteps(newTargetSteps);
           if (StepsForegroundService.instance.isRunning) {
-            unawaited(StepsForegroundService.instance.updateGoal(newTargetSteps));
+            unawaited(
+              StepsForegroundService.instance.updateGoal(newTargetSteps),
+            );
           }
         }
       },
@@ -296,17 +305,23 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
           NutrientInfo(
             name: Strings.proteins,
             value: summary.sum.Protein,
-            percent: proteinNorm > 0 ? (summary.sum.Protein / proteinNorm).clamp(0.0, 1.0) : 0,
+            percent: proteinNorm > 0
+                ? (summary.sum.Protein / proteinNorm).clamp(0.0, 1.0)
+                : 0,
           ),
           NutrientInfo(
             name: Strings.oils,
             value: summary.sum.Fat,
-            percent: fatNorm > 0 ? (summary.sum.Fat / fatNorm).clamp(0.0, 1.0) : 0,
+            percent: fatNorm > 0
+                ? (summary.sum.Fat / fatNorm).clamp(0.0, 1.0)
+                : 0,
           ),
           NutrientInfo(
             name: Strings.carbohydrates,
             value: summary.sum.Carb,
-            percent: carbNorm > 0 ? (summary.sum.Carb / carbNorm).clamp(0.0, 1.0) : 0,
+            percent: carbNorm > 0
+                ? (summary.sum.Carb / carbNorm).clamp(0.0, 1.0)
+                : 0,
           ),
         ],
       ),

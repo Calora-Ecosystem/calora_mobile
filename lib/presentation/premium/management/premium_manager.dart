@@ -20,13 +20,15 @@ import 'package:purchases_flutter/purchases_flutter.dart' show StoreProduct;
 import 'package:url_launcher/url_launcher.dart';
 
 @injectable
-class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBindingObserver {
+class PremiumManager extends Manager<PremiumState, PremiumEffect>
+    with WidgetsBindingObserver {
   final PremiumRepo _premiumRepo;
   final CommonRepo _commonRepo;
 
   StreamSubscription<bool>? _countrySubscription;
 
   bool _awaitingExternalPayment = false;
+  bool _checkingExternalPayment = false;
   Timer? _paymentPollTimer;
   int _paymentPollTicks = 0;
   static const Duration _paymentPollInterval = Duration(seconds: 5);
@@ -41,14 +43,16 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
   final Map<int, StoreProduct> _iapProducts = {};
   bool _paywallViewLogged = false;
 
-  PremiumManager(this._premiumRepo, this._commonRepo) : super(const PremiumState()) {
+  PremiumManager(this._premiumRepo, this._commonRepo)
+    : super(const PremiumState()) {
     WidgetsBinding.instance.addObserver(this);
     _init();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
-    if (lifecycleState == AppLifecycleState.resumed && _awaitingExternalPayment) {
+    if (lifecycleState == AppLifecycleState.resumed &&
+        _awaitingExternalPayment) {
       unawaited(_checkExternalPayment());
     }
   }
@@ -108,7 +112,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
       state.copyWith(
         isLoadingIapPrices: false,
         iapPrices: {
-          for (final entry in products.entries) entry.key: entry.value.priceString,
+          for (final entry in products.entries)
+            entry.key: entry.value.priceString,
         },
       ),
     );
@@ -145,7 +150,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
 
   Future<void> redeemOfferCode() async {
     try {
-      final presented = await getIt<RevenueCatService>().presentOfferCodeRedemption();
+      final presented = await getIt<RevenueCatService>()
+          .presentOfferCodeRedemption();
       _awaitingOfferCode = true;
 
       if (!presented) {
@@ -178,49 +184,50 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
   void selectPaymentMethod(PaymentMethod method) =>
       emit(state.copyWith(selectedPaymentMethod: method));
 
-  Future<void> getPremiumPlans() async => await _premiumRepo.getPremiumPlans().handle(
-    onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
-    onData: (data) {
-      final plans = data.map((e) {
-        if (e.duration == 1) {
-          return PlanModel(
-            id: e.id ?? 0,
-            title: Strings.monthlyPremium,
-            price: e.fee ?? 0,
-            originalFee: e.originalFee ?? 0,
-            packageMonth: e.duration ?? 0,
-            isMostPopular: e.isPopular ?? false,
-          );
-        }
-        return PlanModel(
-          id: e.id ?? 0,
-          title: Strings.nMothPremium(month: e.duration ?? 0),
-          price: e.fee ?? 0,
-          originalFee: e.originalFee ?? 0,
-          packageMonth: e.duration ?? 0,
-          isMostPopular: e.isPopular ?? false,
-        );
-      }).toList();
+  Future<void> getPremiumPlans() async =>
+      await _premiumRepo.getPremiumPlans().handle(
+        onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
+        onData: (data) {
+          final plans = data.map((e) {
+            if (e.duration == 1) {
+              return PlanModel(
+                id: e.id ?? 0,
+                title: Strings.monthlyPremium,
+                price: e.fee ?? 0,
+                originalFee: e.originalFee ?? 0,
+                packageMonth: e.duration ?? 0,
+                isMostPopular: e.isPopular ?? false,
+              );
+            }
+            return PlanModel(
+              id: e.id ?? 0,
+              title: Strings.nMothPremium(month: e.duration ?? 0),
+              price: e.fee ?? 0,
+              originalFee: e.originalFee ?? 0,
+              packageMonth: e.duration ?? 0,
+              isMostPopular: e.isPopular ?? false,
+            );
+          }).toList();
 
-      PlanModel? initialPlan;
-      try {
-        initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
-      } catch (e) {
-        initialPlan = plans.isNotEmpty ? plans.first : null;
-      }
-      emit(
-        state.copyWith(
-          isGettingPremiumPlans: false,
-          plans: plans,
-          selectedPlan: initialPlan,
-        ),
+          PlanModel? initialPlan;
+          try {
+            initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
+          } catch (e) {
+            initialPlan = plans.isNotEmpty ? plans.first : null;
+          }
+          emit(
+            state.copyWith(
+              isGettingPremiumPlans: false,
+              plans: plans,
+              selectedPlan: initialPlan,
+            ),
+          );
+          unawaited(_loadIapPrices());
+          _ensureSelectedPlanIsPurchasable();
+          _logPaywallViewed();
+        },
+        onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
       );
-      unawaited(_loadIapPrices());
-      _ensureSelectedPlanIsPurchasable();
-      _logPaywallViewed();
-    },
-    onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
-  );
 
   Future<void> getMyOrders() async => await _premiumRepo.getMyOrders().handle(
     onStart: () => emit(state.copyWith(isGettingOrders: true)),
@@ -307,7 +314,9 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
                   (plan) => plan.isMostPopular,
                 );
               } catch (e) {
-                newSelectedPlan = discountedPlans.isNotEmpty ? discountedPlans.first : null;
+                newSelectedPlan = discountedPlans.isNotEmpty
+                    ? discountedPlans.first
+                    : null;
               }
 
               PaymentMethod? autoMethod = state.selectedPaymentMethod;
@@ -344,7 +353,9 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
     final isFreePlan = state.selectedPlan?.isFree ?? false;
     final providerCode =
         state.selectedPaymentMethod?.code ??
-        (isFreePlan && state.paymentMethods.isNotEmpty ? state.paymentMethods.first.code : '');
+        (isFreePlan && state.paymentMethods.isNotEmpty
+            ? state.paymentMethods.first.code
+            : '');
 
     await _premiumRepo
         .orderSubscription(
@@ -478,22 +489,28 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
   }
 
   Future<void> _checkExternalPayment() async {
-    if (!_awaitingExternalPayment) return;
+    if (!_awaitingExternalPayment || _checkingExternalPayment) return;
+    _checkingExternalPayment = true;
 
-    if (_awaitingOfferCode && await getIt<RevenueCatService>().hasActiveEntitlement()) {
-      _stopPaymentPolling();
+    try {
+      if (_awaitingOfferCode &&
+          await getIt<RevenueCatService>().hasActiveEntitlement()) {
+        _stopPaymentPolling();
+        await getMyOrders();
+        publish(const PremiumEffect.subscriptionSuccess());
+        return;
+      }
+
+      final premium = await getIt<TokenInterceptor>().refreshAndCheckPremium();
       await getMyOrders();
-      publish(const PremiumEffect.subscriptionSuccess());
-      return;
-    }
 
-    final premium = await getIt<TokenInterceptor>().refreshAndCheckPremium();
-    await getMyOrders();
-
-    if (premium) {
-      _stopPaymentPolling();
-      _logExternalPurchase();
-      publish(const PremiumEffect.subscriptionSuccess());
+      if (premium) {
+        _stopPaymentPolling();
+        _logExternalPurchase();
+        publish(const PremiumEffect.subscriptionSuccess());
+      }
+    } finally {
+      _checkingExternalPayment = false;
     }
   }
 
@@ -582,6 +599,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
     if (plan == null) return;
 
     final orderId = state.myOrders.firstOrNull?.id?.toString();
+    if (orderId == null) return;
+
     final price = _metaPriceFor(plan);
     if (price == null) return;
     final (value, currency) = price;
@@ -592,16 +611,14 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect> with WidgetsBi
     };
 
     final meta = FacebookAnalyticsService.instance;
-    if (orderId != null) {
-      unawaited(
-        meta.logSubscribe(
-          orderId: orderId,
-          value: value,
-          currency: currency,
-          parameters: parameters,
-        ),
-      );
-    }
+    unawaited(
+      meta.logSubscribe(
+        orderId: orderId,
+        value: value,
+        currency: currency,
+        parameters: parameters,
+      ),
+    );
     unawaited(
       meta.logPurchase(
         value: value,

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/flavor/flavor_config.dart';
+import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/token/token.dart';
@@ -44,6 +45,7 @@ class SplashManager extends Manager<SplashState, SplashEffect> {
         token!.refreshTokenExpireAt!.isBefore(DateTime.now())) {
       await _authStore.token.clear();
       await _profileStore.clear();
+      await FacebookAnalyticsService.instance.clearUser();
       token = null;
     }
 
