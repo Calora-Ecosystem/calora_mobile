@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 class ConnectivityOverlay
-    extends
-        Managed<ConnectivityManager, ConnectivityState, ConnectivityEffect> {
+    extends Managed<ConnectivityManager, ConnectivityState, ConnectivityEffect> {
   final Widget child;
+
   ConnectivityOverlay({super.key, required this.child});
 
   OverlayEntry? _overlayEntry;
@@ -29,12 +29,8 @@ class ConnectivityOverlay
 
   @override
   Widget builder(context, manager, state) {
-    // Restore overlay state after hot reload or app resume if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Only restore if we're disconnected and overlay isn't already shown
-      if (!state.isConnected &&
-          _overlayEntry == null &&
-          !_shouldShowSheet.value) {
+      if (!state.isConnected && _overlayEntry == null && !_shouldShowSheet.value) {
         log(
           '[ConnectivityOverlay] Restoring overlay (disconnected state detected)',
         );
@@ -53,7 +49,6 @@ class ConnectivityOverlay
       '[ConnectivityOverlay] _showOverlay called, current entry exists: ${_overlayEntry != null}, shouldShow: ${_shouldShowSheet.value}',
     );
 
-    // If overlay already exists and is showing, just ensure it's visible
     if (_overlayEntry != null) {
       if (!_shouldShowSheet.value) {
         log('[ConnectivityOverlay] Re-showing existing overlay');
@@ -65,7 +60,6 @@ class ConnectivityOverlay
     final overlayState = _overlayKey.currentState;
     if (overlayState == null) {
       log('[ConnectivityOverlay] Overlay state is null, scheduling retry...');
-      // Retry after a frame when overlay is ready
       Future.delayed(const Duration(milliseconds: 100), () {
         if (_overlayEntry == null) {
           _showOverlay();

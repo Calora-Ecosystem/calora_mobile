@@ -44,6 +44,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      magnifierConfiguration: TextMagnifierConfiguration.disabled,
       onTapOutside: (_) => FocusManager.instance.primaryFocus!.unfocus(),
       controller: widget.controller,
       focusNode: _focusNode,
@@ -60,7 +61,8 @@ class _CommonTextFieldState extends State<CommonTextField> {
           height: 0.8,
           leadingDistribution: TextLeadingDistribution.even,
         ),
-        contentPadding: widget.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16),
+        contentPadding:
+            widget.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16),
         suffix: widget.suffix,
         prefixIcon: widget.prefix,
         suffixIcon: widget.suffixIcon,

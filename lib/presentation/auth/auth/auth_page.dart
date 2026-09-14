@@ -65,6 +65,8 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                         const SizedBox(height: 32),
                         if (!state.isUzbekistan) ...[
                           TextField(
+                            magnifierConfiguration:
+                                TextMagnifierConfiguration.disabled,
                             controller: manager.controller,
                             cursorColor: context.colors.accentSub,
                             decoration: InputDecoration(
@@ -137,6 +139,8 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
                           ),
                         ] else ...[
                           TextFormField(
+                            magnifierConfiguration:
+                                TextMagnifierConfiguration.disabled,
                             controller: manager.controller,
                             cursorColor: context.colors.accentSub,
                             inputFormatters: [phoneFormatter],

@@ -50,8 +50,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
 
   late final TextEditingController _searchController;
 
-  // Spotlight anchors for the first-visit coach-mark tour of the three
-  // food-adding buttons.
   final GlobalKey _createKey = GlobalKey();
   final GlobalKey _scanKey = GlobalKey();
   final GlobalKey _voiceKey = GlobalKey();
@@ -59,9 +57,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   @override
   void init(BuildContext context, AddMealsManager manager) {
     _searchController = TextEditingController();
-    // Debounce + length-gating live in the manager — the page is a
-    // dumb forwarder so manager logic can be unit-tested without
-    // pumping a widget tree.
     _searchController.addListener(() {
       manager.onSearchChanged(_searchController.text);
     });
@@ -74,7 +69,13 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     super.listener(context, manager, effect);
     effect.mapOrNull(
       openDishesPage: (e) => context.pushRoute(
-        DishesRoute(data: e.meal, type: type, categoryId: categoryId, meals: meals, dateTime: dateTime),
+        DishesRoute(
+          data: e.meal,
+          type: type,
+          categoryId: categoryId,
+          meals: meals,
+          dateTime: dateTime,
+        ),
       ),
       openAboutPage: (e) => openAboutDishPage(context, e.food, manager, e.isFavourite),
     );
@@ -87,7 +88,11 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   }
 
   @override
-  Widget builder(BuildContext context, AddMealsManager manager, AddMealsState state) {
+  Widget builder(
+    BuildContext context,
+    AddMealsManager manager,
+    AddMealsState state,
+  ) {
     return FeatureTourHost(
       tourId: 'add_food',
       delay: const Duration(milliseconds: 700),
@@ -150,13 +155,16 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                     const SizedBox(height: 12),
                     ToggleButtonsWidget(
                       onChanged: manager.onToggleChanged,
-                      titles: [Strings.allDishes, Strings.lastEaten, Strings.thoseICreated, Strings.favoriteFoods],
+                      titles: [
+                        Strings.allDishes,
+                        Strings.lastEaten,
+                        Strings.thoseICreated,
+                        Strings.favoriteFoods,
+                      ],
                     ),
                     const SizedBox(height: 12),
                   ],
-                  Expanded(
-                    child: _buildBody(context, manager, state),
-                  ),
+                  Expanded(child: _buildBody(context, manager, state)),
                 ],
               ),
             ),
@@ -166,8 +174,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
   }
 
-  /// First-visit coach-mark steps pointing at the three real food-adding
-  /// buttons, explaining exactly what each one does.
   List<FeatureTourStep> _addFoodTourSteps(BuildContext context) => [
     FeatureTourStep(
       targetKey: _scanKey,
@@ -190,10 +196,10 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   ];
 
   Widget _buildBody(
-      BuildContext context,
-      AddMealsManager manager,
-      AddMealsState state,
-      ) {
+    BuildContext context,
+    AddMealsManager manager,
+    AddMealsState state,
+  ) {
     if (state.activeTab == FoodTab.categories) {
       return RepaintBoundary(
         child: MealTypeGrid(
@@ -207,13 +213,17 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     return RepaintBoundary(
       child: PaginatedFoodGrid(
         controller: manager.foodPaginator.pagingController,
-        onFoodSelected: (food) =>
-            manager.openAboutPage(food, food.isFavourite),
+        onFoodSelected: (food) => manager.openAboutPage(food, food.isFavourite),
       ),
     );
   }
 
-  void openAboutDishPage(BuildContext context, FoodModel food, AddMealsManager manager, bool isFavourite) {
+  void openAboutDishPage(
+    BuildContext context,
+    FoodModel food,
+    AddMealsManager manager,
+    bool isFavourite,
+  ) {
     context.showAppBottomSheet(
       child: DishInfoPage(
         isFavourite: isFavourite,
@@ -231,10 +241,9 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               weightInGr: value == 0 ? 100 : value.toInt(),
             ),
           );
-          if (context.mounted) context.router.pop();
-          if (success) {
-            _showInfoDialog(context);
-          }
+          if (!context.mounted) return;
+          context.router.pop();
+          if (success) _showInfoDialog(context);
         },
       ),
     );
@@ -258,8 +267,16 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
               coverUrl: abstractImageUrl,
               metrics: [
-                Metric(userId: 0, metric: MetricType.kcal.name, value: calories),
-                Metric(userId: 0, metric: MetricType.protein.name, value: protein),
+                Metric(
+                  userId: 0,
+                  metric: MetricType.kcal.name,
+                  value: calories,
+                ),
+                Metric(
+                  userId: 0,
+                  metric: MetricType.protein.name,
+                  value: protein,
+                ),
                 Metric(userId: 0, metric: MetricType.fat.name, value: fat),
                 Metric(userId: 0, metric: MetricType.carb.name, value: carbs),
               ],
@@ -270,38 +287,48 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
           bool success = false;
           if (addedFoodId != null) {
             success = await manager.saveMenuItem(
-              MenuInfo(menu: type.name, date: dateTime, foodId: addedFoodId, weightInGr: 400),
+              MenuInfo(
+                menu: type.name,
+                date: dateTime,
+                foodId: addedFoodId,
+                weightInGr: 400,
+              ),
             );
           }
-          if (context.mounted) context.router.pop();
-          if (success) {
-            _showInfoDialog(context);
-          }
+          if (!context.mounted) return;
+          context.router.pop();
+          if (success) _showInfoDialog(context);
         },
       ),
     );
   }
 
   void openCreatorWithSpeech(
-      BuildContext context,
-      AddMealsManager manager,
-      List<ScannerFood> foods, {
-        String? imagePath,
-        String? coverUrl,
-      }) {
+    BuildContext context,
+    AddMealsManager manager,
+    List<ScannerFood> foods, {
+    String? imagePath,
+    String? coverUrl,
+  }) {
     final locale = Localizations.localeOf(context);
     final editable = foods
         .map(
           (e) => EditableFood(
-        name: e.name.localized(locale),
-        calories: MetricsHelper.getMetricValue(e.metrics, MetricType.kcal).round(),
-        protein: MetricsHelper.getMetricValue(e.metrics, MetricType.protein),
-        fat: MetricsHelper.getMetricValue(e.metrics, MetricType.fat),
-        carbs: MetricsHelper.getMetricValue(e.metrics, MetricType.carb),
-        categoryId: e.categoryId,
-        weight: e.weight,
-      ),
-    )
+            name: e.name.localized(locale),
+            calories: MetricsHelper.getMetricValue(
+              e.metrics,
+              MetricType.kcal,
+            ).round(),
+            protein: MetricsHelper.getMetricValue(
+              e.metrics,
+              MetricType.protein,
+            ),
+            fat: MetricsHelper.getMetricValue(e.metrics, MetricType.fat),
+            carbs: MetricsHelper.getMetricValue(e.metrics, MetricType.carb),
+            categoryId: e.categoryId,
+            weight: e.weight,
+          ),
+        )
         .toList();
     context.showAppBottomSheet(
       child: FoodCreatorWithSpeech(
@@ -327,18 +354,18 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               allSucceeded = false;
             }
           }
-          if (context.mounted) {
-            context.router.pop();
-            if (allSucceeded) {
-              _showInfoDialog(context);
-            }
-          }
+          if (!context.mounted) return;
+          context.router.pop();
+          if (allSucceeded) _showInfoDialog(context);
         },
       ),
     );
   }
 
-  Future<void> openCameraPage(BuildContext context, AddMealsManager manager) async {
+  Future<void> openCameraPage(
+    BuildContext context,
+    AddMealsManager manager,
+  ) async {
     final imagePath = await context.pushRoute<String>(
       UniversalCameraRoute(
         title: Strings.scanning,
@@ -351,9 +378,6 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
     if (imagePath == null || !context.mounted) return;
 
-    // Persist the captured photo in parallel with recognition so it's ready
-    // to attach as the food's cover by the time the user taps Add. A failed
-    // upload resolves to null and simply falls back to the placeholder.
     final coverUrlFuture = manager.uploadFoodImage(imagePath);
 
     await context.pushRoute<bool>(
@@ -403,15 +427,14 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               apiCall: () => manager.getScannerFoodByVoice(value, categoryId),
             ),
           );
+          if (!context.mounted) return;
           context.router.pop();
-          if (context.mounted) {
-            final scannedFoods = manager.state.scannedFoodsByVoice;
-            if (scannedFoods.isEmpty) {
-              CustomSnackBar.show(context, Strings.noFoodFoundInVoice);
-              return;
-            }
-            openCreatorWithSpeech(context, manager, scannedFoods);
+          final scannedFoods = manager.state.scannedFoodsByVoice;
+          if (scannedFoods.isEmpty) {
+            CustomSnackBar.show(context, Strings.noFoodFoundInVoice);
+            return;
           }
+          openCreatorWithSpeech(context, manager, scannedFoods);
         },
       ),
     );
@@ -449,16 +472,22 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   color: useGradient ? null : context.colors.backgroundElevation,
                   gradient: useGradient
                       ? RadialGradient(
-                    center: const Alignment(1.2, 0.5),
-                    radius: 1.3,
-                    colors: [context.colors.honeydew, context.colors.mintGreen],
-                    stops: const [0.0, 1.0],
-                  )
+                          center: const Alignment(1.2, 0.5),
+                          radius: 1.3,
+                          colors: [
+                            context.colors.honeydew,
+                            context.colors.mintGreen,
+                          ],
+                          stops: const [0.0, 1.0],
+                        )
                       : null,
                 ),
                 child: Column(
                   spacing: 8,
-                  children: [if (icon != null) icon, text.text(14, 16, 600).c(textColor ?? context.colors.textWhite)],
+                  children: [
+                    if (icon != null) icon,
+                    text.text(14, 16, 600).c(textColor ?? context.colors.textWhite),
+                  ],
                 ),
               ),
             ),

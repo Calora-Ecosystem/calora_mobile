@@ -1,11 +1,12 @@
-import 'dart:math';
+import 'dart:async';
+import 'dart:developer';
+import 'dart:math' show pow;
 
 import 'package:calora/common/base/course_intro_store.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
-import 'package:calora/common/gen/strings.dart';
-import 'package:calora/domain/model/profile/profile_request.dart';
-import 'package:calora/domain/model/questions/questions.dart' show ActivityLevelEnum;
+import 'package:calora/domain/model/questions/questions.dart'
+    show ActivityLevelEnum;
 import 'package:calora/domain/model/questions/questions_request.dart';
 import 'package:calora/domain/model/reminder/reminder_request.dart';
 import 'package:calora/domain/repo/notification/notification_repo.dart';
@@ -15,11 +16,13 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 @injectable
-class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestionsEffect> {
+class CourseQuestionsManager
+    extends Manager<CourseQuestionsState, CourseQuestionsEffect> {
   final QuestionsRepo _questionsRepo;
   final NotificationRepo _notificationRepo;
 
-  CourseQuestionsManager(this._questionsRepo, this._notificationRepo) : super(const CourseQuestionsState());
+  CourseQuestionsManager(this._questionsRepo, this._notificationRepo)
+    : super(const CourseQuestionsState());
 
   void next() {
     emit(state.copyWith(currentIndex: state.currentIndex + 1));
@@ -70,13 +73,16 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
     final profileStore = getIt<ProfileStore>();
     final saved = await profileStore.getProfile();
 
-    final double? bmi = (saved.height != null && saved.weight != null && saved.height! > 0)
+    final double? bmi =
+        (saved.height != null && saved.weight != null && saved.height! > 0)
         ? saved.weight! / pow(saved.height! / 100, 2)
         : saved.bmi;
 
     final activityLevelApi = _activityLevelFromId(info.activityTime);
 
-    final physicalActivity = _physicalActivityFromCondition(info.condition) ?? saved.physicalActivity;
+    final physicalActivity =
+        _physicalActivityFromCondition(info.condition) ??
+        saved.physicalActivity;
 
     await profileStore.updateProfile(
       bmi: bmi,
@@ -84,17 +90,21 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
       physicalActivity: physicalActivity,
     );
 
-    // Purpose mappingni onboarding bilan bir xil qilamiz
     String? purposeApi = saved.goal;
-    if (purposeApi == '0' || purposeApi == 'WeightLoss') purposeApi = 'WeightLoss';
-    else if (purposeApi == '1' || purposeApi == 'SaveCurrent') purposeApi = 'SaveCurrent';
-    else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment') purposeApi = 'MuscleDevelopment';
+    if (purposeApi == '0' || purposeApi == 'WeightLoss')
+      purposeApi = 'WeightLoss';
+    else if (purposeApi == '1' || purposeApi == 'SaveCurrent')
+      purposeApi = 'SaveCurrent';
+    else if (purposeApi == '2' || purposeApi == 'MuscleDevelopment')
+      purposeApi = 'MuscleDevelopment';
 
-    final tWeight = (saved.targetWeight ?? 0) == 0 ? saved.weight : saved.targetWeight;
+    final tWeight = (saved.targetWeight ?? 0) == 0
+        ? saved.weight
+        : saved.targetWeight;
 
     final request = QuestionsRequest(
       name: saved.name,
-      gender: saved.gender, // Swagger kutgan "Male"/"Female" formatida bo'lishi kerak
+      gender: saved.gender,
       purpose: purposeApi,
       birthDate: DateTime.tryParse(saved.birthDay ?? ''),
       height: saved.height,
@@ -106,27 +116,28 @@ class CourseQuestionsManager extends Manager<CourseQuestionsState, CourseQuestio
       physicalActivity: physicalActivity,
     );
 
-    print('DEBUG: Sending full profile update with activityLevel: ${request.activityLevel}');
-
     try {
       await _questionsRepo.sendAnswers(request);
-    } catch (e) {
-      print('DEBUG: Error sending answers: $e');
-    }
-    updateNotification(_formatTimeToApi(state.courseQuestionsInfo.trainingTime) ?? '00:00:00');
+    } catch (e) {}
+    unawaited(
+      updateNotification(
+        _formatTimeToApi(state.courseQuestionsInfo.trainingTime) ?? '00:00:00',
+      ),
+    );
 
-    // Mark this course as intro-completed AFTER the profile write —
-    // even if `sendAnswers` failed, the local profile store is updated
-    // and the notification is scheduled, so the user shouldn't be
-    // forced through the same 3 steps again. `markCompleted` is a
-    // no-op when courseId <= 0.
     if (courseId != null) {
       await CourseIntroStore().markCompleted(courseId);
     }
   }
 
-  void updateNotification(String time) {
-    _notificationRepo.updateReminder(ReminderRequest(menu: 'Breakfast', time: time, type: 'DailyChallenge'));
+  Future<void> updateNotification(String time) async {
+    try {
+      await _notificationRepo.updateReminder(
+        ReminderRequest(menu: 'Breakfast', time: time, type: 'DailyChallenge'),
+      );
+    } catch (e) {
+      log('updateReminder failed: $e', name: 'CourseQuestionsManager');
+    }
   }
 
   String? _activityLevelFromId(int? id) {

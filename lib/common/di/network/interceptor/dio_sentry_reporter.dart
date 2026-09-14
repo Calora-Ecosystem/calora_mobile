@@ -32,16 +32,45 @@ class DioSentryReporter {
   /// Keys redacted by exact (normalised) match. These would over-match as
   /// substrings (e.g. `code` inside `countryCode`), so they're matched whole.
   static const _sensitiveExactKeys = <String>{
-    'email', 'phone', 'phonenumber', 'code', 'verificationcode', 'name',
-    'firstname', 'lastname', 'fullname', 'birthdate', 'birthday', 'dob',
-    'address', 'ssn', 'passport', 'latitude', 'longitude', 'lat', 'lng',
+    'email',
+    'phone',
+    'phonenumber',
+    'code',
+    'verificationcode',
+    'name',
+    'firstname',
+    'lastname',
+    'fullname',
+    'birthdate',
+    'birthday',
+    'dob',
+    'address',
+    'ssn',
+    'passport',
+    'latitude',
+    'longitude',
+    'lat',
+    'lng',
   };
 
   /// Keys redacted by substring (normalised) match — unambiguous secrets.
   static const _sensitiveSubstrings = <String>[
-    'authorization', 'password', 'passwd', 'pwd', 'secret', 'token', 'apikey',
-    'credential', 'ssotoken', 'fcmtoken', 'rtoken', 'otp', 'cookie', 'session',
-    'cvv', 'cardnumber',
+    'authorization',
+    'password',
+    'passwd',
+    'pwd',
+    'secret',
+    'token',
+    'apikey',
+    'credential',
+    'ssotoken',
+    'fcmtoken',
+    'rtoken',
+    'otp',
+    'cookie',
+    'session',
+    'cvv',
+    'cardnumber',
   ];
 
   /// Fire-and-forget report. Never throws — telemetry must not break the
@@ -126,8 +155,9 @@ class DioSentryReporter {
       case DioExceptionType.cancel:
         return false;
       case DioExceptionType.unknown:
-        // `unknown` commonly wraps a SocketException (no internet) — drop it.
-        return err.error is! SocketException;
+        return err.error is! SocketException &&
+            err.error is! HttpException &&
+            err.error is! TlsException;
       case DioExceptionType.badResponse:
       case DioExceptionType.badCertificate:
         return true;
@@ -183,8 +213,9 @@ class DioSentryReporter {
           break;
         }
         final key = entry.key.toString();
-        out[key] =
-            _isSensitiveKey(key) ? _redacted : _scrub(entry.value, depth + 1);
+        out[key] = _isSensitiveKey(key)
+            ? _redacted
+            : _scrub(entry.value, depth + 1);
       }
       return out;
     }

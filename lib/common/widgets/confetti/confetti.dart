@@ -7,7 +7,6 @@ class PremiumConfettiOverlay extends StatefulWidget {
   static Future<void> show(BuildContext context) async {
     await showGeneralDialog(
       context: context,
-      barrierDismissible: false,
       barrierLabel: 'premium_confetti',
       transitionDuration: const Duration(milliseconds: 150),
       pageBuilder: (_, __, ___) => const PremiumConfettiOverlay(),
@@ -19,7 +18,8 @@ class PremiumConfettiOverlay extends StatefulWidget {
   State<PremiumConfettiOverlay> createState() => _PremiumConfettiOverlayState();
 }
 
-class _PremiumConfettiOverlayState extends State<PremiumConfettiOverlay> with SingleTickerProviderStateMixin {
+class _PremiumConfettiOverlayState extends State<PremiumConfettiOverlay>
+    with SingleTickerProviderStateMixin {
   late final ConfettiController _confetti;
   late final AnimationController _anim;
   late final Animation<double> _scale;
@@ -72,7 +72,13 @@ class _PremiumConfettiOverlayState extends State<PremiumConfettiOverlay> with Si
             emissionFrequency: 0.1,
             minimumSize: const Size(6, 6),
             maximumSize: const Size(10, 10),
-            colors: const [Colors.orange, Colors.yellow, Colors.green, Colors.red, Colors.deepPurple],
+            colors: const [
+              Colors.orange,
+              Colors.yellow,
+              Colors.green,
+              Colors.red,
+              Colors.deepPurple,
+            ],
           ),
         ],
       ),

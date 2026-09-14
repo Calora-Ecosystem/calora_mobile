@@ -11,97 +11,35 @@ import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
-/// Which local source the service is reading from.
 enum StepSource { health, pedometer, none }
 
-/// Cross-cutting events the service raises so the UI layer can react
-/// (rationale dialogs, sync-troubleshooting prompts, etc.). The service
-/// itself never touches `BuildContext`.
 sealed class StepCounterEvent {
   const StepCounterEvent();
 }
 
-/// Emitted when Health permission is granted but the central health
-/// repository keeps returning ~0 steps after the grace period AND a
-/// known third-party tracker is installed (Samsung Health, Mi Fitness,
-/// etc.). The UI should surface a dialog telling the user to enable
-/// that app's sync to Health Connect / HealthKit.
 class HealthDataNotSyncing extends StepCounterEvent {
-  /// One of `samsung_health`, `mi_fitness`, `unknown`, or `ios`.
   final String detectedApp;
+
   const HealthDataNotSyncing(this.detectedApp);
 }
 
-/// Single source of truth for today's step total.
-///
-/// Architecture
-/// ────────────
-/// 1. **Primary** — central OS health repository (Health Connect on
-///    Android, HealthKit on iOS). Polled every 5 s while in this mode.
-/// 2. **Fallback** — device pedometer sensor. Used when Health is
-///    unavailable, unpermitted, or the user explicitly forces it.
-/// 3. **Local-only** — the daily total is computed entirely on-device.
-///    Backend values are never read as a source of truth; the backend
-///    only receives writes (see "Backend sync" below).
-/// 4. **Single output** — `stream` (broadcast, replays the latest value)
-///    feeds both the UI and the Android foreground notification.
-///
-/// Backend sync
-/// ────────────
-/// Every [_backendSyncInterval] (1 min) the service POSTs the current
-/// step total to `stepRepo.sendDailyData(metric: 'Step', …)` so the
-/// server's daily history stays current for charts / cross-device read.
-/// The POST fires on every tick regardless of whether the count
-/// changed — the requirement is a heartbeat, not a diff. The only
-/// skip is when [currentSteps] is 0, so a momentary zero never
-/// overwrites a real value on the server. A failed POST is silently
-/// swallowed; the next tick (60 s later) just tries again with the
-/// latest total.
-///
-/// Stuck-Health detection
-/// ──────────────────────
-/// On many Android devices Health Connect is installed and permitted
-/// but a third-party tracker (Samsung Health, Mi Fitness…) hasn't been
-/// configured to sync into it, so we'd otherwise show a stale "0
-/// steps". After [_stuckHealthGracePeriod] the service samples Health
-/// again; if it's still under [_stuckHealthThreshold] and we can
-/// detect such an app, the service raises [HealthDataNotSyncing] on
-/// [events]. Fires at most once per process.
-///
-/// The `BackgroundStepsWorker` runs in a separate isolate and cannot
-/// read this stream. It merges the native FG service's persisted totals
-/// and the Health aggregate into the same `StepLedgerStore` with
-/// max-semantics (never delta-accumulation — that's what used to double
-/// count) and POSTs to the same backend endpoint every ~4 min on
-/// Android — overlapping writes are safe since both sides only ever
-/// push a day's value forward.
 @lazySingleton
 class StepCounterService {
   final StepRepo _stepRepo;
   final PedometerService _pedometer;
 
-  /// Isolate-safe SQLite ledger — shared with the background worker.
   final StepLedgerDb _db = StepLedgerDb.instance;
 
-  /// Single ledger→backend pipeline, shared design with the background
-  /// worker (each isolate constructs its own instance).
   late final StepSyncService _syncService = StepSyncService(_stepRepo);
 
   StepCounterService(this._stepRepo, this._pedometer);
 
-  // ── Public surface ──────────────────────────────────────────────────
-
-  /// Broadcast stream of today's total steps. Latest value is replayed
-  /// to new subscribers (`BehaviorSubject`).
   Stream<int> get stream => _subject.stream;
 
-  /// Synchronous read of the latest emitted value.
   int get currentSteps => _subject.valueOrNull ?? 0;
 
-  /// Which local source is currently active.
   StepSource get source => _source;
 
-  /// One-off events surfaced to the UI layer (see [StepCounterEvent]).
   Stream<StepCounterEvent> get events => _events.stream;
 
   // ── Internals ───────────────────────────────────────────────────────
@@ -194,14 +132,14 @@ class StepCounterService {
       // On Health-mode startup, push the last _backfillDays of daily
       // totals so the history charts stay accurate after a new
       // install, a re-login, or a stretch where the app wasn't open.
-      unawaited(_backfillHistoricalDays());
+      unawaited(_guard('Backfill', _backfillHistoricalDays));
     } else {
       await _useSensor();
       // Pedometer-mode launch backfill: the native hydration above may
       // have imported days that never reached the backend (e.g. the
       // background chain was throttled). Push them now instead of
       // waiting for WorkManager.
-      unawaited(_syncService.syncPendingToBackend());
+      unawaited(_guard('Pending sync', _syncService.syncPendingToBackend));
     }
 
     _startBackendSync();
@@ -260,10 +198,14 @@ class StepCounterService {
       _startHealthPolling();
       await _startNativeMirror();
       _scheduleStuckHealthCheck();
-      unawaited(_stepRepo.ensureBackgroundReadAuthorized());
+      unawaited(
+        _guard(
+          'Background read auth',
+          _stepRepo.ensureBackgroundReadAuthorized,
+        ),
+      );
     } catch (e, s) {
-      log('retryHealth failed: $e',
-          name: 'StepCounterService', stackTrace: s);
+      log('retryHealth failed: $e', name: 'StepCounterService', stackTrace: s);
     }
   }
 
@@ -285,7 +227,7 @@ class StepCounterService {
 
   // ── Native history hydration (rolling 30-day) ───────────────────────
 
-  /// Copy the FG service's `hist_yyyymmdd` daily totals into the ledger.
+  /// Copy the FG service's ` hist_yyyymmdd` daily totals into the ledger.
   /// This is the "user hasn't opened the app for a week" recovery path
   /// — those days were counted natively, but the ledger only advances
   /// while the Dart process is alive. Runs once per `start()`.
@@ -295,11 +237,12 @@ class StepCounterService {
       final native = await StepsForegroundService.instance.getNativeHistory();
       if (native.isEmpty) return;
       await _db.hydrateFromNativeHistory(native);
-      log('Hydrated ${native.length} native history day(s) into ledger',
-          name: 'StepCounterService');
+      log(
+        'Hydrated ${native.length} native history day(s) into ledger',
+        name: 'StepCounterService',
+      );
     } catch (e) {
-      log('Native history hydration failed: $e',
-          name: 'StepCounterService');
+      log('Native history hydration failed: $e', name: 'StepCounterService');
     }
   }
 
@@ -327,8 +270,10 @@ class StepCounterService {
         // any new steps from now. We retry Health on next app resume
         // (see `DashboardManager.didChangeAppLifecycleState`) so a
         // mid-day permission fix in Settings will promote back.
-        log('iOS Health probe returned 0 — using pedometer',
-            name: 'StepCounterService');
+        log(
+          'iOS Health probe returned 0 — using pedometer',
+          name: 'StepCounterService',
+        );
         return false;
       }
 
@@ -340,11 +285,19 @@ class StepCounterService {
 
       _startHealthPolling();
       await _startNativeMirror();
-      unawaited(_stepRepo.ensureBackgroundReadAuthorized());
+      unawaited(
+        _guard(
+          'Background read auth',
+          _stepRepo.ensureBackgroundReadAuthorized,
+        ),
+      );
       return true;
     } catch (e, s) {
-      log('Health activation failed: $e',
-          name: 'StepCounterService', stackTrace: s);
+      log(
+        'Health activation failed: $e',
+        name: 'StepCounterService',
+        stackTrace: s,
+      );
       return false;
     }
   }
@@ -412,9 +365,11 @@ class StepCounterService {
       // the user how to enable proper sync; if they fix it and return,
       // `_recheckAfterUserReturn` promotes back to Health.
       if (Platform.isAndroid) {
-        log('Health permitted but no data — falling back to native sensor.',
-            name: 'StepCounterService');
-        unawaited(forcePedometer());
+        log(
+          'Health permitted but no data — falling back to native sensor.',
+          name: 'StepCounterService',
+        );
+        unawaited(_guard('Force pedometer', forcePedometer));
       }
     } catch (e) {
       log('Stuck-health check failed: $e', name: 'StepCounterService');
@@ -465,9 +420,11 @@ class StepCounterService {
     // foreground service can't even enter the foreground.
     final granted = await _pedometer.ensurePermissionGranted();
     if (!granted) {
-      log('Pedometer fallback: ACTIVITY_RECOGNITION not granted — '
-          'cannot count steps until the user grants it.',
-          name: 'StepCounterService');
+      log(
+        'Pedometer fallback: ACTIVITY_RECOGNITION not granted — '
+        'cannot count steps until the user grants it.',
+        name: 'StepCounterService',
+      );
       _emit(await _db.totalFor(StepLedgerDb.dayKey(DateTime.now())));
       return;
     }
@@ -511,7 +468,8 @@ class StepCounterService {
     _nativePollTimer = Timer.periodic(_nativePollInterval, (_) async {
       if (_source != StepSource.pedometer) return;
       try {
-        final native = await StepsForegroundService.instance.currentNativeSteps();
+        final native = await StepsForegroundService.instance
+            .currentNativeSteps();
         _adoptNativeSteps(native);
       } catch (e) {
         log('Native step poll error: $e', name: 'StepCounterService');
@@ -527,14 +485,28 @@ class StepCounterService {
       // Midnight: the native FG service rebased its baseline, so its
       // count resets to 0 for the new day. Reset the UI too instead of
       // leaving yesterday's total on screen.
-      if (native > 0) unawaited(_db.ensureDayAtLeast(todayKey, native));
+      if (native > 0) {
+        unawaited(
+          _guard('Ledger write', () => _db.ensureDayAtLeast(todayKey, native)),
+        );
+      }
       _emit(native);
       return;
     }
 
     if (native <= 0) return;
-    unawaited(_db.ensureDayAtLeast(todayKey, native));
+    unawaited(
+      _guard('Ledger write', () => _db.ensureDayAtLeast(todayKey, native)),
+    );
     _emit(native);
+  }
+
+  Future<void> _guard(String label, Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (e, s) {
+      log('$label failed: $e', name: 'StepCounterService', stackTrace: s);
+    }
   }
 
   Future<void> _fallbackToInProcessPedometer() async {
@@ -548,24 +520,16 @@ class StepCounterService {
     _listenToSensor();
   }
 
-  /// Sensor ticks are processed strictly one at a time: the handler does
-  /// several async DB reads/writes, and letting a second tick start
-  /// before the first finished its baseline write would double-apply the
-  /// same delta. The queue chains each tick onto the previous one.
   Future<void> _sensorTickQueue = Future.value();
 
   void _listenToSensor() {
     _sensorSub?.cancel();
-    _sensorSub = _pedometer.stepCountStream.listen(
-      (sensorTotal) {
-        _sensorTickQueue = _sensorTickQueue.then(
-          (_) => _onSensorTick(sensorTotal),
-          onError: (_) => _onSensorTick(sensorTotal),
-        );
-      },
-      onError: (e) =>
-          log('Pedometer error: $e', name: 'StepCounterService'),
-    );
+    _sensorSub = _pedometer.stepCountStream.listen((sensorTotal) {
+      _sensorTickQueue = _sensorTickQueue.then(
+        (_) => _onSensorTick(sensorTotal),
+        onError: (_) => _onSensorTick(sensorTotal),
+      );
+    }, onError: (e) => log('Pedometer error: $e', name: 'StepCounterService'));
   }
 
   Future<void> _onSensorTick(int sensorTotal) async {
@@ -585,14 +549,11 @@ class StepCounterService {
       return;
     }
 
-    // First read after install / reset — establish baseline only.
     if (lastSensorTotal < 0) {
       await _db.setLastSensorTotal(sensorTotal);
       return;
     }
 
-    // Reboot — sensor counter restarted from 0; treat the new value as
-    // the delta and let it accumulate on top of the ledger total.
     final delta = sensorTotal < lastSensorTotal
         ? sensorTotal
         : sensorTotal - lastSensorTotal;
@@ -603,54 +564,20 @@ class StepCounterService {
     _emit(await _db.totalFor(todayKey));
   }
 
-  // ── Backend backfill (one-shot on startup) ──────────────────────────
-
-  /// Health-mode startup backfill: hydrate the last [_backfillDays] of
-  /// Health daily totals into the LEDGER (max-merge), then push every
-  /// pending day through the single sync pipeline.
-  ///
-  /// Routing through the ledger — instead of POSTing Health values
-  /// directly, as this used to — is what makes the backfill safe: the
-  /// ledger records exactly what was synced, so the background worker
-  /// can never later re-POST a lower value for the same day and
-  /// downgrade the server's weekly/monthly data.
-  ///
-  /// Runs once per service startup, `unawaited` so it never blocks the
-  /// UI paint. Re-running on every cold start is intentional: Health
-  /// data for recent days can settle late (a tracker syncing last
-  /// night's walk this morning), and the max-merge + pending check turn
-  /// an already-correct backfill into a no-op.
   Future<void> _backfillHistoricalDays() async {
-    log('Backfill starting ($_backfillDays days)…',
-        name: 'StepCounterService');
+    log('Backfill starting ($_backfillDays days)…', name: 'StepCounterService');
     await _syncService.hydrateHealthHistory(days: _backfillDays);
     await _syncService.syncPendingToBackend();
   }
-
-  // ── Backend sync (1 min) ────────────────────────────────────────────
 
   void _startBackendSync() {
     _backendSyncTimer?.cancel();
     _backendSyncTimer = Timer.periodic(
       _backendSyncInterval,
-      (_) => unawaited(_pushToBackend()),
+      (_) => unawaited(_guard('Backend sync', _pushToBackend)),
     );
   }
 
-  /// One tick of the 1-min foreground sync: fold the live count into
-  /// the ledger, then run the shared pipeline.
-  ///
-  /// Change-aware + monotonic for free: `syncPendingToBackend` POSTs a
-  /// day only while `total > synced`, and both columns only move up
-  /// within a day — so standing still produces zero POSTs, a transient
-  /// lower reading can never overwrite a higher server value, and the
-  /// high-water mark is THE SAME ONE the background worker advances
-  /// (`step_days.synced`), so the two sides never re-send what the
-  /// other already delivered.
-  ///
-  /// Bonus over the old today-only push: any pending PAST day (e.g. the
-  /// user crossed midnight with the app open, or the background chain
-  /// was down for a stretch) rides along on the next tick.
   Future<void> _pushToBackend() async {
     final steps = currentSteps;
     if (steps > 0) {
@@ -659,23 +586,22 @@ class StepCounterService {
     await _syncService.syncPendingToBackend();
   }
 
-  // ── Emission ────────────────────────────────────────────────────────
-
   void _emit(int total) {
     if (total < 0) total = 0;
     if (_subject.valueOrNull == total) return;
     _subject.add(total);
 
-    // Mirror to the Android notification ONLY when Flutter is the
-    // authority (Health Connect). In pedometer mode the native service
-    // is the source of truth and pushes its value up to us — syncing
-    // back here would reset its sensor baseline and corrupt the count.
     if (Platform.isAndroid &&
         _source == StepSource.health &&
         StepsForegroundService.instance.isRunning) {
       unawaited(
-        StepsForegroundService.instance
-            .syncSteps(total, mode: StepsForegroundService.modeMirror),
+        _guard(
+          'Notification mirror',
+          () => StepsForegroundService.instance.syncSteps(
+            total,
+            mode: StepsForegroundService.modeMirror,
+          ),
+        ),
       );
     }
   }

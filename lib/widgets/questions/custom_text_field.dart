@@ -53,6 +53,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return TextField(
+      magnifierConfiguration: TextMagnifierConfiguration.disabled,
       controller: _controller,
       keyboardType: widget.keyboardType ?? TextInputType.number,
       textAlign: TextAlign.center,

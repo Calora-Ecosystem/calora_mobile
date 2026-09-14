@@ -90,6 +90,7 @@ class _SingleInputPageState extends State<SingleInputPage> {
           widget.title.text(20, 24, 700).c(context.colors.textStrong),
           const SizedBox(height: 12),
           TextField(
+            magnifierConfiguration: TextMagnifierConfiguration.disabled,
             controller: controller,
             keyboardType: widget.textInputType ?? TextInputType.number,
             textAlign: TextAlign.center,

@@ -85,8 +85,8 @@ class _WeightChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          color.withOpacity(0.35),
-          color.withOpacity(0.05),
+          color.withValues(alpha: 0.35),
+          color.withValues(alpha: 0.05),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;

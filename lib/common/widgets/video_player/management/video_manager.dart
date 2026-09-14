@@ -75,15 +75,8 @@ class VideoManager extends Manager<VideoState, VideoEffect> {
       if (remainingSeconds <= 2 && remainingSeconds >= 0) {
         _hasCalledOnComplete = true;
 
-        print('Video completing: remaining $remainingSeconds seconds');
-        print('onVideoComplete callback is null: ${_onVideoComplete == null}');
-
-        // Call the onVideoComplete callback immediately
         if (_onVideoComplete != null) {
-          print('Calling onVideoComplete callback now!');
           _onVideoComplete!();
-        } else {
-          print('Warning: onVideoComplete callback is null!');
         }
 
         publish(const VideoEffect.videoCompleted());

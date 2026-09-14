@@ -22,12 +22,6 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
 
   @override
   void init(BuildContext context, VideoManager manager) {
-    print(
-      'VideoPlayerPage init - onVideoComplete is null: ${onVideoComplete == null}',
-    );
-    if (onVideoComplete != null) {
-      print('Setting onVideoComplete listener');
-    }
     manager.setOnVideoCompleteListener(onVideoComplete);
     manager.initializeVideo(videoUrl);
   }
@@ -48,15 +42,12 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
         if (manager.controller != null) {
           Navigator.of(context, rootNavigator: true).push(
             MaterialPageRoute(
-              builder: (_) =>
-                  FullscreenVideoPlayer(controller: manager.controller!),
+              builder: (_) => FullscreenVideoPlayer(controller: manager.controller!),
             ),
           );
         }
       },
-      videoCompleted: () {
-        print('Video completed effect received');
-      },
+      videoCompleted: () {},
     );
   }
 
@@ -177,9 +168,9 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                               ),
                               child: Row(
                                 children: [
-                                  _formatDuration(state.position)
-                                      .text(12, 16, 400)
-                                      .c(context.colors.textWhite),
+                                  _formatDuration(
+                                    state.position,
+                                  ).text(12, 16, 400).c(context.colors.textWhite),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: VideoProgressIndicator(
@@ -196,9 +187,9 @@ class VideoPlayerPage extends Managed<VideoManager, VideoState, VideoEffect> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  _formatDuration(state.duration)
-                                      .text(12, 16, 400)
-                                      .c(context.colors.textWhite),
+                                  _formatDuration(
+                                    state.duration,
+                                  ).text(12, 16, 400).c(context.colors.textWhite),
                                 ],
                               ),
                             ),
