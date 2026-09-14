@@ -26,6 +26,7 @@ import 'package:calora/presentation/dashboard/features/steps/widgets/monthly_fit
 import 'package:calora/presentation/dashboard/features/steps/widgets/weekly_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
+import 'package:calora/widgets/premium/premium_promo_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:path_provider/path_provider.dart';
@@ -509,6 +510,10 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverToBoxAdapter(child: widget.fitnessTrackWidget),
+        ),
+        const SliverPadding(
+          padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
+          sliver: SliverToBoxAdapter(child: PremiumPromoBanner()),
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

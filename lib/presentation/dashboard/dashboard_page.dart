@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_route_observer.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/course_tab_signal.dart';
 import 'package:calora/common/service/permission_bootstrap.dart';
@@ -24,7 +25,13 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   @override
   void init(BuildContext context, DashboardManager manager) {
     super.init(context, manager);
-    _runFirstRunPermissionFlow(context, manager);
+    // Permissions are intentionally NOT requested here: right after
+    // registration the dashboard is mounted *underneath* the premium paywall
+    // (replaceAll([Dashboard, Premium])), so asking now would surface the
+    // system dialogs on top of / behind the paywall. Instead the flow is
+    // triggered from [_PermissionVisibilityGate] once the dashboard is actually
+    // the visible page — i.e. on a normal launch, or once the paywall is
+    // dismissed (closed or after purchase) and the user lands on Home.
   }
 
   /// Front-loads the system permissions before the feature tour, in order:
@@ -88,7 +95,9 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
 
   @override
   Widget builder(context, manager, state) {
-    return AutoTabsScaffold(
+    return _PermissionVisibilityGate(
+      onVisible: () => _runFirstRunPermissionFlow(context, manager),
+      child: AutoTabsScaffold(
       routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
       bottomNavigationBuilder: (context, tabRouter) {
         final tabsRouter = AutoTabsRouter.of(context);
@@ -198,6 +207,7 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
           ),
         );
       },
+      ),
     );
   }
 
@@ -207,4 +217,65 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   }) {
     return BottomNavigationBarItem(icon: icon, label: title);
   }
+}
+
+/// Runs [onVisible] exactly once, when the dashboard is the visible top page:
+/// immediately on a normal launch, or — when the premium paywall is pushed on
+/// top right after registration — only once that paywall is dismissed (closed
+/// or after a purchase) and the user is back on Home. This keeps first-run
+/// permission dialogs off the paywall.
+class _PermissionVisibilityGate extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onVisible;
+
+  const _PermissionVisibilityGate({
+    required this.child,
+    required this.onVisible,
+  });
+
+  @override
+  State<_PermissionVisibilityGate> createState() =>
+      _PermissionVisibilityGateState();
+}
+
+class _PermissionVisibilityGateState extends State<_PermissionVisibilityGate>
+    with RouteAware {
+  PageRoute<dynamic>? _route;
+  bool _fired = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final modal = ModalRoute.of(context);
+    if (modal is PageRoute<dynamic> && modal != _route) {
+      if (_route != null) appRouteObserver.unsubscribe(this);
+      _route = modal;
+      appRouteObserver.subscribe(this, modal);
+    }
+    // Normal launch: the dashboard is already the top-most route (no paywall
+    // above it), so fire once this frame settles.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && (_route?.isCurrent ?? false)) _fire();
+    });
+  }
+
+  /// The route above the dashboard (the premium paywall) was popped and the
+  /// dashboard is visible again → request permissions now.
+  @override
+  void didPopNext() => _fire();
+
+  void _fire() {
+    if (_fired || !mounted) return;
+    _fired = true;
+    widget.onVisible();
+  }
+
+  @override
+  void dispose() {
+    if (_route != null) appRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

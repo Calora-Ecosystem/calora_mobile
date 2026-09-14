@@ -106,12 +106,10 @@ class _WeightChartPainter extends CustomPainter {
 
     canvas.drawPath(path, linePaint);
 
-    // Dots
+    // Dots — the A/B cards above the chart already carry the numbers, so the
+    // curve stays clean with just its start/end markers.
     _drawDot(canvas, start);
     _drawDot(canvas, end);
-
-    _drawLabel(canvas, start, startValue, alignLeft: true);
-    _drawLabel(canvas, end, endValue, alignLeft: false);
   }
 
   void _drawDot(Canvas canvas, Offset center) {
@@ -120,34 +118,6 @@ class _WeightChartPainter extends CustomPainter {
 
     canvas.drawCircle(center, 8, outer);
     canvas.drawCircle(center, 4, inner);
-  }
-
-  void _drawLabel(
-    Canvas canvas,
-    Offset point,
-    double value, {
-    required bool alignLeft,
-  }) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: '${value.toInt()} kg',
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Colors.black,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-      ellipsis: '…',
-    )..layout();
-
-    final offset = Offset(
-      alignLeft ? point.dx + 12 : point.dx - textPainter.width - 12,
-      point.dy - textPainter.height / 2,
-    );
-
-    textPainter.paint(canvas, offset);
   }
 
   @override

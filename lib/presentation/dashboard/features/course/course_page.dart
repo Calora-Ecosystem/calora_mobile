@@ -13,6 +13,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/course/management/course_management.dart';
 import 'package:calora/presentation/dashboard/features/course/management/course_manager.dart';
 import 'package:calora/widgets/course/course_card.dart';
+import 'package:calora/widgets/premium/premium_promo_banner.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -57,7 +58,14 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
     CourseManager manager,
     CourseState state,
   ) {
-    final itemCount = state.isLoading ? 3 : state.courses.length;
+    // Slot a premium banner into the browse list right after the first course
+    // (best-practice native placement — visible while scrolling, without
+    // pushing the actual courses down the page).
+    final showBanner = !state.isLoading && state.courses.isNotEmpty;
+    const bannerIndex = 1;
+    final itemCount = state.isLoading
+        ? 3
+        : state.courses.length + (showBanner ? 1 : 0);
     return FeatureTourHost(
       tourId: 'tour_course',
       steps: _courseTourSteps(context),
@@ -103,7 +111,15 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                       itemCount: itemCount,
                       separatorBuilder: (_, __) => const SizedBox(height: 20),
                       itemBuilder: (context, index) {
-                        final course = state.isLoading ? CourseRequest() : state.courses[index];
+                        if (showBanner && index == bannerIndex) {
+                          return const PremiumPromoBanner();
+                        }
+                        final courseIndex = (showBanner && index > bannerIndex)
+                            ? index - 1
+                            : index;
+                        final course = state.isLoading
+                            ? CourseRequest()
+                            : state.courses[courseIndex];
                         final card = ShimmerWrapper(
                           loading: state.isLoading,
                           type: ShimmerType.backgroundElevation,
@@ -150,7 +166,7 @@ class CoursePage extends Managed<CourseManager, CourseState, CourseEffect> {
                           ),
                         );
                         // Anchor the first card for the first-run feature tour.
-                        return index == 0
+                        return courseIndex == 0
                             ? KeyedSubtree(key: TourAnchors.courseFirst, child: card)
                             : card;
                       },

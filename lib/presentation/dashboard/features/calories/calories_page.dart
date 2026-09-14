@@ -13,6 +13,7 @@ import 'package:calora/presentation/dashboard/features/calories/management/calor
 import 'package:calora/widgets/caloriya/daily_meal_plan_widget.dart';
 import 'package:calora/widgets/caloriya/meal_cards_grid.dart';
 import 'package:calora/widgets/notification_widgets/calory_notification_settings.dart';
+import 'package:calora/widgets/premium/premium_promo_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -121,6 +122,10 @@ class CaloriesPage extends Managed<CaloriesManager, CaloriesState, CaloriesEffec
                               CaloryNotificationSettings(),
                             ],
                           ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          child: PremiumPromoBanner(),
                         ),
                       ],
                     ),

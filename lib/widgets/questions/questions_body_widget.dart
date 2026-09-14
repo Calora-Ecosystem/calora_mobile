@@ -6,6 +6,7 @@ import 'package:calora/widgets/questions/custom_text_field.dart';
 import 'package:calora/widgets/questions/date_picker_widget.dart';
 import 'package:calora/widgets/questions/gender_widget.dart';
 import 'package:calora/widgets/questions/purposes_widget.dart';
+import 'package:calora/widgets/questions/ruler_picker.dart';
 import 'package:calora/widgets/questions/questions_widget.dart'
     show QuestionWidget;
 import 'package:flutter/material.dart';
@@ -82,12 +83,13 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         // 4 - Height
         QuestionWidget(
           questionText: Strings.whatIsYourHeight,
-          child: CustomTextField(
-            metrics: ' sm',
-            hintText: '- sm',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          child: RulerPicker(
+            min: 100,
+            max: 220,
+            initial: 170,
+            unit: 'sm',
             onChanged: (val) =>
-                manager.setAnswer(Questions(height: double.tryParse(val))),
+                manager.setAnswer(Questions(height: val.toDouble())),
           ),
           icon: Assets.icons.ruler.svg(),
         ),
@@ -95,12 +97,13 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         // 5 - Weight
         QuestionWidget(
           questionText: Strings.howManyKilograms,
-          child: CustomTextField(
-            metrics: ' kg',
-            hintText: '- kg',
-            keyboardType: TextInputType.number,
+          child: RulerPicker(
+            min: 30,
+            max: 200,
+            initial: 70,
+            unit: 'kg',
             onChanged: (val) =>
-                manager.setAnswer(Questions(weight: double.tryParse(val))),
+                manager.setAnswer(Questions(weight: val.toDouble())),
           ),
           icon: Assets.icons.weight.svg(),
         ),
@@ -108,12 +111,13 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
         // 6 - Target Weight
         QuestionWidget(
           questionText: Strings.weightChange,
-          child: CustomTextField(
-            hintText: '- kg',
-            metrics: ' kg',
-            keyboardType: TextInputType.number,
+          child: RulerPicker(
+            min: 30,
+            max: 200,
+            initial: 65,
+            unit: 'kg',
             onChanged: (val) => manager.setAnswer(
-              Questions(targetWeight: double.tryParse(val)),
+              Questions(targetWeight: val.toDouble()),
             ),
           ),
           icon: Assets.icons.weight.svg(),

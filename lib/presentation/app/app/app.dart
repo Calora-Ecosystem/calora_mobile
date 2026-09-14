@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/router/app_route_observer.dart';
 import 'package:calora/common/router/app_router.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/router/custom_navigator_observer.dart';
@@ -46,6 +47,7 @@ class App extends Managed<AppManager, AppState, AppEffect> {
         navigatorObservers: () => [
           CustomNavigatorObserver(),
           SentryNavigatorObserver(),
+          appRouteObserver,
         ],
       ),
       builder: (context, child) {

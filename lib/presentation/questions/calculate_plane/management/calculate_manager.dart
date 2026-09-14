@@ -4,6 +4,7 @@ import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/domain/repo/questions/questions_repo.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_management.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
@@ -14,12 +15,29 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
   static const int _animationDurationSeconds = 10;
   static const int _ticksPerSecond = 60;
 
+  /// Highest progress a haptic has already fired for, so the milestone buzzes
+  /// tick exactly once as the ring fills.
+  double _lastHapticProgress = 0.0;
+  static const List<double> _hapticMilestones = [0.25, 0.5, 0.75];
+
   CalculateManager(this.questionsRepo) : super(CalculateState.initial());
 
   void resetProgress() {
     _apiProgressTimer?.cancel();
     _animationTimer?.cancel();
+    _lastHapticProgress = 0.0;
     emit(state.copyWith(progressPercent: 0.0));
+  }
+
+  /// Light tactile ticks as the loader passes each quarter, so "analyzing"
+  /// feels physical. Called on every progress emit; fires once per milestone.
+  void _emitProgressHaptics(double progress) {
+    for (final m in _hapticMilestones) {
+      if (_lastHapticProgress < m && progress >= m) {
+        HapticFeedback.lightImpact();
+      }
+    }
+    _lastHapticProgress = progress;
   }
 
   Future<void> getProfile() async {
@@ -52,10 +70,12 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
         currentTick++;
         final progress = (currentTick / totalTicks).clamp(0.0, 1.0);
 
+        _emitProgressHaptics(progress);
         emit(state.copyWith(progressPercent: progress));
 
         if (progress >= 1.0) {
           timer.cancel();
+          HapticFeedback.heavyImpact();
           onComplete?.call();
         }
       },
@@ -101,7 +121,9 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
 
         if (timeFraction >= 1.0 && apiCompleted) {
           timer.cancel();
+          _emitProgressHaptics(1.0);
           emit(state.copyWith(progressPercent: 1.0));
+          HapticFeedback.heavyImpact();
           onComplete?.call();
           publish(const CalculateEffect.navigateNext());
           return;
@@ -111,6 +133,7 @@ class CalculateManager extends Manager<CalculateState, CalculateEffect> {
         // the ring keeps spinning until the response arrives.
         final progress =
             apiCompleted ? timeFraction : (timeFraction * 0.95);
+        _emitProgressHaptics(progress);
         emit(state.copyWith(progressPercent: progress));
       },
     );

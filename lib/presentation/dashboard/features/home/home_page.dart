@@ -24,6 +24,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/widgets/app_bar/home_app_bar.dart' show HomeAppBar;
 import 'package:calora/widgets/home/daily_feed_rate_widget.dart';
 import 'package:calora/widgets/plan/daily_plan_widget.dart';
+import 'package:calora/widgets/premium/premium_promo_banner.dart';
 import 'package:calora/widgets/steps/step_card_widget.dart';
 import 'package:calora/widgets/water/water_intake_selector.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -217,6 +218,7 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                       (state.summary?.sum.Kcal ?? 0),
                                   loading: state.isSummaryLoading,
                                 ),
+                                const PremiumPromoBanner(),
                                 _buildStepCard(
                                   context: context,
                                   state: state,

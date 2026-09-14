@@ -5,7 +5,6 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
-import 'package:calora/common/widgets/disclaimer/medical_disclaimer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_management.dart';
 import 'package:calora/presentation/questions/calculate_plane/management/calculate_manager.dart';
@@ -79,15 +78,17 @@ class CalculatePage
             child: Column(
               children: [
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  // The plan-ready screen is a fixed, non-scrolling page — the
+                  // content is sized to fit, so it must never drift up/down.
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 32, 20, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _FadeSlideIn(
                           child: _CelebrationHeader(),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         _FadeSlideIn(
                           delayMs: 90,
                           child: _WeightJourneyCard(
@@ -110,30 +111,17 @@ class CalculatePage
                           delayMs: 240,
                           child: _DailyTargets(goals: state.dailyGoals),
                         ),
-                        const SizedBox(height: 16),
-                        _FadeSlideIn(
-                          delayMs: 300,
-                          child: const MedicalDisclaimer(),
-                        ),
-                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
                 ),
                 _FadeSlideIn(
-                  delayMs: 360,
-                  child: Container(
+                  delayMs: 300,
+                  child: Padding(
+                    // Transparent bar so the page's green background flows
+                    // straight down behind the button — no white seam between
+                    // the daily-targets area and the CTA.
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                    decoration: BoxDecoration(
-                      color: context.colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.colors.black.withValues(alpha: 0.04),
-                          blurRadius: 16,
-                          offset: const Offset(0, -4),
-                        ),
-                      ],
-                    ),
                     child: SizedBox(
                       width: double.infinity,
                       child: Button(
@@ -203,12 +191,6 @@ class _CelebrationHeader extends StatelessWidget {
         Strings.yourProgramIsReady
             .text(24, 30, 800)
             .c(context.colors.textStrong)
-            .copyWith(textAlign: TextAlign.center),
-        const SizedBox(height: 10),
-        'cal_ready_subtitle'
-            .tr()
-            .text(14, 20, 400)
-            .c(context.colors.textSub)
             .copyWith(textAlign: TextAlign.center),
       ],
     );
@@ -284,44 +266,117 @@ class _WeightJourneyCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 16),
+          // A → B endpoints, spelled out so the start (now) and goal (target)
+          // read at a glance before the curve fills them in.
           Row(
             children: [
-              _pill(context, 'cal_now'.tr(), '${startValue.toInt()} ${'pw_weight_unit'.tr()}',
-                  context.colors.textSub),
-              const SizedBox(width: 8),
-              Icon(Icons.arrow_forward_rounded,
-                  size: 16, color: context.colors.iconSoft),
-              const SizedBox(width: 8),
-              _pill(context, 'cal_target'.tr(),
-                  '${endValue.toInt()} ${'pw_weight_unit'.tr()}', accent),
+              Expanded(
+                child: _endpoint(
+                  context,
+                  marker: 'A',
+                  label: 'cal_now'.tr(),
+                  value: startValue.toInt().toString(),
+                  markerColor: context.colors.neutral600Secondary,
+                  valueColor: context.colors.textStrong,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colors.accentGreenWhite,
+                ),
+                child: Icon(Icons.arrow_forward_rounded, size: 18, color: accent),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _endpoint(
+                  context,
+                  marker: 'B',
+                  label: 'cal_target'.tr(),
+                  value: endValue.toInt().toString(),
+                  markerColor: accent,
+                  valueColor: accent,
+                  highlighted: true,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           WeightProgressChart(
             startValue: startValue,
             endValue: endValue,
             color: accent,
-            height: 170,
+            height: 150,
           ),
         ],
       ),
     );
   }
 
-  Widget _pill(
-    BuildContext context,
-    String label,
-    String value,
-    Color valueColor,
-  ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        label.text(12, 16, 400).c(context.colors.textSub),
-        const SizedBox(width: 6),
-        value.text(14, 18, 700).c(valueColor),
-      ],
+  /// One end of the journey — an "A"/"B" marker, its label and the big weight.
+  Widget _endpoint(
+    BuildContext context, {
+    required String marker,
+    required String label,
+    required String value,
+    required Color markerColor,
+    required Color valueColor,
+    bool highlighted = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: highlighted
+            ? context.colors.lightGreen
+            : context.colors.backgroundElevation,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: markerColor,
+                ),
+                child: marker.text(11, 13, 700).c(context.colors.white),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: label
+                    .text(12, 14, 600)
+                    .c(context.colors.textSub)
+                    .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              value.text(26, 30, 800).c(valueColor),
+              const SizedBox(width: 4),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: 'pw_weight_unit'
+                    .tr()
+                    .text(13, 16, 600)
+                    .c(context.colors.textSub),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
