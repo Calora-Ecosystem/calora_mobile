@@ -2,7 +2,7 @@ name: calora
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.19+85
+version: 1.0.20+86
 
 environment:
   sdk: ^3.9.2
@@ -23,7 +23,7 @@ dependencies:
   auto_route: ^10.2.3
   permission_handler: ^12.0.1
   easy_localization_generator:
-    git: https://github.com/imnadev/easy_localization_generator.git
+    path: packages/easy_localization_generator
   easy_localization_loader: ^2.0.2
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
@@ -96,11 +96,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  injectable_generator: ^2.8.1
+  injectable_generator: ^2.9.1
   auto_route_generator: ^10.2.6
   flutter_gen_runner: 5.12.0
   flutter_gen_core: 5.12.0
-  build_runner: ^2.7.1
+  build_runner: ^2.14.0
   freezed: ^3.2.0
   json_serializable: ^6.11.0
 

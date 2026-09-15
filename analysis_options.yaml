@@ -3,9 +3,12 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - build/**
+    - packages/**
     - lib/generated/**
     - lib/**.g.dart
     - lib/**.freezed.dart
+    - android/**
+    - ios/**
 
   errors:
     unused_import: ignore

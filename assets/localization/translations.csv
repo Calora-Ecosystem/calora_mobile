@@ -43,7 +43,7 @@ course,Course,Kurs,Курс
 steps,Steps,Qadamlar,Шаги
 profile,Profile,Profil,Профиль
 finish,Conclusion,Yakunlash,Заключение
-daily ,Daily,Kunlik,Ежедневно
+daily,Daily,Kunlik,Ежедневно
 weekly,Weekly,Haftalik,Еженедельно
 monthly,Monthly,Oylik,Ежемесячно
 on_time,On time,Vaqtda,Вовремя
@@ -62,8 +62,6 @@ compared_to_last_week,Compared to last week,O'tgan haftaga nisbatan,По сра�
 monthly_results,Monthly results,Oylik natijalar,Ежемесячные результаты
 compared_to_last_month,Compared to last month,O'tgan oyga nisbatan,По сравнению с прошлым месяцем
 in_km_distance,In km distance,Km masofa ,В км расстояние
-calories,Calories,Kaloriya,Калории
-on_time,On time,Vaqtda,Вовремя
 data_cleaning,Data cleaning,Malumotlarni tozalash,Очистка данных
 share,Share,Ulashish,Делиться
 share_app,Share the app,Ilovani ulashish,Поделитесь приложением
@@ -107,7 +105,7 @@ exit,Exit,Chiqish,Выход
 are_you_sure_want_log_out,Are you sure you want to log out of your app account?,Rostdan ham ilovadagi hisobingizdan chiqmoqchisiz ?,"Вы уверены, что хотите выйти из своей учетной записи приложения?"
 write_help,"If you encounter any problems, write to our telegram bot or email address. We will answer you soon!",Muammolarga duch kelsangiz telegram botimiz  yoki elektron manzilimizga yozing.Tezda sizga javob beramiz ! ,"Если у вас возникнут проблемы, напишите нам в Telegram или на почту. Мы ответим вам в ближайшее время!"
 help_desk,Help desk,Yordam xizmati,Справочная служба 
-calora_about_text,"Calora is an innovative platform designed to make self-assessment easier for users. The app helps users analyze their learning outcomes and provides them with the resources they need to achieve their goals. Calora’s UI is intuitive, making it easy for users to navigate. The app also offers a variety of tools and features to make the self-assessment process more effective and engaging for users.","Calora ilovasi, foydalanuvchilarga o'z-o'zini baholash jarayonini osonlashtirish uchun mo'ljallangan innovatsion platformadir. Bu ilova o'qish jarayonidagi natijalarni tahlil qilishda yordam beradi, shuningdek, foydalanuvchilarga o'z maqsadlariga erishish uchun zarur bo'lgan resurslarni taqdim etadi. Calora UI intuitiv interfeysi bilan ajralib turadi, bu esa foydalanuvchilarga oson navigatsiya qilish imkonini beradi. Ilova, shuningdek, foydalanuvchilarning o'z-o'zini baholash jarayonini yanada samarali va qiziqarli qilish uchun turli xil vositalar va funksiyalarni taklif etadi.",
+calora_about_text,"Calora is an innovative platform designed to make self-assessment easier for users. The app helps users analyze their learning outcomes and provides them with the resources they need to achieve their goals. Calora’s UI is intuitive, making it easy for users to navigate. The app also offers a variety of tools and features to make the self-assessment process more effective and engaging for users.","Calora ilovasi, foydalanuvchilarga o'z-o'zini baholash jarayonini osonlashtirish uchun mo'ljallangan innovatsion platformadir. Bu ilova o'qish jarayonidagi natijalarni tahlil qilishda yordam beradi, shuningdek, foydalanuvchilarga o'z maqsadlariga erishish uchun zarur bo'lgan resurslarni taqdim etadi. Calora UI intuitiv interfeysi bilan ajralib turadi, bu esa foydalanuvchilarga oson navigatsiya qilish imkonini beradi. Ilova, shuningdek, foydalanuvchilarning o'z-o'zini baholash jarayonini yanada samarali va qiziqarli qilish uchun turli xil vositalar va funksiyalarni taklif etadi.","Calora — это инновационная платформа, призванная упростить процесс самооценки для пользователей. Приложение помогает анализировать результаты обучения и предоставляет ресурсы, необходимые для достижения поставленных целей. Благодаря интуитивно понятному интерфейсу в приложении легко ориентироваться. Кроме того, Calora предлагает разнообразные инструменты и функции, которые делают процесс самооценки более эффективным и увлекательным."
 welcome_to_healthy_life,Welcome to a healthy life!,Sog’lom hayotga xush kelibsiz !,Добро пожаловать в здоровую жизнь!
 version,Application version,Ilova versiyasi,Версия приложения
 daily_calorie_intake,Daily calorie intake,Kunlik kaloriya normasi,Суточная норма потребления калорий
@@ -134,8 +132,6 @@ september,September,Sentabr,Сентябрь
 october,October,Oktabr,Октябрь
 november,November,Noyabr,Ноябрь
 december,December,Dekabr,Декабрь
-male,Male,Erkak,Мужской
-female,Female,Ayol,Женский
 choose_gender,Choose gender,Jinsni tanlang,Выберите пол
 choose_goal,Choose goal,Maqsadni tanlang,Выберите цель
 choose_activity_level,Choose activity level,Aktivlik tarajasini tanlang,Выберите уровень активности
@@ -203,7 +199,7 @@ continue_btn,Continue,Davom etish,Продолжать
 we_started_the_exercises,We started the exercises !,Mashqlarni boshladik !,Мы приступили к упражнениям !
 i_read_and_agree,I have read and agree to the,Men,Я ознакомился и согласен с
 terms_of_use_link,Terms of Use,Foydalanuvchi shartlarini,Условиями использования
-read_and_agree_end,,o'rganib chiqdim va roziman,
+read_and_agree_end,I have reviewed it and I agree.,o'rganib chiqdim va roziman,Я ознакомился с этим и согласен.
 your_program_is_ready,Your program is ready!,Sizning programmangiz tayyor!,Ваша программа готова!
 meal_plan,Meal plan,Ovqatlanish rejasi,План питания
 daily_goal,Daily goal:,Kunlik maqsad:,Ежедневная цель:
@@ -261,9 +257,8 @@ snacks,Snacks,Aperatiflar,Закуски
 dinner,Dinner,Kechki ovqat,Ужин
 from_kcal,from kcal,kkaldan,из ккал
 to_remind_you_of_meal_times,To remind you of meal times,Ovqat vaqtlarini eslatish uchun,Чтобы напомнить вам о времени приема пищи
-add_food,Add food,Ovqatni qo’shish,Добавить еду
 meals_are_not_available,Meals are not available.,Ovqatlar mavjud emas,Питание не предоставляется.
-add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь вы можете указать свои последние приемы пищи.
+add_your_last_meals_here,Add your last meals here.,Oxirgi ovqatlangan ovqatlaringiz shu yerda qo’shing,Здесь укажите ваши последние приемы пищи.
 search_for_food_or_product,Search for food or product,Ovqat yoki maxsulotni qidirish,Поиск продуктов питания или товаров
 creation,Creation,Yaratish,Творение
 scanning,Scanning,Skanerlash,Сканирование
@@ -275,14 +270,12 @@ those_i_created,Those I created,Men yaratganlar,"Те, которых я соз�
 liquid_foods,Liquid foods,Suyuq taomlar,Жидкие продукты
 deep_dishes,Deep dishes,Quyuq taomlar,Глубокие тарелки
 drinks,Drinks,Ichimliklar,Напитки
-breakfast,Breakfast,Nonushta,Завтрак
 fast_food,Fast food,Fast foodlar,Быстрое питание
 added,Added,Qo’shildi,Добавлен
 the_composition_of_the_food_is_being_determined,The composition of the food is being determined...,Ovqatning tarkibi aniqlanmoqda...,Состав продуктов питания находится в стадии определения...
 the_amount_of_food_is_measured,The amount of food is measured...,Ovqat miqdori o’lchanyabdi...,Количество пищи измеряется...
 the_calorie_content_of_the_food_is_being_measured,The calorie content of the food is being measured...,Ovqatning kaloriyasi o’lchanmoqda...,Измеряется калорийность продуктов питания...
 the_data_in_the_image_is_being_processed_we_will_announce_the_results_soon,"The data in the image is being processed, we will announce the results soon!","Rasmdagi ma’lumotlar qayta ishlanmoqda , tez orada natijasini e’lon qilamiz !","Данные на изображении обрабатываются, результаты мы сообщим в ближайшее время!"
-scanning,Scanning,Skanerlash,Сканирование
 place_the_food_in_the_designated_area_and_take_a_picture,Place the food in the designated area and take a picture!,Taomni belgilangan maydonga to’g’irlab rasmga oling!,Разложите еду в отведенном месте и сфотографируйте!
 the_value_of_the_food_determined,The value of the food determined,Aniqlangan ovqatning qiymati,Определена стоимость продуктов питания.
 nutritional_value_of_food,Nutritional value of food,Ovqatning ozuqaviyligi,Пищевая ценность продуктов питания
@@ -292,10 +285,9 @@ the_information_in_your_voicemail_is_being_analyzed,The information in your voic
 daily_meal_plan,Daily meal plan,Kunlik ozuqa rejasi,Ежедневный план питания
 add,Add,Qo'shish,Добавлять
 more_details,More details,Batafsill,Более подробная информация
-add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённую сумму
+add_a_specific_amount,Add a specific amount,Aniq miqdor qo’shish,Добавить определённое количество
 enter_the_amount_of_food_gr,"Enter the amount of food, gr.","Ovqat miqdorini kiriting, gr","Введите количество еды, гр."
 make_your_own_food,Make your own food,O‘zingizni ovqatingizni yarating,Готовьте еду сами
-name_of_the_dish,Name of the dish,Ovqatning nomi,Название блюда
 calorie_content_kcal,"Calorie content, kcal","Kaloriya tarkibi, kkal","Калорийность, ккал"
 protein_gr,"Protein, gr","Oqsil,gr","Белок, г"
 oil_gr,"Oil, gr.","Yog’,gr","Масло, гр."
@@ -439,7 +431,6 @@ profile_user_id,User ID,Foydalanuvchi ID,ID пользователя
 profile_subscription,Subscription,Obuna,Подписка
 resume,Resume,Davom etish,Продолжить
 pause,Pause,Toʻxtatish,Пауза
-change,Change,Oʻzgartirish,Изменить
 no_food_found_in_image,No food found in the image,Rasmdan taom topilmadi,В изображении не найдено блюд
 no_food_found_in_voice,No food found in the recording,Yozuvdan taom topilmadi,В записи не найдено блюд
 error_view_message,Something went wrong. Please try again.,Xatolik yuz berdi. Qayta urinib koʻring.,Произошла ошибка. Попробуйте снова.
@@ -651,3 +642,7 @@ ft_cal_meals_t,Your meals,Ovqatlaringiz,Ваши приёмы пищи
 ft_cal_meals_d,Tap a meal card to add the food you ate for it.,Ovqat kartasini bosib oʻsha payt yegan taomingizni qoʻshing.,Нажмите карточку приёма пищи и добавьте съеденное.
 ft_mealcat_d,Tap this card to add food to this meal.,Bu kartani bosib shu ovqatga taom qoʻshing.,Нажмите эту карточку чтобы добавить еду в этот приём.
 nutrition_per_400g,Nutritional value per 400 g,400 grammdagi ozuqaviyligi,Пищевая ценность на 400 г
+cal_daily_targets,Your daily targets,Sizning kunlik maqsadlaringiz,Ваши ежедневные цели
+cal_weight_journey,Your weight journey,Sizning vazn o'zgarish tarixingiz,История изменения вашего веса
+cal_now,Now,Hozir,Сейчас
+cal_target,Target,Maqsad,Цель
