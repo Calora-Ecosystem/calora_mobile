@@ -32,7 +32,8 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffect> {
+class AddMealsPage
+    extends Managed<AddMealsManager, AddMealsState, AddMealsEffect> {
   final bool shouldOpenCreator;
   final MealType type;
   final List<MealData> meals;
@@ -65,19 +66,28 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
   }
 
   @override
-  void listener(BuildContext context, AddMealsManager manager, AddMealsEffect effect) {
+  void listener(
+    BuildContext context,
+    AddMealsManager manager,
+    AddMealsEffect effect,
+  ) {
     super.listener(context, manager, effect);
     effect.mapOrNull(
-      openDishesPage: (e) => context.pushRoute(
-        DishesRoute(
-          data: e.meal,
-          type: type,
-          categoryId: categoryId,
-          meals: meals,
-          dateTime: dateTime,
-        ),
-      ),
-      openAboutPage: (e) => openAboutDishPage(context, e.food, manager, e.isFavourite),
+      openDishesPage: (e) => context
+          .pushRoute<bool>(
+            DishesRoute(
+              data: e.meal,
+              type: type,
+              categoryId: categoryId,
+              meals: meals,
+              dateTime: dateTime,
+            ),
+          )
+          .then((saved) {
+            if (saved == true && context.mounted) context.router.pop(true);
+          }),
+      openAboutPage: (e) =>
+          openAboutDishPage(context, e.food, manager, e.isFavourite),
     );
   }
 
@@ -118,7 +128,8 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                     hint: Strings.searchForFoodOrProduct,
                     controller: _searchController,
                   ),
-                  if (context.read<AppManager>().state.isUserPremium) const SizedBox(height: 12),
+                  if (context.read<AppManager>().state.isUserPremium)
+                    const SizedBox(height: 12),
                   if (state.activeTab != FoodTab.search) ...[
                     Row(
                       children: [
@@ -218,22 +229,22 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     );
   }
 
-  void openAboutDishPage(
+  Future<void> openAboutDishPage(
     BuildContext context,
     FoodModel food,
     AddMealsManager manager,
     bool isFavourite,
-  ) {
-    context.showAppBottomSheet(
+  ) async {
+    final saved = await context.showAppBottomSheet<bool>(
       child: DishInfoPage(
         isFavourite: isFavourite,
         foodItem: food,
         onFavouriteChanged: (value) {
           if (value) manager.addFavourite(food.id ?? 0);
         },
-        onSave: (value) async {
+        onSave: (value) {
           manager.addFavourite(food.id ?? 0);
-          final success = await manager.saveMenuItem(
+          return manager.saveMenuItem(
             MenuInfo(
               menu: type.name,
               date: dateTime,
@@ -241,12 +252,10 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
               weightInGr: value == 0 ? 100 : value.toInt(),
             ),
           );
-          if (!context.mounted) return;
-          context.router.pop();
-          if (success) _showInfoDialog(context);
         },
       ),
     );
+    if (saved == true && context.mounted) _showInfoDialog(context);
   }
 
   void openCreatePage(BuildContext context, AddMealsManager manager) {
@@ -383,7 +392,8 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
     await context.pushRoute<bool>(
       UniversalProgressRoute(
         title: Strings.caloraAi,
-        description: Strings.theDataInTheImageIsBeingProcessedWeWillAnnounceTheResultsSoon,
+        description: Strings
+            .theDataInTheImageIsBeingProcessedWeWillAnnounceTheResultsSoon,
         steps: [
           Strings.theCompositionOfTheFoodIsBeingDetermined,
           Strings.theAmountOfFoodIsMeasured,
@@ -469,7 +479,9 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: useGradient ? null : context.colors.backgroundElevation,
+                  color: useGradient
+                      ? null
+                      : context.colors.backgroundElevation,
                   gradient: useGradient
                       ? RadialGradient(
                           center: const Alignment(1.2, 0.5),
@@ -486,7 +498,9 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
                   spacing: 8,
                   children: [
                     if (icon != null) icon,
-                    text.text(14, 16, 600).c(textColor ?? context.colors.textWhite),
+                    text
+                        .text(14, 16, 600)
+                        .c(textColor ?? context.colors.textWhite),
                   ],
                 ),
               ),
@@ -524,8 +538,8 @@ class AddMealsPage extends Managed<AddMealsManager, AddMealsState, AddMealsEffec
             Center(
               child: Button(
                 onPressed: () {
-                  dialogContext.pop();
-                  context.pop(true);
+                  Navigator.of(dialogContext).pop();
+                  if (context.mounted) context.pop(true);
                 },
                 text: Strings.close,
                 textColor: context.colors.textStrong,

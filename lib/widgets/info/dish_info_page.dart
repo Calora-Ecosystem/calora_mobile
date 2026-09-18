@@ -14,7 +14,7 @@ import 'package:flutter/services.dart';
 
 class DishInfoPage extends StatefulWidget {
   final FoodModel foodItem;
-  final ValueChanged<double> onSave;
+  final Future<bool> Function(double amount) onSave;
   final bool isFavourite;
   final ValueChanged<bool> onFavouriteChanged;
 
@@ -32,6 +32,7 @@ class DishInfoPage extends StatefulWidget {
 
 class _DishInfoPageState extends State<DishInfoPage> {
   bool isFavourite = false;
+  bool _saving = false;
 
   final TextEditingController _amountController = TextEditingController();
 
@@ -45,6 +46,29 @@ class _DishInfoPageState extends State<DishInfoPage> {
   void dispose() {
     _amountController.dispose();
     super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (_saving) return;
+
+    final text = _amountController.text.trim();
+    double? amount = double.tryParse(text);
+    if (text.isEmpty || amount == null || amount <= 0) {
+      amount = widget.foodItem.weight;
+    }
+
+    setState(() => _saving = true);
+    var saved = false;
+    try {
+      saved = await widget.onSave(amount);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+
+    if (!mounted) return;
+    if (ModalRoute.of(context)?.isCurrent ?? false) {
+      Navigator.of(context).pop(saved);
+    }
   }
 
   @override
@@ -152,14 +176,8 @@ class _DishInfoPageState extends State<DishInfoPage> {
                   SizedBox(
                     width: double.infinity,
                     child: Button(
-                      onPressed: () {
-                        final text = _amountController.text.trim();
-                        double? amount = double.tryParse(text);
-                        if (text.isEmpty || amount == null || amount <= 0) {
-                          amount = widget.foodItem.weight;
-                        }
-                        widget.onSave(amount);
-                      },
+                      onPressed: _save,
+                      loading: _saving,
                       text: Strings.save,
                     ),
                   ),

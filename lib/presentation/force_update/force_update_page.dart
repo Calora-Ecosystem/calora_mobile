@@ -20,7 +20,9 @@ class ForceUpdatePage extends StatelessWidget {
             child: Assets.icons.background.image(fit: BoxFit.cover),
           ),
           Center(
-            child: Strings.installTheNewVersion.text(24, 30, 500).copyWith(textAlign: TextAlign.center),
+            child: Strings.installTheNewVersion
+                .text(24, 30, 500)
+                .copyWith(textAlign: TextAlign.center),
           ),
         ],
       ),

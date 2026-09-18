@@ -19,7 +19,9 @@ import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:management/management.dart';
 
 class App extends Managed<AppManager, AppState, AppEffect> {
-  App({super.key});
+  App({super.key, required this.initialRoute});
+
+  final PageRouteInfo initialRoute;
 
   @override
   void listener(BuildContext context, AppManager manager, AppEffect effect) {
@@ -44,6 +46,8 @@ class App extends Managed<AppManager, AppState, AppEffect> {
       // names into every event and replay — without it a replay is a video
       // with no idea which screen it is showing.
       routerConfig: appRouter.config(
+        deepLinkBuilder: (deepLink) =>
+            deepLink.initial ? DeepLink([initialRoute]) : deepLink,
         navigatorObservers: () => [
           CustomNavigatorObserver(),
           SentryNavigatorObserver(),
@@ -66,7 +70,10 @@ class App extends Managed<AppManager, AppState, AppEffect> {
                 ),
               ),
               child: RemoveStatusBarBackground(
-                child: DisplayWidget(key: ValueKey(state.language), child: child!),
+                child: DisplayWidget(
+                  key: ValueKey(state.language),
+                  child: child!,
+                ),
               ),
             ),
           ),

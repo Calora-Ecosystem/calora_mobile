@@ -3,11 +3,14 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:alice/alice.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/step_ledger_db.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/localization/safe_csv_asset_loader.dart';
+import 'package:calora/common/router/app_router.dart';
+import 'package:calora/common/router/initial_route_resolver.dart';
 import 'package:calora/common/service/background_steps_worker.dart';
 import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/common/service/notification_service.dart';
@@ -23,6 +26,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -42,7 +46,8 @@ Future<void> main() async {
   await SentryFlutter.init(
     configureSentry,
     appRunner: () async {
-      WidgetsFlutterBinding.ensureInitialized();
+      final binding = WidgetsFlutterBinding.ensureInitialized();
+      FlutterNativeSplash.preserve(widgetsBinding: binding);
 
       await dotenv.load();
       await EasyLocalization.ensureInitialized();
@@ -81,6 +86,8 @@ Future<void> main() async {
 
       await FacebookAnalyticsService.instance.init();
 
+      final initialRoute = await getIt<InitialRouteResolver>().resolve();
+
       runApp(
         EasyLocalization(
           supportedLocales: Strings.supportedLocales,
@@ -88,13 +95,33 @@ Future<void> main() async {
           assetLoader: SafeCsvAssetLoader(),
           fallbackLocale: Language.UZ.locale,
           startLocale: Language.UZ.locale,
-          child: App(),
+          child: App(initialRoute: initialRoute),
         ),
       );
+      unawaited(_removeSplashOnFirstRoute(getIt<AppRouter>()));
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         unawaited(FacebookAnalyticsService.instance.start());
       });
     },
   );
+}
+
+Future<void> _removeSplashOnFirstRoute(StackRouter router) async {
+  if (!router.hasEntries) {
+    final routed = Completer<void>();
+    void onChange() {
+      if (router.hasEntries && !routed.isCompleted) routed.complete();
+    }
+
+    router.addListener(onChange);
+    await routed.future;
+    router.removeListener(onChange);
+  }
+  await WidgetsBinding.instance.endOfFrame;
+  final context = router.navigatorKey.currentContext;
+  if (context != null && context.mounted) {
+    await precacheImage(Assets.icons.background.provider(), context);
+  }
+  FlutterNativeSplash.remove();
 }

@@ -4,42 +4,58 @@ import 'package:calora/common/extensions/duration.dart';
 import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/domain/repo/course/course_repo.dart';
 import 'package:calora/presentation/tasks_process/management/tasks_process_management.dart';
+import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 @injectable
-class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect> {
+class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
+    with WidgetsBindingObserver {
+  static const _countTickSeconds = 3;
+
+  final CourseRepo _courseRepo;
+  final _exerciseSyncs = <int, Future<bool>>{};
+
   Timer? _timer;
-  CourseRepo _courseRepo;
-
-  bool _leaveSheetOpen = false;
-
-  TasksProcessManager(this._courseRepo) : super(const TasksProcessState());
   int? _workoutId;
+  bool _leaveSheetOpen = false;
+  bool _completed = false;
+
+  TasksProcessManager(this._courseRepo) : super(const TasksProcessState()) {
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   void init(List<ExercisesRequest> exercises, {required int workoutId}) {
     if (exercises.isEmpty) return;
 
     _workoutId = workoutId;
+    unawaited(WakelockPlus.enable().handle());
 
     emit(state.copyWith(exercises: exercises, currentIndex: 0));
     _startForCurrent();
     emit(state.copyWith(isInitialized: true));
   }
 
-  void finishWorkout(int id) {
-    _courseRepo
-        .finishWorkout(id)
-        .handle(
-          onStart: () => emit(state.copyWith()),
-          onDone: () => emit(state.copyWith()),
-          onError: (e) => emit(state.copyWith()),
-        );
-  }
-
   ExercisesRequest? get currentExercise {
     if (state.exercises.isEmpty) return null;
     return state.exercises[state.currentIndex];
+  }
+
+  double get progress {
+    if (state.totalSeconds <= 0) return 0;
+    return 1 - state.remainingSeconds / state.totalSeconds;
+  }
+
+  Duration get tick =>
+      Duration(seconds: state.isCountType ? _countTickSeconds : 1);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
+    if (lifecycleState == AppLifecycleState.hidden ||
+        lifecycleState == AppLifecycleState.paused) {
+      emit(state.copyWith(isPaused: true));
+    }
   }
 
   void togglePause() {
@@ -48,11 +64,13 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
 
   void onExerciseFinished() {
     final ex = currentExercise;
-    if (ex == null) return;
+    if (ex == null || _completed) return;
 
-    unawaited(finishExercises(ex.id));
+    _exerciseSyncs[ex.id] = _syncExercise(ex.id);
 
-    final newCompletedExercises = List<ExercisesRequest>.from(state.completedExercises)..add(ex);
+    final newCompletedExercises = List<ExercisesRequest>.from(
+      state.completedExercises,
+    )..add(ex);
 
     emit(
       state.copyWith(
@@ -78,9 +96,12 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
       return;
     }
 
+    _completed = true;
+    unawaited(WakelockPlus.disable().handle());
+
     final id = _workoutId;
     if (id != null) {
-      unawaited(_courseRepo.finishWorkout(id));
+      unawaited(_submitWorkout(id).handle());
     }
 
     publish(
@@ -199,8 +220,7 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
       return;
     }
 
-    const tickSeconds = 3;
-    final total = count * tickSeconds;
+    final total = count * _countTickSeconds;
 
     emit(
       state.copyWith(
@@ -213,7 +233,7 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
       ),
     );
 
-    _timer = Timer.periodic(const Duration(seconds: tickSeconds), (t) {
+    _timer = Timer.periodic(const Duration(seconds: _countTickSeconds), (t) {
       if (state.isPaused) return;
 
       final nextRemaining = state.remainingCount - 1;
@@ -225,7 +245,7 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
         emit(
           state.copyWith(
             remainingCount: nextRemaining,
-            remainingSeconds: nextRemaining * tickSeconds,
+            remainingSeconds: nextRemaining * _countTickSeconds,
           ),
         );
       }
@@ -239,7 +259,7 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
       if (comp == null) {
         sum += parseDuration(e.duration).inSeconds;
       } else if (comp.computationType == ComputationType.count) {
-        sum += comp.value.toInt() * 3;
+        sum += comp.value.toInt() * _countTickSeconds;
       } else {
         sum += comp.value.toInt();
       }
@@ -247,19 +267,29 @@ class TasksProcessManager extends Manager<TasksProcessState, TasksProcessEffect>
     return sum;
   }
 
-  Future<void> finishExercises(int id) async {
-    await _courseRepo
-        .finishedExercises(id)
-        .handle(
-          onStart: () => emit(state.copyWith(isFinished: true)),
-          onDone: () => emit(state.copyWith(isFinished: false)),
-          onError: (e) => emit(state.copyWith(isFinished: false)),
-        );
+  Future<bool> _syncExercise(int id) async {
+    try {
+      await _courseRepo.finishedExercises(id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _submitWorkout(int workoutId) async {
+    final unsynced = [
+      for (final MapEntry(key: id, value: synced) in _exerciseSyncs.entries)
+        if (!await synced) id,
+    ];
+    await Future.wait(unsynced.map(_syncExercise));
+    await _courseRepo.finishWorkout(workoutId);
   }
 
   @override
   Future<void> close() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    unawaited(WakelockPlus.disable().handle());
     return super.close();
   }
 }

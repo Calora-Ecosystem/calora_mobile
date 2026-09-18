@@ -74,22 +74,22 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
     );
   }
 
-  void openAboutDishPage(
+  Future<void> openAboutDishPage(
     BuildContext context,
     FoodModel food,
     DishesManager manager,
     bool isFavourite,
-  ) {
-    context.showAppBottomSheet(
+  ) async {
+    final saved = await context.showAppBottomSheet<bool>(
       child: DishInfoPage(
         isFavourite: isFavourite,
         foodItem: food,
         onFavouriteChanged: (value) {
           if (value) manager.addFavourite(food.id ?? 0);
         },
-        onSave: (value) async {
+        onSave: (value) {
           manager.addFavourite(food.id ?? 0);
-          final success = await manager.saveMenuItem(
+          return manager.saveMenuItem(
             MenuInfo(
               menu: type.name,
               date: dateTime,
@@ -97,18 +97,17 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
               weightInGr: value == 0 ? 100 : value.toInt(),
             ),
           );
-          if (context.mounted) context.router.pop();
-
-          if (success) {
-            _showInfoDialog(context);
-          }
         },
       ),
     );
+    if (saved != true || !context.mounted) return;
+
+    final closed = await _showInfoDialog(context);
+    if (closed == true && context.mounted) context.router.pop(true);
   }
 
-  void _showInfoDialog(BuildContext context) {
-    showDialog(
+  Future<bool?> _showInfoDialog(BuildContext context) {
+    return showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
@@ -127,11 +126,7 @@ class DishesPage extends Managed<DishesManager, DishesState, DishesEffect> {
           actions: [
             Center(
               child: Button(
-                onPressed: () {
-                  dialogContext.pop();
-                  context.router.pop();
-                  context.router.pop(true);
-                },
+                onPressed: () => Navigator.of(dialogContext).pop(true),
                 text: Strings.close,
                 textColor: context.colors.textStrong,
                 type: ButtonType.secondary,

@@ -18,7 +18,9 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, TasksProcessEffect> {
+class TasksProcessPage
+    extends
+        Managed<TasksProcessManager, TasksProcessState, TasksProcessEffect> {
   final List<ExercisesRequest> exercises;
   final WorkoutRequest workout;
 
@@ -35,7 +37,11 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
   }
 
   @override
-  void listener(BuildContext context, TasksProcessManager manager, TasksProcessEffect effect) {
+  void listener(
+    BuildContext context,
+    TasksProcessManager manager,
+    TasksProcessEffect effect,
+  ) {
     effect.when(
       showLeaveSheet: () async {
         await showModalBottomSheet(
@@ -63,7 +69,11 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
   }
 
   @override
-  Widget builder(BuildContext context, TasksProcessManager manager, TasksProcessState state) {
+  Widget builder(
+    BuildContext context,
+    TasksProcessManager manager,
+    TasksProcessState state,
+  ) {
     final ex = manager.currentExercise;
     if (!state.isInitialized || ex == null) {
       return Scaffold(
@@ -113,19 +123,20 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
                 ex.title.text(20, 24, 700).c(context.colors.textStrong),
                 const SizedBox(height: 12),
                 Center(
-                  child: (state.isCountType
-                          ? 'x${state.remainingCount}'
-                          : _formatSeconds(state.remainingSeconds))
-                      .text(32, 40, 700)
-                      .c(context.colors.textStrong),
+                  child:
+                      (state.isCountType
+                              ? 'x${state.remainingCount}'
+                              : _formatSeconds(state.remainingSeconds))
+                          .text(32, 40, 700)
+                          .c(context.colors.textStrong),
                 ),
                 const SizedBox(height: 16),
                 ProgressButton(
                   key: ValueKey(state.currentIndex),
-                  duration: Duration(seconds: state.totalSeconds),
+                  progress: manager.progress,
+                  step: manager.tick,
                   isPaused: state.isPaused,
                   onToggle: manager.togglePause,
-                  onFinished: manager.next,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -133,10 +144,16 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
                     Expanded(
                       child: SimpleButton(
                         text: Strings.previous,
-                        icon: state.currentIndex > 0 ? Assets.icons.previewIcon.svg() : Assets.icons.softPrevious.svg(),
-                        onPressed: state.currentIndex > 0 ? manager.previous : () {},
+                        icon: state.currentIndex > 0
+                            ? Assets.icons.previewIcon.svg()
+                            : Assets.icons.softPrevious.svg(),
+                        onPressed: state.currentIndex > 0
+                            ? manager.previous
+                            : () {},
                         color: context.colors.backgroundElevation,
-                        textColor: state.currentIndex > 0 ? context.colors.textStrong : context.colors.textSub,
+                        textColor: state.currentIndex > 0
+                            ? context.colors.textStrong
+                            : context.colors.textSub,
                       ),
                     ),
                     const SizedBox(width: 20),
@@ -161,7 +178,10 @@ class TasksProcessPage extends Managed<TasksProcessManager, TasksProcessState, T
   }
 
   String _formatSeconds(int totalSeconds) {
-    final minutes = (totalSeconds ~/ 60).remainder(60).toString().padLeft(2, '0');
+    final minutes = (totalSeconds ~/ 60)
+        .remainder(60)
+        .toString()
+        .padLeft(2, '0');
     final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
