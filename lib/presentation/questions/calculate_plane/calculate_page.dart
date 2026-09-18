@@ -413,14 +413,16 @@ class _DailyTargets extends StatelessWidget {
         tint: context.colors.informationLighter,
       ),
     ];
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (int i = 0; i < tiles.length; i++) ...[
-          Expanded(child: tiles[i]),
-          if (i != tiles.length - 1) const SizedBox(width: 10),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < tiles.length; i++) ...[
+            Expanded(child: tiles[i]),
+            if (i != tiles.length - 1) const SizedBox(width: 10),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

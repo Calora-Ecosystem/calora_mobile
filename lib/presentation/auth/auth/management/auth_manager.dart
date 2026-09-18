@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/facebook_analytics_service.dart';
+import 'package:calora/common/service/sms_autofill_service.dart';
 import 'package:calora/domain/repo/auth/auth_repo.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/presentation/auth/auth/management/auth_management.dart';
@@ -58,6 +59,10 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
       }
       final fullPhoneNumber = '+998$phone';
 
+      // Armed before the request: Google's SMS User Consent API only reports
+      // messages that arrive after the listener is registered.
+      unawaited(SmsAutofillService.instance.start());
+
       return _repo
           .sendOtpToPhone(fullPhoneNumber)
           .handle(
@@ -109,11 +114,13 @@ class AuthManager extends Manager<AuthState, AuthEffect> {
     }
 
     if (cached != null) {
-      emit(state.copyWith(
-        isUzbekistan: cached,
-        countryLoading: false,
-        countryError: false,
-      ));
+      emit(
+        state.copyWith(
+          isUzbekistan: cached,
+          countryLoading: false,
+          countryError: false,
+        ),
+      );
     } else {
       emit(state.copyWith(countryLoading: true, countryError: false));
     }

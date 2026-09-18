@@ -26,6 +26,8 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
   Duration _remainingTime = const Duration(minutes: 3);
   Timer? _timer;
 
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +51,9 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
           child: PinCodeTextField(
             autoFocus: true,
             controller: widget.controller,
+            focusNode: _focusNode,
+            autoDisposeControllers: false,
+            onAutoFillDisposeAction: AutofillContextAction.cancel,
             appContext: context,
             length: 6,
             keyboardType: TextInputType.number,
@@ -79,7 +84,9 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
                 },
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Strings.resend.text(14, 20, 500).c(context.colors.accentSub),
+                  child: Strings.resend
+                      .text(14, 20, 500)
+                      .c(context.colors.accentSub),
                 ),
               )
             : Row(
@@ -99,6 +106,7 @@ class _VerifyCodeWidgetState extends State<VerifyCodeWidget> {
   @override
   void dispose() {
     _timer?.cancel();
+    _focusNode.dispose();
     super.dispose();
   }
 

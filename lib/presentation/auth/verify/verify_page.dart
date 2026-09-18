@@ -45,7 +45,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
+          Positioned.fill(
+            child: Assets.icons.background.image(fit: BoxFit.fill),
+          ),
           SafeArea(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -59,9 +61,7 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       controller: manager.controller,
                       resend: manager.resend,
                       resultCode: (data) {
-                        if (data.length == 6) {
-                          // manager.verify();
-                        }
+                        if (data.length == 6) manager.verify();
                       },
                     ),
                     const SizedBox(height: 16),
@@ -70,7 +70,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
                       child: Button(
                         loading: state.loading,
                         onPressed: manager.verify,
-                        child: Strings.doContinue.text(16, 20, 500).c(context.colors.textWhite),
+                        child: Strings.doContinue
+                            .text(16, 20, 500)
+                            .c(context.colors.textWhite),
                       ),
                     ),
                   ],

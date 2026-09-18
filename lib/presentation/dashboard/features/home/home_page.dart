@@ -10,7 +10,6 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/calendar/calendar_selector_widget.dart';
-import 'package:calora/common/widgets/disclaimer/medical_disclaimer.dart';
 import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
@@ -235,7 +234,6 @@ class HomePage extends Managed<HomeManager, HomeState, HomeEffect> {
                                   targetLiters: state.targetLiters,
                                   currentIntake: state.waterIntake,
                                 ),
-                                const MedicalDisclaimer(),
                               ],
                             ),
                           ),

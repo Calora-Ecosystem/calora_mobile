@@ -40,9 +40,7 @@ class NotificationApi {
 
   Future<ReminderRequest> updateReminder(ReminderRequest request) async {
     final requestPayload = request.toJson()..remove('id');
-    log(
-      'NotificationApi: Sending updateReminder request with payload: $requestPayload',
-    );
+
     final response = await _dio.post('/reminder', data: requestPayload);
     log(
       'NotificationApi: Received updateReminder response data: ${response.data}',

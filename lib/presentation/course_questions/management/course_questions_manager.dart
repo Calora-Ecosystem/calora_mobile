@@ -5,6 +5,7 @@ import 'dart:math' show pow;
 import 'package:calora/common/base/course_intro_store.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/util/api_error.dart';
 import 'package:calora/domain/model/questions/questions.dart'
     show ActivityLevelEnum;
 import 'package:calora/domain/model/questions/questions_request.dart';
@@ -136,7 +137,10 @@ class CourseQuestionsManager
         ReminderRequest(menu: 'Breakfast', time: time, type: 'DailyChallenge'),
       );
     } catch (e) {
-      log('updateReminder failed: $e', name: 'CourseQuestionsManager');
+      log(
+        'updateReminder failed: ${apiErrorMessage(e)}',
+        name: 'CourseQuestionsManager',
+      );
     }
   }
 
