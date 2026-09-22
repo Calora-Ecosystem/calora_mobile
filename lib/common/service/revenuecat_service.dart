@@ -81,9 +81,7 @@ class RevenueCatService {
 
   Future<void> init() async {
     if (kIsWeb) return;
-    await Purchases.setLogLevel(
-      kDebugMode ? LogLevel.debug : LogLevel.info,
-    );
+    await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.info);
 
     final key = Platform.isAndroid
         ? 'goog_GChcNuFzhSLLuenQOOdpdaatuJQ'
@@ -203,9 +201,7 @@ class RevenueCatService {
       throw IapException(Strings.errorViewMessage);
     }
     try {
-      await Purchases.setAttributes({
-        'order_id': order?.id?.toString() ?? '',
-      });
+      await Purchases.setAttributes({'order_id': order?.id?.toString() ?? ''});
       await Purchases.syncAttributesAndOfferingsIfNeeded();
 
       if (restore) {
@@ -227,7 +223,9 @@ class RevenueCatService {
 
       final packages = offering.availablePackages;
       if (packages.isEmpty) {
-        getIt<Logger>().e('IAP: offering "${offering.identifier}" has no packages');
+        getIt<Logger>().e(
+          'IAP: offering "${offering.identifier}" has no packages',
+        );
         throw IapException(Strings.errorViewMessage);
       }
 
@@ -312,12 +310,13 @@ class RevenueCatService {
     );
     unawaited(
       meta.logPurchase(
-        value: product.price,
+        contentId: product.identifier,
+        contentType: FacebookAnalyticsService.contentTypeSubscription,
         currency: product.currencyCode,
+        valueToSum: product.price,
         transactionId: orderId,
         parameters: parameters,
       ),
     );
   }
-
 }

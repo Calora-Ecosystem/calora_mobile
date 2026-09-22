@@ -181,8 +181,12 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     );
   }
 
-  void selectPaymentMethod(PaymentMethod method) =>
-      emit(state.copyWith(selectedPaymentMethod: method));
+  void selectPaymentMethod(PaymentMethod method) {
+    emit(state.copyWith(selectedPaymentMethod: method));
+    unawaited(
+      FacebookAnalyticsService.instance.logAddPaymentInfo(success: true),
+    );
+  }
 
   Future<void> getPremiumPlans() async =>
       await _premiumRepo.getPremiumPlans().handle(
@@ -543,7 +547,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     }
   }
 
-  static const String _metaContentType = 'subscription';
+  static const String _metaContentType =
+      FacebookAnalyticsService.contentTypeSubscription;
 
   static const String _localCurrency = 'UZS';
 
@@ -570,8 +575,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
       FacebookAnalyticsService.instance.logViewContent(
         contentId: plan.id.toString(),
         contentType: _metaContentType,
-        price: value,
         currency: currency,
+        valueToSum: value,
       ),
     );
   }
@@ -585,10 +590,10 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     final (value, currency) = price;
     unawaited(
       FacebookAnalyticsService.instance.logInitiateCheckout(
-        totalPrice: value,
-        currency: currency,
         contentId: plan.id.toString(),
         contentType: _metaContentType,
+        currency: currency,
+        valueToSum: value,
         paymentInfoAvailable: state.selectedPaymentMethod != null,
       ),
     );
@@ -621,8 +626,10 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     );
     unawaited(
       meta.logPurchase(
-        value: value,
+        contentId: plan.id.toString(),
+        contentType: _metaContentType,
         currency: currency,
+        valueToSum: value,
         transactionId: orderId,
         parameters: parameters,
       ),
