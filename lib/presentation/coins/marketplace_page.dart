@@ -66,25 +66,34 @@ class MarketplacePage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
                   const SizedBox(height: 4),
                   'market_tariffs_sub'.tr().text(14, 19, 400).c(colors.textSub),
                   const SizedBox(height: 16),
-                  for (final item in tariffs) ...[
-                    MarketItemCard(
-                      item: item,
-                      balance: state.balance,
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: tariffs.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          mainAxisExtent: 168,
+                        ),
+                    itemBuilder: (context, index) => MarketItemCard(
+                      item: tariffs[index],
                       onBuy: () {
-                        if (!state.busy)
-                          _confirm(context, manager, state, item);
+                        if (!state.busy) {
+                          _confirm(context, manager, state, tariffs[index]);
+                        }
                       },
                     ),
-                    const SizedBox(height: 12),
-                  ],
+                  ),
                 ],
               ),
             ),
     );
   }
 
-  /// Coins can't be refunded, so a purchase is confirmed first; a tariff the
-  /// user can't afford explains how many coins are missing instead.
+  /// Coins can't be refunded, so a purchase is confirmed first; without
+  /// enough coins a short notice is shown instead.
   void _confirm(
     BuildContext context,
     CoinsManager manager,
@@ -92,12 +101,7 @@ class MarketplacePage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
     MarketItem item,
   ) {
     if (state.balance < item.priceCoins) {
-      CustomSnackBar.show(
-        context,
-        'tariff_missing'.tr(
-          namedArgs: {'coins': '${item.priceCoins - state.balance}'},
-        ),
-      );
+      CustomSnackBar.show(context, 'insufficient_coins'.tr());
       return;
     }
     final colors = context.colors;

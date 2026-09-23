@@ -38,56 +38,47 @@ void main() {
     expect(find.byType(StepCoinBanner), findsOneWidget);
   });
 
-  testWidgets('tariff cards lay out (affordable, popular, missing coins)', (
-    tester,
-  ) async {
+  testWidgets('tariff grid lays out', (tester) async {
     tester.view.physicalSize = const Size(360 * 3, 740 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    const items = [
-      MarketItem(
-        id: 1,
-        title: 'mi_premium_7',
-        subtitle: 'mi_premium_7_sub',
-        priceCoins: 150,
-        category: MarketCategory.tariff,
-        rewardType: MarketRewardType.premiumDays,
-        rewardValue: 7,
-      ),
-      MarketItem(
-        id: 2,
-        title: 'mi_premium_30',
-        subtitle: 'mi_premium_30_sub',
-        priceCoins: 300,
-        category: MarketCategory.tariff,
-        rewardType: MarketRewardType.premiumDays,
-        rewardValue: 30,
-        isPopular: true,
-      ),
-      MarketItem(
-        id: 4,
-        title: 'mi_premium_120',
-        subtitle: 'mi_premium_120_sub',
-        priceCoins: 900,
-        category: MarketCategory.tariff,
-        rewardType: MarketRewardType.premiumDays,
-        rewardValue: 120,
-      ),
+    const tariffs = [
+      (1, 'mi_premium_7', 150, 7),
+      (2, 'mi_premium_30', 300, 30),
+      (3, 'mi_premium_75', 600, 75),
+      (4, 'mi_premium_120', 900, 120),
     ];
 
     await tester.pumpWidget(
       wrap(
-        Column(
+        GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            mainAxisExtent: 168,
+          ),
           children: [
-            for (final item in items)
-              MarketItemCard(item: item, balance: 320, onBuy: () {}),
+            for (final t in tariffs)
+              MarketItemCard(
+                item: MarketItem(
+                  id: t.$1,
+                  title: t.$2,
+                  subtitle: '${t.$2}_sub',
+                  priceCoins: t.$3,
+                  category: MarketCategory.tariff,
+                  rewardType: MarketRewardType.premiumDays,
+                  rewardValue: t.$4,
+                ),
+                onBuy: () {},
+              ),
           ],
         ),
       ),
     );
     await tester.pump();
     expect(tester.takeException(), isNull);
-    expect(find.byType(MarketItemCard), findsNWidgets(3));
+    expect(find.byType(MarketItemCard), findsNWidgets(4));
   });
 }

@@ -12,5 +12,6 @@ sealed class PromoCodeModel with _$PromoCodeModel {
     String? expireAt,
   }) = _PromoCodeModel;
 
-  factory PromoCodeModel.fromJson(Map<String, dynamic> json) => _$PromoCodeModelFromJson(json);
+  factory PromoCodeModel.fromJson(Map<String, dynamic> json) =>
+      _$PromoCodeModelFromJson(json);
 }

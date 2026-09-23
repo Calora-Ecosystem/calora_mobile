@@ -21,9 +21,13 @@ sealed class PremiumPlanModel with _$PremiumPlanModel {
     int? discountedFee,
   }) = _PremiumPlanModel;
 
-  factory PremiumPlanModel.fromJson(Map<String, dynamic> json) => _$PremiumPlanModelFromJson(json);
+  factory PremiumPlanModel.fromJson(Map<String, dynamic> json) =>
+      _$PremiumPlanModelFromJson(json);
 
   static List<PremiumPlanModel> listFromJson(List<dynamic> json) {
-    return json.whereType<Map<String, dynamic>>().map(PremiumPlanModel.fromJson).toList();
+    return json
+        .whereType<Map<String, dynamic>>()
+        .map(PremiumPlanModel.fromJson)
+        .toList();
   }
 }

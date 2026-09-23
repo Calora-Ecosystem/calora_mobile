@@ -1,7 +1,15 @@
 /// The user's current plan (`GET billing/subscription/my`) for the
 /// Profile → Subscription panel.
+/// Free, active, or cancelled in the store (Premium kept until [MySubscription.endsAt]).
+enum SubscriptionStatus { free, active, cancelled }
+
 class MySubscription {
   final bool isPremium;
+  final SubscriptionStatus status;
+
+  /// Paid through App Store / Google Play — plan changes and cancellation
+  /// happen in the store.
+  final bool managedByStore;
 
   /// Payment, Admin, Coins or Referral — where the Premium came from.
   final String? source;
@@ -17,6 +25,8 @@ class MySubscription {
 
   const MySubscription({
     this.isPremium = false,
+    this.status = SubscriptionStatus.free,
+    this.managedByStore = false,
     this.source,
     this.startsAt,
     this.endsAt,
@@ -29,6 +39,12 @@ class MySubscription {
 
   factory MySubscription.fromJson(Map<String, dynamic> json) => MySubscription(
     isPremium: json['isPremium'] as bool? ?? false,
+    status: switch ((json['status'] as String?)?.toLowerCase()) {
+      'active' => SubscriptionStatus.active,
+      'cancelled' => SubscriptionStatus.cancelled,
+      _ => SubscriptionStatus.free,
+    },
+    managedByStore: json['managedByStore'] as bool? ?? false,
     source: json['source'] as String?,
     startsAt: DateTime.tryParse(json['startsAt'] as String? ?? ''),
     endsAt: DateTime.tryParse(json['endsAt'] as String? ?? ''),

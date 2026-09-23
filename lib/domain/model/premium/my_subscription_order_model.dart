@@ -15,9 +15,13 @@ sealed class MySubscriptionOrderModel with _$MySubscriptionOrderModel {
     String? updatedAt,
   }) = _MySubscriptionOrderModel;
 
-  factory MySubscriptionOrderModel.fromJson(Map<String, dynamic> json) => _$MySubscriptionOrderModelFromJson(json);
+  factory MySubscriptionOrderModel.fromJson(Map<String, dynamic> json) =>
+      _$MySubscriptionOrderModelFromJson(json);
 
   static List<MySubscriptionOrderModel> listFromJson(List<dynamic> json) {
-    return json.whereType<Map<String, dynamic>>().map(MySubscriptionOrderModel.fromJson).toList();
+    return json
+        .whereType<Map<String, dynamic>>()
+        .map(MySubscriptionOrderModel.fromJson)
+        .toList();
   }
 }

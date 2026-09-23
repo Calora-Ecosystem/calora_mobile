@@ -662,7 +662,7 @@ insufficient_coins,Not enough coins,Coin yetarli emas,Недостаточно �
 mi_premium_7,Premium 7 days,Premium 7 kun,Premium 7 дней
 mi_premium_7_sub,To try it out,Sinab koʻrish uchun,Чтобы попробовать
 mi_premium_30,Premium 30 days,Premium 30 kun,Premium 30 дней
-mi_premium_30_sub,Most popular,Eng ommabop,Самый популярный
+mi_premium_30_sub,A full month,Toʻliq bir oy,Целый месяц
 mi_discount,-20% discount,-20% chegirma,Скидка -20%
 mi_discount_sub,On the yearly plan,Yillik tarifga,На годовой тариф
 mi_ai_pack,+10 AI scans,+10 AI skan,+10 AI-сканов
@@ -786,9 +786,6 @@ mi_premium_75,Premium 75 days,Premium 75 kun,Premium 75 дней
 mi_premium_75_sub,Great value,Foydali tanlov,Выгодный выбор
 mi_premium_120,Premium 120 days,Premium 120 kun,Premium 120 дней
 mi_premium_120_sub,Best value,Eng tejamkor,Самый выгодный
-tariff_days,{count} days,{count} kun,{count} дней
-tariff_per_day,≈ {coins} coins a day,≈ {coins} coin / kun,≈ {coins} монет в день
-tariff_missing,{coins} more coins needed,Yana {coins} coin kerak,Нужно ещё {coins} монет
 tariff_confirm_title,Get Premium,Premium olish,Получить Premium
 tariff_confirm_msg,{days} days of Premium for {coins} coins. Continue?,{coins} coin evaziga {days} kunlik Premium. Davom etasizmi?,{days} дней Premium за {coins} монет. Продолжить?
 tariff_success_title,Premium is on! 🎉,Premium faollashdi! 🎉,Premium активирован! 🎉
@@ -796,6 +793,10 @@ tariff_success_msg,All features are unlocked for {days} days,{days} kun davomida
 great,Great,Zoʻr,Отлично
 coin_banner_chip,WALK & EARN,YUR VA YIGʻ,ХОДИ И КОПИ
 coin_banner_today,Earned today,Bugun yigʻildi,Сегодня собрано
-premium_tariffs_title,Premium plans,Premium tariflar,Тарифы Premium
 premium_with_coins,Get it with coins,Coin evaziga olish,Получить за монеты
-premium_with_coins_sub,With the coins you earn by walking,Yurib yigʻgan coinlaringizga,За монеты от шагов
+status_cancelled,Cancelled,Bekor qilingan,Отменена
+sub_no_payment,None,Yoʻq,Нет
+sub_cancelled_note,Auto-renewal is off. Premium stays active until {date}.,Avtomatik toʻlov oʻchirilgan. Premium {date} gacha amal qiladi.,Автопродление выключено. Premium действует до {date}.
+manage_in_app_store,Manage in App Store,App Store’da boshqarish,Управлять в App Store
+manage_in_google_play,Manage in Google Play,Google Play’da boshqarish,Управлять в Google Play
+plan_yearly,Yearly,Yillik,Годовой
