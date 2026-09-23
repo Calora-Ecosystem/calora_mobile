@@ -777,8 +777,6 @@ referral_discount_card,You joined through {name} — your first Premium is {perc
 referral_discount_applied,Friend invite discount: -{percent}% already applied,Doʻst taklifi chegirmasi: -{percent}% narxga qoʻllandi,Скидка по приглашению: -{percent}% уже учтена
 coin_tx_referral,Friend invite,Doʻst taklifi,Приглашение друга
 coin_tx_referral_welcome,Welcome bonus,Xush kelibsiz bonusi,Приветственный бонус
-invite_code_title,Did a friend invite you?,Sizni doʻstingiz taklif qildimi?,Вас пригласил друг?
-invite_code_subtitle,Enter their code — you get a discount on Premium and your friend gets closer to free Premium,Uning kodini kiriting — siz Premiumga chegirma olasiz va doʻstingiz bepul Premiumga yaqinlashadi,Введите его код — вы получите скидку на Premium а друг станет ближе к бесплатному Premium
 invite_code_question,Have a friend’s invite code?,Doʻstingizning taklif kodi bormi?,Есть код приглашения друга?
 invite_code_applied,You joined through {name}! {percent}% off your first Premium,Siz {name} taklifi bilan qoʻshildingiz! Birinchi Premium {percent}% chegirma bilan,Вы присоединились по приглашению {name}! Скидка {percent}% на первый Premium
 invite_code_not_found,Code not found,Kod topilmadi,Код не найден
@@ -786,7 +784,6 @@ invite_code_already_applied,You have already entered an invite code,Siz allaqach
 invite_code_self,You can’t use this code,Bu koddan foydalana olmaysiz,Этот код нельзя использовать
 invite_code_expired,Invite codes can only be entered by new users,Taklif kodini faqat yangi foydalanuvchilar kirita oladi,Код приглашения могут ввести только новые пользователи
 confirm_action,Confirm,Tasdiqlash,Подтвердить
-skip,Skip,Oʻtkazib yuborish,Пропустить
 your_code,Your code,Sizning kodingiz,Ваш код
 plan_n_months,{count} months,{count} oylik,{count} мес.
 sub_source,Plan,Tarif,Тариф
@@ -795,3 +792,5 @@ sub_source_referral,Gift for invited friends,Doʻstlarni taklif qilgani uchun,З
 sub_source_gift,Gift,Sovgʻa,Подарок
 sub_ends_at,Active until,Amal qiladi,Действует до
 sub_days_left,Days left,Qolgan kunlar,Осталось дней
+invite_code_confirmed,You joined through {name},Siz {name} taklifi bilan qoʻshilgansiz,Вы присоединились по приглашению {name}
+invite_code_hint,Enter the code of the friend who invited you — get a discount on your first Premium,Sizni taklif qilgan doʻstingizning kodini kiriting — birinchi Premiumga chegirma olasiz,Введите код друга который вас пригласил — получите скидку на первый Premium

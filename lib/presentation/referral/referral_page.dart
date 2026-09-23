@@ -14,8 +14,9 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Referral screen — share your code; every [ReferralInfo.friendsGoal] friends
-/// who join with it and start using the app earn [ReferralInfo.premiumDays]
-/// days of Premium. Friends who joined get a first-purchase discount.
+/// who confirm it and start using the app earn [ReferralInfo.premiumDays]
+/// days of Premium. It is also the one place where a user confirms the code of
+/// the friend who invited them, which unlocks a first-purchase discount.
 /// Everything is read from `referrals/me` and `referrals/invited`.
 class ReferralPage extends StatefulWidget {
   const ReferralPage({super.key});
@@ -98,14 +99,10 @@ class _ReferralPageState extends State<ReferralPage>
                   _progressCard(context, info),
                   const SizedBox(height: 14),
                   _codeCard(context, info),
-                  if (info.hasDiscount) ...[
-                    const SizedBox(height: 14),
-                    _discountCard(context, info),
-                  ],
-                  if (info.canApplyCode) ...[
-                    const SizedBox(height: 14),
-                    _applyCard(context),
-                  ],
+                  const SizedBox(height: 14),
+                  info.isReferred
+                      ? _referredCard(context, info)
+                      : _applyCard(context),
                   const SizedBox(height: 14),
                   _statsRow(context, info),
                   const SizedBox(height: 14),
@@ -300,9 +297,10 @@ class _ReferralPageState extends State<ReferralPage>
     );
   }
 
-  /// For a user who joined with a friend's code: their first Premium is
-  /// cheaper. Shown until that discount is used.
-  Widget _discountCard(BuildContext context, ReferralInfo info) {
+  /// Once the user has confirmed a friend's code: who invited them and, while
+  /// unused, their first-Premium discount. Replaces [_applyCard] for good —
+  /// a code can be confirmed only once.
+  Widget _referredCard(BuildContext context, ReferralInfo info) {
     final colors = context.colors;
     return Container(
       padding: const EdgeInsets.all(16),
@@ -313,26 +311,35 @@ class _ReferralPageState extends State<ReferralPage>
       ),
       child: Row(
         children: [
-          Icon(Icons.card_giftcard_rounded, color: colors.accentSub, size: 26),
+          Icon(
+            info.hasDiscount
+                ? Icons.card_giftcard_rounded
+                : Icons.verified_rounded,
+            color: colors.accentSub,
+            size: 26,
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: 'referral_discount_card'
-                .tr(
-                  namedArgs: {
-                    'name': info.referredBy ?? '',
-                    'percent': '${info.discountPercent}',
-                  },
-                )
-                .text(14, 19, 600)
-                .c(colors.textStrong),
+            child:
+                (info.hasDiscount
+                        ? 'referral_discount_card'
+                        : 'invite_code_confirmed')
+                    .tr(
+                      namedArgs: {
+                        'name': info.referredBy ?? '',
+                        'percent': '${info.discountPercent}',
+                      },
+                    )
+                    .text(14, 19, 600)
+                    .c(colors.textStrong),
           ),
         ],
       ),
     );
   }
 
-  /// A new user who skipped the code at sign-up can still confirm it here
-  /// (the server allows it for a few days after registration).
+  /// Where the user confirms the code of the friend who invited them — the
+  /// only place a code is entered. Any account can do it, once.
   Widget _applyCard(BuildContext context) {
     final colors = context.colors;
     return _card(
@@ -341,6 +348,8 @@ class _ReferralPageState extends State<ReferralPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           'invite_code_question'.tr().text(15, 20, 600).c(colors.textStrong),
+          const SizedBox(height: 4),
+          'invite_code_hint'.tr().text(13, 18, 400).c(colors.textSub),
           const SizedBox(height: 10),
           Row(
             children: [

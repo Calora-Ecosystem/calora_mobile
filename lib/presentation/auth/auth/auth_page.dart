@@ -31,8 +31,7 @@ class AuthPage extends Managed<AuthManager, AuthState, AuthEffect> {
           context.router.push(VerifyRoute(verification: verification)),
       showError: (message) => CustomSnackBar.show(context, message),
       openDashboard: () => context.router.replaceAll([DashboardRoute()]),
-      // New account: first ask for a friend's invite code, then onboarding.
-      openQuestions: (email) => context.router.push(const InviteCodeRoute()),
+      openQuestions: (email) => context.router.push(QuestionsRoute()),
     );
   }
 

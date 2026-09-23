@@ -49,6 +49,5 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: MarketplaceRoute.page),
     AutoRoute(page: GroupsRoute.page),
     AutoRoute(page: GroupDetailRoute.page),
-    AutoRoute(page: InviteCodeRoute.page),
   ];
 }
