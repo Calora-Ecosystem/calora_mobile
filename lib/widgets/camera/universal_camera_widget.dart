@@ -20,6 +20,11 @@ class UniversalCameraPage extends StatefulWidget {
   final bool allowGallery;
   final Future<void> Function(String image)? onImageCaptured;
 
+  /// Optional short line shown as a pill in the header, e.g. how many free AI
+  /// scans a non-premium user has left ("3/5 free scans"). Null hides the pill,
+  /// so flows that don't meter usage (face scan, etc.) look unchanged.
+  final String? creditText;
+
   const UniversalCameraPage({
     super.key,
     required this.title,
@@ -28,6 +33,7 @@ class UniversalCameraPage extends StatefulWidget {
     required this.onImageCaptured,
     this.useFrontCamera = true,
     this.allowGallery = false,
+    this.creditText,
   });
 
   @override
@@ -396,6 +402,39 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> with WidgetsB
                         fontSize: 16,
                       ),
                     ),
+                    if (widget.creditText != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(38),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white.withAlpha(90)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome,
+                              color: Colors.white,
+                              size: 15,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              widget.creditText!,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

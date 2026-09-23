@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:async';
 
 import 'package:calora/common/di/injection.dart';
@@ -193,12 +194,21 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
         onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
         onData: (data) {
           final plans = data.map((e) {
+            // Referral discount: the backend charges `discountedFee` on
+            // Payme / Click, so that is the price shown; the full fee is
+            // crossed out. IAP ignores it (store prices come from Apple / Google).
+            final discounted = (e.referralDiscountPercent ?? 0) > 0;
+            final fee = e.fee ?? 0;
+            final price = discounted ? (e.discountedFee ?? fee) : fee;
+            final originalFee = discounted
+                ? max(e.originalFee ?? 0, fee)
+                : e.originalFee ?? 0;
             if (e.duration == 1) {
               return PlanModel(
                 id: e.id ?? 0,
                 title: Strings.monthlyPremium,
-                price: e.fee ?? 0,
-                originalFee: e.originalFee ?? 0,
+                price: price,
+                originalFee: originalFee,
                 packageMonth: e.duration ?? 0,
                 isMostPopular: e.isPopular ?? false,
               );
@@ -206,12 +216,15 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
             return PlanModel(
               id: e.id ?? 0,
               title: Strings.nMothPremium(month: e.duration ?? 0),
-              price: e.fee ?? 0,
-              originalFee: e.originalFee ?? 0,
+              price: price,
+              originalFee: originalFee,
               packageMonth: e.duration ?? 0,
               isMostPopular: e.isPopular ?? false,
             );
           }).toList();
+          final referralDiscountPercent = data
+              .map((e) => e.referralDiscountPercent ?? 0)
+              .fold(0, max);
 
           PlanModel? initialPlan;
           try {
@@ -224,6 +237,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
               isGettingPremiumPlans: false,
               plans: plans,
               selectedPlan: initialPlan,
+              referralDiscountPercent: referralDiscountPercent,
             ),
           );
           unawaited(_loadIapPrices());

@@ -312,7 +312,7 @@ notes_for_the_30_day_challenge,Notes for the 30-day challenge,30 kunlik chellenj
 should_the_food_be_added_to_the_menu,Should the food be added to the menu?,Ovqat menyuga qo‘shilsinmi ?,Стоит ли добавить это блюдо в меню?
 yes_add,"Yes, add.","Ha, qo'shish","Да, добавьте."
 please_enter_the_name_of_the_dish,Please enter the name of the dish.,"Iltimos, taom nomini kiriting","Пожалуйста, введите название блюда."
-your_data_has_been_saved,Your data has been saved successfully.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
+your_data_has_been_saved,Your data has been successfully saved.,Ma’lumotlaringiz muvaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 something_went_wrong,Something went wrong.,Nimadir xato ketdi,Что-то пошло не так.
 no_favorite_foods,No favorite foods,Sevimli ovqatlar yo‘q,Нет любимых блюд
 liter,liter,litr,литр
@@ -323,7 +323,7 @@ number_of_lessons,Number of lessons,Darslar soni,Количество уроко
 price,Price,Narxi,Цена
 snack,snack,gazak,перекус
 try_again,Try again,Qayta urunish,Попробуйте еще раз
-snack_time_reminder,snack time reminder,gazak vaqtini eslatish,напоминание о перекусе
+snack_time_reminder,snack time reminder,gazak vaqtini eslatish,напоминание о времени перекуса
 minute,minute,minut,минута
 yourDataHasBeenSuccessfullySaved,You data has been saved successfully,Ma'lumotlaringiz muaffaqiyatli saqlandi,Ваши данные успешно сохранены.
 limited_internet_title,Internet is unavailable.,Internet mavjud emas,Интернет недоступен
@@ -646,3 +646,152 @@ cal_daily_targets,Your daily targets,Sizning kunlik maqsadlaringiz,Ваши еж
 cal_weight_journey,Your weight journey,Sizning vazn o'zgarish tarixingiz,История изменения вашего веса
 cal_now,Now,Hozir,Сейчас
 cal_target,Target,Maqsad,Цель
+calora_coin,Calora coin,Calora coin,Calora coin
+coin_balance,Balance,Balans,Баланс
+wallet_title,Wallet,Hamyon,Кошелёк
+available_calories,Collected calories,Yigʻilgan kaloriya,Накоплено калорий
+ready_to_exchange,{coins} coins ready to exchange,{coins} coin almashtirishga tayyor,{coins} монет готово к обмену
+exchange_to_coins,Exchange to coins,Coinga almashtirish,Обменять на монеты
+open_marketplace,Open marketplace,Doʻkonga oʻtish,Открыть магазин
+recent_activity,Recent activity,Oxirgi harakatlar,Последние действия
+coin_tx_from_calories,From calories,Kaloriyadan,Из калорий
+coin_tx_daily_steps,Daily steps,Kunlik qadamlar,Ежедневные шаги
+exchange_success,{coins} coins added,{coins} coin qoʻshildi,Добавлено {coins} монет
+nothing_to_exchange,Not enough calories to exchange,Almashtirish uchun kaloriya yetarli emas,Недостаточно калорий для обмена
+date_today,Today,Bugun,Сегодня
+date_yesterday,Yesterday,Kecha,Вчера
+marketplace_title,Marketplace,Doʻkon,Магазин
+market_cat_tariff,Tariffs,Tariflar,Тарифы
+market_cat_voucher,Vouchers,Vaucherlar,Ваучеры
+market_cat_boost,Boosts,Bonuslar,Бонусы
+buy,Buy,Sotib olish,Купить
+popular,Popular,Ommabop,Популярно
+purchase_success,{title} purchased,{title} sotib olindi,{title} куплен
+insufficient_coins,Not enough coins,Coin yetarli emas,Недостаточно монет
+mi_premium_7,Premium 7 days,Premium 7 kun,Premium 7 дней
+mi_premium_7_sub,Unlimited AI scan,Cheksiz AI skan,Безлимитный AI-скан
+mi_premium_30,Premium 30 days,Premium 30 kun,Premium 30 дней
+mi_premium_30_sub,Most popular,Eng ommabop,Самый популярный
+mi_discount,-20% discount,-20% chegirma,Скидка -20%
+mi_discount_sub,On the yearly plan,Yillik tarifga,На годовой тариф
+mi_ai_pack,+10 AI scans,+10 AI skan,+10 AI-сканов
+mi_ai_pack_sub,One-time,Bir martalik,Разовый
+groups_title,Groups,Guruhlar,Группы
+group_members,{count} members,{count} aʼzo,{count} участников
+group_total_steps,Group steps,Guruh qadamlari,Шаги группы
+create_group,Create group,Guruh yaratish,Создать группу
+join_by_code,Join by code,Kod bilan qoʻshilish,Присоединиться по коду
+no_groups_title,No groups yet,Hali guruh yoʻq,Пока нет групп
+no_groups_desc,Create a group or join with a friend's code,Guruh yarating yoki doʻst kodiga qoʻshiling,Создайте группу или присоединитесь по коду друга
+group_name,Group name,Guruh nomi,Название группы
+group_name_hint,e.g. Family challenge,Masalan: Oila challenge,Напр.: Семейный челлендж
+invite_code,Invite code,Taklif kodi,Код приглашения
+enter_code,Enter code,Kodni kiriting,Введите код
+join,Join,Qoʻshilish,Присоединиться
+group_created,Group created,Guruh yaratildi,Группа создана
+group_joined,Joined the group,Guruhga qoʻshildingiz,Вы присоединились к группе
+join_failed,Code not found,Kod topilmadi,Код не найден
+invite_friends,Invite,Taklif qilish,Пригласить
+share_invite,Join me on Calora! Code: {code},Menga Caloraʼda qoʻshiling! Kod: {code},Присоединяйся ко мне в Calora! Код: {code}
+coin_tx_from_calora,From Calora,Caloradan,Из Calora
+mi_free_delivery,Free delivery,Bepul yetkazib berish,Бесплатная доставка
+mi_free_delivery_sub,One order,Bitta buyurtma,Один заказ
+exchange_title,Exchange,Almashtirish,Обмен
+exchange_give,You give,Berasiz,Отдаёте
+exchange_get,You get,Olasiz,Получаете
+exchange_available,Available: {amount},Mavjud: {amount},Доступно: {amount}
+exchange_max,MAX,MAX,MAX
+exchange_rate,{calora} Calora = 1 coin,{calora} Calora = 1 coin,{calora} Calora = 1 монета
+exchange_action,Exchange,Almashtirish,Обменять
+calora_unit,Calora,Calora,Calora
+coin_unit,Coin,Coin,Монета
+group_banner_title,Step groups,Qadam guruhlari,Шаговые группы
+group_banner_desc,Rank with your friends,Doʻstlar bilan bellashing,Соревнуйтесь с друзьями
+wallet_entry_desc,Coins and marketplace,Coin va doʻkon,Монеты и магазин
+rank_by_steps,By steps,Qadam boʻyicha,По шагам
+rank_by_coins,By coins,Coin boʻyicha,По монетам
+members_manage,Manage members,Aʼzolarni boshqarish,Управление участниками
+group_admin,Admin,Admin,Админ
+remove_member,Remove,Chiqarish,Удалить
+remove_member_confirm,Remove {name} from the group?,{name}ni guruhdan chiqarasizmi?,Удалить {name} из группы?
+member_removed,Member removed,Aʼzo chiqarildi,Участник удалён
+total_balance,Total balance,Umumiy balans,Общий баланс
+market_subtitle,Tariffs and vouchers,Tarif va vaucher,Тарифы и ваучеры
+group_delete,Delete group,Guruhni oʻchirish,Удалить группу
+group_leave,Leave group,Guruhdan chiqish,Покинуть группу
+group_delete_confirm,Delete {name}?,{name} guruhini oʻchirasizmi?,Удалить группу {name}?
+group_leave_confirm,Leave {name}?,{name} guruhidan chiqasizmi?,Покинуть группу {name}?
+group_deleted,Group deleted,Guruh oʻchirildi,Группа удалена
+group_left,You left the group,Guruhdan chiqdingiz,Вы покинули группу
+free_ai_scans_left,{count} free AI scans left,{count} ta bepul AI skan qoldi,Осталось {count} бесплатных AI-сканов
+free_scans_over,Free scans are over,Bepul skanlar tugadi,Бесплатные сканы закончились
+unlimited_with_premium,Go unlimited with Premium,Premium bilan cheksiz,Безлимит с Premium
+tx_income,Income,Kirim,Приход
+tx_expense,Expense,Chiqim,Расход
+exchange_confirm_title,Confirm exchange,Almashtirishni tasdiqlang,Подтвердите обмен
+exchange_confirm_msg,{calora} Calora will become {coins} coin. Continue?,{calora} Calora {coins} coinga aylanadi. Davom etasizmi?,{calora} Calora станет {coins} монет. Продолжить?
+exchange_agree,Exchange now,Almashtirish,Обменять
+free_scans_title,Free AI scans,Bepul AI skanlar,Бесплатные AI-сканы
+subscription_title,Subscription,Obuna,Подписка
+manage_subscription,Manage subscription,Obunani boshqarish,Управление подпиской
+current_plan,Current plan,Joriy tarif,Текущий тариф
+plan_free,Free,Free,Free
+plan_premium,Premium,Premium,Premium
+next_payment,Next payment,Keyingi toʻlov,Следующий платёж
+sub_status,Status,Holat,Статус
+status_active,Active,Faol,Активна
+change_plan,Change plan,Tarifni oʻzgartirish,Изменить тариф
+go_premium,Go Premium,Premiumʼga oʻtish,Перейти на Premium
+plan_monthly,Monthly,Oylik,Ежемесячно
+free_plan_desc,Basic features,Asosiy imkoniyatlar,Базовые возможности
+premium_plan_desc,All features unlocked,Barcha imkoniyatlar ochiq,Все функции открыты
+premium_feat_scans,Unlimited AI scans,Cheksiz AI skanlar,Безлимитные AI-сканы
+premium_feat_plan,Personalized plan,Shaxsiy reja,Персональный план
+premium_feat_coins,Turn coins into Premium,Coinni Premiumga aylantiring,Обменивайте монеты на Premium
+unlock_premium,Unlock Premium,Premiumni oching,Откройте Premium
+referral_title,Invite friends,Doʻstni taklif qilish,Пригласить друзей
+referral_hero_title,Invite friends — get Premium,Doʻstlarni taklif qiling — Premium oling,Приглашайте друзей — получайте Premium
+referral_hero_sub,{friends} friends = {days} days of Premium for free,{friends} ta doʻst = {days} kunlik Premium bepul,{friends} друзей = {days} дней Premium бесплатно
+referral_progress_title,To {days} days of Premium,{days} kunlik Premiumgacha,До {days} дней Premium
+referral_progress_hint,{left} more friends in the app = {days} days of Premium,Yana {left} ta doʻst ilovaga kirsa = {days} kunlik Premium,Ещё {left} друзей в приложении = {days} дней Premium
+referral_code,Your invite code,Sizning taklif kodingiz,Ваш код приглашения
+copy_action,Copy,Nusxalash,Копировать
+copied,Copied,Nusxalandi,Скопировано
+share_action,Share,Ulashish,Поделиться
+how_it_works,How it works,Qanday ishlaydi,Как это работает
+referral_step_1,Share your code,Kodingizni ulashing,Поделитесь кодом
+referral_step_2,Your friend signs up and enters your code,Doʻstingiz roʻyxatdan oʻtib kodingizni tasdiqlaydi,Друг регистрируется и подтверждает ваш код
+referral_step_3,{friends} friends start using the app — you get {days} days of Premium,{friends} ta doʻst ilovaga kirsa — sizga {days} kunlik Premium,{friends} друзей начали пользоваться — вам {days} дней Premium
+referral_invited,Joined,Roʻyxatdan oʻtdi,Зарегистрировались
+referral_earned,Earned,Ishlab topildi,Заработано
+referral_share_text,Join me on Calora! Enter my code {code} when you sign up and get {percent}% off Premium,Caloraʼga qoʻshiling! Roʻyxatdan oʻtishda {code} kodimni kiriting va Premiumga {percent}% chegirma oling,Присоединяйся к Calora! Введи мой код {code} при регистрации и получи скидку {percent}% на Premium
+referral_success,🎉 Friend joined! +{coins} coins (total: {total}),🎉 Doʻstingiz qoʻshildi! +{coins} coin oldingiz (jami: {total}),🎉 Друг присоединился! +{coins} монет (всего: {total})
+referral_step_4,Your friend gets {percent}% off their first Premium,Doʻstingiz birinchi Premiumni {percent}% chegirma bilan oladi,Друг получает скидку {percent}% на первый Premium
+referral_active,In the app,Ilovaga kirdi,В приложении
+referral_premiums,Premiums earned,Olingan Premium,Получено Premium
+referral_friends_title,Invited friends,Taklif qilingan doʻstlar,Приглашённые друзья
+referral_friends_empty,No one has joined with your code yet,Hali hech kim kodingiz bilan qoʻshilmadi,Пока никто не присоединился по вашему коду
+referral_status_joined,Signed up,Roʻyxatdan oʻtdi,Зарегистрирован
+referral_status_active,In the app,Ilovaga kirdi,В приложении
+referral_discount_card,You joined through {name} — your first Premium is {percent}% off,Siz {name} taklifi bilan qoʻshildingiz — birinchi Premium {percent}% chegirma bilan,Вы присоединились по приглашению {name} — первый Premium со скидкой {percent}%
+referral_discount_applied,Friend invite discount: -{percent}% already applied,Doʻst taklifi chegirmasi: -{percent}% narxga qoʻllandi,Скидка по приглашению: -{percent}% уже учтена
+coin_tx_referral,Friend invite,Doʻst taklifi,Приглашение друга
+coin_tx_referral_welcome,Welcome bonus,Xush kelibsiz bonusi,Приветственный бонус
+invite_code_title,Did a friend invite you?,Sizni doʻstingiz taklif qildimi?,Вас пригласил друг?
+invite_code_subtitle,Enter their code — you get a discount on Premium and your friend gets closer to free Premium,Uning kodini kiriting — siz Premiumga chegirma olasiz va doʻstingiz bepul Premiumga yaqinlashadi,Введите его код — вы получите скидку на Premium а друг станет ближе к бесплатному Premium
+invite_code_question,Have a friend’s invite code?,Doʻstingizning taklif kodi bormi?,Есть код приглашения друга?
+invite_code_applied,You joined through {name}! {percent}% off your first Premium,Siz {name} taklifi bilan qoʻshildingiz! Birinchi Premium {percent}% chegirma bilan,Вы присоединились по приглашению {name}! Скидка {percent}% на первый Premium
+invite_code_not_found,Code not found,Kod topilmadi,Код не найден
+invite_code_already_applied,You have already entered an invite code,Siz allaqachon taklif kodini kiritgansiz,Вы уже ввели код приглашения
+invite_code_self,You can’t use this code,Bu koddan foydalana olmaysiz,Этот код нельзя использовать
+invite_code_expired,Invite codes can only be entered by new users,Taklif kodini faqat yangi foydalanuvchilar kirita oladi,Код приглашения могут ввести только новые пользователи
+confirm_action,Confirm,Tasdiqlash,Подтвердить
+skip,Skip,Oʻtkazib yuborish,Пропустить
+your_code,Your code,Sizning kodingiz,Ваш код
+plan_n_months,{count} months,{count} oylik,{count} мес.
+sub_source,Plan,Tarif,Тариф
+sub_source_coins,Bought with coins,Coin evaziga,За монеты
+sub_source_referral,Gift for invited friends,Doʻstlarni taklif qilgani uchun,За приглашённых друзей
+sub_source_gift,Gift,Sovgʻa,Подарок
+sub_ends_at,Active until,Amal qiladi,Действует до
+sub_days_left,Days left,Qolgan kunlar,Осталось дней

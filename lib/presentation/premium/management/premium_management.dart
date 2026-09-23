@@ -35,6 +35,10 @@ abstract class PremiumState with _$PremiumState {
     /// rather than showing the backend UZS fee the store won't charge.
     @Default(<int, String>{}) Map<int, String> iapPrices,
     @Default(false) bool isLoadingIapPrices,
+
+    /// First-purchase discount (%) for a user who joined with a friend's
+    /// code. Already applied to [PlanModel.price] on the Payme / Click flow.
+    @Default(0) int referralDiscountPercent,
   }) = _PremiumState;
 
   /// Whether the active payment method is store billing (Apple / Google)

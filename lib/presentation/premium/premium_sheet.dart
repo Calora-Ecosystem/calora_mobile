@@ -151,6 +151,14 @@ class PremiumSheet
                     // Promo code is visible for EVERYONE — never gate it
                     // on region/IP: a VPN flips isUzbekistan to false and
                     // used to hide the field from legitimate users.
+                    if (state.referralDiscountPercent > 0 &&
+                        !state.isIap) ...[
+                      const SizedBox(height: 12),
+                      _referralDiscountBanner(
+                        context,
+                        state.referralDiscountPercent,
+                      ),
+                    ],
                     if (!state.isPaymentPending) ...[
                       const SizedBox(height: 16),
                       PromoCodeWidget(),
@@ -301,6 +309,32 @@ class PremiumSheet
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Shown to users who joined with a friend's code — the discount is already
+  /// in the prices above, this just explains the crossed-out amount.
+  Widget _referralDiscountBanner(BuildContext context, int percent) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.honeydew,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colors.paleGreen),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.card_giftcard_rounded, color: colors.accentSub, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: 'referral_discount_applied'
+                .tr(namedArgs: {'percent': '$percent'})
+                .text(13, 18, 600)
+                .c(colors.textStrong),
+          ),
+        ],
       ),
     );
   }

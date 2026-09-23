@@ -9,6 +9,8 @@ import 'package:calora/presentation/about/about_page.dart' show AboutPage;
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_manager.dart';
+import 'package:calora/presentation/referral/referral_page.dart';
+import 'package:calora/presentation/subscription/subscription_panel.dart';
 import 'package:calora/presentation/help/help_page.dart';
 import 'package:calora/presentation/language/bottom_sheet/language_bottom_sheet.dart';
 import 'package:calora/widgets/premium/premium_entry_card.dart';
@@ -18,7 +20,6 @@ import 'package:calora/widgets/profile_cards/settings_card.dart' show SettingsCa
 import 'package:calora/widgets/health/health_sync_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
 class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
@@ -68,14 +69,17 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                     ),
                     const SizedBox(height: 16),
                     SettingsCard(
+                      onSubscriptionTap: () => context.showAppBottomSheet(
+                        child: const SubscriptionPanel(),
+                      ),
+                      onWalletTap: () => context.router.push(WalletRoute()),
                       onAccountTap: () => _openAccountDetailPage(context),
                       onNormsTap: () => _openNormsPage(context),
                       onLanguageTap: () => _showLanguageBottomSheet(context),
                       onNotificationsTap: () => _openNotificationSettingsPage(context),
                       onHealthTap: () => HealthSyncBottomSheet.show(context),
-                      onInviteTap: () => launchUrl(
-                        Uri.parse('https://calora.uz'),
-                        mode: LaunchMode.externalApplication,
+                      onInviteTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ReferralPage()),
                       ),
                       onAboutTap: () => _showAboutBottomSheet(context),
                       onHelpTap: () => _showHelpBottomSheet(context),

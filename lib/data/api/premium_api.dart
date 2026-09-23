@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
@@ -38,6 +39,14 @@ class PremiumApi {
     final content = data['content'] as List<dynamic>?;
     if (content == null) return [];
     return MySubscriptionOrderModel.listFromJson(content);
+  }
+
+  /// Current plan for the Profile → Subscription panel.
+  Future<MySubscription> getMySubscription() async {
+    final response = await _dio.get('billing/subscription/my');
+    return MySubscription.fromJson(
+      (response.data as Map<String, dynamic>)['content'] as Map<String, dynamic>,
+    );
   }
 
   Future<List<PremiumPlanModel>> getPremiumPlans() async {

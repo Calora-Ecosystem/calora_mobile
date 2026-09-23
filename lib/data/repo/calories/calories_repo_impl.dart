@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/calories/ai_quota.dart';
 import 'package:calora/data/api/calories_api.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
@@ -152,6 +153,9 @@ class CaloriesRepoImpl extends CaloriesRepo {
     final response = await _api.getScannerFoodByVoice(filePath);
     return response;
   }
+
+  @override
+  Future<AiQuota> getAiQuota() => _api.getAiQuota();
 
   @override
   Future<String?> uploadFoodImage(String filePath) async {

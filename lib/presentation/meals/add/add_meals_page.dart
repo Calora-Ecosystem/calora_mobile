@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/foods_extension.dart';
@@ -7,8 +10,10 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
+import 'package:calora/common/service/ai_quota_service.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/button/toggle_buttons.dart';
+import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
@@ -25,6 +30,7 @@ import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/creator/food_creator.dart';
 import 'package:calora/widgets/creator/food_creator_with_speech.dart';
 import 'package:calora/widgets/info/dish_info_page.dart';
+import 'package:calora/widgets/meals/free_scan_banner.dart';
 import 'package:calora/widgets/meals/meals_type_widget.dart';
 import 'package:calora/widgets/meals/paginated_food_grid.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -128,9 +134,15 @@ class AddMealsPage
                     hint: Strings.searchForFoodOrProduct,
                     controller: _searchController,
                   ),
-                  if (context.read<AppManager>().state.isUserPremium)
-                    const SizedBox(height: 12),
                   if (state.activeTab != FoodTab.search) ...[
+                    if (!context.read<AppManager>().state.isUserPremium) ...[
+                      const SizedBox(height: 12),
+                      FreeScanBanner(
+                        onTap: () =>
+                            context.router.push(const PremiumFeaturesRoute()),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         buildActionCard(
@@ -375,6 +387,23 @@ class AddMealsPage
     BuildContext context,
     AddMealsManager manager,
   ) async {
+    final bool isPremium = context.read<AppManager>().state.isUserPremium;
+    if (!await _guardAiUsage(context, isPremium)) return;
+    if (!context.mounted) return;
+
+    // Non-premium users see how many free AI scans they have left right on the
+    // camera screen, so the 5-scan limit is obvious before they shoot.
+    String? creditText;
+    if (!isPremium) {
+      final store = getIt<CommonStore>();
+      final used = await store.freeAiScansUsed();
+      final limit = await store.freeAiScanLimit();
+      final remaining = (limit - used).clamp(0, limit);
+      // Compact: just "N/5" so the camera header stays clean.
+      creditText = '$remaining/$limit';
+    }
+    if (!context.mounted) return;
+
     final imagePath = await context.pushRoute<String>(
       UniversalCameraRoute(
         title: Strings.scanning,
@@ -382,6 +411,7 @@ class AddMealsPage
         bottomText: Strings.food,
         useFrontCamera: false,
         allowGallery: true,
+        creditText: creditText,
         onImageCaptured: (imagePath) async => context.router.pop(imagePath),
       ),
     );
@@ -408,9 +438,13 @@ class AddMealsPage
     if (context.mounted) {
       final scannedFoods = manager.state.scannedFoods;
       if (scannedFoods.isEmpty) {
+        if (await _openPaywallIfExhausted(context, isPremium)) return;
+        if (!context.mounted) return;
         CustomSnackBar.show(context, Strings.noFoodFoundInImage);
         return;
       }
+      // The server counted it — refresh the banner.
+      if (!isPremium) unawaited(_refreshQuota());
       openCreatorWithSpeech(
         context,
         manager,
@@ -421,7 +455,14 @@ class AddMealsPage
     }
   }
 
-  void openSpeechPage(BuildContext context, AddMealsManager manager) {
+  Future<void> openSpeechPage(
+    BuildContext context,
+    AddMealsManager manager,
+  ) async {
+    final bool isPremium = context.read<AppManager>().state.isUserPremium;
+    if (!await _guardAiUsage(context, isPremium)) return;
+    if (!context.mounted) return;
+
     context.showAppBottomSheet(
       child: ModernVoiceRecorder(
         onFinished: (value) async {
@@ -441,14 +482,48 @@ class AddMealsPage
           context.router.pop();
           final scannedFoods = manager.state.scannedFoodsByVoice;
           if (scannedFoods.isEmpty) {
+            if (await _openPaywallIfExhausted(context, isPremium)) return;
+            if (!context.mounted) return;
             CustomSnackBar.show(context, Strings.noFoodFoundInVoice);
             return;
           }
+          // The server counted it — refresh the banner.
+          if (!isPremium) unawaited(_refreshQuota());
           openCreatorWithSpeech(context, manager, scannedFoods);
         },
       ),
     );
   }
+
+  /// Gates the AI recognitions (photo scan + voice) for non-premium users.
+  /// Returns true when the flow may proceed; otherwise routes to the paywall
+  /// and returns false. Premium users always pass.
+  Future<bool> _guardAiUsage(BuildContext context, bool isPremium) async {
+    if (isPremium) return true;
+    final quota = await getIt<AiQuotaService>().refresh();
+    if (!quota.canUse) {
+      if (context.mounted) context.router.push(const PremiumFeaturesRoute());
+      return false;
+    }
+    return true;
+  }
+
+  /// An empty result can mean the server refused the request because the free
+  /// allowance ran out (403 `ai_free_limit_exceeded`) — then show the paywall
+  /// instead of "no food found". Returns true when the paywall was opened.
+  Future<bool> _openPaywallIfExhausted(
+    BuildContext context,
+    bool isPremium,
+  ) async {
+    if (isPremium) return false;
+    final quota = await getIt<AiQuotaService>().refresh();
+    if (quota.canUse || !context.mounted) return false;
+    context.router.push(const PremiumFeaturesRoute());
+    return true;
+  }
+
+  /// Re-reads the server quota so the banner shows the new count.
+  Future<void> _refreshQuota() => getIt<AiQuotaService>().refresh();
 
   Widget buildActionCard({
     required BuildContext context,
@@ -470,9 +545,7 @@ class AddMealsPage
             right: isPremiumFeature ? 10 : 0,
             bottom: 0,
             child: GestureDetector(
-              onTap: isUserPremium || !isPremiumFeature
-                  ? onTap
-                  : () => context.router.push(const PremiumFeaturesRoute()),
+              onTap: onTap,
               child: Container(
                 key: spotlightKey,
                 height: 72,

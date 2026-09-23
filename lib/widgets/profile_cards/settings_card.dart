@@ -4,9 +4,12 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class SettingsCard extends StatelessWidget {
+  final VoidCallback onSubscriptionTap;
+  final VoidCallback onWalletTap;
   final VoidCallback onAccountTap;
   final VoidCallback onNormsTap;
   final VoidCallback onLanguageTap;
@@ -18,6 +21,8 @@ class SettingsCard extends StatelessWidget {
 
   const SettingsCard({
     super.key,
+    required this.onSubscriptionTap,
+    required this.onWalletTap,
     required this.onAccountTap,
     required this.onNormsTap,
     required this.onLanguageTap,
@@ -37,6 +42,24 @@ class SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
+      {
+        'icon': Icon(
+          Icons.workspace_premium_rounded,
+          size: 20,
+          color: context.colors.accentSub,
+        ),
+        'title': 'subscription_title'.tr(),
+        'onTap': onSubscriptionTap,
+      },
+      {
+        'icon': Icon(
+          Icons.account_balance_wallet_rounded,
+          size: 20,
+          color: context.colors.accentSub,
+        ),
+        'title': 'wallet_title'.tr(),
+        'onTap': onWalletTap,
+      },
       {
         'icon': Assets.icons.userList.svg(),
         'title': Strings.accountInformation,

@@ -45,5 +45,10 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: UniversalProgressRoute.page),
     AutoRoute(page: PremiumFeaturesRoute.page),
     AutoRoute(page: ForceUpdateRoute.page),
+    AutoRoute(page: WalletRoute.page),
+    AutoRoute(page: MarketplaceRoute.page),
+    AutoRoute(page: GroupsRoute.page),
+    AutoRoute(page: GroupDetailRoute.page),
+    AutoRoute(page: InviteCodeRoute.page),
   ];
 }

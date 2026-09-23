@@ -1,4 +1,5 @@
 import 'package:calora/data/api/premium_api.dart';
+import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
@@ -43,6 +44,9 @@ class PremiumRepoImpl implements PremiumRepo {
   @override
   Future<List<PremiumPlanModel>> getPremiumPlans() async =>
       await _api.getPremiumPlans();
+
+  @override
+  Future<MySubscription> getMySubscription() => _api.getMySubscription();
 
   @override
   Future<PromoCodeModel> getPromoCodeAmount({required String code}) async =>

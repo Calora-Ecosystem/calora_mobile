@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/calories/ai_quota.dart';
 import 'package:calora/common/constants/request_extras.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart'
     show ScannerFood;
@@ -131,6 +132,14 @@ class CaloriesApi {
     final List content = response.data['content'] ?? [];
 
     return content.map((e) => ScannerFood.fromJson(e)).toList();
+  }
+
+  /// Free AI recognitions left (photo scan + voice share one pool).
+  Future<AiQuota> getAiQuota() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      'food/recognization/quota',
+    );
+    return AiQuota.fromJson(response.data!['content'] as Map<String, dynamic>);
   }
 
   Future<List<ScannerFood>> getScannerFoodByVoice(String audioPath) async {

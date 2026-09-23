@@ -28,8 +28,9 @@ class VerifyPage extends Managed<VerifyManager, VerifyState, VerifyEffect> {
   @override
   void listener(context, manager, effect) {
     effect.when(
+      // New account: first ask for a friend's invite code, then onboarding.
       openQuestions: (email) {
-        context.router.replaceAll([QuestionsRoute()]);
+        context.router.replaceAll([const InviteCodeRoute()]);
       },
       openDashboard: () {
         context.router.replaceAll([const DashboardRoute()]);

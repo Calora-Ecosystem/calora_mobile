@@ -20,13 +20,14 @@ import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:calora/presentation/dashboard/features/steps/features/edit/edit_step_goal_page.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
+import 'package:calora/presentation/dashboard/features/steps/widgets/coin_leaderboard_section.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/daily_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/leaderboard_section.dart';
+import 'package:calora/presentation/groups/widgets/group_banner.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/monthly_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/weekly_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_manager.dart';
-import 'package:calora/widgets/premium/premium_promo_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:path_provider/path_provider.dart';
@@ -497,6 +498,10 @@ class _KeepAliveTabContent extends StatefulWidget {
 }
 
 class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with AutomaticKeepAliveClientMixin {
+  /// Whether the ranking below shows the coin board (true) or the step board
+  /// (false). Local to the tab — it's a view switch, not app state.
+  bool _byCoins = false;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -513,13 +518,62 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
         ),
         const SliverPadding(
           padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
-          sliver: SliverToBoxAdapter(child: PremiumPromoBanner()),
+          sliver: SliverToBoxAdapter(child: GroupBanner()),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          sliver: SliverToBoxAdapter(child: _buildRankToggle(context)),
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          sliver: LeaderboardSection(paginationService: widget.paginationService),
+          sliver: _byCoins
+              ? const CoinLeaderboard()
+              : LeaderboardSection(paginationService: widget.paginationService),
         ),
       ],
+    );
+  }
+
+  /// Segmented switch between the step ranking and the coin ranking, so it's
+  /// always clear which board the podium below is showing.
+  Widget _buildRankToggle(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _rankTab(context, label: 'rank_by_steps'.tr(), selected: !_byCoins, onTap: () => setState(() => _byCoins = false)),
+          _rankTab(context, label: 'rank_by_coins'.tr(), selected: _byCoins, onTap: () => setState(() => _byCoins = true)),
+        ],
+      ),
+    );
+  }
+
+  Widget _rankTab(
+    BuildContext context, {
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    final colors = context.colors;
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected ? colors.backgroundElevation : null,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: label
+              .text(14, 18, 500)
+              .c(selected ? colors.neutralPrimary : colors.neutral600Secondary),
+        ),
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
@@ -18,6 +19,8 @@ abstract class PremiumRepo {
   Future<List<MySubscriptionOrderModel>> getMyOrders();
 
   Future<List<PremiumPlanModel>> getPremiumPlans();
+
+  Future<MySubscription> getMySubscription();
 
   Future<PromoCodeModel> getPromoCodeAmount({required String code});
 }

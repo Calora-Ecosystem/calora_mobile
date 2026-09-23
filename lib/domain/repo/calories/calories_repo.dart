@@ -1,3 +1,4 @@
+import 'package:calora/domain/model/calories/ai_quota.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
@@ -32,6 +33,8 @@ abstract class CaloriesRepo {
   Future<List<ScannerFood>> getScannerFood(String filePath);
 
   Future<List<ScannerFood>> getScannerFoodByVoice(String filePath);
+
+  Future<AiQuota> getAiQuota();
 
   /// Uploads a scanned food photo and returns its persisted relative
   /// URL (used as the food's `coverUrl`), or `null` if the upload failed.
