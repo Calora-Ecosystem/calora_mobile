@@ -733,25 +733,25 @@ premium_feat_plan,Personalized plan,Shaxsiy reja,Персональный пла
 premium_feat_coins,Turn coins into Premium,Coinni Premiumga aylantiring,Обменивайте монеты на Premium
 unlock_premium,Unlock Premium,Premiumni oching,Откройте Premium
 referral_title,Invite friends,Doʻstni taklif qilish,Пригласить друзей
-referral_hero_title,Invite friends — get Premium,Doʻstlarni taklif qiling — Premium oling,Приглашайте друзей — получайте Premium
-referral_hero_sub,{friends} friends = {days} days of Premium for free,{friends} ta doʻst = {days} kunlik Premium bepul,{friends} друзей = {days} дней Premium бесплатно
-referral_progress_title,To {days} days of Premium,{days} kunlik Premiumgacha,До {days} дней Premium
-referral_progress_hint,{left} more friends in the app = {days} days of Premium,Yana {left} ta doʻst ilovaga kirsa = {days} kunlik Premium,Ещё {left} друзей в приложении = {days} дней Premium
-referral_code,Your invite code,Sizning taklif kodingiz,Ваш код приглашения
+referral_hero_title,{friends} friends = {period} of Premium,{friends} doʻst = {period} Premium,{friends} друзей = {period} Premium
+referral_hero_sub,Invite friends and get Premium for free,Doʻstlaringizni taklif qiling — Premium bepul,Приглашайте друзей — Premium бесплатно
+referral_progress_title,Progress to Premium,Premiumgacha,До Premium
+referral_progress_hint,{left} more friends to go,Yana {left} ta doʻst qoldi,Осталось ещё {left}
+referral_code,Your invite code,Taklif kodingiz,Ваш код приглашения
 copy_action,Copy,Nusxalash,Копировать
 copied,Copied,Nusxalandi,Скопировано
 share_action,Share,Ulashish,Поделиться
 how_it_works,How it works,Qanday ishlaydi,Как это работает
-referral_step_1,Share your code,Kodingizni ulashing,Поделитесь кодом
-referral_step_2,Your friend signs up and enters your code,Doʻstingiz roʻyxatdan oʻtib kodingizni tasdiqlaydi,Друг регистрируется и подтверждает ваш код
-referral_step_3,{friends} friends start using the app — you get {days} days of Premium,{friends} ta doʻst ilovaga kirsa — sizga {days} kunlik Premium,{friends} друзей начали пользоваться — вам {days} дней Premium
-referral_invited,Joined,Roʻyxatdan oʻtdi,Зарегистрировались
+referral_step_1,Send your code to a friend,Kodingizni doʻstingizga yuboring,Отправьте код другу
+referral_step_2,Your friend enters it in the app,Doʻstingiz uni ilovada kiritadi,Друг вводит его в приложении
+referral_step_3,{friends} active friends — {period} of Premium for you,{friends} ta faol doʻst — sizga {period} Premium,{friends} активных друзей — вам {period} Premium
+referral_invited,Joined,Qoʻshildi,Пришли
 referral_earned,Earned,Ishlab topildi,Заработано
-referral_share_text,Join me on Calora! Enter my code {code} when you sign up and get {percent}% off Premium,Caloraʼga qoʻshiling! Roʻyxatdan oʻtishda {code} kodimni kiriting va Premiumga {percent}% chegirma oling,Присоединяйся к Calora! Введи мой код {code} при регистрации и получи скидку {percent}% на Premium
+referral_share_text,Join me on Calora 🍏 Enter my code {code} in “Invite friends” and get {percent}% off Premium. Download: {link},Calora’da men bilan birga boʻling 🍏 Ilovadagi “Doʻstni taklif qilish” boʻlimiga {code} kodimni kiriting va Premiumga {percent}% chegirma oling. Yuklab olish: {link},Присоединяйся ко мне в Calora 🍏 Введи мой код {code} в разделе «Пригласить друзей» и получи скидку {percent}% на Premium. Скачать: {link}
 referral_success,🎉 Friend joined! +{coins} coins (total: {total}),🎉 Doʻstingiz qoʻshildi! +{coins} coin oldingiz (jami: {total}),🎉 Друг присоединился! +{coins} монет (всего: {total})
-referral_step_4,Your friend gets {percent}% off their first Premium,Doʻstingiz birinchi Premiumni {percent}% chegirma bilan oladi,Друг получает скидку {percent}% на первый Premium
-referral_active,In the app,Ilovaga kirdi,В приложении
-referral_premiums,Premiums earned,Olingan Premium,Получено Premium
+referral_step_4,Your friend gets {percent}% off Premium,Doʻstingizga Premiumga {percent}% chegirma,Другу скидка {percent}% на Premium
+referral_active,Active,Faol,Активны
+referral_premiums,Premiums,Premium,Premium
 referral_friends_title,Invited friends,Taklif qilingan doʻstlar,Приглашённые друзья
 referral_friends_empty,No one has joined with your code yet,Hali hech kim kodingiz bilan qoʻshilmadi,Пока никто не присоединился по вашему коду
 referral_status_joined,Signed up,Roʻyxatdan oʻtdi,Зарегистрирован
@@ -776,8 +776,10 @@ sub_source_gift,Gift,Sovgʻa,Подарок
 sub_ends_at,Active until,Amal qiladi,Действует до
 sub_days_left,Days left,Qolgan kunlar,Осталось дней
 invite_code_confirmed,You joined through {name},Siz {name} taklifi bilan qoʻshilgansiz,Вы присоединились по приглашению {name}
-invite_code_hint,Enter the code of the friend who invited you — get a discount on your first Premium,Sizni taklif qilgan doʻstingizning kodini kiriting — birinchi Premiumga chegirma olasiz,Введите код друга который вас пригласил — получите скидку на первый Premium
+invite_code_hint,Enter your friend’s code and get a Premium discount,Doʻstingiz kodini kiriting va Premiumga chegirma oling,Введите код друга и получите скидку на Premium
 coin_earn_rule,{steps} steps = 1 coin,{steps} qadam = 1 coin,{steps} шагов = 1 монета
 coin_earn_limit,Up to {coins} coins a day — walk and spend them on Premium,Kuniga {coins} tagacha coin — yuring va Premiumga sarflang,До {coins} монет в день — ходите и тратьте их на Premium
 wallet_today_coins,Today,Bugun,Сегодня
 wallet_no_activity,No coins yet — take a walk!,Hali coin yoʻq — biroz yuring!,Монет пока нет — прогуляйтесь!
+referral_period_months,{count} month,{count} oylik,{count} мес.
+referral_period_days,{count} days,{count} kunlik,{count} дн.

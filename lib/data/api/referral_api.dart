@@ -15,6 +15,12 @@ class ReferralApi {
     );
   }
 
+  /// A fresh invite code for this share — every earlier code keeps working.
+  Future<String> newCode() async {
+    final response = await _dio.post<Map<String, dynamic>>('referrals/code');
+    return response.data!['content'] as String;
+  }
+
   Future<List<ReferredFriend>> getInvited({
     int skip = 0,
     int take = 100,

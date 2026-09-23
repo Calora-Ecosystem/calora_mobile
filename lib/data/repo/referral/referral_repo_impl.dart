@@ -13,6 +13,9 @@ class ReferralRepoImpl implements ReferralRepo {
   Future<ReferralInfo> getMy() => _api.getMy();
 
   @override
+  Future<String> newCode() => _api.newCode();
+
+  @override
   Future<List<ReferredFriend>> getInvited() => _api.getInvited();
 
   @override

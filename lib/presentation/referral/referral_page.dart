@@ -13,11 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// Referral screen — share your code; every [ReferralInfo.friendsGoal] friends
-/// who confirm it and start using the app earn [ReferralInfo.premiumDays]
-/// days of Premium. It is also the one place where a user confirms the code of
-/// the friend who invited them, which unlocks a first-purchase discount.
-/// Everything is read from `referrals/me` and `referrals/invited`.
+/// App download link appended to every invite message.
+const String _appLink =
+    'https://calora.uz/get-app?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAdGRleAUgr35wZG9mAmZkaWQWUO_31iVOcBg-gWrPQuL6s370ESIfzWV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp-RykBP5lisCPJ-X3snDgwSdcroKjwcpCcZ_RnSyX9FvyV-n1iHvtG_wxDmN_aem_dKS_Q99npN7Yml6Ale4vNg';
+
+/// Referral screen — share an invite code; every [ReferralInfo.friendsGoal]
+/// friends who confirm it and start using the app earn
+/// [ReferralInfo.premiumDays] days of Premium. Each share gets a fresh code
+/// (all earlier codes keep working). It is also the one place where a user
+/// confirms the code of the friend who invited them, which unlocks a
+/// first-purchase discount. Data: `referrals/me`, `referrals/invited`,
+/// `referrals/code`.
 class ReferralPage extends StatefulWidget {
   const ReferralPage({super.key});
 
@@ -31,9 +37,11 @@ class _ReferralPageState extends State<ReferralPage>
   final _codeController = TextEditingController();
 
   ReferralInfo? _info;
+  String _code = '';
   List<ReferredFriend> _friends = const [];
   bool _loadFailed = false;
   bool _applying = false;
+  bool _sharing = false;
 
   late final AnimationController _float = AnimationController(
     vsync: this,
@@ -53,6 +61,7 @@ class _ReferralPageState extends State<ReferralPage>
       if (!mounted) return;
       setState(() {
         _info = info;
+        _code = info.code;
         _friends = friends;
         _loadFailed = false;
       });
@@ -95,19 +104,19 @@ class _ReferralPageState extends State<ReferralPage>
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                 children: [
                   _hero(context, info),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   _progressCard(context, info),
-                  const SizedBox(height: 14),
-                  _codeCard(context, info),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
+                  _codeCard(context),
+                  const SizedBox(height: 12),
+                  _statsRow(context, info),
+                  const SizedBox(height: 12),
                   info.isReferred
                       ? _referredCard(context, info)
                       : _applyCard(context),
-                  const SizedBox(height: 14),
-                  _statsRow(context, info),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   _friendsCard(context),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   _howItWorks(context, info),
                 ],
               ),
@@ -115,13 +124,18 @@ class _ReferralPageState extends State<ReferralPage>
     );
   }
 
+  /// "1 month" for multiples of 30 days, otherwise "N days".
+  String _period(int days) => days % 30 == 0
+      ? 'referral_period_months'.tr(namedArgs: {'count': '${days ~/ 30}'})
+      : 'referral_period_days'.tr(namedArgs: {'count': '$days'});
+
   Widget _hero(BuildContext context, ReferralInfo info) {
     final colors = context.colors;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         gradient: RadialGradient(
           center: const Alignment(1.3, -0.9),
           radius: 1.5,
@@ -130,9 +144,9 @@ class _ReferralPageState extends State<ReferralPage>
         ),
         boxShadow: [
           BoxShadow(
-            color: colors.mintGreen.withValues(alpha: 0.30),
+            color: colors.mintGreen.withValues(alpha: 0.28),
             blurRadius: 22,
-            offset: const Offset(0, 12),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -143,28 +157,28 @@ class _ReferralPageState extends State<ReferralPage>
             builder: (context, child) {
               final t = Curves.easeInOut.transform(_float.value);
               return Transform.translate(
-                offset: Offset(0, -8 * t),
+                offset: Offset(0, -6 * t),
                 child: child,
               );
             },
-            child: Assets.images.premiumFire.image(height: 92),
+            child: Assets.images.premiumFire.image(height: 76),
           ),
           const SizedBox(height: 12),
           'referral_hero_title'
-              .tr()
-              .text(19, 24, 700)
+              .tr(
+                namedArgs: {
+                  'friends': '${info.friendsGoal}',
+                  'period': _period(info.premiumDays),
+                },
+              )
+              .text(21, 26, 700)
               .c(colors.textWhite)
               .copyWith(textAlign: TextAlign.center),
           const SizedBox(height: 6),
           'referral_hero_sub'
-              .tr(
-                namedArgs: {
-                  'friends': '${info.friendsGoal}',
-                  'days': '${info.premiumDays}',
-                },
-              )
-              .text(14, 18, 500)
-              .c(colors.textWhite.withValues(alpha: 0.9))
+              .tr()
+              .text(14, 19, 500)
+              .c(colors.textWhite.withValues(alpha: 0.92))
               .copyWith(textAlign: TextAlign.center),
         ],
       ),
@@ -182,20 +196,13 @@ class _ReferralPageState extends State<ReferralPage>
             children: [
               Expanded(
                 child: 'referral_progress_title'
-                    .tr(namedArgs: {'days': '${info.premiumDays}'})
+                    .tr()
                     .text(15, 20, 600)
                     .c(colors.textStrong),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.group_rounded, size: 16, color: colors.accentSub),
-                  const SizedBox(width: 4),
-                  '${info.progressFriends}/${info.friendsGoal}'
-                      .text(14, 18, 700)
-                      .c(colors.accentSub),
-                ],
-              ),
+              '${info.progressFriends}/${info.friendsGoal}'
+                  .text(15, 20, 700)
+                  .c(colors.accentSub),
             ],
           ),
           const SizedBox(height: 12),
@@ -204,7 +211,7 @@ class _ReferralPageState extends State<ReferralPage>
               for (int i = 0; i < info.friendsGoal; i++)
                 Expanded(
                   child: Container(
-                    height: 10,
+                    height: 8,
                     margin: EdgeInsets.only(
                       right: i == info.friendsGoal - 1 ? 0 : 6,
                     ),
@@ -212,7 +219,7 @@ class _ReferralPageState extends State<ReferralPage>
                       color: i < info.progressFriends
                           ? colors.mintGreen
                           : colors.backgroundElevation,
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
@@ -220,76 +227,85 @@ class _ReferralPageState extends State<ReferralPage>
           ),
           const SizedBox(height: 10),
           'referral_progress_hint'
-              .tr(
-                namedArgs: {
-                  'left': '${info.friendsLeft}',
-                  'days': '${info.premiumDays}',
-                },
-              )
-              .text(13, 18, 500)
+              .tr(namedArgs: {'left': '${info.friendsLeft}'})
+              .text(13, 17, 500)
               .c(colors.textSub),
         ],
       ),
     );
   }
 
-  Widget _codeCard(BuildContext context, ReferralInfo info) {
+  Widget _codeCard(BuildContext context) {
     final colors = context.colors;
     return _card(
       context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          'referral_code'.tr().text(13, 16, 400).c(colors.textSub),
+          'referral_code'.tr().text(13, 16, 500).c(colors.textSub),
           const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
             decoration: BoxDecoration(
               color: colors.backgroundElevation,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(color: colors.strokeSoft),
             ),
             child: Row(
               children: [
                 Expanded(
-                  child: info.code.text(16, 20, 700).c(colors.textStrong),
-                ),
-                GestureDetector(
-                  onTap: () => _copyCode(info.code),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.copy_rounded,
-                        size: 16,
-                        color: colors.accentSub,
-                      ),
-                      const SizedBox(width: 4),
-                      'copy_action'.tr().text(13, 16, 600).c(colors.accentSub),
-                    ],
+                  child: Text(
+                    _code,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: colors.textStrong,
+                    ),
                   ),
+                ),
+                IconButton(
+                  onPressed: _copyCode,
+                  icon: Icon(Icons.copy_rounded, color: colors.accentSub),
+                  tooltip: 'copy_action'.tr(),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
           GestureDetector(
-            onTap: () => _shareCode(info),
+            onTap: _sharing ? null : _share,
             child: Container(
-              height: 48,
+              height: 50,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: colors.accentSub,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.share_rounded, size: 18, color: colors.textWhite),
-                  const SizedBox(width: 8),
-                  'share_action'.tr().text(15, 20, 600).c(colors.textWhite),
-                ],
-              ),
+              child: _sharing
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colors.textWhite,
+                      ),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.ios_share_rounded,
+                          size: 18,
+                          color: colors.textWhite,
+                        ),
+                        const SizedBox(width: 8),
+                        'share_action'
+                            .tr()
+                            .text(15, 20, 600)
+                            .c(colors.textWhite),
+                      ],
+                    ),
             ),
           ),
         ],
@@ -297,9 +313,81 @@ class _ReferralPageState extends State<ReferralPage>
     );
   }
 
+  /// Three equal tiles: signed up, in the app, Premiums earned.
+  Widget _statsRow(BuildContext context, ReferralInfo info) {
+    final tiles = [
+      (Icons.person_add_alt_1_rounded, info.invited, 'referral_invited'),
+      (Icons.verified_rounded, info.active, 'referral_active'),
+      (
+        Icons.workspace_premium_rounded,
+        info.premiumsEarned,
+        'referral_premiums',
+      ),
+    ];
+    return Row(
+      children: [
+        for (int i = 0; i < tiles.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(
+            child: _statTile(
+              context,
+              icon: tiles[i].$1,
+              value: tiles[i].$2,
+              label: tiles[i].$3.tr(),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _statTile(
+    BuildContext context, {
+    required IconData icon,
+    required int value,
+    required String label,
+  }) {
+    final colors = context.colors;
+    return _card(
+      context,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+      child: SizedBox(
+        height: 92,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 34,
+              width: 34,
+              decoration: BoxDecoration(
+                color: colors.lightGreen,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 18, color: colors.accentSub),
+            ),
+            const SizedBox(height: 8),
+            '$value'.text(20, 24, 700).c(colors.textStrong),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                height: 15 / 12,
+                fontWeight: FontWeight.w500,
+                color: colors.textSub,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Once the user has confirmed a friend's code: who invited them and, while
-  /// unused, their first-Premium discount. Replaces [_applyCard] for good —
-  /// a code can be confirmed only once.
+  /// unused, their first-Premium discount. A code is confirmed only once.
   Widget _referredCard(BuildContext context, ReferralInfo info) {
     final colors = context.colors;
     return Container(
@@ -316,7 +404,7 @@ class _ReferralPageState extends State<ReferralPage>
                 ? Icons.card_giftcard_rounded
                 : Icons.verified_rounded,
             color: colors.accentSub,
-            size: 26,
+            size: 24,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -342,6 +430,7 @@ class _ReferralPageState extends State<ReferralPage>
   /// only place a code is entered. Any account can do it, once.
   Widget _applyCard(BuildContext context) {
     final colors = context.colors;
+    final canSubmit = _codeController.text.trim().isNotEmpty && !_applying;
     return _card(
       context,
       child: Column(
@@ -349,36 +438,55 @@ class _ReferralPageState extends State<ReferralPage>
         children: [
           'invite_code_question'.tr().text(15, 20, 600).c(colors.textStrong),
           const SizedBox(height: 4),
-          'invite_code_hint'.tr().text(13, 18, 400).c(colors.textSub),
-          const SizedBox(height: 10),
+          'invite_code_hint'.tr().text(13, 17, 400).c(colors.textSub),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _codeController,
+                  onChanged: (_) => setState(() {}),
+                  onSubmitted: (_) => _applyCode(),
                   textCapitalization: TextCapitalization.characters,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1,
+                    color: colors.textStrong,
+                  ),
                   decoration: InputDecoration(
-                    hintText: 'CALORA-XXXX',
+                    hintText: 'CALORA-XXXXXX',
                     isDense: true,
                     filled: true,
                     fillColor: colors.backgroundElevation,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(color: colors.strokeSoft),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: colors.accentSub),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               GestureDetector(
-                onTap: _applying ? null : _applyCode,
-                child: Container(
-                  height: 44,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                onTap: canSubmit ? _applyCode : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: colors.accentSub,
-                    borderRadius: BorderRadius.circular(12),
+                    color: canSubmit
+                        ? colors.accentSub
+                        : colors.accentSub.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: _applying
                       ? SizedBox(
@@ -402,63 +510,7 @@ class _ReferralPageState extends State<ReferralPage>
     );
   }
 
-  Widget _statsRow(BuildContext context, ReferralInfo info) {
-    return Row(
-      children: [
-        Expanded(
-          child: _statTile(
-            context,
-            icon: Icons.person_add_alt_1_rounded,
-            value: '${info.invited}',
-            label: 'referral_invited'.tr(),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _statTile(
-            context,
-            icon: Icons.verified_rounded,
-            value: '${info.active}',
-            label: 'referral_active'.tr(),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _statTile(
-            context,
-            icon: Icons.workspace_premium_rounded,
-            value: '${info.premiumsEarned}',
-            label: 'referral_premiums'.tr(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _statTile(
-    BuildContext context, {
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    final colors = context.colors;
-    return _card(
-      context,
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 22, color: colors.accentSub),
-          const SizedBox(height: 10),
-          value.text(22, 26, 700).c(colors.textStrong),
-          const SizedBox(height: 2),
-          label.text(12, 15, 400).c(colors.textSub),
-        ],
-      ),
-    );
-  }
-
-  /// Everyone who joined with the code and whether they're in the app yet —
+  /// Everyone who confirmed the code and whether they're in the app yet —
   /// only friends who finished onboarding count toward Premium.
   Widget _friendsCard(BuildContext context) {
     final colors = context.colors;
@@ -468,17 +520,20 @@ class _ReferralPageState extends State<ReferralPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           'referral_friends_title'.tr().text(15, 20, 600).c(colors.textStrong),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           if (_friends.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 6),
               child: 'referral_friends_empty'
                   .tr()
                   .text(13, 18, 400)
                   .c(colors.textSub),
             )
           else
-            for (final friend in _friends) _friendRow(context, friend),
+            for (int i = 0; i < _friends.length; i++) ...[
+              if (i > 0) Divider(height: 1, color: colors.strokeSoft),
+              _friendRow(context, _friends[i]),
+            ],
         ],
       ),
     );
@@ -489,7 +544,7 @@ class _ReferralPageState extends State<ReferralPage>
     final active = friend.status == ReferredFriendStatus.active;
     final name = friend.name.trim().isEmpty ? '—' : friend.name.trim();
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
           CircleAvatar(
@@ -530,72 +585,104 @@ class _ReferralPageState extends State<ReferralPage>
     );
   }
 
+  /// Four short steps on a vertical timeline.
   Widget _howItWorks(BuildContext context, ReferralInfo info) {
     final colors = context.colors;
+    final steps = [
+      'referral_step_1'.tr(),
+      'referral_step_2'.tr(),
+      'referral_step_3'.tr(
+        namedArgs: {
+          'friends': '${info.friendsGoal}',
+          'period': _period(info.premiumDays),
+        },
+      ),
+      'referral_step_4'.tr(namedArgs: {'percent': '${info.discountPercent}'}),
+    ];
     return _card(
       context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           'how_it_works'.tr().text(15, 20, 600).c(colors.textStrong),
-          const SizedBox(height: 12),
-          _step(context, 1, 'referral_step_1'.tr()),
-          _step(context, 2, 'referral_step_2'.tr()),
-          _step(
-            context,
-            3,
-            'referral_step_3'.tr(
-              namedArgs: {
-                'friends': '${info.friendsGoal}',
-                'days': '${info.premiumDays}',
-              },
-            ),
-          ),
-          _step(
-            context,
-            4,
-            'referral_step_4'.tr(
-              namedArgs: {'percent': '${info.discountPercent}'},
-            ),
-          ),
+          const SizedBox(height: 14),
+          for (int i = 0; i < steps.length; i++)
+            _step(context, i + 1, steps[i], isLast: i == steps.length - 1),
         ],
       ),
     );
   }
 
-  Widget _step(BuildContext context, int n, String text) {
+  Widget _step(
+    BuildContext context,
+    int n,
+    String text, {
+    required bool isLast,
+  }) {
     final colors = context.colors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+    return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            height: 28,
+          SizedBox(
             width: 28,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.lightGreen,
-              shape: BoxShape.circle,
+            child: Column(
+              children: [
+                Container(
+                  height: 28,
+                  width: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: colors.lightGreen,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: colors.paleGreen),
+                  ),
+                  child: '$n'.text(13, 16, 700).c(colors.accentSub),
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: colors.paleGreen,
+                    ),
+                  ),
+              ],
             ),
-            child: '$n'.text(13, 16, 700).c(colors.accentSub),
           ),
           const SizedBox(width: 12),
-          Expanded(child: text.text(14, 18, 500).c(colors.textStrong)),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: 4, bottom: isLast ? 0 : 16),
+              child: text.text(14, 19, 500).c(colors.textStrong),
+            ),
+          ),
         ],
       ),
     );
   }
 
+  /// Shared card look for the whole screen: white, rounded 20, hairline
+  /// border and a soft lift.
   Widget _card(
     BuildContext context, {
     required Widget child,
     EdgeInsets? padding,
   }) {
+    final colors = context.colors;
     return Container(
       padding: padding ?? const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: context.colors.white,
+        color: colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.strokeSoft),
+        boxShadow: [
+          BoxShadow(
+            color: colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: child,
     );
@@ -603,7 +690,8 @@ class _ReferralPageState extends State<ReferralPage>
 
   Future<void> _applyCode() async {
     final code = _codeController.text.trim();
-    if (code.isEmpty) return;
+    if (code.isEmpty || _applying) return;
+    FocusScope.of(context).unfocus();
     setState(() => _applying = true);
     try {
       final result = await _repo.apply(code);
@@ -626,19 +714,35 @@ class _ReferralPageState extends State<ReferralPage>
     }
   }
 
-  void _copyCode(String code) {
-    Clipboard.setData(ClipboardData(text: code));
+  void _copyCode() {
+    Clipboard.setData(ClipboardData(text: _code));
     CustomSnackBar.show(context, 'copied'.tr());
   }
 
-  void _shareCode(ReferralInfo info) {
-    SharePlus.instance.share(
-      ShareParams(
-        text: 'referral_share_text'.tr(
-          namedArgs: {'code': info.code, 'percent': '${info.discountPercent}'},
+  /// Every share gets a fresh code, so the same code isn't sent twice; the
+  /// message carries the app download link.
+  Future<void> _share() async {
+    setState(() => _sharing = true);
+    try {
+      final code = await _repo.newCode();
+      if (!mounted) return;
+      setState(() => _code = code);
+      await SharePlus.instance.share(
+        ShareParams(
+          text: 'referral_share_text'.tr(
+            namedArgs: {
+              'code': code,
+              'percent': '${_info?.discountPercent ?? 10}',
+              'link': _appLink,
+            },
+          ),
         ),
-      ),
-    );
+      );
+    } catch (_) {
+      if (mounted) CustomSnackBar.show(context, 'something_went_wrong'.tr());
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
   }
 
   String _formatDate(DateTime d) =>
