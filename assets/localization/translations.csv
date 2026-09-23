@@ -337,7 +337,7 @@ medium,Medium,O‘rtacha,Средний
 high,High,Qiyin,Сложный
 maximal,Maximal,Juda qiyin,Очень сложный
 calora_premium,Calora Premium,Calora Premium,Калора Премиум
-price_per_month,For {price} soums per month,Xar oy {price} so‘m evaziga,За {цена} сумов в месяц
+price_per_month,{price} UZS / month,{price} UZS / oy,{price} UZS / мес.
 ai_health_analysis_title,AI-powered health level analysis,AI orqali sog‘lomlik darajasini aniqlash,Определение уровня здоровья с помощью ИИ
 ai_health_analysis_subtitle,Discover optimal health indicators for your body,Tanangiz uchun optimal sog‘lomlik ko‘rsatkichlarini bilib oling,Узнайте оптимальные показатели здоровья для вашего организма
 ai_food_photo_analysis_title,AI food analysis from photos,AI orqali suratdagi taomlarni tahlil qilish,Анализ блюд по фото с помощью ИИ
@@ -655,15 +655,12 @@ coin_tx_daily_steps,Daily steps,Kunlik qadamlar,Ежедневные шаги
 date_today,Today,Bugun,Сегодня
 date_yesterday,Yesterday,Kecha,Вчера
 marketplace_title,Marketplace,Doʻkon,Магазин
-market_cat_tariff,Tariffs,Tariflar,Тарифы
-market_cat_voucher,Vouchers,Vaucherlar,Ваучеры
-market_cat_boost,Boosts,Bonuslar,Бонусы
 buy,Buy,Sotib olish,Купить
 popular,Popular,Ommabop,Популярно
 purchase_success,{title} purchased,{title} sotib olindi,{title} куплен
 insufficient_coins,Not enough coins,Coin yetarli emas,Недостаточно монет
 mi_premium_7,Premium 7 days,Premium 7 kun,Premium 7 дней
-mi_premium_7_sub,Unlimited AI scan,Cheksiz AI skan,Безлимитный AI-скан
+mi_premium_7_sub,To try it out,Sinab koʻrish uchun,Чтобы попробовать
 mi_premium_30,Premium 30 days,Premium 30 kun,Premium 30 дней
 mi_premium_30_sub,Most popular,Eng ommabop,Самый популярный
 mi_discount,-20% discount,-20% chegirma,Скидка -20%
@@ -702,7 +699,7 @@ remove_member,Remove,Chiqarish,Удалить
 remove_member_confirm,Remove {name} from the group?,{name}ni guruhdan chiqarasizmi?,Удалить {name} из группы?
 member_removed,Member removed,Aʼzo chiqarildi,Участник удалён
 total_balance,Total balance,Umumiy balans,Общий баланс
-market_subtitle,Tariffs and vouchers,Tarif va vaucher,Тарифы и ваучеры
+market_subtitle,Premium for coins,Coin evaziga Premium,Premium за монеты
 group_delete,Delete group,Guruhni oʻchirish,Удалить группу
 group_leave,Leave group,Guruhdan chiqish,Покинуть группу
 group_delete_confirm,Delete {name}?,{name} guruhini oʻchirasizmi?,Удалить группу {name}?
@@ -778,8 +775,27 @@ sub_days_left,Days left,Qolgan kunlar,Осталось дней
 invite_code_confirmed,You joined through {name},Siz {name} taklifi bilan qoʻshilgansiz,Вы присоединились по приглашению {name}
 invite_code_hint,Enter your friend’s code and get a Premium discount,Doʻstingiz kodini kiriting va Premiumga chegirma oling,Введите код друга и получите скидку на Premium
 coin_earn_rule,{steps} steps = 1 coin,{steps} qadam = 1 coin,{steps} шагов = 1 монета
-coin_earn_limit,Up to {coins} coins a day — walk and spend them on Premium,Kuniga {coins} tagacha coin — yuring va Premiumga sarflang,До {coins} монет в день — ходите и тратьте их на Premium
+coin_earn_limit,Up to {coins} coins a day,Kuniga {coins} tagacha coin,До {coins} монет в день
 wallet_today_coins,Today,Bugun,Сегодня
 wallet_no_activity,No coins yet — take a walk!,Hali coin yoʻq — biroz yuring!,Монет пока нет — прогуляйтесь!
 referral_period_months,{count} month,{count} oylik,{count} мес.
 referral_period_days,{count} days,{count} kunlik,{count} дн.
+market_tariffs_title,Premium tariffs,Premium tariflar,Тарифы Premium
+market_tariffs_sub,Get Premium with the coins you earn by walking,Yurib yigʻgan coinlaringizga Premium oling,Получите Premium за монеты от шагов
+mi_premium_75,Premium 75 days,Premium 75 kun,Premium 75 дней
+mi_premium_75_sub,Great value,Foydali tanlov,Выгодный выбор
+mi_premium_120,Premium 120 days,Premium 120 kun,Premium 120 дней
+mi_premium_120_sub,Best value,Eng tejamkor,Самый выгодный
+tariff_days,{count} days,{count} kun,{count} дней
+tariff_per_day,≈ {coins} coins a day,≈ {coins} coin / kun,≈ {coins} монет в день
+tariff_missing,{coins} more coins needed,Yana {coins} coin kerak,Нужно ещё {coins} монет
+tariff_confirm_title,Get Premium,Premium olish,Получить Premium
+tariff_confirm_msg,{days} days of Premium for {coins} coins. Continue?,{coins} coin evaziga {days} kunlik Premium. Davom etasizmi?,{days} дней Premium за {coins} монет. Продолжить?
+tariff_success_title,Premium is on! 🎉,Premium faollashdi! 🎉,Premium активирован! 🎉
+tariff_success_msg,All features are unlocked for {days} days,{days} kun davomida barcha imkoniyatlar ochiq,Все функции открыты на {days} дней
+great,Great,Zoʻr,Отлично
+coin_banner_chip,WALK & EARN,YUR VA YIGʻ,ХОДИ И КОПИ
+coin_banner_today,Earned today,Bugun yigʻildi,Сегодня собрано
+premium_tariffs_title,Premium plans,Premium tariflar,Тарифы Premium
+premium_with_coins,Get it with coins,Coin evaziga olish,Получить за монеты
+premium_with_coins_sub,With the coins you earn by walking,Yurib yigʻgan coinlaringizga,За монеты от шагов

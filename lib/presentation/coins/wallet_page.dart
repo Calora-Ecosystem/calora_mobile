@@ -6,6 +6,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/coins/management/coins_management.dart';
 import 'package:calora/presentation/coins/management/coins_manager.dart';
 import 'package:calora/presentation/coins/widgets/coin_balance_card.dart';
+import 'package:calora/presentation/coins/widgets/step_coin_banner.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -38,9 +39,10 @@ class WalletPage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
               todayCoins: state.todayCoins,
             ),
             const SizedBox(height: 14),
-            _EarnRuleCard(
+            StepCoinBanner(
               stepsPerCoin: state.stepsPerCoin,
               maxDailyCoins: state.maxDailyCoins,
+              todayCoins: state.todayCoins,
             ),
             const SizedBox(height: 14),
             _ActionCard(
@@ -72,64 +74,6 @@ class WalletPage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
               _HistoryCard(transactions: state.transactions),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// How coins are earned: every N steps is a coin, up to a daily limit.
-class _EarnRuleCard extends StatelessWidget {
-  const _EarnRuleCard({
-    required this.stepsPerCoin,
-    required this.maxDailyCoins,
-  });
-
-  final int stepsPerCoin;
-  final int maxDailyCoins;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.honeydew,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colors.paleGreen),
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 44,
-            width: 44,
-            decoration: BoxDecoration(
-              color: colors.white,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              Icons.directions_walk_rounded,
-              color: colors.accentSub,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                'coin_earn_rule'
-                    .tr(namedArgs: {'steps': '$stepsPerCoin'})
-                    .text(15, 20, 600)
-                    .c(colors.textStrong),
-                const SizedBox(height: 3),
-                'coin_earn_limit'
-                    .tr(namedArgs: {'coins': '$maxDailyCoins'})
-                    .text(13, 17, 400)
-                    .c(colors.textSub),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

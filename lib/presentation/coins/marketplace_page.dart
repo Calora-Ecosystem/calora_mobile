@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/coins/market_item.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -9,9 +10,10 @@ import 'package:calora/presentation/coins/widgets/market_item_card.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:management/management.dart';
 
+/// Coin shop — Premium tariffs only (7 / 30 / 75 / 120 days). Buying one turns
+/// Premium on right away (or extends an active Premium) until the chosen date.
 @RoutePage()
 class MarketplacePage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
   MarketplacePage({super.key});
@@ -23,13 +25,7 @@ class MarketplacePage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
     CoinsEffect effect,
   ) {
     effect.mapOrNull(
-      purchased: (e) {
-        CustomSnackBar.show(
-          context,
-          'purchase_success'.tr(namedArgs: {'title': e.item.title.tr()}),
-        );
-        if (e.code != null) _showCode(context, e.code!);
-      },
+      purchased: (e) => _showSuccess(context, e.item),
       insufficientCoins: (_) =>
           CustomSnackBar.show(context, 'insufficient_coins'.tr()),
       failed: (_) => CustomSnackBar.show(context, 'something_went_wrong'.tr()),
@@ -38,42 +34,154 @@ class MarketplacePage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
 
   @override
   Widget builder(BuildContext context, CoinsManager manager, CoinsState state) {
+    final colors = context.colors;
+    final tariffs =
+        state.catalog
+            .where(
+              (i) =>
+                  i.category == MarketCategory.tariff &&
+                  i.rewardType == MarketRewardType.premiumDays,
+            )
+            .toList()
+          ..sort((a, b) => a.rewardValue.compareTo(b.rewardValue));
+
     return Scaffold(
-      backgroundColor: context.colors.softGray,
+      backgroundColor: colors.softGray,
       appBar: CustomAppBar(
         title: 'marketplace_title'.tr(),
         onBack: () => context.router.maybePop(),
         trailing: _balanceChip(context, state.balance),
       ),
-      body: _MarketBody(state: state, onBuy: manager.purchase),
+      body: state.loading && tariffs.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: manager.refresh,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                children: [
+                  'market_tariffs_title'
+                      .tr()
+                      .text(20, 26, 700)
+                      .c(colors.textStrong),
+                  const SizedBox(height: 4),
+                  'market_tariffs_sub'.tr().text(14, 19, 400).c(colors.textSub),
+                  const SizedBox(height: 16),
+                  for (final item in tariffs) ...[
+                    MarketItemCard(
+                      item: item,
+                      balance: state.balance,
+                      onBuy: () {
+                        if (!state.busy)
+                          _confirm(context, manager, state, item);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ],
+              ),
+            ),
     );
   }
 
-  /// Coupon / voucher rewards come with a code the user needs later (a coupon
-  /// is entered as a promo code at checkout), so it's shown and copyable.
-  void _showCode(BuildContext context, String code) {
+  /// Coins can't be refunded, so a purchase is confirmed first; a tariff the
+  /// user can't afford explains how many coins are missing instead.
+  void _confirm(
+    BuildContext context,
+    CoinsManager manager,
+    CoinsState state,
+    MarketItem item,
+  ) {
+    if (state.balance < item.priceCoins) {
+      CustomSnackBar.show(
+        context,
+        'tariff_missing'.tr(
+          namedArgs: {'coins': '${item.priceCoins - state.balance}'},
+        ),
+      );
+      return;
+    }
     final colors = context.colors;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.white,
-        title: 'your_code'.tr().text(17, 22, 600).c(colors.textStrong),
-        content: SelectableText(
-          code,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: colors.accentSub,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: 'tariff_confirm_title'
+            .tr()
+            .text(18, 24, 700)
+            .c(colors.textStrong),
+        content: 'tariff_confirm_msg'
+            .tr(
+              namedArgs: {
+                'coins': '${item.priceCoins}',
+                'days': '${item.rewardValue}',
+              },
+            )
+            .text(14, 20, 400)
+            .c(colors.textSub),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Strings.close.text(14, 18, 500).c(colors.textSub),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              manager.purchase(item);
+            },
+            child: 'buy'.tr().text(14, 18, 700).c(colors.accentSub),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccess(BuildContext context, MarketItem item) {
+    final colors = context.colors;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              height: 64,
+              width: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(0.6, -0.6),
+                  radius: 1.2,
+                  colors: [colors.honeydew, colors.mintGreen],
+                ),
+              ),
+              child: Icon(
+                Icons.workspace_premium_rounded,
+                color: colors.textWhite,
+                size: 34,
+              ),
+            ),
+            const SizedBox(height: 14),
+            'tariff_success_title'
+                .tr()
+                .text(18, 24, 700)
+                .c(colors.textStrong)
+                .copyWith(textAlign: TextAlign.center),
+            const SizedBox(height: 6),
+            'tariff_success_msg'
+                .tr(namedArgs: {'days': '${item.rewardValue}'})
+                .text(14, 20, 400)
+                .c(colors.textSub)
+                .copyWith(textAlign: TextAlign.center),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: code));
-              Navigator.of(dialogContext).pop();
-              CustomSnackBar.show(context, 'copied'.tr());
-            },
-            child: 'copy_action'.tr().text(14, 18, 600).c(colors.accentSub),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: 'great'.tr().text(15, 20, 700).c(colors.accentSub),
           ),
         ],
       ),
@@ -98,107 +206,6 @@ class MarketplacePage extends Managed<CoinsManager, CoinsState, CoinsEffect> {
           ),
           const SizedBox(width: 4),
           '$balance'.text(13, 16, 600).c(colors.accentSub),
-        ],
-      ),
-    );
-  }
-}
-
-/// Holds the selected category tab locally — a pure view concern that doesn't
-/// belong in the shared coins state.
-class _MarketBody extends StatefulWidget {
-  const _MarketBody({required this.state, required this.onBuy});
-
-  final CoinsState state;
-  final void Function(MarketItem item) onBuy;
-
-  @override
-  State<_MarketBody> createState() => _MarketBodyState();
-}
-
-class _MarketBodyState extends State<_MarketBody> {
-  MarketCategory _category = MarketCategory.tariff;
-
-  static const _allTabs = [
-    (MarketCategory.tariff, 'market_cat_tariff'),
-    (MarketCategory.voucher, 'market_cat_voucher'),
-    (MarketCategory.boost, 'market_cat_boost'),
-  ];
-
-  /// Only categories the server actually sells right now.
-  List<(MarketCategory, String)> get _tabs {
-    final present = widget.state.catalog.map((i) => i.category).toSet();
-    final tabs = _allTabs.where((t) => present.contains(t.$1)).toList();
-    return tabs.isEmpty ? _allTabs.take(1).toList() : tabs;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final tabs = _tabs;
-    if (!tabs.any((t) => t.$1 == _category)) _category = tabs.first.$1;
-    final items = widget.state.catalog
-        .where((i) => i.category == _category)
-        .toList();
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      children: [
-        _buildSegment(context, tabs),
-        const SizedBox(height: 16),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: items.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            mainAxisExtent: 168,
-          ),
-          itemBuilder: (context, index) => MarketItemCard(
-            item: items[index],
-            onBuy: () => widget.onBuy(items[index]),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSegment(
-    BuildContext context,
-    List<(MarketCategory, String)> tabs,
-  ) {
-    final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: colors.backgroundElevation,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          for (final tab in tabs)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => setState(() => _category = tab.$1),
-                child: Container(
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: _category == tab.$1 ? colors.white : null,
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  child: tab.$2
-                      .tr()
-                      .text(13, 16, 500)
-                      .c(
-                        _category == tab.$1
-                            ? colors.textStrong
-                            : colors.neutral600Secondary,
-                      ),
-                ),
-              ),
-            ),
         ],
       ),
     );
