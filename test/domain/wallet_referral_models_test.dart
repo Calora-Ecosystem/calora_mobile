@@ -12,18 +12,17 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('wallet', () {
     final wallet = Wallet.fromJson({
-      'balance': 4,
-      'totalEarned': 4,
+      'balance': 8,
+      'totalEarned': 8,
       'totalSpent': 0,
-      'availableCalora': 748,
-      'earnedCalora': 4748,
-      'caloraExchanged': 4000,
-      'caloraPerCoin': 1000,
-      'maxExchangeableCoins': 0,
+      'todayCoins': 8,
+      'stepsPerCoin': 1000,
+      'maxDailyCoins': 22,
     });
-    expect(wallet.balance, 4);
-    expect(wallet.availableCalora, 748);
-    expect(wallet.caloraPerCoin, 1000);
+    expect(wallet.balance, 8);
+    expect(wallet.todayCoins, 8);
+    expect(wallet.stepsPerCoin, 1000);
+    expect(wallet.maxDailyCoins, 22);
   });
 
   test('coin transaction sign decides earn / spend', () {

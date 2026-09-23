@@ -1,20 +1,21 @@
 import 'package:calora/common/extensions/text_extensions.dart';
-import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-/// The wallet's hero card: coin and Calora balances side by side on the app's
-/// signature mint gradient, with a soft lift so it anchors the screen.
+/// The wallet's hero card: the coin balance next to the coins earned from
+/// today's steps, on the app's signature mint gradient.
 class CoinBalanceCard extends StatelessWidget {
   const CoinBalanceCard({
     super.key,
     required this.coinBalance,
-    required this.caloraBalance,
+    required this.todayCoins,
   });
 
   final int coinBalance;
-  final int caloraBalance;
+
+  /// Coins credited for today's steps so far.
+  final int todayCoins;
 
   @override
   Widget build(BuildContext context) {
@@ -82,13 +83,13 @@ class CoinBalanceCard extends StatelessWidget {
               Expanded(
                 child: _statTile(
                   context,
-                  icon: Assets.images.caloraLogo.image(
-                    height: 20,
+                  icon: Icon(
+                    Icons.directions_walk_rounded,
                     color: colors.textWhite,
-                    colorBlendMode: BlendMode.srcIn,
+                    size: 20,
                   ),
-                  value: caloraBalance,
-                  label: 'calora_unit'.tr(),
+                  value: todayCoins,
+                  label: 'wallet_today_coins'.tr(),
                 ),
               ),
             ],

@@ -10,9 +10,9 @@ abstract class CoinsState with _$CoinsState {
     @Default(true) bool loading,
     @Default(false) bool busy,
     @Default(0) int balance,
-    @Default(0) int availableCalora,
-    @Default(0) int maxExchangeableCoins,
-    @Default(1000) int caloraPerCoin,
+    @Default(0) int todayCoins,
+    @Default(1000) int stepsPerCoin,
+    @Default(22) int maxDailyCoins,
     @Default([]) List<CoinTransaction> transactions,
     @Default([]) List<MarketItem> catalog,
   }) = _CoinsState;
@@ -20,10 +20,6 @@ abstract class CoinsState with _$CoinsState {
 
 @freezed
 class CoinsEffect with _$CoinsEffect {
-  const factory CoinsEffect.exchanged(int coins) = Exchanged;
-
-  const factory CoinsEffect.nothingToExchange() = NothingToExchange;
-
   const factory CoinsEffect.purchased(MarketItem item, String? code) =
       Purchased;
 

@@ -1,27 +1,28 @@
-/// Coin wallet snapshot (`GET wallet`).
+/// Coin wallet snapshot (`GET wallet`). Coins are earned only by walking:
+/// every [stepsPerCoin] steps give one coin, at most [maxDailyCoins] a day.
 class Wallet {
   final int balance;
 
-  /// Calora (kcal burned by steps) that can still be exchanged for coins.
-  final int availableCalora;
+  /// Coins credited for today's steps so far.
+  final int todayCoins;
 
-  /// How many Calora make one coin (server-controlled, 1000 by default).
-  final int caloraPerCoin;
+  /// How many steps make one coin (server-controlled, 1000 by default).
+  final int stepsPerCoin;
 
-  /// Coins the current [availableCalora] can mint right now.
-  final int maxExchangeableCoins;
+  /// Daily ceiling for step coins (server-controlled, 22 by default).
+  final int maxDailyCoins;
 
   const Wallet({
     this.balance = 0,
-    this.availableCalora = 0,
-    this.caloraPerCoin = 1000,
-    this.maxExchangeableCoins = 0,
+    this.todayCoins = 0,
+    this.stepsPerCoin = 1000,
+    this.maxDailyCoins = 22,
   });
 
   factory Wallet.fromJson(Map<String, dynamic> json) => Wallet(
     balance: (json['balance'] as num?)?.toInt() ?? 0,
-    availableCalora: (json['availableCalora'] as num?)?.toInt() ?? 0,
-    caloraPerCoin: (json['caloraPerCoin'] as num?)?.toInt() ?? 1000,
-    maxExchangeableCoins: (json['maxExchangeableCoins'] as num?)?.toInt() ?? 0,
+    todayCoins: (json['todayCoins'] as num?)?.toInt() ?? 0,
+    stepsPerCoin: (json['stepsPerCoin'] as num?)?.toInt() ?? 1000,
+    maxDailyCoins: (json['maxDailyCoins'] as num?)?.toInt() ?? 22,
   );
 }

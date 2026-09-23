@@ -32,20 +32,6 @@ class CoinsApi {
         .toList();
   }
 
-  /// Converts [calora] into coins. Returns the minted coin count and the fresh
-  /// wallet.
-  Future<(int, Wallet)> exchange(int calora) async {
-    final response = await _dio.post<Map<String, dynamic>>(
-      'wallet/exchange',
-      data: {'calora': calora},
-    );
-    final content = response.data!['content'] as Map<String, dynamic>;
-    return (
-      (content['coins'] as num?)?.toInt() ?? 0,
-      Wallet.fromJson(content['wallet'] as Map<String, dynamic>),
-    );
-  }
-
   Future<List<MarketItem>> getMarket() async {
     final response = await _dio.get<Map<String, dynamic>>(
       'wallet/market',

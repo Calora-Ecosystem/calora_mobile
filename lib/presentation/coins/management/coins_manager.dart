@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
 import 'package:calora/common/extensions/api_error_extension.dart';
 import 'package:calora/domain/model/coins/market_item.dart';
-import 'package:calora/domain/model/coins/wallet.dart';
 import 'package:calora/domain/repo/coins/coins_repo.dart';
 import 'package:calora/presentation/coins/management/coins_management.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
-/// Drives the wallet, the exchange screen and the marketplace against the
-/// `wallet` API. Each page gets its own manager; they stay in sync because
-/// every screen re-reads the server on open ([refresh]).
+/// Drives the wallet and the marketplace against the `wallet` API. Coins are
+/// earned on the server from the user's steps (1000 steps = 1 coin), so the
+/// app only reads the balance and spends it. Each page gets its own manager;
+/// they stay in sync because every screen re-reads the server ([refresh]).
 @injectable
 class CoinsManager extends Manager<CoinsState, CoinsEffect> {
   final CoinsRepo _repo;
@@ -36,8 +36,12 @@ class CoinsManager extends Manager<CoinsState, CoinsEffect> {
       final catalog = await catalogFuture;
       if (isClosed) return;
       emit(
-        _withWallet(wallet).copyWith(
+        state.copyWith(
           loading: false,
+          balance: wallet.balance,
+          todayCoins: wallet.todayCoins,
+          stepsPerCoin: wallet.stepsPerCoin,
+          maxDailyCoins: wallet.maxDailyCoins,
           transactions: transactions,
           catalog: catalog,
         ),
@@ -46,34 +50,6 @@ class CoinsManager extends Manager<CoinsState, CoinsEffect> {
       if (isClosed) return;
       emit(state.copyWith(loading: false));
       publish(const CoinsEffect.failed());
-    }
-  }
-
-  CoinsState _withWallet(Wallet wallet) => state.copyWith(
-    balance: wallet.balance,
-    availableCalora: wallet.availableCalora,
-    maxExchangeableCoins: wallet.maxExchangeableCoins,
-    caloraPerCoin: wallet.caloraPerCoin,
-  );
-
-  /// Converts a chosen amount of calora into coins (server rate, whole coins).
-  Future<void> exchange(int calora) async {
-    if (state.busy) return;
-    emit(state.copyWith(busy: true));
-    try {
-      final (coins, wallet) = await _repo.exchange(calora);
-      if (isClosed) return;
-      emit(_withWallet(wallet).copyWith(busy: false));
-      publish(CoinsEffect.exchanged(coins));
-      unawaited(refresh());
-    } catch (e) {
-      if (isClosed) return;
-      emit(state.copyWith(busy: false));
-      publish(
-        e.apiErrorCode == 'nothing_to_exchange'
-            ? const CoinsEffect.nothingToExchange()
-            : const CoinsEffect.failed(),
-      );
     }
   }
 

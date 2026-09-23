@@ -19,9 +19,6 @@ class CoinsRepoImpl implements CoinsRepo {
   Future<List<CoinTransaction>> getTransactions() => _api.getTransactions();
 
   @override
-  Future<(int, Wallet)> exchange(int calora) => _api.exchange(calora);
-
-  @override
   Future<List<MarketItem>> getMarket() => _api.getMarket();
 
   @override

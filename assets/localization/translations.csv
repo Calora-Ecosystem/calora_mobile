@@ -649,15 +649,9 @@ cal_target,Target,Maqsad,Цель
 calora_coin,Calora coin,Calora coin,Calora coin
 coin_balance,Balance,Balans,Баланс
 wallet_title,Wallet,Hamyon,Кошелёк
-available_calories,Collected calories,Yigʻilgan kaloriya,Накоплено калорий
-ready_to_exchange,{coins} coins ready to exchange,{coins} coin almashtirishga tayyor,{coins} монет готово к обмену
-exchange_to_coins,Exchange to coins,Coinga almashtirish,Обменять на монеты
 open_marketplace,Open marketplace,Doʻkonga oʻtish,Открыть магазин
 recent_activity,Recent activity,Oxirgi harakatlar,Последние действия
-coin_tx_from_calories,From calories,Kaloriyadan,Из калорий
 coin_tx_daily_steps,Daily steps,Kunlik qadamlar,Ежедневные шаги
-exchange_success,{coins} coins added,{coins} coin qoʻshildi,Добавлено {coins} монет
-nothing_to_exchange,Not enough calories to exchange,Almashtirish uchun kaloriya yetarli emas,Недостаточно калорий для обмена
 date_today,Today,Bugun,Сегодня
 date_yesterday,Yesterday,Kecha,Вчера
 marketplace_title,Marketplace,Doʻkon,Магазин
@@ -696,14 +690,6 @@ share_invite,Join me on Calora! Code: {code},Menga Caloraʼda qoʻshiling! Kod: 
 coin_tx_from_calora,From Calora,Caloradan,Из Calora
 mi_free_delivery,Free delivery,Bepul yetkazib berish,Бесплатная доставка
 mi_free_delivery_sub,One order,Bitta buyurtma,Один заказ
-exchange_title,Exchange,Almashtirish,Обмен
-exchange_give,You give,Berasiz,Отдаёте
-exchange_get,You get,Olasiz,Получаете
-exchange_available,Available: {amount},Mavjud: {amount},Доступно: {amount}
-exchange_max,MAX,MAX,MAX
-exchange_rate,{calora} Calora = 1 coin,{calora} Calora = 1 coin,{calora} Calora = 1 монета
-exchange_action,Exchange,Almashtirish,Обменять
-calora_unit,Calora,Calora,Calora
 coin_unit,Coin,Coin,Монета
 group_banner_title,Step groups,Qadam guruhlari,Шаговые группы
 group_banner_desc,Rank with your friends,Doʻstlar bilan bellashing,Соревнуйтесь с друзьями
@@ -728,9 +714,6 @@ free_scans_over,Free scans are over,Bepul skanlar tugadi,Бесплатные с
 unlimited_with_premium,Go unlimited with Premium,Premium bilan cheksiz,Безлимит с Premium
 tx_income,Income,Kirim,Приход
 tx_expense,Expense,Chiqim,Расход
-exchange_confirm_title,Confirm exchange,Almashtirishni tasdiqlang,Подтвердите обмен
-exchange_confirm_msg,{calora} Calora will become {coins} coin. Continue?,{calora} Calora {coins} coinga aylanadi. Davom etasizmi?,{calora} Calora станет {coins} монет. Продолжить?
-exchange_agree,Exchange now,Almashtirish,Обменять
 free_scans_title,Free AI scans,Bepul AI skanlar,Бесплатные AI-сканы
 subscription_title,Subscription,Obuna,Подписка
 manage_subscription,Manage subscription,Obunani boshqarish,Управление подпиской
@@ -794,3 +777,7 @@ sub_ends_at,Active until,Amal qiladi,Действует до
 sub_days_left,Days left,Qolgan kunlar,Осталось дней
 invite_code_confirmed,You joined through {name},Siz {name} taklifi bilan qoʻshilgansiz,Вы присоединились по приглашению {name}
 invite_code_hint,Enter the code of the friend who invited you — get a discount on your first Premium,Sizni taklif qilgan doʻstingizning kodini kiriting — birinchi Premiumga chegirma olasiz,Введите код друга который вас пригласил — получите скидку на первый Premium
+coin_earn_rule,{steps} steps = 1 coin,{steps} qadam = 1 coin,{steps} шагов = 1 монета
+coin_earn_limit,Up to {coins} coins a day — walk and spend them on Premium,Kuniga {coins} tagacha coin — yuring va Premiumga sarflang,До {coins} монет в день — ходите и тратьте их на Premium
+wallet_today_coins,Today,Bugun,Сегодня
+wallet_no_activity,No coins yet — take a walk!,Hali coin yoʻq — biroz yuring!,Монет пока нет — прогуляйтесь!

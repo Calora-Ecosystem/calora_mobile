@@ -8,9 +8,6 @@ abstract class CoinsRepo {
 
   Future<List<CoinTransaction>> getTransactions();
 
-  /// Returns the minted coin count and the fresh wallet.
-  Future<(int, Wallet)> exchange(int calora);
-
   Future<List<MarketItem>> getMarket();
 
   Future<MarketPurchaseResult> purchase(MarketItem item);
