@@ -11,6 +11,11 @@ class PaginationService<T> {
 
   PaginationQuery _currentQuery;
 
+  /// Bumped on every [refresh]. A response that lands after a refresh
+  /// belongs to the old query (e.g. the previous tab) and is dropped, so
+  /// it can't leak into — or cut short — the newly selected list.
+  int _generation = 0;
+
   PaginationService({
     required this.fetchData,
     this.pageSize = 20,
@@ -24,9 +29,11 @@ class PaginationService<T> {
   Future<void> _fetchPage(int pageKey) async {
     log('PaginationService → fetch page: $pageKey', name: 'PaginationService');
 
+    final generation = _generation;
     try {
       final query = _buildQuery(pageKey);
       final response = await fetchData(query);
+      if (generation != _generation) return;
 
       if (response.error != null) {
         pagingController.error = Exception(response.error);
@@ -45,6 +52,7 @@ class PaginationService<T> {
         pagingController.appendPage(items, pageKey + items.length);
       }
     } catch (e, s) {
+      if (generation != _generation) return;
       pagingController.error = e;
       log(
         'PaginationService error: $e',
@@ -67,6 +75,7 @@ class PaginationService<T> {
 
   void refresh() {
     log('PaginationService → refresh()', name: 'PaginationService');
+    _generation++;
     pagingController.refresh();
   }
 
