@@ -10,13 +10,15 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_management.dart';
 import 'package:calora/presentation/dashboard/features/profile/management/profile_manager.dart';
 import 'package:calora/presentation/referral/referral_page.dart';
+import 'package:calora/presentation/report/widgets/weekly_report_section.dart';
 import 'package:calora/presentation/subscription/subscription_panel.dart';
 import 'package:calora/presentation/help/help_page.dart';
 import 'package:calora/presentation/language/bottom_sheet/language_bottom_sheet.dart';
 import 'package:calora/widgets/premium/premium_entry_card.dart';
 import 'package:calora/widgets/profile_cards/bmi_card/bmi_card.dart';
 import 'package:calora/widgets/profile_cards/profile_card.dart';
-import 'package:calora/widgets/profile_cards/settings_card.dart' show SettingsCard;
+import 'package:calora/widgets/profile_cards/settings_card.dart'
+    show SettingsCard;
 import 'package:calora/widgets/health/health_sync_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -32,67 +34,81 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
   }
 
   @override
-  Widget builder(BuildContext context, ProfileManager manager, ProfileState state) {
+  Widget builder(
+    BuildContext context,
+    ProfileManager manager,
+    ProfileState state,
+  ) {
     final profile = state.profile ?? const ProfileRequest();
     return FeatureTourHost(
       tourId: 'tour_profile',
       steps: _profileTourSteps(context),
       child: Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(child: Assets.icons.background.image(fit: BoxFit.fill)),
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                child: Column(
-                  children: [
-                    KeyedSubtree(
-                      key: TourAnchors.profileMain,
-                      child: ProfileCard(
-                        surname: profile.name ?? '',
-                        name: profile.name ?? '',
-                        email: profile.email ?? '',
-                        onEdit: () => _openProfileDetailPage(
-                          context,
-                          profile.userId?.toString() ?? '',
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Assets.icons.background.image(fit: BoxFit.fill),
+            ),
+            SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
+                  child: Column(
+                    children: [
+                      KeyedSubtree(
+                        key: TourAnchors.profileMain,
+                        child: ProfileCard(
+                          surname: profile.name ?? '',
+                          name: profile.name ?? '',
+                          email: profile.email ?? '',
+                          onEdit: () => _openProfileDetailPage(
+                            context,
+                            profile.userId?.toString() ?? '',
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    BmiCard(
-                      showProgress: state.showBmiProgress,
-                      height: profile.height ?? 1,
-                      entryWeight: profile.entryWeight ?? 100,
-                      weight: profile.weight ?? 0,
-                      targetWeight: profile.targetWeight ?? 0,
-                    ),
-                    const SizedBox(height: 16),
-                    SettingsCard(
-                      onSubscriptionTap: () => context.showAppBottomSheet(
-                        child: const SubscriptionPanel(),
+                      const SizedBox(height: 16),
+                      BmiCard(
+                        showProgress: state.showBmiProgress,
+                        height: profile.height ?? 1,
+                        entryWeight: profile.entryWeight ?? 100,
+                        weight: profile.weight ?? 0,
+                        targetWeight: profile.targetWeight ?? 0,
                       ),
-                      onWalletTap: () => context.router.push(WalletRoute()),
-                      onAccountTap: () => _openAccountDetailPage(context),
-                      onNormsTap: () => _openNormsPage(context),
-                      onLanguageTap: () => _showLanguageBottomSheet(context),
-                      onNotificationsTap: () => _openNotificationSettingsPage(context),
-                      onHealthTap: () => HealthSyncBottomSheet.show(context),
-                      onInviteTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ReferralPage()),
+                      const SizedBox(height: 16),
+                      const WeeklyReportSection(),
+                      const SizedBox(height: 16),
+                      SettingsCard(
+                        onSubscriptionTap: () => context.showAppBottomSheet(
+                          child: const SubscriptionPanel(),
+                        ),
+                        onWalletTap: () => context.router.push(WalletRoute()),
+                        onAccountTap: () => _openAccountDetailPage(context),
+                        onNormsTap: () => _openNormsPage(context),
+                        onLanguageTap: () => _showLanguageBottomSheet(context),
+                        onNotificationsTap: () =>
+                            _openNotificationSettingsPage(context),
+                        onHealthTap: () => HealthSyncBottomSheet.show(context),
+                        onInviteTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ReferralPage(),
+                          ),
+                        ),
+                        onAboutTap: () => _showAboutBottomSheet(context),
+                        onHelpTap: () => _showHelpBottomSheet(context),
                       ),
-                      onAboutTap: () => _showAboutBottomSheet(context),
-                      onHelpTap: () => _showHelpBottomSheet(context),
-                    ),
-                    const SizedBox(height: 16),
-                    PremiumEntryCard(),
-                  ],
+                      const SizedBox(height: 16),
+                      PremiumEntryCard(),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

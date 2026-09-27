@@ -150,7 +150,6 @@ class AddMealsPage
                           onTap: () => openCreatePage(context, manager),
                           context: context,
                           text: Strings.creation,
-                          isPremiumFeature: false,
                           textColor: context.colors.textStrong,
                           icon: Assets.icons.icPlusCircle.svg(),
                         ),
@@ -164,6 +163,7 @@ class AddMealsPage
                           textColor: context.colors.textWhite,
                           useGradient: true,
                         ),
+                        const SizedBox(width: 8),
                         buildActionCard(
                           spotlightKey: _voiceKey,
                           onTap: () => openSpeechPage(context, manager),
@@ -399,8 +399,9 @@ class AddMealsPage
       final used = await store.freeAiScansUsed();
       final limit = await store.freeAiScanLimit();
       final remaining = (limit - used).clamp(0, limit);
-      // Compact: just "N/5" so the camera header stays clean.
-      creditText = '$remaining/$limit';
+      creditText = 'camera_free_left'.tr(
+        namedArgs: {'count': '$remaining', 'limit': '$limit'},
+      );
     }
     if (!context.mounted) return;
 
@@ -502,10 +503,21 @@ class AddMealsPage
     if (isPremium) return true;
     final quota = await getIt<AiQuotaService>().refresh();
     if (!quota.canUse) {
-      if (context.mounted) context.router.push(const PremiumFeaturesRoute());
+      if (context.mounted) _showFreeScansOver(context, quota.limit);
       return false;
     }
     return true;
+  }
+
+  /// Explains that the free recognitions are used up and offers Premium;
+  /// closing it leaves the user on this page to add food by hand.
+  void _showFreeScansOver(BuildContext context, int limit) {
+    context.showAppBottomSheet(
+      child: FreeScansOverSheet(
+        limit: limit,
+        onPremium: () => context.router.push(const PremiumFeaturesRoute()),
+      ),
+    );
   }
 
   /// An empty result can mean the server refused the request because the free
@@ -518,7 +530,7 @@ class AddMealsPage
     if (isPremium) return false;
     final quota = await getIt<AiQuotaService>().refresh();
     if (quota.canUse || !context.mounted) return false;
-    context.router.push(const PremiumFeaturesRoute());
+    _showFreeScansOver(context, quota.limit);
     return true;
   }
 
@@ -532,60 +544,35 @@ class AddMealsPage
     Color? textColor,
     VoidCallback? onTap,
     bool useGradient = false,
-    bool isPremiumFeature = true,
     Key? spotlightKey,
   }) {
-    final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
     return Expanded(
-      child: Stack(
-        children: [
-          const SizedBox(height: 84),
-          Positioned(
-            left: 0,
-            right: isPremiumFeature ? 10 : 0,
-            bottom: 0,
-            child: GestureDetector(
-              onTap: onTap,
-              child: Container(
-                key: spotlightKey,
-                height: 72,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: useGradient
-                      ? null
-                      : context.colors.backgroundElevation,
-                  gradient: useGradient
-                      ? RadialGradient(
-                          center: const Alignment(1.2, 0.5),
-                          radius: 1.3,
-                          colors: [
-                            context.colors.honeydew,
-                            context.colors.mintGreen,
-                          ],
-                          stops: const [0.0, 1.0],
-                        )
-                      : null,
-                ),
-                child: Column(
-                  spacing: 8,
-                  children: [
-                    if (icon != null) icon,
-                    text
-                        .text(14, 16, 600)
-                        .c(textColor ?? context.colors.textWhite),
-                  ],
-                ),
-              ),
-            ),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          key: spotlightKey,
+          height: 72,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: useGradient ? null : context.colors.backgroundElevation,
+            gradient: useGradient
+                ? RadialGradient(
+                    center: const Alignment(1.2, 0.5),
+                    radius: 1.3,
+                    colors: [context.colors.honeydew, context.colors.mintGreen],
+                    stops: const [0.0, 1.0],
+                  )
+                : null,
           ),
-          if (isPremiumFeature && !isUserPremium)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Assets.images.premiumFire.image(height: 42),
-            ),
-        ],
+          child: Column(
+            spacing: 8,
+            children: [
+              if (icon != null) icon,
+              text.text(14, 16, 600).c(textColor ?? context.colors.textWhite),
+            ],
+          ),
+        ),
       ),
     );
   }

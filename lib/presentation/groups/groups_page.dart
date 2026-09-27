@@ -30,16 +30,16 @@ class GroupsPage extends Managed<GroupsManager, GroupsState, GroupsEffect> {
   ) {
     effect.mapOrNull(
       created: (e) {
-        CustomSnackBar.show(context, 'group_created'.tr());
+        CustomSnackBar.showSuccess(context, 'group_created'.tr());
         _openGroup(context, e.group);
       },
       joined: (e) {
-        CustomSnackBar.show(context, 'group_joined'.tr());
+        CustomSnackBar.showSuccess(context, 'group_joined'.tr());
         _openGroup(context, e.group);
       },
       joinFailed: (_) => CustomSnackBar.show(context, 'join_failed'.tr()),
-      deleted: (_) => CustomSnackBar.show(context, 'group_deleted'.tr()),
-      left: (_) => CustomSnackBar.show(context, 'group_left'.tr()),
+      deleted: (_) => CustomSnackBar.showSuccess(context, 'group_deleted'.tr()),
+      left: (_) => CustomSnackBar.showSuccess(context, 'group_left'.tr()),
       failed: (_) => CustomSnackBar.show(context, 'something_went_wrong'.tr()),
     );
   }

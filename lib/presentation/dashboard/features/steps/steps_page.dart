@@ -20,7 +20,6 @@ import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:calora/presentation/dashboard/features/steps/features/edit/edit_step_goal_page.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_management.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
-import 'package:calora/presentation/dashboard/features/steps/widgets/coin_leaderboard_section.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/daily_fitness_track_widget.dart';
 import 'package:calora/presentation/dashboard/features/steps/widgets/leaderboard_section.dart';
 import 'package:calora/presentation/groups/widgets/group_banner.dart';
@@ -526,9 +525,7 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          sliver: _byCoins
-              ? const CoinLeaderboard()
-              : LeaderboardSection(paginationService: widget.paginationService),
+          sliver: LeaderboardSection(paginationService: widget.paginationService, byCoins: _byCoins),
         ),
       ],
     );

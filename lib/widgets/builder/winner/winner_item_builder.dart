@@ -11,7 +11,11 @@ class WinnerItemBuilder extends StatelessWidget {
   final UserStatRequest userStat;
   final bool loading;
 
-  WinnerItemBuilder({super.key, required this.userStat, required this.loading});
+  /// Shows the coins earned from [UserStatRequest.stepCount] (1 coin per
+  /// 1000 steps) instead of the raw step count.
+  final bool byCoins;
+
+  WinnerItemBuilder({super.key, required this.userStat, required this.loading, this.byCoins = false});
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +58,18 @@ class WinnerItemBuilder extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(12)),
               color: context.colors.backgroundElevation6,
             ),
-            child: userStat.prettySteps
-                .text(12, 16, 500)
-                .c(context.colors.neutral900Primary),
+            child: byCoins
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.monetization_on_rounded, size: 15, color: context.colors.accentSub),
+                      const SizedBox(width: 4),
+                      userStat.prettyCoins.text(12, 16, 600).c(context.colors.neutral900Primary),
+                    ],
+                  )
+                : userStat.prettySteps
+                    .text(12, 16, 500)
+                    .c(context.colors.neutral900Primary),
           ),
         ),
       ],

@@ -18,6 +18,9 @@ import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:share_plus/share_plus.dart';
 
+/// Where an invited friend downloads the app (store redirect on calora.uz).
+const String _appLink = 'https://calora.uz/get-app?utm_source=step_challenge';
+
 @RoutePage()
 class GroupDetailPage
     extends Managed<GroupsManager, GroupsState, GroupsEffect> {
@@ -37,7 +40,7 @@ class GroupDetailPage
     GroupsEffect effect,
   ) {
     effect.mapOrNull(
-      memberRemoved: (_) => CustomSnackBar.show(context, 'member_removed'.tr()),
+      memberRemoved: (_) => CustomSnackBar.showSuccess(context, 'member_removed'.tr()),
       failed: (_) => CustomSnackBar.show(context, 'something_went_wrong'.tr()),
     );
   }
@@ -287,7 +290,11 @@ class GroupDetailPage
   void _shareInvite(StepGroup group) {
     SharePlus.instance.share(
       ShareParams(
-        text: 'share_invite'.tr(namedArgs: {'code': group.inviteCode}),
+        text: [
+          'share_group_invite'.tr(namedArgs: {'name': group.name}),
+          'share_group_code'.tr(namedArgs: {'code': group.inviteCode}),
+          'share_app_download'.tr(namedArgs: {'link': _appLink}),
+        ].join('\n\n'),
       ),
     );
   }

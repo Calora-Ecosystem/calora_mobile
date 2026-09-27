@@ -520,7 +520,7 @@ pw_cta_button,Unlock Premium,Premiumni ochish,Открыть Premium
 pw_guarantee,Secure payment • Cancel anytime,Xavfsiz toʻlov • Istalgan vaqt bekor qilish,Безопасная оплата • Отмена в любой момент
 pw_spots_left,Only a few spots left at this price,Bu narxda faqat bir nechta joy qoldi,По этой цене осталось всего несколько мест
 pw_week,wk,hafta,нед
-pw_trust,"4.9★ • 50,000+ users trust Calora",4.9★ • 50 000+ foydalanuvchi ishonadi,4.9★ • 50 000+ пользователей доверяют
+pw_trust,"4.9★ • 10,000+ users trust Calora",4.9★ • 10 000+ foydalanuvchi ishonadi,4.9★ • 10 000+ пользователей доверяют
 pw_value_hook,You're not buying an app — you're buying results,Siz ilova emas — natija sotib olasiz,Вы покупаете не приложение — вы покупаете результат
 pw_eco_title,One subscription — a whole ecosystem,Bitta obuna — butun ekotizim,Одна подписка — целая экосистема
 pw_eco_subtitle,Calora isn't just a calorie counter. It's a complete system for your health.,Calora shunchaki kaloriya sanagich emas. Sogʻligingiz uchun toʻliq tizim.,Calora — это не просто счётчик калорий. Это целая система для вашего здоровья.
@@ -564,7 +564,7 @@ pw_faq_2_a,Follow the plan and results are guaranteed — 94% of users reach the
 pw_faq_3_q,Is payment secure?,Toʻlov xavfsizmi?,Оплата безопасна?
 pw_faq_3_a,All payments are encrypted and secure. Your data stays private.,Toʻlovlar shifrlangan va xavfsiz. Maʻlumotlaringiz himoyalangan.,Все платежи зашифрованы и безопасны. Ваши данные защищены.
 pw_final_title,Start today — your future self will thank you,Bugun boshlang — ertaga oʻzingizga rahmat aytasiz,Начните сегодня — вы скажете себе спасибо
-pw_join,"Join 50,000+ users",50 000+ foydalanuvchiga qoʻshiling,Присоединяйтесь к 50 000+ пользователей
+pw_join,"Join 10,000+ users",10 000+ foydalanuvchiga qoʻshiling,Присоединяйтесь к 10 000+ пользователей
 pw_final_cta,Start now,Hoziroq boshlash,Начать сейчас
 pw_video_badge,FREE LESSON,BEPUL DARS,БЕСПЛАТНЫЙ УРОК
 pw_video_title,Watch a real expert lesson — free,Mutaxassisdan bitta darsni bepul koʻring,Посмотрите урок от эксперта — бесплатно
@@ -667,7 +667,7 @@ mi_discount,-20% discount,-20% chegirma,Скидка -20%
 mi_discount_sub,On the yearly plan,Yillik tarifga,На годовой тариф
 mi_ai_pack,+10 AI scans,+10 AI skan,+10 AI-сканов
 mi_ai_pack_sub,One-time,Bir martalik,Разовый
-groups_title,Groups,Guruhlar,Группы
+groups_title,Step challenge,Qadam chellenji,Шаговый челлендж
 group_members,{count} members,{count} aʼzo,{count} участников
 group_total_steps,Group steps,Guruh qadamlari,Шаги группы
 create_group,Create group,Guruh yaratish,Создать группу
@@ -688,7 +688,7 @@ coin_tx_from_calora,From Calora,Caloradan,Из Calora
 mi_free_delivery,Free delivery,Bepul yetkazib berish,Бесплатная доставка
 mi_free_delivery_sub,One order,Bitta buyurtma,Один заказ
 coin_unit,Coin,Coin,Монета
-group_banner_title,Step groups,Qadam guruhlari,Шаговые группы
+group_banner_title,Step challenge,Qadam chellenji,Шаговый челлендж
 group_banner_desc,Rank with your friends,Doʻstlar bilan bellashing,Соревнуйтесь с друзьями
 wallet_entry_desc,Coins and marketplace,Coin va doʻkon,Монеты и магазин
 rank_by_steps,By steps,Qadam boʻyicha,По шагам
@@ -800,3 +800,163 @@ sub_cancelled_note,Auto-renewal is off. Premium stays active until {date}.,Avtom
 manage_in_app_store,Manage in App Store,App Store’da boshqarish,Управлять в App Store
 manage_in_google_play,Manage in Google Play,Google Play’da boshqarish,Управлять в Google Play
 plan_yearly,Yearly,Yillik,Годовой
+wr_hello,"Hi, {name}! 👋","Salom, {name}! 👋","Привет, {name}! 👋"
+wr_intro_sub,Here's how your last week went,Mana oʻtgan haftang qanday oʻtdi,Вот как прошла твоя неделя
+wr_intro_short,You logged food on {days} days — log more next week for a sharper picture 💪,Bu hafta {days} kun ovqat yozding — keyingi hafta koʻproq yozsang hisobot yanada aniq boʻladi 💪,"Ты записывал еду {days} дн. — записывай чаще, и отчёт станет точнее 💪"
+wr_tap_hint,Tap to continue,Davom etish uchun bosing,"Нажми, чтобы продолжить"
+wr_calories_title,Calories,Kaloriya,Калории
+wr_daily_avg,daily average,kunlik oʻrtacha,в среднем за день
+wr_week_total,Week total: {kcal} kcal,Haftalik jami: {kcal} kkal,За неделю: {kcal} ккал
+wr_norm_label,Norm,Norma,Норма
+wr_days_in_norm,{count} of 7 days within your norm ✅,7 kundan {count} tasida normada boʻlding ✅,{count} из 7 дней в пределах нормы ✅
+wr_habits_title,Your habits,Odatlaring,Твои привычки
+wr_top_food,Dish of the week,Haftaning hiti,Блюдо недели
+wr_times,{count} times,{count} marta,{count} раз(а)
+wr_meals_logged,meals logged,ta ovqat yozding,приёмов пищи записано
+wr_heaviest_day,Heaviest day,Eng ogʻir kun,Самый сытный день
+wr_meal_split,Where your calories went,Kaloriyang qayerga ketdi,Как распределились калории
+wr_activity_title,Activity,Faollik,Активность
+wr_steps_total,steps this week,qadam bu hafta,шагов за неделю
+wr_distance,≈ {km} km walked,≈ {km} km yurding,≈ {km} км пройдено
+wr_most_active,Most active day,Eng faol kun,Самый активный день
+wr_coins_earned,Coins earned,Ishlangan coin,Заработано монет
+wr_water,Water,Suv,Вода
+wr_water_days,Water goal reached on {count} days,{count} kun suv normasini bajarding,Норма воды выполнена {count} дн.
+wr_progress_title,Progress,Natijalar,Прогресс
+wr_streak,day streak,kun ketma-ket,дней подряд
+wr_vs_last_week,Compared to last week,Oʻtgan haftaga nisbatan,По сравнению с прошлой неделей
+wr_avg_kcal,Average calories,Oʻrtacha kaloriya,Средние калории
+wr_no_compare,Nothing to compare yet — you'll see the trend next week,Hozircha solishtirishga data yoʻq — trend keyingi hafta koʻrinadi,Пока не с чем сравнить — тренд появится через неделю
+wr_badges,Badges this week,Bu haftaning nishonlari,Награды недели
+wr_badge_perfect_week,Perfect week,Mukammal hafta,Идеальная неделя
+wr_badge_consistent,Every day logged,Har kuni yozildi,Ни дня без записи
+wr_badge_step_master,Step master,Qadam qiroli,Король шагов
+wr_badge_protein_pro,Protein pro,Protein ustasi,Мастер белка
+wr_badge_hydrated,Well hydrated,Suv chempioni,Водный баланс
+wr_share_title,Share your week,Haftangni ulash,Поделись неделей
+wr_show_numbers,Show calories,Kaloriyani koʻrsatish,Показать калории
+wr_share_card_title,{name}'s week,{name}ning haftasi,Неделя: {name}
+wr_share_in_norm,days within norm,kun normada,дней в норме
+wr_share_join,Join me on Calora · code {code},Caloraʼda menga qoʻshil · kod {code},Присоединяйся в Calora · код {code}
+wr_share_text,My week on Calora 💚 Join me with code {code}: {link},Caloraʼdagi haftam 💚 {code} kodi bilan menga qoʻshil: {link},Моя неделя в Calora 💚 Присоединяйся по коду {code}: {link}
+wr_day_1,Mo,Du,Пн
+wr_day_2,Tu,Se,Вт
+wr_day_3,We,Ch,Ср
+wr_day_4,Th,Pa,Чт
+wr_day_5,Fr,Ju,Пт
+wr_day_6,Sa,Sh,Сб
+wr_day_7,Su,Ya,Вс
+wr_day_full_1,Monday,Dushanba,Понедельник
+wr_day_full_2,Tuesday,Seshanba,Вторник
+wr_day_full_3,Wednesday,Chorshanba,Среда
+wr_day_full_4,Thursday,Payshanba,Четверг
+wr_day_full_5,Friday,Juma,Пятница
+wr_day_full_6,Saturday,Shanba,Суббота
+wr_day_full_7,Sunday,Yakshanba,Воскресенье
+wr_section_title,Weekly report,Haftalik hisobot,Недельный отчёт
+wr_last_week,Last week,Oʻtgan hafta,Прошлая неделя
+wr_section_empty,Nothing recorded this week,Bu haftada hech narsa yozilmagan,На этой неделе нет данных
+wr_section_open,View report,Hisobotni koʻrish,Смотреть отчёт
+wr_intro_no_food,"No meals logged this week, but here's everything else you did 👇","Bu hafta ovqat yozilmadi, lekin mana qilgan ishlaring 👇","Еду на этой неделе не записывал, но вот что ты сделал 👇"
+wr_food_nudge,Log your meals too — next week you'll see your calories here 🍽,Ovqatlaringni ham yozib bor — keyingi hafta kaloriyang shu yerda koʻrinadi 🍽,Записывай и еду — через неделю здесь появятся калории 🍽
+wr_active_days,active days,kun faol,активных дней
+wr_steps_avg,{steps} steps a day on average,kuniga oʻrtacha {steps} qadam,в среднем {steps} шагов в день
+wr_step_goal_days,Step goal,Qadam normasi,Норма шагов
+wr_you_title,You & your goal,Sen va maqsading,Ты и твоя цель
+wr_weight_now,Current weight,Hozirgi vazn,Текущий вес
+wr_weight_target,Goal {kg} kg · {left} kg to go,Maqsad {kg} kg · {left} kg qoldi,Цель {kg} кг · осталось {left} кг
+wr_weight_reached,Goal weight reached 🎉,Maqsad vaznga yetding 🎉,Целевой вес достигнут 🎉
+wr_weight_change,{kg} kg since you started,boshlaganingdan beri {kg} kg,{kg} кг с начала
+wr_bmi,BMI,TVI,ИМТ
+wr_coins_week,coins earned this week,coin shu hafta ishlanding,монет заработано за неделю
+wr_coins_balance,coin balance,coin balans,баланс монет
+wr_coins_spent,coins spent,coin sarflanding,монет потрачено
+wr_lessons_done,lessons completed,dars oʻtildi,уроков пройдено
+wr_workouts_done,workouts done,mashgʻulot bajarildi,тренировок выполнено
+wr_exercises_done,exercises done,mashq bajarildi,упражнений выполнено
+wr_friends_invited,friends invited,doʻst taklif qilding,друзей приглашено
+wr_step_groups,step groups,qadam guruhi,групп шагов
+wr_badge_step_goal,Step goal hero,Qadam normasi ustasi,Норма шагов — есть!
+tf_title,Plans,Tariflar,Тарифы
+tf_subtitle,Every plan includes all Premium features,Har bir tarifda barcha Premium imkoniyatlar bor,В каждом тарифе все возможности Premium
+tf_monthly,Monthly,Oylik,Месячный
+tf_monthly_sub,"Pay month by month, cancel anytime","Har oy toʻlaysiz, xohlagan payt bekor qilasiz","Оплата помесячно, отмена в любой момент"
+tf_yearly,Yearly,Yillik,Годовой
+tf_yearly_sub,Just {price} sum a month,Oyiga atigi {price} soʻm,Всего {price} сум в месяц
+tf_best_value,Save {percent}%,{percent}% tejaysiz,Экономия {percent}%
+tf_family,Family,Oila,Семейный
+tf_family_sub,One subscription for two people,Ikki kishi uchun bitta obuna,Одна подписка на двоих
+tf_new,New,Yangi,Новинка
+tf_one_person,1 person,1 kishi,1 человек
+tf_two_people,2 people,2 kishi,2 человека
+tf_person_you,You,Siz,Вы
+tf_person_partner,Partner,Yaqiningiz,Близкий
+tf_person_add,Add,Qoʻshish,Добавить
+tf_family_each,{price} sum each per month,Har biriga oyiga {price} soʻm,По {price} сум в месяц каждому
+tf_family_invite,Add a second person and pay less for each,Ikkinchi odamni qoʻshing — har biriga arzonroq,Добавьте второго — каждому дешевле
+tf_family_soon,The family plan is coming soon 💚,Oila tarifi tez orada ishga tushadi 💚,Семейный тариф скоро появится 💚
+tf_per_month,month,oy,мес
+tf_per_year,year,yil,год
+tf_sum,sum,soʻm,сум
+tf_included,Included in every plan,Har bir tarifda,Входит в каждый тариф
+tf_feature_ai,Unlimited AI food scanning,Cheksiz AI ovqat skaneri,Безлимитный AI-скан еды
+tf_feature_voice,Log meals by voice,Ovqatni ovoz bilan yozish,Запись еды голосом
+tf_feature_report,Weekly report and progress,Haftalik hisobot va natijalar,Недельный отчёт и прогресс
+tf_feature_workouts,All lessons and workouts,Barcha darslar va mashgʻulotlar,Все уроки и тренировки
+tf_continue,Continue,Davom etish,Продолжить
+tf_billed_monthly,Billed monthly · cancel anytime,Har oy toʻlanadi · istalgan payt bekor qilish mumkin,Оплата ежемесячно · отмена в любой момент
+tf_billed_yearly,Billed yearly · cancel anytime,Har yili toʻlanadi · istalgan payt bekor qilish mumkin,Оплата раз в год · отмена в любой момент
+tf_unit_days,days,kun,дней
+tf_unit_months,months,oy,месяцев
+share_group_invite,Join my step challenge “{name}” on Calora! 🏃,Caloraʼdagi “{name}” qadam chellenjimga qoʻshiling! 🏃,Присоединяйся к моему шаговому челленджу «{name}» в Calora! 🏃
+share_group_code,Invite code: {code},Taklif kodi: {code},Код приглашения: {code}
+share_app_download,Download the app: {link},Ilovani yuklab oling: {link},Скачать приложение: {link}
+wr_section_title_kcal,Weekly calorie report,Haftalik kaloriya hisoboti,Недельный отчёт по калориям
+wr_section_title_steps,Weekly steps report,Haftalik qadam hisoboti,Недельный отчёт по шагам
+wr_chart_kcal_caption,Calories eaten per day (kcal),Har kuni yeyilgan kaloriya (kkal),Съедено калорий за день (ккал)
+wr_chart_steps_caption,Steps walked per day,Har kuni yurilgan qadamlar,Пройдено шагов за день
+wr_legend_in_norm,Within norm,Normada,В норме
+wr_legend_over,Over norm,Normadan koʻp,Выше нормы
+wr_legend_norm,Daily norm {value},Kunlik norma {value},Дневная норма {value}
+wr_legend_step_goal,Daily goal {value} steps,Kunlik maqsad {value} qadam,Цель на день {value} шагов
+wr_unit_kcal,kcal,kkal,ккал
+wr_unit_days,days,kun,дн.
+wr_stat_avg_kcal,daily average,kunlik oʻrtacha,в среднем за день
+wr_stat_in_norm,within calorie norm,kaloriya normada,в норме калорий
+wr_stat_streak,meals logged in a row,ketma-ket ovqat yozildi,подряд с записью еды
+pw_scan_title,Snap your meal — know its calories,Ovqatni suratga oling — kaloriyasini biling,Сфотографируйте еду — узнайте калории
+pw_scan_subtitle,"Calora recognises the dish from a photo and counts calories, protein, carbs and fat for you.","Calora taomni rasmdan taniydi va kaloriya, oqsil, uglevod hamda yogʻni siz uchun hisoblaydi.","Calora распознаёт блюдо по фото и считает калории, белки, углеводы и жиры за вас."
+pw_scan_detected,Recognised,Aniqlandi,Распознано
+pw_scan_dish,Garden salad,Sabzavotli salat,Овощной салат
+pw_scan_portion,1 plate · 250 g,1 likopcha · 250 g,1 тарелка · 250 г
+pw_macro_protein,Protein,Oqsil,Белки
+pw_macro_carbs,Carbs,Uglevod,Углеводы
+pw_macro_fat,Fat,Yogʻ,Жиры
+pw_unit_g,g,g,г
+pw_scan_step_1,Take a photo,Suratga oling,Сфотографируйте
+pw_scan_step_2,Calora counts it,Calora hisoblaydi,Calora посчитает
+pw_scan_step_3,Saved to your diary,Kundalikka yoziladi,Сохранится в дневник
+tf_choose_title,Choose your plan,Tarifingizni tanlang,Выберите тариф
+tf_due_today,Due today,Bugun toʻlanadi,К оплате сегодня
+tf_secure,Secure payment,Xavfsiz toʻlov,Безопасная оплата
+tf_cancel_anytime,Cancel anytime,Istalgan payt bekor qilish mumkin,Отмена в любой момент
+tf_family_pair,You and a loved one,Siz va yaqiningiz,Вы и близкий человек
+tf_family_separately,Two separate plans,Ikki kishi alohida olsa,Два отдельных тарифа
+tf_family_plan_row,Family plan,Oila tarifida,Семейный тариф
+tf_family_save,You save {price} sum every month,Har oy {price} soʻm tejaysiz,Экономия {price} сум каждый месяц
+tf_family_how,How it works,Qanday ishlaydi,Как это работает
+tf_family_step_1,You take the family plan,Siz oila tarifini olasiz,Вы оформляете семейный тариф
+tf_family_step_2,Send an invite to your loved one,Yaqiningizga taklif yuborasiz,Отправляете приглашение близкому
+tf_family_step_3,Both of you get full Premium,Ikkalangiz ham toʻliq Premiumdan foydalanasiz,Оба получаете полный Premium
+free_scans_left_title,{count} free scans left,{count} ta bepul skan qoldi,Осталось бесплатных сканов: {count}
+free_scans_sub,Photo or voice · unlimited with Premium,Rasm yoki ovoz orqali · Premiumda cheksiz,По фото или голосу · в Premium без лимита
+free_scans_last_sub,Your last free one · unlimited with Premium,Bu oxirgi bepul skan · Premiumda cheksiz,Последний бесплатный · в Premium без лимита
+free_scans_over_sub,Adding food by hand is always free,Qoʻlda qoʻshish doim bepul,Добавлять вручную — всегда бесплатно
+free_over_title,You have used all {count} free scans,{count} ta bepul skan ishlatildi,Все {count} бесплатных сканов использованы
+free_over_body,"With Premium, snap any meal and Calora counts it for you — as often as you like.",Premium bilan istalgan taomni suratga oling — Calora uni cheklovsiz hisoblab beradi.,С Premium фотографируйте любую еду — Calora посчитает её без ограничений.
+free_over_perk_scan,Unlimited photo scans,Cheksiz rasm orqali skanerlash,Безлимитное сканирование по фото
+free_over_perk_voice,Add meals by voice,Ovqatni ovoz bilan qoʻshish,Добавление еды голосом
+free_over_perk_macros,"Calories, protein, carbs and fat for every meal","Har bir taom uchun kaloriya, oqsil, uglevod va yogʻ","Калории, белки, углеводы и жиры для каждого блюда"
+free_over_cta,Get Premium,Premiumga oʻtish,Перейти на Premium
+free_over_manual,Add by hand for now,Hozircha qoʻlda qoʻshaman,Пока добавлю вручную
+camera_free_left,Free scans: {count}/{limit},Bepul skan: {count}/{limit},Бесплатно: {count}/{limit}

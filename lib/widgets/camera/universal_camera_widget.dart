@@ -418,7 +418,7 @@ class _UniversalCameraPageState extends State<UniversalCameraPage> with WidgetsB
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
-                              Icons.auto_awesome,
+                              Icons.photo_camera_outlined,
                               color: Colors.white,
                               size: 15,
                             ),

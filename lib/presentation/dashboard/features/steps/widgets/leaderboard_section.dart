@@ -15,7 +15,11 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 class LeaderboardSection extends StatelessWidget {
   final PaginationService<UserStatRequest> paginationService;
 
-  const LeaderboardSection({super.key, required this.paginationService});
+  /// Same users in the same order as the step board, but each row shows the
+  /// coins earned from those steps (1 coin per 1000 steps).
+  final bool byCoins;
+
+  const LeaderboardSection({super.key, required this.paginationService, this.byCoins = false});
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +40,9 @@ class LeaderboardSection extends StatelessWidget {
 
             return SliverToBoxAdapter(
               child: PodiumWidget(
-                firstPosition: WinnerItemBuilder(userStat: topThree[0], loading: isLoadingFirstPage),
-                secondPosition: WinnerItemBuilder(userStat: topThree[1], loading: isLoadingFirstPage),
-                thirdPosition: WinnerItemBuilder(userStat: topThree[2], loading: isLoadingFirstPage),
+                firstPosition: WinnerItemBuilder(userStat: topThree[0], loading: isLoadingFirstPage, byCoins: byCoins),
+                secondPosition: WinnerItemBuilder(userStat: topThree[1], loading: isLoadingFirstPage, byCoins: byCoins),
+                thirdPosition: WinnerItemBuilder(userStat: topThree[2], loading: isLoadingFirstPage, byCoins: byCoins),
               ),
             );
           },
@@ -112,7 +116,16 @@ class LeaderboardSection extends StatelessWidget {
           ),
         ],
       ),
-      trailing: user.prettySteps.text(12, 16, 500).c(context.colors.neutral900Primary),
+      trailing: byCoins
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.monetization_on_rounded, size: 15, color: context.colors.accentSub),
+                const SizedBox(width: 4),
+                user.prettyCoins.text(12, 16, 600).c(context.colors.neutral900Primary),
+              ],
+            )
+          : user.prettySteps.text(12, 16, 500).c(context.colors.neutral900Primary),
     );
   }
 }

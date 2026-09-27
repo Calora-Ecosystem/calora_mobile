@@ -1,12 +1,13 @@
-﻿import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/fonts.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/common/extensions/assets_extension.dart';
@@ -64,14 +65,6 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
   LessonRequest? _lesson;
   ExercisesRequest? _exercise;
 
-  /// Single source of truth for the "50% off" countdown so the hero and the
-  /// closing CTA tick in perfect sync. Owned by the page (not the scrolled
-  /// widgets) so it restarts on every open and is unaffected by scrolling.
-  static const Duration _kOfferWindow = Duration(minutes: 10);
-  final ValueNotifier<Duration> _offerRemaining =
-      ValueNotifier<Duration>(_kOfferWindow);
-  Timer? _offerTimer;
-
   static const List<String> _levels = [
     'Minimal',
     'Less',
@@ -83,25 +76,8 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
   @override
   void initState() {
     super.initState();
-    _startOfferCountdown();
     _loadProfile();
     _loadContent();
-  }
-
-  void _startOfferCountdown() {
-    _offerRemaining.value = _kOfferWindow;
-    _offerTimer?.cancel();
-    _offerTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final next = _offerRemaining.value - const Duration(seconds: 1);
-      _offerRemaining.value = next.isNegative ? Duration.zero : next;
-    });
-  }
-
-  @override
-  void dispose() {
-    _offerTimer?.cancel();
-    _offerRemaining.dispose();
-    super.dispose();
   }
 
   Future<void> _loadProfile() async {
@@ -124,15 +100,18 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
 
       // Gender is applied inside getCourse() from the stored profile.
       final courses = await repo.getCourse();
-      final videoCourse =
-          courses.firstWhereOrNull((c) => (c.type ?? '') != 'Workout');
-      final workoutCourse =
-          courses.firstWhereOrNull((c) => c.type == 'Workout');
+      final videoCourse = courses.firstWhereOrNull(
+        (c) => (c.type ?? '') != 'Workout',
+      );
+      final workoutCourse = courses.firstWhereOrNull(
+        (c) => c.type == 'Workout',
+      );
 
       LessonRequest? lesson;
       if (videoCourse?.id != null) {
         final lessons = await repo.getLessonsById(videoCourse!.id!);
-        lesson = lessons.firstWhereOrNull((l) => l.isFree) ??
+        lesson =
+            lessons.firstWhereOrNull((l) => l.isFree) ??
             (lessons.isNotEmpty ? lessons.first : null);
       }
 
@@ -140,8 +119,10 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
       if (workoutCourse?.id != null) {
         final workouts = await repo.getWorkout(workoutCourse!.id!, level);
         if (workouts.isNotEmpty) {
-          final exercises =
-              await repo.getExercisesByWorkoutId(workouts.first.id, level);
+          final exercises = await repo.getExercisesByWorkoutId(
+            workouts.first.id,
+            level,
+          );
           exercise = exercises.isNotEmpty ? exercises.first : null;
         }
       }
@@ -167,17 +148,8 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
     );
   }
 
-  void _openPayment() {
-    showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => PremiumSheet(),
-    );
-  }
+  /// The tariff picker comes first; it opens [PremiumSheet] for payment.
+  void _openPayment() => context.router.push(const TariffsRoute());
 
   @override
   Widget build(BuildContext context) {
@@ -190,10 +162,8 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
               padding: EdgeInsets.zero,
               physics: const ClampingScrollPhysics(),
               children: [
-                _Hero(remaining: _offerRemaining),
-                const SizedBox(height: 20),
-                _wrap(context, const _SocialProofRow()),
-                const SizedBox(height: 28),
+                const _ScanHero(),
+                const SizedBox(height: 36),
                 _wrap(
                   context,
                   _LessonShowcase(
@@ -202,9 +172,7 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
                     onPlay: _openLesson,
                   ),
                 ),
-                const SizedBox(height: 28),
-                _wrap(context, _JourneySection(journey: _journey)),
-                const SizedBox(height: 28),
+                const SizedBox(height: 32),
                 _wrap(
                   context,
                   _ExerciseShowcase(
@@ -212,6 +180,10 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
                     exercise: _exercise,
                   ),
                 ),
+                const SizedBox(height: 32),
+                _wrap(context, const _SocialProofRow()),
+                const SizedBox(height: 28),
+                _wrap(context, _JourneySection(journey: _journey)),
                 const SizedBox(height: 28),
                 _wrap(context, const _FeaturesSection()),
                 const SizedBox(height: 28),
@@ -223,13 +195,7 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
                 const SizedBox(height: 28),
                 _wrap(context, const _FaqSection()),
                 const SizedBox(height: 24),
-                _wrap(
-                  context,
-                  _FinalReinforce(
-                    remaining: _offerRemaining,
-                    onBuy: _openPayment,
-                  ),
-                ),
+                _wrap(context, _FinalReinforce(onBuy: _openPayment)),
                 const SizedBox(height: 16),
               ],
             ),
@@ -242,395 +208,521 @@ class _PremiumFeaturesPageState extends State<PremiumFeaturesPage> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-//  Hero header
+//  Hero — the thing people come for: photograph a meal, get its calories.
+//  A real food photo, the scan frame the camera shows, and the result card
+//  the app returns (kcal + protein / carbs / fat), so the value is obvious
+//  before reading a single line of copy.
 // ─────────────────────────────────────────────────────────────────────────
-class _Hero extends StatefulWidget {
-  /// Shared countdown owned by the page, so this and the closing CTA stay
-  /// in sync and restart on every open.
-  final ValueListenable<Duration> remaining;
-  const _Hero({required this.remaining});
+class _ScanHero extends StatelessWidget {
+  const _ScanHero();
 
   @override
-  State<_Hero> createState() => _HeroState();
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final double w = MediaQuery.sizeOf(context).width;
+    final double titleSize = w < 360 ? 24 : 28;
+
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 8),
+      child: _wrap(
+        context,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => context.router.maybePop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: colors.softGray,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: colors.textStrong,
+                      size: 16,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.accentGreenWhite,
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Assets.icons.crown.svg(
+                        width: 13,
+                        height: 13,
+                        colorFilter: ColorFilter.mode(
+                          colors.accentSub,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      'Calora Premium'.text(12, 14, 700).c(colors.accentSub),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            'pw_scan_title'
+                .tr()
+                .text(titleSize, titleSize + 6, 700)
+                .c(colors.textStrong),
+            const SizedBox(height: 10),
+            'pw_scan_subtitle'.tr().text(15, 22, 400).c(colors.textSub),
+            const SizedBox(height: 22),
+            const _ScanDemo(),
+            const SizedBox(height: 20),
+            const _ScanSteps(),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                for (var i = 0; i < 5; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 2),
+                    child: Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: colors.awayBase,
+                    ),
+                  ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: 'pw_trust'
+                      .tr()
+                      .text(12, 16, 600)
+                      .c(colors.textSub)
+                      .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _HeroState extends State<_Hero> with TickerProviderStateMixin {
-  late final AnimationController _intro;
-  late final AnimationController _glow;
+/// A single worked example of a scan. The numbers are a real serving of a
+/// dressed garden salad (≈250 g), and they add up: 4·4 + 11·4 + 10·9 ≈ 150.
+class _ScanDemo extends StatefulWidget {
+  const _ScanDemo();
 
   @override
-  void initState() {
-    super.initState();
-    _intro = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 950),
-    )..forward();
-    _glow = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
-  }
+  State<_ScanDemo> createState() => _ScanDemoState();
+}
+
+class _ScanDemoState extends State<_ScanDemo>
+    with SingleTickerProviderStateMixin {
+  static const _kcal = 150;
+  static const _protein = 4;
+  static const _carbs = 11;
+  static const _fat = 10;
+
+  static const _proteinColor = Color(0xFFE0735A);
+  static const _carbsColor = Color(0xFFE9A93A);
+  static const _fatColor = Color(0xFF4F86E8);
+
+  static const double _photoHeight = 290;
+  static const double _overlap = 44;
+
+  /// Plays once: the scan line sweeps the plate, then the result settles in.
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2200),
+  )..forward();
 
   @override
   void dispose() {
-    _intro.dispose();
-    _glow.dispose();
+    _c.dispose();
     super.dispose();
   }
 
-  /// Staggered fade + rise for a hero element, driven by [_intro].
-  Widget _reveal(double start, double end, Widget child, {double dy = 22}) {
-    final anim = CurvedAnimation(
-      parent: _intro,
-      curve: Interval(start, end, curve: Curves.easeOutCubic),
-    );
-    return AnimatedBuilder(
-      animation: anim,
-      builder: (context, c) => Opacity(
-        opacity: anim.value.clamp(0.0, 1.0),
-        child: Transform.translate(
-          offset: Offset(0, (1 - anim.value) * dy),
-          child: c,
-        ),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _orb(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [color, color.withValues(alpha: 0)],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final accent = context.colors.accentSub;
-    final double w = MediaQuery.sizeOf(context).width;
-    final double titleSize = w < 360 ? 23 : 27;
-    const radius = BorderRadius.vertical(bottom: Radius.circular(32));
+    final sweep = CurvedAnimation(
+      parent: _c,
+      curve: const Interval(0.0, 0.55, curve: Curves.easeInOut),
+    );
+    final result = CurvedAnimation(
+      parent: _c,
+      curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
+    );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color.lerp(accent, Colors.black, 0.30)!,
-            accent,
-            context.colors.accentLightSub,
-          ],
-        ),
-        borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: accent.withValues(alpha: 0.35),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Stack(
-          children: [
-            // Softly drifting glow orbs for depth.
-            Positioned.fill(
-              child: AnimatedBuilder(
-                animation: _glow,
-                builder: (context, _) {
-                  final t = _glow.value;
-                  return Stack(
-                    children: [
-                      Positioned(
-                        top: -60 + 14 * t,
-                        right: -50,
-                        child: _orb(
-                            170,
-                            context.colors.white
-                                .withValues(alpha: 0.10 + 0.06 * t)),
-                      ),
-                      Positioned(
-                        bottom: -70,
-                        left: -40 - 14 * t,
-                        child: _orb(
-                            200,
-                            context.colors.accentWhite
-                                .withValues(alpha: 0.08 + 0.05 * (1 - t))),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding:
-                  EdgeInsets.only(top: MediaQuery.of(context).padding.top + 8),
-              child: _wrap(
-                context,
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24, top: 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => context.router.maybePop(),
-                            child: Container(
-                              width: 38,
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color:
-                                    context.colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.arrow_back_ios_new_rounded,
-                                  color: context.colors.white, size: 16),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: _photoHeight,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Warm tabletop behind the plate — reads as a real photo,
+                // not a flat app colour.
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(0, -0.2),
+                      radius: 0.95,
+                      colors: [Color(0xFFF6F1EA), Color(0xFFE4DACB)],
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: const Alignment(0, -0.35),
+                  child: Container(
+                    width: 214,
+                    height: 214,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.18),
+                          blurRadius: 26,
+                          offset: const Offset(0, 14),
+                        ),
+                      ],
+                    ),
+                    child: Assets.images.scanFoodPng.image(fit: BoxFit.cover),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(18, 18, 18, _overlap + 12),
+                  child: CustomPaint(painter: _ScanFramePainter()),
+                ),
+                // Scan line sweeping once over the plate.
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: _c,
+                    builder: (context, _) {
+                      if (_c.value >= 0.55) return const SizedBox.shrink();
+                      final top =
+                          24 + (_photoHeight - _overlap - 60) * sweep.value;
+                      return Align(
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(24, top, 24, 0),
+                          child: Container(
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  blurRadius: 12,
+                                ),
+                              ],
                             ),
                           ),
-                          const Spacer(),
-                          _premiumBadge(context),
-                        ],
-                      ),
-                      const SizedBox(height: 22),
-                      _reveal(
-                        0.05,
-                        0.55,
-                        'pw_hero_title'
-                            .tr()
-                            .text(titleSize, titleSize + 6, 700)
-                            .c(context.colors.white),
-                      ),
-                      const SizedBox(height: 10),
-                      _reveal(
-                        0.15,
-                        0.65,
-                        'pw_hero_subtitle'
-                            .tr()
-                            .text(14, 20, 400)
-                            .c(context.colors.white.withValues(alpha: 0.92)),
-                      ),
-                      const SizedBox(height: 16),
-                      _reveal(
-                        0.25,
-                        0.75,
-                        Row(
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 30,
+                  left: 0,
+                  right: 0,
+                  child: FadeTransition(
+                    opacity: result,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            ...List.generate(
-                              5,
-                              (_) => Padding(
-                                padding: const EdgeInsets.only(right: 2),
-                                child: Icon(Icons.star_rounded,
-                                    size: 16, color: context.colors.awayBase),
-                              ),
+                            Icon(
+                              Icons.check_circle_rounded,
+                              size: 14,
+                              color: context.colors.accentSub,
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: 'pw_trust'
-                                  .tr()
-                                  .text(12, 16, 600)
-                                  .c(context.colors.white)
-                                  .copyWith(
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis),
-                            ),
+                            const SizedBox(width: 5),
+                            'pw_scan_detected'
+                                .tr()
+                                .text(11, 14, 600)
+                                .c(context.colors.textStrong),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
-                      _reveal(
-                        0.4,
-                        1.0,
-                        _offerCard(context, accent),
-                        dy: 30,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: _photoHeight - _overlap,
+            left: 12,
+            right: 12,
+          ),
+          child: AnimatedBuilder(
+            animation: result,
+            builder: (context, child) => Opacity(
+              opacity: result.value,
+              child: Transform.translate(
+                offset: Offset(0, 18 * (1 - result.value)),
+                child: child,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// PREMIUM pill with a gentle breathing pulse.
-  Widget _premiumBadge(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _glow,
-      builder: (context, child) => Transform.scale(
-        scale: 1 + 0.04 * _glow.value,
-        child: child,
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: context.colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(100),
-          border: Border.all(color: context.colors.white.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Assets.icons.crown.svg(
-              width: 14,
-              height: 14,
-              colorFilter:
-                  ColorFilter.mode(context.colors.white, BlendMode.srcIn),
-            ),
-            const SizedBox(width: 6),
-            'pw_hero_badge'.tr().text(11, 12, 700).c(context.colors.white),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Glassy "-50%" card with a live mm:ss countdown.
-  Widget _offerCard(BuildContext context, Color accent) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: context.colors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.colors.white.withValues(alpha: 0.28)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: context.colors.white,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                '−50%'.text(20, 22, 800).c(accent),
-                'pw_off'.tr().text(9, 10, 700).c(context.colors.textSub),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Assets.icons.fire.svg(width: 14, height: 14),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: 'pw_offer_ends'
-                          .tr()
-                          .text(12, 15, 700)
-                          .c(context.colors.white)
-                          .copyWith(
-                              maxLines: 1, overflow: TextOverflow.ellipsis),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ValueListenableBuilder<Duration>(
-                  valueListenable: widget.remaining,
-                  builder: (context, rem, _) => _CountdownTimer(
-                    remaining: rem,
-                    urgent: rem <= const Duration(minutes: 1),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────
-//  Shared mm:ss countdown display with rolling digit cells.
-//  Stateless — the parent owns the ticking [remaining] value.
-// ─────────────────────────────────────────────────────────────────────────
-class _CountdownTimer extends StatelessWidget {
-  final Duration remaining;
-  final bool urgent;
-  final double boxWidth;
-  final double fontSize;
-
-  const _CountdownTimer({
-    required this.remaining,
-    this.urgent = false,
-    this.boxWidth = 36,
-    this.fontSize = 19,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final mm = remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final ss = remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _box(context, mm),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Text(
-            ':',
-            style: TextStyle(
-              color: context.colors.white,
-              fontSize: fontSize,
-              fontWeight: FontWeight.w800,
-            ),
+            child: _resultCard(context),
           ),
         ),
-        _box(context, ss),
       ],
     );
   }
 
-  Widget _box(BuildContext context, String value) {
+  Widget _resultCard(BuildContext context) {
+    final colors = context.colors;
+    const total = _protein * 4 + _carbs * 4 + _fat * 9;
     return Container(
-      width: boxWidth,
-      height: boxWidth + 2,
-      alignment: Alignment.center,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
-        color: urgent
-            ? context.colors.errorBase.withValues(alpha: 0.9)
-            : context.colors.black.withValues(alpha: 0.30),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: context.colors.white.withValues(alpha: 0.2)),
+        color: colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
-        transitionBuilder: (child, anim) => ClipRect(
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.7),
-              end: Offset.zero,
-            ).animate(anim),
-            child: FadeTransition(opacity: anim, child: child),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    'pw_scan_dish'
+                        .tr()
+                        .text(16, 20, 700)
+                        .c(colors.textStrong)
+                        .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 2),
+                    'pw_scan_portion'.tr().text(12, 16, 500).c(colors.textSub),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '$_kcal',
+                      style: TextStyle(
+                        fontSize: 28,
+                        height: 1.0,
+                        fontWeight: FontWeight.w800,
+                        color: colors.textStrong,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' ${'kcal'.tr()}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textSub,
+                      ),
+                    ),
+                  ],
+                ),
+                style: const TextStyle(fontFamily: FontFamily.inter),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Divider(height: 1, color: colors.strokeSoft),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _macro(
+                  context,
+                  'pw_macro_protein'.tr(),
+                  _protein,
+                  _protein * 4 / total,
+                  _proteinColor,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _macro(
+                  context,
+                  'pw_macro_carbs'.tr(),
+                  _carbs,
+                  _carbs * 4 / total,
+                  _carbsColor,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _macro(
+                  context,
+                  'pw_macro_fat'.tr(),
+                  _fat,
+                  _fat * 9 / total,
+                  _fatColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _macro(
+    BuildContext context,
+    String label,
+    int grams,
+    double share,
+    Color color,
+  ) {
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        label
+            .text(12, 16, 500)
+            .c(colors.textSub)
+            .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+        const SizedBox(height: 2),
+        '$grams ${'pw_unit_g'.tr()}'.text(16, 20, 700).c(colors.textStrong),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: Stack(
+            children: [
+              Container(height: 5, color: color.withValues(alpha: 0.16)),
+              AnimatedBuilder(
+                animation: _c,
+                builder: (context, _) => FractionallySizedBox(
+                  widthFactor:
+                      share *
+                      Curves.easeOutCubic.transform(
+                        ((_c.value - 0.55) / 0.45).clamp(0.0, 1.0),
+                      ),
+                  child: Container(height: 5, color: color),
+                ),
+              ),
+            ],
           ),
         ),
-        child: Text(
-          value,
-          key: ValueKey(value),
-          style: TextStyle(
-            color: context.colors.white,
-            fontSize: fontSize,
-            height: (fontSize + 1) / fontSize,
-            fontWeight: FontWeight.w800,
-            fontFeatures: const [FontFeature.tabularFigures()],
+      ],
+    );
+  }
+}
+
+/// Four corner brackets — the frame the in-app camera shows while scanning.
+class _ScanFramePainter extends CustomPainter {
+  const _ScanFramePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    const l = 26.0;
+    final w = size.width;
+    final h = size.height;
+    final path = Path()
+      ..moveTo(0, l)
+      ..lineTo(0, 0)
+      ..lineTo(l, 0)
+      ..moveTo(w - l, 0)
+      ..lineTo(w, 0)
+      ..lineTo(w, l)
+      ..moveTo(w, h - l)
+      ..lineTo(w, h)
+      ..lineTo(w - l, h)
+      ..moveTo(l, h)
+      ..lineTo(0, h)
+      ..lineTo(0, h - l);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_ScanFramePainter oldDelegate) => false;
+}
+
+/// Three-step "how it works" strip under the demo.
+class _ScanSteps extends StatelessWidget {
+  const _ScanSteps();
+
+  @override
+  Widget build(BuildContext context) {
+    final steps = [
+      (Icons.photo_camera_outlined, 'pw_scan_step_1'.tr()),
+      (Icons.insights_rounded, 'pw_scan_step_2'.tr()),
+      (Icons.menu_book_outlined, 'pw_scan_step_3'.tr()),
+    ];
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < steps.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(child: _step(context, i + 1, steps[i].$1, steps[i].$2)),
+        ],
+      ],
+    );
+  }
+
+  Widget _step(BuildContext context, int n, IconData icon, String label) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: colors.softGray,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: colors.accentSub),
+              const Spacer(),
+              '$n'.text(12, 14, 700).c(colors.textSub),
+            ],
           ),
-        ),
+          const SizedBox(height: 10),
+          label
+              .text(12, 16, 600)
+              .c(colors.textStrong)
+              .copyWith(maxLines: 3, overflow: TextOverflow.ellipsis),
+        ],
       ),
     );
   }
@@ -648,8 +740,10 @@ class _JourneySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle('pw_journey_title'.tr(),
-            subtitle: 'pw_journey_subtitle'.tr()),
+        _SectionTitle(
+          'pw_journey_title'.tr(),
+          subtitle: 'pw_journey_subtitle'.tr(),
+        ),
         const SizedBox(height: 16),
         const _PhasesCard(),
         const SizedBox(height: 12),
@@ -668,12 +762,24 @@ class _PhasesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final phases = <_Phase>[
-      _Phase(Icons.eco_rounded, 'pw_phase_1_range'.tr(),
-          'pw_phase_1_title'.tr(), 'pw_phase_1_desc'.tr()),
-      _Phase(Icons.bolt_rounded, 'pw_phase_2_range'.tr(),
-          'pw_phase_2_title'.tr(), 'pw_phase_2_desc'.tr()),
-      _Phase(Icons.emoji_events_rounded, 'pw_phase_3_range'.tr(),
-          'pw_phase_3_title'.tr(), 'pw_phase_3_desc'.tr()),
+      _Phase(
+        Icons.eco_rounded,
+        'pw_phase_1_range'.tr(),
+        'pw_phase_1_title'.tr(),
+        'pw_phase_1_desc'.tr(),
+      ),
+      _Phase(
+        Icons.bolt_rounded,
+        'pw_phase_2_range'.tr(),
+        'pw_phase_2_title'.tr(),
+        'pw_phase_2_desc'.tr(),
+      ),
+      _Phase(
+        Icons.emoji_events_rounded,
+        'pw_phase_3_range'.tr(),
+        'pw_phase_3_title'.tr(),
+        'pw_phase_3_desc'.tr(),
+      ),
     ];
     return Container(
       width: double.infinity,
@@ -739,12 +845,16 @@ class _PhasesCard extends StatelessWidget {
                             .text(15, 19, 700)
                             .c(context.colors.textStrong)
                             .copyWith(
-                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                       ),
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: context.colors.lightGreen,
                           borderRadius: BorderRadius.circular(100),
@@ -814,8 +924,11 @@ class _ProjectionChartCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline_rounded,
-                  size: 14, color: context.colors.textSub),
+              Icon(
+                Icons.info_outline_rounded,
+                size: 14,
+                color: context.colors.textSub,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: 'pw_chart_note'
@@ -835,9 +948,10 @@ class _ProjectionChartCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 6),
         label.text(12, 14, 500).c(context.colors.textSub),
       ],
@@ -845,7 +959,11 @@ class _ProjectionChartCard extends StatelessWidget {
   }
 
   LineChartData _chartData(
-      BuildContext context, double t, Color accent, Color grey) {
+    BuildContext context,
+    double t,
+    Color accent,
+    Color grey,
+  ) {
     final withSpots = <FlSpot>[];
     final withoutSpots = <FlSpot>[];
     final start = journey.startWeight;
@@ -874,7 +992,10 @@ class _ProjectionChartCard extends StatelessWidget {
         drawVerticalLine: false,
         horizontalInterval: interval,
         getDrawingHorizontalLine: (_) => FlLine(
-            color: context.colors.strokeSoft, strokeWidth: 1, dashArray: [4, 4]),
+          color: context.colors.strokeSoft,
+          strokeWidth: 1,
+          dashArray: [4, 4],
+        ),
       ),
       borderData: FlBorderData(show: false),
       titlesData: FlTitlesData(
@@ -888,8 +1009,9 @@ class _ProjectionChartCard extends StatelessWidget {
             getTitlesWidget: (value, meta) {
               if (value % 3 != 0) return const SizedBox.shrink();
               final wk = value.toInt();
-              final label =
-                  wk == 0 ? 'pw_point_a'.tr() : '$wk ${'pw_week'.tr()}';
+              final label = wk == 0
+                  ? 'pw_point_a'.tr()
+                  : '$wk ${'pw_week'.tr()}';
               return Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: label.text(9, 10, 500).c(context.colors.textSub),
@@ -964,8 +1086,11 @@ class _ValueStackCard extends StatelessWidget {
           for (final r in rows) ...[
             Row(
               children: [
-                Icon(Icons.remove_circle_outline_rounded,
-                    size: 16, color: context.colors.iconSoft),
+                Icon(
+                  Icons.remove_circle_outline_rounded,
+                  size: 16,
+                  color: context.colors.iconSoft,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: r[0]
@@ -1010,8 +1135,11 @@ class _ValueStackCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.check_circle_rounded,
-                    size: 22, color: context.colors.accentSub),
+                Icon(
+                  Icons.check_circle_rounded,
+                  size: 22,
+                  color: context.colors.accentSub,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -1062,7 +1190,7 @@ class _SocialProofRow extends StatelessWidget {
       _Proof('94%', 'pw_proof_success'.tr(), context.colors.accentSub),
       _Proof('−8.4', 'pw_proof_loss'.tr(), context.colors.blueAccent),
       _Proof('4.9★', 'pw_proof_rating'.tr(), context.colors.warningBase),
-      _Proof('50k+', 'pw_proof_users'.tr(), context.colors.accentSub),
+      _Proof('10k+', 'pw_proof_users'.tr(), context.colors.accentSub),
     ];
     return Row(
       children: [
@@ -1122,8 +1250,10 @@ class _CompareSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle('pw_compare_title'.tr(),
-            subtitle: 'pw_compare_subtitle'.tr()),
+        _SectionTitle(
+          'pw_compare_title'.tr(),
+          subtitle: 'pw_compare_subtitle'.tr(),
+        ),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
@@ -1146,14 +1276,18 @@ class _CompareSection extends StatelessWidget {
                     ),
                   ),
                   Container(
-                      width: 1, height: 44, color: context.colors.strokeSoft),
+                    width: 1,
+                    height: 44,
+                    color: context.colors.strokeSoft,
+                  ),
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: context.colors.lightGreen,
                         borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(19)),
+                          topRight: Radius.circular(19),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -1162,7 +1296,9 @@ class _CompareSection extends StatelessWidget {
                             width: 14,
                             height: 14,
                             colorFilter: ColorFilter.mode(
-                                context.colors.accentSub, BlendMode.srcIn),
+                              context.colors.accentSub,
+                              BlendMode.srcIn,
+                            ),
                           ),
                           const SizedBox(width: 6),
                           Flexible(
@@ -1171,8 +1307,9 @@ class _CompareSection extends StatelessWidget {
                                 .text(13, 16, 700)
                                 .c(context.colors.accentSub)
                                 .copyWith(
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                           ),
                         ],
                       ),
@@ -1184,7 +1321,8 @@ class _CompareSection extends StatelessWidget {
                 DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(
-                        top: BorderSide(color: context.colors.strokeSoft)),
+                      top: BorderSide(color: context.colors.strokeSoft),
+                    ),
                   ),
                   child: IntrinsicHeight(
                     child: Row(
@@ -1194,8 +1332,9 @@ class _CompareSection extends StatelessWidget {
                         Container(width: 1, color: context.colors.strokeSoft),
                         Expanded(
                           child: ColoredBox(
-                            color: context.colors.lightGreen
-                                .withValues(alpha: 0.4),
+                            color: context.colors.lightGreen.withValues(
+                              alpha: 0.4,
+                            ),
                             child: _cell(context, r[1], true),
                           ),
                         ),
@@ -1213,10 +1352,7 @@ class _CompareSection extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
-              colors: [
-                context.colors.accentSub,
-                context.colors.accentLightSub,
-              ],
+              colors: [context.colors.accentSub, context.colors.accentLightSub],
             ),
             boxShadow: [
               BoxShadow(
@@ -1228,8 +1364,11 @@ class _CompareSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.auto_awesome_rounded,
-                  size: 18, color: context.colors.white),
+              Icon(
+                Icons.auto_awesome_rounded,
+                size: 18,
+                color: context.colors.white,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: 'pw_compare_footer'
@@ -1251,13 +1390,16 @@ class _CompareSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(good ? Icons.check_circle_rounded : Icons.cancel_rounded,
-              size: 16,
-              color: good ? context.colors.accentSub : context.colors.iconSoft),
+          Icon(
+            good ? Icons.check_circle_rounded : Icons.cancel_rounded,
+            size: 16,
+            color: good ? context.colors.accentSub : context.colors.iconSoft,
+          ),
           const SizedBox(width: 8),
           Expanded(
-            child: text.text(12, 16, good ? 600 : 400).c(
-                good ? context.colors.textStrong : context.colors.textSub),
+            child: text
+                .text(12, 16, good ? 600 : 400)
+                .c(good ? context.colors.textStrong : context.colors.textSub),
           ),
         ],
       ),
@@ -1274,12 +1416,36 @@ class _FeaturesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final features = <List<dynamic>>[
-      [Strings.aiHealthAnalysisTitle, Strings.aiHealthAnalysisSubtitle, Assets.icons.brain],
-      [Strings.aiFoodPhotoAnalysisTitle, Strings.aiFoodPhotoAnalysisSubtitle, Assets.icons.camera],
-      [Strings.voiceFoodInputTitle, Strings.voiceFoodInputSubtitle, Assets.icons.icMicro],
-      [Strings.men30DayWorkoutTitle, Strings.men30DayWorkoutSubtitle, Assets.icons.malePerson],
-      [Strings.women30DayWorkoutTitle, Strings.women30DayWorkoutSubtitle, Assets.icons.femalePerson],
-      [Strings.adFreeExperienceTitle, Strings.adFreeExperienceSubtitle, Assets.icons.shield],
+      [
+        Strings.aiHealthAnalysisTitle,
+        Strings.aiHealthAnalysisSubtitle,
+        Assets.icons.brain,
+      ],
+      [
+        Strings.aiFoodPhotoAnalysisTitle,
+        Strings.aiFoodPhotoAnalysisSubtitle,
+        Assets.icons.camera,
+      ],
+      [
+        Strings.voiceFoodInputTitle,
+        Strings.voiceFoodInputSubtitle,
+        Assets.icons.icMicro,
+      ],
+      [
+        Strings.men30DayWorkoutTitle,
+        Strings.men30DayWorkoutSubtitle,
+        Assets.icons.malePerson,
+      ],
+      [
+        Strings.women30DayWorkoutTitle,
+        Strings.women30DayWorkoutSubtitle,
+        Assets.icons.femalePerson,
+      ],
+      [
+        Strings.adFreeExperienceTitle,
+        Strings.adFreeExperienceSubtitle,
+        Assets.icons.shield,
+      ],
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1326,14 +1492,17 @@ class _FeatureCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-                color: context.colors.white,
-                borderRadius: BorderRadius.circular(12)),
+              color: context.colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
             alignment: Alignment.center,
             child: icon.svg(
               height: 20,
               width: 20,
-              colorFilter:
-                  ColorFilter.mode(context.colors.accentSub, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(
+                context.colors.accentSub,
+                BlendMode.srcIn,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -1354,8 +1523,11 @@ class _FeatureCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Icon(Icons.check_circle_rounded,
-              size: 20, color: context.colors.accentSub),
+          Icon(
+            Icons.check_circle_rounded,
+            size: 20,
+            color: context.colors.accentSub,
+          ),
         ],
       ),
     );
@@ -1371,12 +1543,24 @@ class _TestimonialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = [
-      _Testimonial('pw_tst_1_name'.tr(), 'pw_tst_1_text'.tr(),
-          'pw_tst_1_result'.tr(), 'pw_tst_1_meta'.tr()),
-      _Testimonial('pw_tst_2_name'.tr(), 'pw_tst_2_text'.tr(),
-          'pw_tst_2_result'.tr(), 'pw_tst_2_meta'.tr()),
-      _Testimonial('pw_tst_3_name'.tr(), 'pw_tst_3_text'.tr(),
-          'pw_tst_3_result'.tr(), 'pw_tst_3_meta'.tr()),
+      _Testimonial(
+        'pw_tst_1_name'.tr(),
+        'pw_tst_1_text'.tr(),
+        'pw_tst_1_result'.tr(),
+        'pw_tst_1_meta'.tr(),
+      ),
+      _Testimonial(
+        'pw_tst_2_name'.tr(),
+        'pw_tst_2_text'.tr(),
+        'pw_tst_2_result'.tr(),
+        'pw_tst_2_meta'.tr(),
+      ),
+      _Testimonial(
+        'pw_tst_3_name'.tr(),
+        'pw_tst_3_text'.tr(),
+        'pw_tst_3_result'.tr(),
+        'pw_tst_3_meta'.tr(),
+      ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1402,8 +1586,9 @@ class _TestimonialsSection extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                  color: context.colors.accentGreenWhite,
-                  shape: BoxShape.circle),
+                color: context.colors.accentGreenWhite,
+                shape: BoxShape.circle,
+              ),
               alignment: Alignment.center,
               child: initial.text(18, 20, 700).c(context.colors.accentSub),
             ),
@@ -1419,19 +1604,27 @@ class _TestimonialsSection extends StatelessWidget {
                             .text(14, 18, 600)
                             .c(context.colors.textStrong)
                             .copyWith(
-                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                       ),
                       const SizedBox(width: 6),
-                      Icon(Icons.verified_rounded,
-                          size: 14, color: context.colors.blueAccent),
+                      Icon(
+                        Icons.verified_rounded,
+                        size: 14,
+                        color: context.colors.blueAccent,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 2),
                   Row(
                     children: List.generate(
                       5,
-                      (_) => Icon(Icons.star_rounded,
-                          size: 13, color: context.colors.awayBase),
+                      (_) => Icon(
+                        Icons.star_rounded,
+                        size: 13,
+                        color: context.colors.awayBase,
+                      ),
                     ),
                   ),
                 ],
@@ -1440,8 +1633,9 @@ class _TestimonialsSection extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                  color: context.colors.lightGreen,
-                  borderRadius: BorderRadius.circular(100)),
+                color: context.colors.lightGreen,
+                borderRadius: BorderRadius.circular(100),
+              ),
               child: t.result.text(13, 16, 700).c(context.colors.accentSub),
             ),
           ],
@@ -1513,11 +1707,13 @@ class _FaqSection extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.help_outline_rounded,
-                  size: 18, color: context.colors.accentSub),
+              Icon(
+                Icons.help_outline_rounded,
+                size: 18,
+                color: context.colors.accentSub,
+              ),
               const SizedBox(width: 8),
-              Expanded(
-                  child: q.text(14, 18, 600).c(context.colors.textStrong)),
+              Expanded(child: q.text(14, 18, 600).c(context.colors.textStrong)),
             ],
           ),
           const SizedBox(height: 8),
@@ -1535,13 +1731,10 @@ class _FaqSection extends StatelessWidget {
 //  Final reinforcement
 // ─────────────────────────────────────────────────────────────────────────
 class _FinalReinforce extends StatefulWidget {
-  /// Shared countdown owned by the page (kept in sync with the hero).
-  final ValueListenable<Duration> remaining;
-
   /// Opens the payment sheet — the closing card is itself a CTA.
   final VoidCallback onBuy;
 
-  const _FinalReinforce({required this.remaining, required this.onBuy});
+  const _FinalReinforce({required this.onBuy});
 
   @override
   State<_FinalReinforce> createState() => _FinalReinforceState();
@@ -1656,17 +1849,21 @@ class _FinalReinforceState extends State<_FinalReinforce>
                           top: -50 + 12 * t,
                           right: -40,
                           child: _orb(
-                              150,
-                              context.colors.white
-                                  .withValues(alpha: 0.12 + 0.06 * t)),
+                            150,
+                            context.colors.white.withValues(
+                              alpha: 0.12 + 0.06 * t,
+                            ),
+                          ),
                         ),
                         Positioned(
                           bottom: -60,
                           left: -30 - 12 * t,
                           child: _orb(
-                              180,
-                              context.colors.accentWhite
-                                  .withValues(alpha: 0.10 + 0.05 * (1 - t))),
+                            180,
+                            context.colors.accentWhite.withValues(
+                              alpha: 0.10 + 0.05 * (1 - t),
+                            ),
+                          ),
                         ),
                       ],
                     );
@@ -1674,8 +1871,10 @@ class _FinalReinforceState extends State<_FinalReinforce>
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 26),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 26,
+                ),
                 child: Column(
                   children: [
                     _reveal(0.0, 0.5, _medallion(context)),
@@ -1691,12 +1890,18 @@ class _FinalReinforceState extends State<_FinalReinforce>
                     ),
                     const SizedBox(height: 16),
                     _reveal(0.2, 0.7, _joinRow(context)),
-                    const SizedBox(height: 18),
-                    _reveal(0.3, 0.85, _spotsLeft(context)),
-                    const SizedBox(height: 16),
-                    _reveal(0.4, 0.95, _timerBlock(context), dy: 26),
-                    const SizedBox(height: 18),
-                    _reveal(0.5, 1.0, _ctaButton(context), dy: 26),
+                    const SizedBox(height: 20),
+                    _reveal(0.3, 0.9, _ctaButton(context), dy: 26),
+                    const SizedBox(height: 12),
+                    _reveal(
+                      0.4,
+                      1.0,
+                      'pw_cta_subtitle'
+                          .tr()
+                          .text(12, 16, 500)
+                          .c(context.colors.white.withValues(alpha: 0.85))
+                          .copyWith(textAlign: TextAlign.center),
+                    ),
                   ],
                 ),
               ),
@@ -1720,21 +1925,25 @@ class _FinalReinforceState extends State<_FinalReinforce>
           shape: BoxShape.circle,
           color: context.colors.white.withValues(alpha: 0.18),
           border: Border.all(
-              color: context.colors.white.withValues(alpha: 0.45), width: 1.5),
+            color: context.colors.white.withValues(alpha: 0.45),
+            width: 1.5,
+          ),
         ),
         child: Center(
           child: Assets.icons.crown.svg(
             width: 28,
             height: 28,
-            colorFilter:
-                ColorFilter.mode(context.colors.white, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(
+              context.colors.white,
+              BlendMode.srcIn,
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// Overlapping avatar stack + "join 50,000+" line.
+  /// Overlapping avatar stack + "join 10,000+" line.
   Widget _joinRow(BuildContext context) {
     const avatarCount = 4;
     const double d = 30;
@@ -1763,8 +1972,11 @@ class _FinalReinforceState extends State<_FinalReinforce>
                       color: tints[i],
                       border: Border.all(color: context.colors.white, width: 2),
                     ),
-                    child: Icon(Icons.person_rounded,
-                        size: 16, color: context.colors.white),
+                    child: Icon(
+                      Icons.person_rounded,
+                      size: 16,
+                      color: context.colors.white,
+                    ),
                   ),
                 ),
               Positioned(
@@ -1794,106 +2006,13 @@ class _FinalReinforceState extends State<_FinalReinforce>
     );
   }
 
-  /// Scarcity chip with an animated "almost full" progress bar.
-  Widget _spotsLeft(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: context.colors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.colors.white.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.local_fire_department_rounded,
-                  size: 15, color: context.colors.awayBase),
-              const SizedBox(width: 6),
-              Expanded(
-                child: 'pw_spots_left'
-                    .tr()
-                    .text(12, 16, 600)
-                    .c(context.colors.white)
-                    .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: Stack(
-              children: [
-                Container(
-                  height: 6,
-                  color: context.colors.white.withValues(alpha: 0.22),
-                ),
-                AnimatedBuilder(
-                  animation: _intro,
-                  builder: (context, _) => FractionallySizedBox(
-                    widthFactor: 0.88 * _intro.value,
-                    child: Container(
-                      height: 6,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        gradient: LinearGradient(colors: [
-                          context.colors.awayBase,
-                          context.colors.warningBase,
-                        ]),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// "50% off ends in" label + live mm:ss countdown.
-  Widget _timerBlock(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Assets.icons.fire.svg(width: 14, height: 14),
-            const SizedBox(width: 6),
-            Flexible(
-              child: 'pw_offer_ends'
-                  .tr()
-                  .text(12, 16, 700)
-                  .c(context.colors.white)
-                  .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        ValueListenableBuilder<Duration>(
-          valueListenable: widget.remaining,
-          builder: (context, rem, _) => _CountdownTimer(
-            remaining: rem,
-            urgent: rem <= const Duration(minutes: 1),
-            boxWidth: 42,
-            fontSize: 22,
-          ),
-        ),
-      ],
-    );
-  }
-
   /// High-contrast white "buy now" button — the closing conversion point.
   Widget _ctaButton(BuildContext context) {
     final accent = context.colors.accentSub;
     return AnimatedBuilder(
       animation: _glow,
-      builder: (context, child) => Transform.scale(
-        scale: 1 + 0.02 * _glow.value,
-        child: child,
-      ),
+      builder: (context, child) =>
+          Transform.scale(scale: 1 + 0.02 * _glow.value, child: child),
       child: GestureDetector(
         onTap: widget.onBuy,
         child: Container(
@@ -1952,28 +2071,14 @@ class _BottomCta extends StatelessWidget {
       shadowColor: context.colors.black.withValues(alpha: 0.12),
       child: Padding(
         padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom + 12, top: 12),
+          bottom: MediaQuery.of(context).padding.bottom + 12,
+          top: 12,
+        ),
         child: _wrap(
           context,
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.local_fire_department_rounded,
-                      size: 14, color: context.colors.warningBase),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: 'pw_spots_left'
-                        .tr()
-                        .text(11, 14, 500)
-                        .c(context.colors.warningBase)
-                        .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
               GestureDetector(
                 onTap: onTap,
                 child: Container(
@@ -1985,7 +2090,10 @@ class _BottomCta extends StatelessWidget {
                       colors: [
                         context.colors.accentSub,
                         Color.lerp(
-                            context.colors.accentSub, Colors.black, 0.14)!,
+                          context.colors.accentSub,
+                          Colors.black,
+                          0.14,
+                        )!,
                       ],
                     ),
                     boxShadow: [
@@ -2004,7 +2112,9 @@ class _BottomCta extends StatelessWidget {
                         width: 18,
                         height: 18,
                         colorFilter: ColorFilter.mode(
-                            context.colors.white, BlendMode.srcIn),
+                          context.colors.white,
+                          BlendMode.srcIn,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Flexible(
@@ -2013,7 +2123,9 @@ class _BottomCta extends StatelessWidget {
                             .text(16, 20, 700)
                             .c(context.colors.white)
                             .copyWith(
-                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                       ),
                     ],
                   ),
@@ -2057,8 +2169,10 @@ Widget _forYouChip(BuildContext context) {
 Widget _mediaBadge(BuildContext context, IconData icon, String text, Color bg) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-    decoration:
-        BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
+    decoration: BoxDecoration(
+      color: bg,
+      borderRadius: BorderRadius.circular(8),
+    ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -2086,16 +2200,12 @@ class _LessonShowcase extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _SectionTitle('pw_video_title'.tr(),
-                  subtitle: 'pw_video_subtitle'.tr()),
-            ),
-            const SizedBox(width: 8),
-            _forYouChip(context),
-          ],
+        // Chip above the heading so the title gets the full width.
+        _forYouChip(context),
+        const SizedBox(height: 10),
+        _SectionTitle(
+          'pw_video_title'.tr(),
+          subtitle: 'pw_video_subtitle'.tr(),
         ),
         const SizedBox(height: 14),
         if (loading)
@@ -2145,16 +2255,16 @@ class _LessonShowcase extends StatelessWidget {
                           priority: true,
                         )
                       : (cover != null && cover.isNotEmpty)
-                          ? CachedNetworkImage(
-                              imageUrl: cover,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => ColoredBox(
-                                  color: context.colors.backgroundElevation),
-                              errorWidget: (_, __, ___) => Assets
-                                  .images.courseImage
-                                  .image(fit: BoxFit.cover),
-                            )
-                          : Assets.images.courseImage.image(fit: BoxFit.cover),
+                      ? CachedNetworkImage(
+                          imageUrl: cover,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => ColoredBox(
+                            color: context.colors.backgroundElevation,
+                          ),
+                          errorWidget: (_, __, ___) => Assets.images.courseImage
+                              .image(fit: BoxFit.cover),
+                        )
+                      : Assets.images.courseImage.image(fit: BoxFit.cover),
                 ),
                 // Soft top + bottom vignette so the badges stay legible over
                 // any frame of the video without darkening the whole preview.
@@ -2179,8 +2289,12 @@ class _LessonShowcase extends StatelessWidget {
                 Positioned(
                   top: 12,
                   left: 12,
-                  child: _mediaBadge(context, Icons.lock_open_rounded,
-                      'pw_lesson_free'.tr(), context.colors.accentSub),
+                  child: _mediaBadge(
+                    context,
+                    Icons.lock_open_rounded,
+                    'pw_lesson_free'.tr(),
+                    context.colors.accentSub,
+                  ),
                 ),
                 if (l != null && l.duration.isNotEmpty)
                   Positioned(
@@ -2188,13 +2302,16 @@ class _LessonShowcase extends StatelessWidget {
                     right: 12,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child:
-                          l.duration.text(11, 14, 600).c(context.colors.white),
+                      child: l.duration
+                          .text(11, 14, 600)
+                          .c(context.colors.white),
                     ),
                   ),
                 // Muted-preview hint — tap opens the full lesson with sound.
@@ -2204,7 +2321,9 @@ class _LessonShowcase extends StatelessWidget {
                     right: 12,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 5),
+                        horizontal: 9,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(100),
@@ -2212,8 +2331,11 @@ class _LessonShowcase extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.volume_off_rounded,
-                              size: 12, color: context.colors.white),
+                          Icon(
+                            Icons.volume_off_rounded,
+                            size: 12,
+                            color: context.colors.white,
+                          ),
                           const SizedBox(width: 5),
                           'pw_tap_sound'
                               .tr()
@@ -2240,8 +2362,11 @@ class _LessonShowcase extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Icon(Icons.play_arrow_rounded,
-                          size: 32, color: context.colors.accentSub),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        size: 32,
+                        color: context.colors.accentSub,
+                      ),
                     ),
                   ),
                 ),
@@ -2261,21 +2386,27 @@ class _LessonShowcase extends StatelessWidget {
                             .text(15, 20, 700)
                             .c(context.colors.textStrong)
                             .copyWith(
-                                maxLines: 2, overflow: TextOverflow.ellipsis),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                         const SizedBox(height: 4),
                         'pw_video_subtitle'
                             .tr()
                             .text(12, 16, 400)
                             .c(context.colors.textSub)
                             .copyWith(
-                                maxLines: 2, overflow: TextOverflow.ellipsis),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: context.colors.lightGreen,
                       borderRadius: BorderRadius.circular(12),
@@ -2283,8 +2414,11 @@ class _LessonShowcase extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.play_circle_fill_rounded,
-                            size: 16, color: context.colors.accentSub),
+                        Icon(
+                          Icons.play_circle_fill_rounded,
+                          size: 16,
+                          color: context.colors.accentSub,
+                        ),
                         const SizedBox(width: 6),
                         'pw_video_watch'
                             .tr()
@@ -2317,16 +2451,12 @@ class _ExerciseShowcase extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _SectionTitle('pw_workout_title'.tr(),
-                  subtitle: 'pw_workout_subtitle'.tr()),
-            ),
-            const SizedBox(width: 8),
-            _forYouChip(context),
-          ],
+        // Chip above the heading so the title gets the full width.
+        _forYouChip(context),
+        const SizedBox(height: 10),
+        _SectionTitle(
+          'pw_workout_title'.tr(),
+          subtitle: 'pw_workout_subtitle'.tr(),
         ),
         const SizedBox(height: 14),
         if (loading)
@@ -2366,22 +2496,29 @@ class _ExerciseShowcase extends StatelessWidget {
                   : SizedBox(
                       height: 210,
                       width: double.infinity,
-                      child: Assets.images.day30WeightLossWorkout
-                          .image(fit: BoxFit.cover),
+                      child: Assets.images.day30WeightLossWorkout.image(
+                        fit: BoxFit.cover,
+                      ),
                     ),
               Positioned(
                 top: 12,
                 left: 12,
-                child: _mediaBadge(context, Icons.lock_open_rounded,
-                    'pw_exercise_free'.tr(), context.colors.accentSub),
+                child: _mediaBadge(
+                  context,
+                  Icons.lock_open_rounded,
+                  'pw_exercise_free'.tr(),
+                  context.colors.accentSub,
+                ),
               ),
               if (badge != null && badge.isNotEmpty)
                 Positioned(
                   top: 12,
                   right: 12,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.55),
                       borderRadius: BorderRadius.circular(8),
@@ -2389,8 +2526,11 @@ class _ExerciseShowcase extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.bolt_rounded,
-                            size: 12, color: context.colors.white),
+                        Icon(
+                          Icons.bolt_rounded,
+                          size: 12,
+                          color: context.colors.white,
+                        ),
                         const SizedBox(width: 4),
                         badge.text(11, 14, 600).c(context.colors.white),
                       ],
@@ -2410,8 +2550,11 @@ class _ExerciseShowcase extends StatelessWidget {
                     color: context.colors.lightGreen,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.fitness_center_rounded,
-                      size: 20, color: context.colors.accentSub),
+                  child: Icon(
+                    Icons.fitness_center_rounded,
+                    size: 20,
+                    color: context.colors.accentSub,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -2424,14 +2567,18 @@ class _ExerciseShowcase extends StatelessWidget {
                           .text(15, 20, 700)
                           .c(context.colors.textStrong)
                           .copyWith(
-                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                       const SizedBox(height: 3),
                       'pw_workout_subtitle'
                           .tr()
                           .text(12, 16, 400)
                           .c(context.colors.textSub)
                           .copyWith(
-                              maxLines: 2, overflow: TextOverflow.ellipsis),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                     ],
                   ),
                 ),
@@ -2443,6 +2590,7 @@ class _ExerciseShowcase extends StatelessWidget {
     );
   }
 }
+
 // ─────────────────────────────────────────────────────────────────────────
 //  Shared helpers
 // ─────────────────────────────────────────────────────────────────────────
@@ -2503,7 +2651,8 @@ class _Journey {
     double target = (p.targetWeight ?? 0).toDouble();
 
     final goal = (p.goal ?? '').toLowerCase();
-    final isGain = goal.contains('mass') ||
+    final isGain =
+        goal.contains('mass') ||
         goal.contains('muscle') ||
         goal.contains('gain');
 

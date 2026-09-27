@@ -52,4 +52,12 @@ class StepLedgerStore {
   /// prompt to avoid stacking dialogs on top of the tour). The Home tab is the
   /// first tour a user sees, so its completion marks the walkthrough as begun.
   bool isFeatureTourShown() => isTourShown('tour_home');
+
+  /// Whether the weekly report story for the week starting on [weekKey]
+  /// (`yyyyMMdd` of its Monday) has already popped up.
+  bool isWeeklyReportShown(String weekKey) =>
+      (_meta.get('weekly_report_$weekKey') as bool?) ?? false;
+
+  Future<void> setWeeklyReportShown(String weekKey) =>
+      _meta.put('weekly_report_$weekKey', true);
 }

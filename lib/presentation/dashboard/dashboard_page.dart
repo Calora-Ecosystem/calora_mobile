@@ -14,6 +14,7 @@ import 'package:calora/presentation/dashboard/management/dashboard_manager.dart'
 import 'package:calora/presentation/dashboard/widgets/battery_optimization_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_connect_hint_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_sync_fix_dialog.dart';
+import 'package:calora/presentation/report/weekly_report_story.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
@@ -55,6 +56,9 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
       // Always unblock the tour, even if a prompt threw.
       PermissionBootstrap.instance.markFirstRunPromptsDone();
     }
+    // Last week's report, once per week — after every first-run prompt so it
+    // never stacks on a system dialog (skipped while the tour is pending).
+    if (context.mounted) await WeeklyReportStory.maybeShow(context);
   }
 
   /// Battery-optimization whitelist prompt (Android, first run only) so the
