@@ -318,7 +318,11 @@ class AddMealsPage
           }
           if (!context.mounted) return;
           context.router.pop();
-          if (success) _showInfoDialog(context);
+          if (success) {
+            _showInfoDialog(context);
+          } else {
+            _showAddError(context, manager);
+          }
         },
       ),
     );
@@ -377,7 +381,11 @@ class AddMealsPage
           }
           if (!context.mounted) return;
           context.router.pop();
-          if (allSucceeded) _showInfoDialog(context);
+          if (allSucceeded) {
+            _showInfoDialog(context);
+          } else {
+            _showAddError(context, manager);
+          }
         },
       ),
     );
@@ -574,6 +582,15 @@ class AddMealsPage
           ),
         ),
       ),
+    );
+  }
+
+  /// A failed add used to just close the sheet, so the user thought the food
+  /// was saved. Surface the backend's reason instead.
+  void _showAddError(BuildContext context, AddMealsManager manager) {
+    CustomSnackBar.show(
+      context,
+      manager.state.addErrorMessage ?? Strings.somethingWentWrong,
     );
   }
 

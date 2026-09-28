@@ -3,6 +3,7 @@ import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/api_error_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/util/share_origin.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/referral/referral_info.dart';
 import 'package:calora/domain/repo/referral/referral_repo.dart';
@@ -42,6 +43,7 @@ class _ReferralPageState extends State<ReferralPage>
   bool _loadFailed = false;
   bool _applying = false;
   bool _sharing = false;
+  final GlobalKey _shareButtonKey = GlobalKey();
 
   late final AnimationController _float = AnimationController(
     vsync: this,
@@ -276,6 +278,7 @@ class _ReferralPageState extends State<ReferralPage>
           GestureDetector(
             onTap: _sharing ? null : _share,
             child: Container(
+              key: _shareButtonKey,
               height: 50,
               alignment: Alignment.center,
               decoration: BoxDecoration(
@@ -720,11 +723,17 @@ class _ReferralPageState extends State<ReferralPage>
   }
 
   /// Every share gets a fresh code, so the same code isn't sent twice; the
-  /// message carries the app download link.
+  /// message carries the app download link. If a fresh code can't be issued,
+  /// the current one is shared instead so the invite still goes out.
   Future<void> _share() async {
     setState(() => _sharing = true);
     try {
-      final code = await _repo.newCode();
+      String code = _code;
+      try {
+        code = await _repo.newCode();
+      } catch (_) {
+        if (code.isEmpty) rethrow;
+      }
       if (!mounted) return;
       setState(() => _code = code);
       await SharePlus.instance.share(
@@ -735,6 +744,9 @@ class _ReferralPageState extends State<ReferralPage>
               'percent': '${_info?.discountPercent ?? 10}',
               'link': _appLink,
             },
+          ),
+          sharePositionOrigin: shareOrigin(
+            _shareButtonKey.currentContext ?? context,
           ),
         ),
       );

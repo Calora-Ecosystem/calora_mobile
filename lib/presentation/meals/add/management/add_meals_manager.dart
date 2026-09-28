@@ -57,7 +57,15 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
         return _repo.fetchFoodsPaged(query: query, latest: true);
 
       case FoodTab.userFoods:
-        return _repo.fetchFoodsPaged(query: query, isUserFood: true);
+        // Newest first — unsorted, a just-created food lands at the end of
+        // the list, out of sight past the first page.
+        return _repo.fetchFoodsPaged(
+          query: query.copyWith(
+            sortPropName: query.sortPropName ?? 'id',
+            sortDirection: query.sortDirection ?? 'Descending',
+          ),
+          isUserFood: true,
+        );
 
       case FoodTab.favourites:
         return _repo.fetchFoodsPaged(query: query, isFavourite: true);
@@ -150,6 +158,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           onStart: () => emit(state.copyWith(isLoading: true)),
           onData: (_) {
             success = true;
+            _refreshFoodList();
           },
           onDone: () => emit(state.copyWith(isLoading: false)),
           onError: (error) {
@@ -163,6 +172,14 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
           },
         );
     return success;
+  }
+
+  /// A logged food changes "Last eaten" (and "My foods" when it was just
+  /// created), so reload the visible list — otherwise it stays stale until
+  /// the tab is switched.
+  void _refreshFoodList() {
+    if (state.activeTab == FoodTab.categories) return;
+    foodPaginator.refresh();
   }
 
   void addFavourite(int id) {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/util/share_origin.dart';
 import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
@@ -227,7 +228,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
                   return;
               }
 
-              final Rect origin = _getWidgetRect(shareAnchorKey);
+              final Rect origin = _getWidgetRect(context, shareAnchorKey);
               final directory = await getTemporaryDirectory();
               final imagePath = await File('${directory.path}/screenshot.png').create();
               await imagePath.writeAsBytes(image);
@@ -242,18 +243,8 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
     );
   }
 
-  Rect _getWidgetRect(GlobalKey key) {
-    final ctx = key.currentContext;
-    if (ctx == null) return Offset.zero & Size.zero;
-
-    final renderBox = ctx.findRenderObject() as RenderBox?;
-    if (renderBox == null) return Offset.zero & Size.zero;
-
-    final offset = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-
-    return offset & size;
-  }
+  Rect _getWidgetRect(BuildContext context, GlobalKey key) =>
+      shareOrigin(key.currentContext ?? context);
 }
 
 class _TabBarWrapper extends StatefulWidget {

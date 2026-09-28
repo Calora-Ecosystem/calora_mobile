@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/util/share_origin.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/group/step_group.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
@@ -70,9 +71,11 @@ class GroupDetailPage
       appBar: CustomAppBar(
         title: group.name,
         onBack: () => context.router.maybePop(),
-        trailing: GestureDetector(
-          onTap: () => _shareInvite(group),
-          child: Assets.icons.share.svg(),
+        trailing: Builder(
+          builder: (buttonContext) => GestureDetector(
+            onTap: () => _shareInvite(buttonContext, group),
+            child: Assets.icons.share.svg(),
+          ),
         ),
       ),
       body: ListView(
@@ -129,8 +132,9 @@ class GroupDetailPage
             ],
           ),
           const Spacer(),
-          GestureDetector(
-            onTap: () => _shareInvite(group),
+          Builder(
+            builder: (buttonContext) => GestureDetector(
+            onTap: () => _shareInvite(buttonContext, group),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
               decoration: BoxDecoration(
@@ -145,6 +149,7 @@ class GroupDetailPage
                   'invite_friends'.tr().text(13, 16, 600).c(colors.textWhite),
                 ],
               ),
+            ),
             ),
           ),
         ],
@@ -287,15 +292,22 @@ class GroupDetailPage
     );
   }
 
-  void _shareInvite(StepGroup group) {
-    SharePlus.instance.share(
-      ShareParams(
-        text: [
-          'share_group_invite'.tr(namedArgs: {'name': group.name}),
-          'share_group_code'.tr(namedArgs: {'code': group.inviteCode}),
-          'share_app_download'.tr(namedArgs: {'link': _appLink}),
-        ].join('\n\n'),
-      ),
-    );
+  Future<void> _shareInvite(BuildContext context, StepGroup group) async {
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: [
+            'share_group_invite'.tr(namedArgs: {'name': group.name}),
+            'share_group_code'.tr(namedArgs: {'code': group.inviteCode}),
+            'share_app_download'.tr(namedArgs: {'link': _appLink}),
+          ].join('\n\n'),
+          sharePositionOrigin: shareOrigin(context),
+        ),
+      );
+    } catch (_) {
+      if (context.mounted) {
+        CustomSnackBar.show(context, 'something_went_wrong'.tr());
+      }
+    }
   }
 }
