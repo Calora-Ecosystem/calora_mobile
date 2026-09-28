@@ -120,10 +120,13 @@ class StepsApi {
     required int value,
     DateTime? date,
   }) async {
+    // Local wall-clock time, no offset: the backend buckets by calendar day,
+    // and a UTC timestamp put steps taken 00:00–05:00 (Tashkent) — and every
+    // past-day fallback, sent as local midnight — on the previous day.
     final body = {
       'metric': metric,
       'value': value,
-      'date': (date ?? DateTime.now()).toUtc().toIso8601String(),
+      'date': (date ?? DateTime.now()).toIso8601String(),
     };
     await _dio.post('users/dailies', data: body);
   }

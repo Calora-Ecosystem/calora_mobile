@@ -132,7 +132,7 @@ class _HistoryCard extends StatelessWidget {
               children: [
                 tx.title.tr().text(14, 18, 600).c(colors.textStrong),
                 const SizedBox(height: 2),
-                _formatDate(tx.date).text(12, 15, 400).c(colors.textSub),
+                _subtitle(tx).text(12, 15, 400).c(colors.textSub),
               ],
             ),
           ),
@@ -143,6 +143,20 @@ class _HistoryCard extends StatelessWidget {
       ),
     );
   }
+
+  /// Step coins show the day they were earned for and that day's steps, so the
+  /// amount can be checked against "1000 steps = 1 coin".
+  String _subtitle(CoinTransaction tx) {
+    final date = _formatDate(tx.displayDate);
+    final steps = tx.steps;
+    if (steps == null) return date;
+    return '$date · ${'coin_tx_steps'.tr(namedArgs: {'steps': _groupDigits(steps)})}';
+  }
+
+  String _groupDigits(int n) => n.toString().replaceAllMapped(
+    RegExp(r'\B(?=(\d{3})+(?!\d))'),
+    (_) => ' ',
+  );
 
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.'

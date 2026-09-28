@@ -129,7 +129,13 @@ class StepSyncService {
 
       for (final p in pending.where((p) => p.day == todayKey)) {
         try {
-          await _stepRepo.sendDailyData(metric: 'Step', value: p.total);
+          // The ledger day, not "now": a sync that runs just after midnight
+          // must not post yesterday's total onto the new day.
+          await _stepRepo.sendDailyData(
+            metric: 'Step',
+            value: p.total,
+            date: DateTime.parse(p.day),
+          );
           await _db.setSynced(p.day, p.total);
         } catch (e) {
           log('Today sync failed (retries next cycle): $e',

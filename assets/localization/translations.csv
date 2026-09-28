@@ -652,6 +652,7 @@ wallet_title,Wallet,Hamyon,Кошелёк
 open_marketplace,Open marketplace,Doʻkonga oʻtish,Открыть магазин
 recent_activity,Recent activity,Oxirgi harakatlar,Последние действия
 coin_tx_daily_steps,Daily steps,Kunlik qadamlar,Ежедневные шаги
+coin_tx_steps,{steps} steps,{steps} qadam,{steps} шагов
 date_today,Today,Bugun,Сегодня
 date_yesterday,Yesterday,Kecha,Вчера
 marketplace_title,Marketplace,Doʻkon,Магазин

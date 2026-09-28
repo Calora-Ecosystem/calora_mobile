@@ -9,7 +9,17 @@ class CoinTransaction {
   final String title;
   final int amount;
   final CoinTxType type;
+
+  /// When the coins were written to the wallet. Step coins for several days
+  /// can land at once (e.g. the first sync after install), so for them
+  /// [stepDate] is the day that matters.
   final DateTime date;
+
+  /// Step coins only: the day whose steps earned them.
+  final DateTime? stepDate;
+
+  /// Step coins only: that day's step count.
+  final int? steps;
 
   const CoinTransaction({
     this.id = 0,
@@ -17,7 +27,12 @@ class CoinTransaction {
     required this.amount,
     required this.type,
     required this.date,
+    this.stepDate,
+    this.steps,
   });
+
+  /// The date shown in the history — the step day for step coins.
+  DateTime get displayDate => stepDate ?? date;
 
   factory CoinTransaction.fromJson(Map<String, dynamic> json) {
     final amount = (json['amount'] as num?)?.toInt() ?? 0;
@@ -29,6 +44,8 @@ class CoinTransaction {
       date:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
+      stepDate: DateTime.tryParse(json['stepDate'] as String? ?? ''),
+      steps: (json['steps'] as num?)?.toInt(),
     );
   }
 }

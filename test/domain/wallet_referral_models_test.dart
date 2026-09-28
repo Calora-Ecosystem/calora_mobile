@@ -37,6 +37,23 @@ void main() {
     expect(spend.type, CoinTxType.spend);
     expect(spend.amount, -90);
     expect(spend.date.year, 2026);
+    expect(spend.stepDate, isNull);
+    expect(spend.displayDate, spend.date);
+  });
+
+  test('step coins show the step day, not the credit day', () {
+    final tx = CoinTransaction.fromJson({
+      'id': 9,
+      'title': 'coin_tx_daily_steps',
+      'amount': 1,
+      'type': 'Steps',
+      'createdAt': '2026-09-28T14:05:00',
+      'stepDate': '2026-09-27T00:00:00',
+      'steps': 1295,
+    });
+    expect(tx.type, CoinTxType.earn);
+    expect(tx.displayDate, DateTime(2026, 9, 27));
+    expect(tx.steps, 1295);
   });
 
   test('market item enums', () {
