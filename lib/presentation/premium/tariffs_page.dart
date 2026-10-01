@@ -7,6 +7,7 @@ import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/premium/family/family_redeem_sheet.dart';
+import 'package:calora/presentation/premium/family/person_avatar.dart';
 import 'package:calora/presentation/premium/premium_sheet.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -981,12 +982,12 @@ class _PersonPrice extends StatelessWidget {
     final (bg, fg) = muted
         ? (colors.softGray, colors.iconSoft)
         : second
-        ? (const Color(0xFFFCE9D2), const Color(0xFFD9822B))
+        ? (PersonAvatar.partnerBackground, PersonAvatar.partnerForeground)
         : (colors.accentSub, colors.white);
 
     return Row(
       children: [
-        _Avatar(size: 30, background: bg, foreground: fg),
+        PersonAvatar(size: 30, background: bg, foreground: fg),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -1012,57 +1013,6 @@ class _PersonPrice extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Neutral person silhouette in a circle — head and shoulders, no face.
-class _Avatar extends StatelessWidget {
-  final double size;
-  final Color background;
-  final Color foreground;
-
-  const _Avatar({
-    required this.size,
-    required this.background,
-    required this.foreground,
-  });
-
-  @override
-  Widget build(BuildContext context) => CustomPaint(
-    size: Size.square(size),
-    painter: _AvatarPainter(background, foreground),
-  );
-}
-
-class _AvatarPainter extends CustomPainter {
-  final Color background;
-  final Color foreground;
-
-  const _AvatarPainter(this.background, this.foreground);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final d = size.width;
-    final circle = Path()..addOval(Offset.zero & size);
-    canvas.drawPath(circle, Paint()..color = background);
-
-    canvas.save();
-    canvas.clipPath(circle);
-    final fill = Paint()..color = foreground;
-    canvas.drawCircle(Offset(d * 0.5, d * 0.39), d * 0.17, fill);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(d * 0.5, d * 0.98),
-        width: d * 0.66,
-        height: d * 0.56,
-      ),
-      fill,
-    );
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_AvatarPainter old) =>
-      old.background != background || old.foreground != foreground;
 }
 
 /// Plan rows while the backend packages load.

@@ -49,7 +49,12 @@ void main() {
     }
   });
 
-  Future<void> pump(WidgetTester tester, String locale, Widget sheet) async {
+  Future<void> pump(
+    WidgetTester tester,
+    String locale,
+    Widget sheet, {
+    bool reduceMotion = false,
+  }) async {
     tester.view.physicalSize = const Size(360 * 3, 740 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -69,6 +74,12 @@ void main() {
               supportedLocales: context.supportedLocales,
               locale: context.locale,
               theme: ThemeData(fontFamily: FontFamily.inter),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(disableAnimations: reduceMotion),
+                child: child!,
+              ),
               home: Scaffold(
                 body: SafeArea(child: SingleChildScrollView(child: sheet)),
               ),
@@ -102,12 +113,45 @@ void main() {
       repo.codes = [
         FamilyCode(code: 'FAMILY-AB12CD', expireAt: DateTime(2026, 10, 31)),
       ];
+      final semantics = tester.ensureSemantics();
       await pump(tester, locale, const FamilyCodeSheet());
+      // Mid-story: the ticket is decoding, nothing may overflow.
+      await tester.pump(const Duration(milliseconds: 600));
+      await shot(tester, '${locale}_code_mid');
+      // The whole story: ticket flies over, code decodes, steps slide in.
+      await tester.pump(const Duration(seconds: 3));
 
       await shot(tester, '${locale}_code');
-      expect(find.text('FAMILY-AB12CD'), findsOneWidget);
+      expect(find.bySemanticsLabel('FAMILY-AB12CD'), findsOneWidget);
       expect(find.text(tr(locale, 'family_code_copy')), findsOneWidget);
+      expect(find.text(tr(locale, 'family_code_send')), findsOneWidget);
       expect(find.textContaining('31.10.2026'), findsOneWidget);
+
+      // Tap the ticket: copied, confirmed in place.
+      await tester.tap(find.bySemanticsLabel('FAMILY-AB12CD'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text(tr(locale, 'copied')), findsOneWidget);
+      await shot(tester, '${locale}_code_copied');
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.text(tr(locale, 'family_code_copy')), findsOneWidget);
+      semantics.dispose();
+    });
+
+    testWidgets('code sheet without motion is final at once ($locale)', (
+      tester,
+    ) async {
+      repo.codes = [
+        FamilyCode(code: 'FAMILY-AB12CD', expireAt: DateTime(2026, 10, 31)),
+      ];
+      final semantics = tester.ensureSemantics();
+      await pump(tester, locale, const FamilyCodeSheet(), reduceMotion: true);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.bySemanticsLabel('FAMILY-AB12CD'), findsOneWidget);
+      expect(find.text(tr(locale, 'family_code_how_3')), findsOneWidget);
+      semantics.dispose();
     });
 
     testWidgets('code sheet shows who redeemed it ($locale)', (tester) async {
@@ -119,6 +163,7 @@ void main() {
         ),
       ];
       await pump(tester, locale, const FamilyCodeSheet());
+      await tester.pump(const Duration(seconds: 3));
 
       await shot(tester, '${locale}_redeemed');
       expect(find.textContaining('Vali'), findsOneWidget);

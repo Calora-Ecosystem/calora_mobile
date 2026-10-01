@@ -8,6 +8,7 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
+import 'package:calora/domain/model/premium/family_code.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/premium/family/family_code_error.dart';
@@ -38,6 +39,12 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   static const int _paymentPollMaxTicks = 24;
 
   bool _awaitingOfferCode = false;
+
+  /// Family codes the user had before paying for the family plan. The
+  /// family payment counts as done when a code outside this set shows up —
+  /// "is the user Premium" can't tell, a Premium user may buy it too. Null
+  /// when not paying for the family plan (or the lookup failed).
+  Set<String>? _familyCodesBefore;
 
   static const String _playRedeemUrl = 'https://play.google.com/redeem';
 
@@ -565,6 +572,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   Future<void> _openPaymentUrl(String url) async {
     try {
       final uri = Uri.parse(url);
+      _familyCodesBefore = state.isFamily ? await _familyCodesNow() : null;
       if (await canLaunchUrl(uri)) {
         if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
           publish(
@@ -606,11 +614,50 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     _awaitingOfferCode = false;
   }
 
+  /// Codes the user already has, or null when they can't be read.
+  Future<Set<String>?> _familyCodesNow() async {
+    try {
+      final codes = await _premiumRepo.getFamilyCodes();
+      return codes.map((code) => code.code).toSet();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// The family payment went through: the backend issues the second
+  /// person's code together with the subscription, so a fresh active code
+  /// is the proof.
+  static bool familyCodeIssued(Set<String> before, List<FamilyCode> now) =>
+      now.any(
+        (code) =>
+            code.status == FamilyCodeStatus.active &&
+            !before.contains(code.code),
+      );
+
   Future<void> _checkExternalPayment() async {
     if (!_awaitingExternalPayment || _checkingExternalPayment) return;
     _checkingExternalPayment = true;
 
     try {
+      final before = _familyCodesBefore;
+      if (state.isFamily && before != null) {
+        List<FamilyCode> codes;
+        try {
+          codes = await _premiumRepo.getFamilyCodes();
+        } catch (_) {
+          return; // try again on the next tick
+        }
+        await getMyOrders();
+        if (!familyCodeIssued(before, codes)) return;
+        // The plan claim lives in the JWT — pick it up before celebrating.
+        await getIt<TokenInterceptor>().refreshAndCheckPremium();
+        _stopPaymentPolling();
+        _familyCodesBefore = null;
+        _logExternalPurchase();
+        publish(const PremiumEffect.subscriptionSuccess());
+        return;
+      }
+
       if (_awaitingOfferCode &&
           await getIt<RevenueCatService>().hasActiveEntitlement()) {
         _stopPaymentPolling();

@@ -2,6 +2,7 @@ import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/pagination/paginated_response.dart';
 import 'package:calora/domain/model/premium/family_code.dart';
 import 'package:calora/domain/model/premium/my_subscription.dart';
+import 'package:calora/presentation/premium/management/premium_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -76,6 +77,23 @@ void main() {
       });
       expect(result.ownerName, 'Ali');
       expect(result.requiresTokenRefresh, isTrue);
+    });
+
+    test('a family payment is done once a new active code appears', () {
+      const old = FamilyCode(code: 'FAMILY-OLD111');
+      const fresh = FamilyCode(code: 'FAMILY-NEW222');
+      const used = FamilyCode(
+        code: 'FAMILY-USE333',
+        status: FamilyCodeStatus.redeemed,
+      );
+      // A Premium user's old unused code from last month isn't proof.
+      expect(PremiumManager.familyCodeIssued({'FAMILY-OLD111'}, [old]), isFalse);
+      expect(
+        PremiumManager.familyCodeIssued({'FAMILY-OLD111'}, [fresh, old]),
+        isTrue,
+      );
+      expect(PremiumManager.familyCodeIssued({}, [fresh]), isTrue);
+      expect(PremiumManager.familyCodeIssued({}, [used]), isFalse);
     });
 
     test('subscription/my reports the family plan', () {

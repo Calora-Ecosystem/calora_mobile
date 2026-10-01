@@ -999,3 +999,8 @@ family_err_self,This is your own code — send it to your loved one.,Bu oʻzingi
 tf_have_family_code,Got a family code?,Oila kodingiz bormi?,Есть семейный код?
 sub_source_family,Family plan gift,Oila tarifi sovgʻasi,Подарок по семейному тарифу
 plan_family,Family,Oila,Семейный
+family_code_badge,Family plan is on,Oila tarifi faol,Семейный тариф активен
+family_code_ticket_label,Premium · {months} mo,Premium · {months} oy,Premium · {months} мес.
+family_code_days_left,{days} days left to activate,Faollashtirishga {days} kun qoldi,На активацию осталось {days} дн.
+family_code_until,until {date},{date} gacha,до {date}
+family_code_send,Send to your loved one,Yaqiningizga yuborish,Отправить близкому
