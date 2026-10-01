@@ -74,8 +74,10 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
     return await stepRepo.getStats(period, offset: effectiveOffset, skip: query.skip ?? 0, take: query.take ?? 20);
   }
 
-  PaginationService<UserStatRequest> get currentPaginationService {
-    switch (state.period) {
+  PaginationService<UserStatRequest> get currentPaginationService => _paginationServiceFor(state.period);
+
+  PaginationService<UserStatRequest> _paginationServiceFor(int period) {
+    switch (period) {
       case 0:
         return _dailyPaginationService;
       case 1:
@@ -306,7 +308,9 @@ class StepsManager extends Manager<StepsState, StepsEffect> {
       );
       if (showLoading) {
         log('StepsManager: Refreshing pagination for period $period', name: 'StepsManager');
-        currentPaginationService.refresh();
+        // The period being loaded, not the visible tab — on open all three
+        // periods load while the daily tab is showing.
+        _paginationServiceFor(period).refresh();
       }
       await Future.wait(tasks);
     } finally {

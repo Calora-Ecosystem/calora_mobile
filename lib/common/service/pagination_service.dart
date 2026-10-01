@@ -16,6 +16,9 @@ class PaginationService<T> {
   /// it can't leak into — or cut short — the newly selected list.
   int _generation = 0;
 
+  /// Generation of the request still waiting for a response, if any.
+  int? _inFlight;
+
   PaginationService({
     required this.fetchData,
     this.pageSize = 20,
@@ -27,9 +30,14 @@ class PaginationService<T> {
   }
 
   Future<void> _fetchPage(int pageKey) async {
+    final generation = _generation;
+    // One request per generation at a time — a second ask for the same
+    // query (e.g. the list remounting mid-load) would append the page twice.
+    if (_inFlight == generation) return;
+    _inFlight = generation;
+
     log('PaginationService → fetch page: $pageKey', name: 'PaginationService');
 
-    final generation = _generation;
     try {
       final query = _buildQuery(pageKey);
       final response = await fetchData(query);
@@ -60,6 +68,8 @@ class PaginationService<T> {
         error: e,
         stackTrace: s,
       );
+    } finally {
+      if (_inFlight == generation) _inFlight = null;
     }
   }
 
@@ -76,7 +86,16 @@ class PaginationService<T> {
   void refresh() {
     log('PaginationService → refresh()', name: 'PaginationService');
     _generation++;
+    final orphaned = _inFlight != null;
+    final before = pagingController.value;
     pagingController.refresh();
+    // Refreshing while the first page is still loading leaves the state
+    // unchanged, so the controller notifies nobody and the paged list never
+    // asks again — while the response it is waiting for was just dropped.
+    // Ask for the first page ourselves, or the list stays a skeleton forever.
+    if (orphaned && identical(before, pagingController.value)) {
+      pagingController.notifyPageRequestListeners(pagingController.firstPageKey);
+    }
   }
 
   void updateQuery(PaginationQuery query) {
