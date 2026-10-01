@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/localization/locale_scoped_tabs.dart';
 import 'package:calora/common/router/app_route_observer.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/course_tab_signal.dart';
@@ -101,10 +102,12 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   Widget builder(context, manager, state) {
     return _PermissionVisibilityGate(
       onVisible: () => _runFirstRunPermissionFlow(context, manager),
-      child: AutoTabsScaffold(
+      child: LocaleScopedTabs(
+        builder: (context, onTabsRouter) => AutoTabsScaffold(
       routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
       bottomNavigationBuilder: (context, tabRouter) {
         final tabsRouter = AutoTabsRouter.of(context);
+        onTabsRouter(tabsRouter);
         return ClipRRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -211,6 +214,7 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
           ),
         );
       },
+        ),
       ),
     );
   }

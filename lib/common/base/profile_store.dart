@@ -113,7 +113,7 @@ enum Gender {
       case Gender.Female:
         return Strings.female;
       case Gender.Unknown:
-        return 'Unknown';
+        return Strings.input;
     }
   }
 

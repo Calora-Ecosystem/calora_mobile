@@ -4,6 +4,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class MealCardsGrid extends StatelessWidget {
@@ -115,7 +116,7 @@ class MealCardsGrid extends StatelessWidget {
                     .c(Colors.black)
                     .auto(minSize: 12),
                 const SizedBox(height: 4),
-                '$max ${Strings.fromKcal}'.text(14, 16, 600).c(Colors.grey),
+                'of_max_kcal'.tr(namedArgs: {'max': max}).text(14, 16, 600).c(Colors.grey),
               ],
             ),
           ],

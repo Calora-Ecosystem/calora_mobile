@@ -33,7 +33,7 @@ enum ActivityLevelEnum {
       case ActivityLevelEnum.Maximal:
         return Strings.veryHighActivity;
       case ActivityLevelEnum.Unknown:
-        return 'Unknown';
+        return Strings.input;
     }
   }
 

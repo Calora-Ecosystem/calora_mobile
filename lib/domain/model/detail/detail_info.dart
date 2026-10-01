@@ -4,12 +4,14 @@ import 'package:calora/domain/model/detail/detail_info_type.dart';
 import 'package:calora/domain/model/questions/questions.dart'; // For ActivityLevelEnum
 import 'package:calora/domain/model/questions/questions_request.dart'; // For PurposeEnum
 import 'package:calora/common/base/profile_store.dart'; // For Gender
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 
 class DetailInfo {
   final String id;
   final String title;
   final String message;
+  /// Translation key of the unit (`kcal`, `unit_g`, …), shown via [metricLabel].
   final String metric;
   final DetailInfoType type;
 
@@ -23,6 +25,9 @@ class DetailInfo {
 
   bool get isHaveMessage => message.isNotEmpty;
 
+  /// Unit in the current app language, e.g. `ккал` / `kkal` / `kcal`.
+  String get metricLabel => metric.isEmpty ? '' : metric.tr();
+
   String get resultMessage {
     switch (type) {
       case DetailInfoType.birthDay:
@@ -34,7 +39,8 @@ class DetailInfo {
       case DetailInfoType.gender:
         return Gender.fromApi(message).displayName;
       default:
-        return isHaveMessage ? '$message $metric' : Strings.input;
+        if (!isHaveMessage) return Strings.input;
+        return metric.isEmpty ? message : '$message $metricLabel';
     }
   }
 

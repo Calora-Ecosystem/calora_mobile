@@ -408,7 +408,7 @@ class _DailyTargets extends StatelessWidget {
       _TargetTile(
         icon: Assets.icons.water.svg(),
         value: '${goals[2].toInt()}',
-        unit: 'ml',
+        unit: 'unit_ml'.tr(),
         label: Strings.water,
         tint: context.colors.informationLighter,
       ),

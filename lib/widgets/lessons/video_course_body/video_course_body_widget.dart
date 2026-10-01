@@ -18,6 +18,7 @@ import 'package:calora/widgets/lessons/video_course_body/management/video_course
 import 'package:calora/widgets/lessons/video_course_body/management/video_course_body_manager.dart';
 import 'package:calora/widgets/task/task_parametrs_widget.dart';
 import 'package:calora/widgets/video/about_video_page.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -101,11 +102,11 @@ class VideoCourseBodyWidgetPage
                           if (course.price != null)
                             ParameterItem(
                               name: Strings.price,
-                              value: '${course.price} so‘m',
+                              value: '${course.price} ${'tf_sum'.tr()}',
                             ),
                           ParameterItem(
                             name: Strings.numberOfLessons,
-                            value: '${state.lessons.length} ta',
+                            value: 'n_items'.tr(namedArgs: {'count': '${state.lessons.length}'}),
                           ),
                           ParameterItem(
                             name: Strings.duration,
@@ -267,9 +268,9 @@ class VideoCourseBodyWidgetPage
     final minutes = (totalSeconds % 3600) ~/ 60;
 
     if (hours > 0) {
-      return '${hours}h ${minutes}m';
+      return 'duration_h_m'.tr(namedArgs: {'h': '$hours', 'm': '$minutes'});
     } else {
-      return '${minutes}m';
+      return 'duration_m'.tr(namedArgs: {'m': '$minutes'});
     }
   }
 }

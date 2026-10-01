@@ -20,7 +20,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
       title: Strings.dailyProteinIntake,
       id: 'daily_protein_intake',
       message: protein.asFixedTruncated(2).toString(),
-      metric: 'gr',
+      metric: 'unit_g',
       type: DetailInfoType.dailyProteinNorm,
     );
   }
@@ -30,7 +30,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
       title: Strings.dailyFatIntake,
       id: 'daily_fat_intake',
       message: fat.asFixedTruncated(2).toString(),
-      metric: 'gr',
+      metric: 'unit_g',
       type: DetailInfoType.dailyFatNorm,
     );
   }
@@ -40,7 +40,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
       title: Strings.dailyCarbohydradeIntake,
       id: 'daily_carbohydrate_intake',
       message: carbs.asFixedTruncated(2).toString(),
-      metric: 'gr',
+      metric: 'unit_g',
       type: DetailInfoType.dailyCarbohydrateNorm,
     );
   }
@@ -50,7 +50,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
       title: Strings.dailyWaterIntake,
       id: 'daily_water_intake',
       message: water.asFixedTruncated(2).toString(),
-      metric: 'ml',
+      metric: 'unit_ml',
       type: DetailInfoType.dailyWaterNorm,
     );
   }
@@ -60,7 +60,7 @@ extension DailyNormsInfoExtension on DailyNormsInfo {
       title: Strings.dailyStepRate,
       id: 'daily_step_intake',
       message: steps.asFixedTruncated(2).toString(),
-      metric: 'steps',
+      metric: 'step',
       type: DetailInfoType.dailyStepNorm,
     );
   }

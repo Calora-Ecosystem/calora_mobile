@@ -2,6 +2,7 @@ import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -59,7 +60,7 @@ class HelpPage extends StatelessWidget {
                       children: [
                         Assets.icons.mail.svg(),
                         const SizedBox(height: 4),
-                        'Mail'.text(12, 16, 500),
+                        'help_mail'.tr().text(12, 16, 500),
                       ],
                     ),
                   ),

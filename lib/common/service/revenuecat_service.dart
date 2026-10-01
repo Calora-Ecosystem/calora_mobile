@@ -10,6 +10,7 @@ import 'package:calora/domain/model/profile/profile_request.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
@@ -209,7 +210,7 @@ class RevenueCatService {
         final isActive =
             customerInfo.entitlements.all[_entitlementId]?.isActive == true;
         if (!isActive) {
-          getIt<Display>().info(description: 'No previous purchase');
+          getIt<Display>().info(description: 'no_previous_purchase'.tr());
         }
         return isActive;
       }

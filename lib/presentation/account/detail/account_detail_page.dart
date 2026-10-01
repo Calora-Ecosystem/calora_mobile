@@ -216,7 +216,7 @@ class AccountDetailPage extends Managed<AccountDetailManager, AccountDetailState
             return SingleInputPage(
               loading: accountState.updatingType == info.type,
               title: info.title,
-              metrics: info.metric,
+              metrics: info.metricLabel,
               textInputType: info.currentTextInputType,
               message: info.message,
               onSave: (data) {

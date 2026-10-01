@@ -260,7 +260,7 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                     ),
                     if (_totalWeight > 0) ...[
                       const SizedBox(height: 2),
-                      '${_weightLabel(context)}: $_totalWeight gr'
+                      '${_weightLabel(context)}: $_totalWeight ${'unit_g'.tr()}'
                           .text(12, 16, 400)
                           .c(context.colors.textSub),
                     ],
@@ -351,7 +351,7 @@ class _FoodCreatorWithSpeechState extends State<FoodCreatorWithSpeech> {
                         .auto(minSize: 13),
                     if (item.weight > 0) ...[
                       const SizedBox(height: 2),
-                      '${item.weight} gr'
+                      '${item.weight} ${'unit_g'.tr()}'
                           .text(12, 16, 400)
                           .c(context.colors.textSub),
                     ],

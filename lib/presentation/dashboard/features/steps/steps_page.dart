@@ -332,10 +332,16 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
                   ),
                   labelColor: context.colors.neutralPrimary,
                   unselectedLabelColor: context.colors.neutral600Secondary,
+                  // One line, shrunk if needed — a long label (e.g. Russian)
+                  // must never wrap mid-word inside the 40px segment.
                   tabs: [
-                    Tab(child: Strings.daily.text(14, 18, 500)),
-                    Tab(child: Strings.weekly.text(14, 18, 500)),
-                    Tab(child: Strings.monthly.text(14, 18, 500)),
+                    for (final label in [Strings.daily, Strings.weekly, Strings.monthly])
+                      Tab(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: label.text(14, 18, 500).copyWith(maxLines: 1, softWrap: false),
+                        ),
+                      ),
                   ],
                 ),
               ),

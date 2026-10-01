@@ -205,7 +205,7 @@ class _DishInfoPageState extends State<DishInfoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            '${value.asFixedTruncated(0)} gr'.toString().text(16, 20, 500),
+            '${value.asFixedTruncated(0)} ${'unit_g'.tr()}'.text(16, 20, 500),
             label
                 .text(14, 18, 400)
                 .c(context.colors.textSub)

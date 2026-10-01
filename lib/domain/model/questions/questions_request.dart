@@ -41,7 +41,7 @@ enum PurposeEnum {
       case PurposeEnum.MuscleDevelopment:
         return Strings.muscleDevelopment;
       case PurposeEnum.Unknown:
-        return 'Unknown';
+        return Strings.input;
     }
   }
 

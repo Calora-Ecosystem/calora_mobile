@@ -7,6 +7,7 @@ import 'package:calora/common/widgets/video_player/animated_asset_view.dart';
 import 'package:calora/common/widgets/video_player/youtube_inline_player.dart';
 import 'package:calora/domain/model/course/exercise/exercises_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart' hide StepperType;
 
 class TaskInfoPage extends StatefulWidget {
@@ -165,7 +166,7 @@ class _ExpandableDescriptionState extends State<_ExpandableDescription> {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    _expanded ? 'Yopish' : 'Batafsil',
+                    _expanded ? 'show_less'.tr() : Strings.moreDetails,
                     style: TextStyle(
                       fontSize: 14,
                       height: 18 / 14,

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:flutter/cupertino.dart';
@@ -94,7 +95,7 @@ class UniversalProgressPage
                     Icon(Icons.error_outline, color: Colors.red.shade700),
                     Expanded(
                       child:
-                          'Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.'
+                          Strings.errorViewMessage
                               .text(16, 20, 500)
                               .c(Colors.red.shade700),
                     ),

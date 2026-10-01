@@ -127,7 +127,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                                     '${state.meal?.mass.asFixedTruncated(0)}'
                                         .text(20, 24, 600)
                                         .c(context.colors.textStrong),
-                                    'gr'.text(20, 24, 600).c(context.colors.textSub),
+                                    'unit_g'.tr().text(20, 24, 600).c(context.colors.textSub),
                                   ],
                                 ),
                               ],
@@ -250,7 +250,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                                             .c(context.colors.textStrong)
                                             .auto(minSize: 13),
                                         const SizedBox(height: 2),
-                                        '${(item.weight ?? 0).asFixedTruncated(0)} gr'
+                                        '${(item.weight ?? 0).asFixedTruncated(0)} ${'unit_g'.tr()}'
                                             .text(12, 16, 400)
                                             .c(context.colors.textSub),
                                       ],
@@ -377,7 +377,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
         return 'Delete';
       case 'uz':
       default:
-        return 'O‘chirish';
+        return 'Oʻchirish';
     }
   }
 
@@ -401,7 +401,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
         return 'Delete "$name" from the menu?';
       case 'uz':
       default:
-        return '«$name» menyudan o‘chirilsinmi?';
+        return '«$name» menyudan oʻchirilsinmi?';
     }
   }
 
@@ -515,7 +515,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
     return check.isAfter(today);
   }
 
-  Widget mealInfoCard(BuildContext context, {required String title, required double value, String unit = 'gr'}) {
+  Widget mealInfoCard(BuildContext context, {required String title, required double value, String? unit}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -531,7 +531,7 @@ class MealsPage extends Managed<MealsManager, MealsState, MealsEffect> {
                 Expanded(
                   child: value.asFixedTruncated(1).text(20, 24, 600).c(context.colors.textStrong).auto(minSize: 16),
                 ),
-                unit.text(20, 24, 600).c(context.colors.textSub),
+                (unit ?? 'unit_g'.tr()).text(20, 24, 600).c(context.colors.textSub),
               ],
             ),
           ],

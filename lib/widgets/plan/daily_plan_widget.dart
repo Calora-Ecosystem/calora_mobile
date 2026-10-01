@@ -4,7 +4,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class DailyPlanWidget extends StatelessWidget {
   final VoidCallback onBackward;
@@ -35,7 +35,9 @@ class DailyPlanWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formattedMonth = DateFormat.yMMMM('Uz').format(date);
+    // "21 sentabr 2026" / "21 сентября 2026" / "21 September 2026" — in the
+    // app language, not a fixed one.
+    final formattedDate = DateFormat('d MMMM y', context.locale.languageCode).format(date);
 
     return Container(
       width: double.infinity,
@@ -62,14 +64,7 @@ class DailyPlanWidget extends StatelessWidget {
                   child: Column(
                     children: [
                       (isToday ? Strings.today : '').text(14, 16, 400).c(context.colors.white),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          date.day.toString().text(14, 16, 400).c(context.colors.textWhite),
-                          const SizedBox(width: 4),
-                          formattedMonth.text(14, 16, 400).c(context.colors.white),
-                        ],
-                      ),
+                      formattedDate.text(14, 16, 400).c(context.colors.white),
                     ],
                   ),
                 ),

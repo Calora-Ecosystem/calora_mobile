@@ -1099,7 +1099,7 @@ class _ValueStackCard extends StatelessWidget {
                       .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
                 const SizedBox(width: 8),
-                _struck(context, "${r[1]} so'm"),
+                _struck(context, '${r[1]} ${'tf_sum'.tr()}'),
               ],
             ),
             const SizedBox(height: 10),

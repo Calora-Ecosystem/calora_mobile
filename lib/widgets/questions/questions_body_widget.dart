@@ -9,6 +9,7 @@ import 'package:calora/widgets/questions/purposes_widget.dart';
 import 'package:calora/widgets/questions/ruler_picker.dart';
 import 'package:calora/widgets/questions/questions_widget.dart'
     show QuestionWidget;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -87,7 +88,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
             min: 100,
             max: 220,
             initial: 170,
-            unit: 'sm',
+            unit: 'unit_cm'.tr(),
             onChanged: (val) =>
                 manager.setAnswer(Questions(height: val.toDouble())),
           ),
@@ -101,7 +102,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
             min: 30,
             max: 200,
             initial: 70,
-            unit: 'kg',
+            unit: 'unit_kg'.tr(),
             onChanged: (val) =>
                 manager.setAnswer(Questions(weight: val.toDouble())),
           ),
@@ -115,7 +116,7 @@ class _QuestionsBodyWidgetState extends State<QuestionsBodyWidget> {
             min: 30,
             max: 200,
             initial: 65,
-            unit: 'kg',
+            unit: 'unit_kg'.tr(),
             onChanged: (val) => manager.setAnswer(
               Questions(targetWeight: val.toDouble()),
             ),

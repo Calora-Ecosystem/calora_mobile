@@ -5,6 +5,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/disclaimer/medical_disclaimer.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class CourseCalculate extends StatelessWidget {
@@ -69,7 +70,7 @@ class CourseCalculate extends StatelessWidget {
                           _buildIconTextRow(
                             context,
                             icon: Assets.icons.water.svg(),
-                            count: '$waterMl ml',
+                            count: '$waterMl ${'unit_ml'.tr()}',
                             title: Strings.water,
                             subtitle: Strings.dailyGoal,
                           ),

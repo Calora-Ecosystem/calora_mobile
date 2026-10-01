@@ -12,7 +12,9 @@ class NutrientInfo {
   });
 }
 
-final List<NutrientInfo> defaultNutrients = [
+// A getter, not a top-level final: a cached list would keep the language
+// it was first read in.
+List<NutrientInfo> get defaultNutrients => [
   NutrientInfo(name: Strings.oils, value: 49.3, percent: 0.5),
   NutrientInfo(name: Strings.proteins, value: 32.7, percent: 0.7),
   NutrientInfo(name: Strings.carbohydrates, value: 68.2, percent: 0.6),

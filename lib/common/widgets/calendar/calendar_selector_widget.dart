@@ -3,7 +3,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CalendarSelectorWidget extends StatefulWidget {
   final ValueChanged<DateTime> onDaySelected;
@@ -124,7 +124,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
   }
 
   Widget _buildWeekdayHeaders() {
-    final locale = Localizations.localeOf(context).languageCode;
+    final locale = context.locale.languageCode;
     final monday = DateTime(2023, 1, 2);
     final days = List.generate(7, (i) => monday.add(Duration(days: i)));
 
@@ -154,7 +154,7 @@ class _CalendarSelectorWidgetState extends State<CalendarSelectorWidget> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-          child: DateFormat.yMMMM('Uz')
+          child: DateFormat('LLLL y', context.locale.languageCode)
               .format(month)
               .capitalize()
               .text(20, 24, 600)

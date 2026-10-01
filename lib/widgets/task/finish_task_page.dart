@@ -8,6 +8,7 @@ import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/tasks/management/tasks_management.dart';
 import 'package:calora/presentation/tasks/management/tasks_manager.dart';
 import 'package:calora/widgets/task/mood_selector_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -94,7 +95,7 @@ class FinishTaskPage extends Managed<TasksManager, TasksState, TasksEffect> {
                           Expanded(
                             child: _buildTaskParametrs(
                               Strings.exercises,
-                              '$taskCount ta',
+                              'n_items'.tr(namedArgs: {'count': '$taskCount'}),
                               context,
                             ),
                           ),

@@ -34,6 +34,10 @@ class App extends Managed<AppManager, AppState, AppEffect> {
 
   @override
   Widget builder(context, manager, state) {
+    // Formatting without an explicit locale (e.g. DateFormat('d MMMM')) must
+    // follow the app language, not the phone's — otherwise a Russian UI shows
+    // Uzbek or English month names.
+    Intl.defaultLocale = context.locale.languageCode;
     final appRouter = getIt<AppRouter>();
     return MaterialApp.router(
       title: 'Calora',

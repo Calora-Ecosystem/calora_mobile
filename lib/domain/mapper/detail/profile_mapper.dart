@@ -37,13 +37,13 @@ extension ProfileRequestToDetailInfos on ProfileRequest {
       DetailInfo(
         title: Strings.height,
         message: height?.toString() ?? '',
-        metric: 'sm',
+        metric: 'unit_cm',
         type: DetailInfoType.height,
       ),
       DetailInfo(
         title: Strings.weight,
         message: weight?.toString() ?? '',
-        metric: 'kg',
+        metric: 'unit_kg',
         type: DetailInfoType.weight,
       ),
       // DetailInfo(

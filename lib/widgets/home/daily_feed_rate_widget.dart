@@ -4,6 +4,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/nutrient/nutrient_data.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -100,7 +101,7 @@ class DailyFeedRateWidget extends StatelessWidget {
                         spacing: 4,
                         children: [
                           nutrient.value.asFixedTruncated(1).toString().text(16, 20, 500),
-                          'gr'.text(12, 14, 400),
+                          'unit_g'.tr().text(12, 14, 400),
                         ],
                       ),
                       LinearPercentIndicator(

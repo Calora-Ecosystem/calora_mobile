@@ -1,43 +1,31 @@
-String formatDateLabel(int offset, String period) {
-  final now = DateTime.now();
+import 'package:intl/intl.dart';
 
-  String monthName(int month) {
-    const months = [
-      'Yanvar',
-      'Fevral',
-      'Mart',
-      'Aprel',
-      'May',
-      'Iyun',
-      'Iyul',
-      'Avgust',
-      'Sentyabr',
-      'Oktabr',
-      'Noyabr',
-      'Dekabr',
-    ];
-    return months[month - 1];
-  }
+/// Period label for the steps cards, e.g. `22 сентября` or
+/// `15 sentabr - 21 sentabr`. [locale] is the app language code
+/// (`context.locale.languageCode`) so the month follows the chosen language
+/// instead of a hardcoded one.
+String formatDateLabel(int offset, String period, String locale) {
+  final now = DateTime.now();
+  final day = DateFormat('d MMMM', locale);
+  final paddedDay = DateFormat('dd MMMM', locale);
 
   if (period == 'daily') {
     final today = DateTime(now.year, now.month, now.day);
     final target = today.add(Duration(days: offset));
-    return '${target.day} ${monthName(target.month)}';
+    return day.format(target);
   } else if (period == 'weekly') {
     final today = DateTime(now.year, now.month, now.day);
     final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
     final targetStart = startOfWeek.add(Duration(days: offset * 7));
     final targetEnd = targetStart.add(const Duration(days: 6));
 
-    return "${targetStart.day.toString().padLeft(2, '0')} ${monthName(targetStart.month)}"
-        " - ${targetEnd.day.toString().padLeft(2, '0')} ${monthName(targetEnd.month)}";
+    return '${paddedDay.format(targetStart)} - ${paddedDay.format(targetEnd)}';
   } else if (period == 'monthly') {
     final target = DateTime(now.year, now.month + offset);
     final firstDay = DateTime(target.year, target.month);
     final lastDay = DateTime(target.year, target.month + 1, 0);
 
-    return "${firstDay.day.toString().padLeft(2, '0')} ${monthName(firstDay.month)}"
-        " - ${lastDay.day.toString().padLeft(2, '0')} ${monthName(lastDay.month)}";
+    return '${paddedDay.format(firstDay)} - ${paddedDay.format(lastDay)}';
   }
 
   return '';

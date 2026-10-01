@@ -7,6 +7,7 @@ import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/dashboard/features/steps/management/steps_manager.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -38,8 +39,8 @@ class BaseFitnessTrackWidget extends StatelessWidget {
   final String period;
   final String? title;
 
-  String _getDateLabel(String period) {
-    return formatDateLabel(offset, period);
+  String _getDateLabel(BuildContext context, String period) {
+    return formatDateLabel(offset, period, context.locale.languageCode);
   }
 
   @override
@@ -70,7 +71,7 @@ class BaseFitnessTrackWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  _getDateLabel(period).text(14, 16, 400).c(context.colors.textWhite),
+                  _getDateLabel(context, period).text(14, 16, 400).c(context.colors.textWhite),
                   canGoForward
                       ? SizedBox(
                           width: 40,

@@ -90,7 +90,8 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
     // Label from the middle of the visible week so a week that straddles two
     // months reads as its dominant one.
     final labelDate = _weekStartForPage(_visiblePage).add(const Duration(days: 3));
-    final monthLabel = DateFormat('MMMM yyyy').format(labelDate);
+    // Standalone month (LLLL) so Russian reads "сентябрь", not "сентября".
+    final monthLabel = DateFormat('LLLL y', context.locale.languageCode).format(labelDate).capitalize();
     final showTodayChip = _visiblePage != _initialPage || !_isSameDay(_selectedDate, _today);
 
     return Column(
@@ -158,7 +159,7 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
   }
 
   Widget _dayCell(BuildContext context, DateTime day) {
-    final dayName = DateFormat('EEE').format(day);
+    final dayName = DateFormat('EEE', context.locale.languageCode).format(day).capitalize();
     final dayNumber = DateFormat('d').format(day);
     final isSelected = _isSameDay(day, _selectedDate);
     final isToday = _isSameDay(day, _today);

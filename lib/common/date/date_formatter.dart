@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:calora/common/gen/strings.dart';
 import 'package:intl/intl.dart';
 
 class DateFormatter {
@@ -46,25 +43,13 @@ class DateFormatter {
     return _formatDate(date);
   }
 
+  /// `21 sentabr 2000` / `21 сентября 2000` / `21 September 2000`. Uses
+  /// `Intl.defaultLocale`, which the app keeps in sync with the chosen
+  /// language — a month list of nominatives would read "21 Сентябрь" in
+  /// Russian.
   static String _formatDate(DateTime? date) {
     if (date == null) return '';
-
-    final monthNames = [
-      Strings.january,
-      Strings.february,
-      Strings.march,
-      Strings.april,
-      Strings.may,
-      Strings.june,
-      Strings.july,
-      Strings.august,
-      Strings.september,
-      Strings.october,
-      Strings.november,
-      Strings.december,
-    ];
-
-    return '${date.day} ${monthNames[date.month - 1]} ${date.year}';
+    return DateFormat('d MMMM y').format(date);
   }
 
   static DateTime? parseIsoDateTime({required String dateString}) {

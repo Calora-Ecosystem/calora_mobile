@@ -1,6 +1,7 @@
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -147,9 +148,9 @@ class ChartWidget extends StatelessWidget {
       }
       return const SizedBox.shrink();
     } else {
-      const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-      if (index >= 0 && index < days.length) {
-        return days[index].text(14, 16, 400).c(context.colors.neutralPrimary);
+      // Short weekday in the app language: Mo / Du / Пн (Monday = 1).
+      if (index >= 0 && index < 7) {
+        return 'wr_day_${index + 1}'.tr().text(14, 16, 400).c(context.colors.neutralPrimary);
       }
       return const SizedBox.shrink();
     }

@@ -4,6 +4,7 @@ import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/widgets/citation/citation_link.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/widgets/profile_cards/bmi_card/color_level_bar.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
@@ -62,14 +63,14 @@ class BmiCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _infoBox(
-                    'Progress',
-                    '${(entryWeight - weight).abs()}',
+                    Strings.progress,
+                    '${(entryWeight - weight).abs()} ${'unit_kg'.tr()}',
                     context,
                   ),
                   SizedBox(width: 16),
                   _infoBox(
                     Strings.remained,
-                    '${(weight - targetWeight).abs()} kg',
+                    '${(weight - targetWeight).abs()} ${'unit_kg'.tr()}',
                     context,
                   ),
                 ],

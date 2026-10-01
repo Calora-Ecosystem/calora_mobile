@@ -86,7 +86,7 @@ class NormsPage extends Managed<NormsManager, NormsState, NormsEffect> {
       builder: (context) {
         return SingleInputPage(
           title: info.title,
-          metrics: info.metric,
+          metrics: info.metricLabel,
           textInputType: info.currentTextInputType,
           message: info.message,
           onSave: (data) {
