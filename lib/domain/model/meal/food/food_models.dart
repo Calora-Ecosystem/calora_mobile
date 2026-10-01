@@ -9,10 +9,14 @@ abstract class FoodModel with _$FoodModel {
   const factory FoodModel({
     int? id,
     required String name,
-    required int categoryId,
+
+    /// Null (or 0) for a user's own food without a category — manual
+    /// "Create", or an AI category that didn't resolve. A required int here
+    /// failed the whole "Last eaten" / "My foods" page on one such food.
+    int? categoryId,
     String? categoryName,
     String? description,
-    required String coverUrl,
+    @Default('') String coverUrl,
     required List<Metric> metrics,
     @Default(false) bool isUserFood,
     @Default(false) bool isFavourite,

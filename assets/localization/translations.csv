@@ -972,3 +972,30 @@ show_less,Show less,Yopish,Свернуть
 of_max_kcal,of {max} kcal,{max} kkaldan,из {max} ккал
 no_previous_purchase,No previous purchases found,Avvalgi xaridlar topilmadi,Предыдущие покупки не найдены
 help_mail,Email,Pochta,Почта
+family_plan_title,Family · 2 people,Oila · 2 kishi,Семейный · 2 человека
+family_sheet_title,Family plan,Oila tarifi,Семейный тариф
+family_store_unavailable,The family plan can be paid with Payme or Click only for now.,Oila tarifini hozircha faqat Payme yoki Click orqali toʻlash mumkin.,Семейный тариф пока можно оплатить только через Payme или Click.
+family_code_title,Premium for your loved one,Yaqiningiz uchun Premium,Premium для близкого
+family_code_subtitle,Your family plan covers two. Send this code — they get {months} month(s) of Premium too.,Oila tarifi ikki kishi uchun. Bu kodni yaqiningizga yuboring — u ham {months} oylik Premium oladi.,Семейный тариф — на двоих. Отправьте этот код близкому — он тоже получит Premium на {months} мес.
+family_code_copy,Copy code,Kodni nusxalash,Скопировать код
+family_code_active_until,Can be activated until {date},{date} gacha faollashtirish mumkin,Активировать можно до {date}
+family_code_redeemed_by,Activated by {name},{name} faollashtirdi,Активировал(а): {name}
+family_code_redeemed,Activated,Faollashtirildi,Активирован
+family_code_expired,This code has expired,Kodning muddati oʻtgan,Срок действия кода истёк
+family_code_pending,"Your code is being prepared. You'll get a notification, and it's always in Profile → Subscription.","Kod tayyorlanmoqda. Sizga bildirishnoma keladi, kod doim Profil → Obuna boʻlimida turadi.","Код готовится. Придёт уведомление, а сам код всегда есть в Профиль → Подписка."
+family_code_how_1,Send the code to your loved one,Kodni yaqiningizga yuboring,Отправьте код близкому
+family_code_how_2,They open Calora → Profile → Subscription → “Enter family code”,U Calora ilovasida Profil → Obuna → “Oila kodini kiritish”ni bosadi,Он открывает Calora → Профиль → Подписка → «Ввести семейный код»
+family_code_how_3,Premium turns on for them right away,Unga darhol Premium ochiladi,Premium включается сразу
+family_code_share_text,I'm sharing Calora Premium with you 🍏 Your code: {code} — open Calora → Profile → Subscription → “Enter family code” and get {months} month(s) of Premium. Download: {link},Sizga Calora Premium sovgʻa qilaman 🍏 Kodingiz: {code} — Calora ilovasida Profil → Obuna → “Oila kodini kiritish”ni bosing va {months} oylik Premium oling. Yuklab olish: {link},Дарю тебе Calora Premium 🍏 Твой код: {code} — открой Calora → Профиль → Подписка → «Ввести семейный код» и получи Premium на {months} мес. Скачать: {link}
+family_code_card,Code for your loved one,Yaqiningiz uchun kod,Код для близкого
+family_redeem_action,Enter family code,Oila kodini kiritish,Ввести семейный код
+family_redeem_subtitle,"If your loved one bought the family plan, enter the code they sent you — Premium turns on right away.","Yaqiningiz oila tarifini olgan boʻlsa, u yuborgan kodni kiriting — Premium darhol ochiladi.","Если близкий оформил семейный тариф, введите присланный им код — Premium включится сразу."
+family_redeem_button,Activate,Faollashtirish,Активировать
+family_redeem_success,Premium is on — a gift from {name}!,Premium faollashdi — {name} sovgʻasi!,Premium включён — подарок от {name}!
+family_redeem_success_plain,Premium is on!,Premium faollashdi!,Premium включён!
+family_err_not_found,Code not found. Check it and try again.,"Kod topilmadi. Tekshirib, qayta urinib koʻring.",Код не найден. Проверьте и попробуйте снова.
+family_err_used,This code has already been used.,Bu kod allaqachon ishlatilgan.,Этот код уже использован.
+family_err_self,This is your own code — send it to your loved one.,Bu oʻzingizning kodingiz — uni yaqiningizga yuboring.,Это ваш собственный код — отправьте его близкому.
+tf_have_family_code,Got a family code?,Oila kodingiz bormi?,Есть семейный код?
+sub_source_family,Family plan gift,Oila tarifi sovgʻasi,Подарок по семейному тарифу
+plan_family,Family,Oila,Семейный

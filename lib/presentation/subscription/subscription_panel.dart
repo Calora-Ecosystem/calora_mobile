@@ -5,10 +5,13 @@ import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/domain/model/premium/family_code.dart';
 import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/premium/family/family_code_sheet.dart';
+import 'package:calora/presentation/premium/family/family_redeem_sheet.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -21,7 +24,9 @@ import 'package:url_launcher/url_launcher.dart';
 /// 2. next payment date,
 /// 3. status — active or cancelled,
 ///
-/// plus "change plan" for Premium and "Go Premium" for Free.
+/// plus "change plan" for Premium and "Go Premium" for Free. A family-plan
+/// buyer also finds the second person's code here, and anyone can enter a
+/// family code they were sent.
 /// Data: `billing/subscription/my`; until it loads the tier comes from
 /// [AppManager] so the header never flickers.
 class SubscriptionPanel extends StatefulWidget {
@@ -34,15 +39,41 @@ class SubscriptionPanel extends StatefulWidget {
 class _SubscriptionPanelState extends State<SubscriptionPanel> {
   MySubscription? _sub;
 
+  /// Newest family-plan code this user bought for someone, if any.
+  FamilyCode? _familyCode;
+
   @override
   void initState() {
     super.initState();
-    getIt<PremiumRepo>()
+    _load();
+  }
+
+  void _load() {
+    final repo = getIt<PremiumRepo>();
+    repo
         .getMySubscription()
         .then((value) {
           if (mounted) setState(() => _sub = value);
         })
         .catchError((_) {});
+    repo
+        .getFamilyCodes()
+        .then((codes) {
+          if (mounted && codes.isNotEmpty) {
+            // Same pick as the code sheet: the newest unused one first.
+            final code = codes.firstWhere(
+              (c) => c.status == FamilyCodeStatus.active,
+              orElse: () => codes.first,
+            );
+            setState(() => _familyCode = code);
+          }
+        })
+        .catchError((_) {});
+  }
+
+  Future<void> _redeemFamilyCode() async {
+    final redeemed = await FamilyRedeemSheet.show(context, goHome: false);
+    if (redeemed && mounted) _load();
   }
 
   @override
@@ -77,11 +108,22 @@ class _SubscriptionPanelState extends State<SubscriptionPanel> {
                 ),
               ),
             ],
+            if (_familyCode != null) ...[
+              const SizedBox(height: 12),
+              _familyCodeCard(context, _familyCode!),
+            ],
             const SizedBox(height: 20),
             if (isPremium)
               ..._premiumActions(context, sub)
             else
               ..._freeActions(context),
+            TextButton(
+              onPressed: _redeemFamilyCode,
+              child: 'family_redeem_action'
+                  .tr()
+                  .text(14, 18, 600)
+                  .c(colors.accentSub),
+            ),
           ],
         ),
       ),
@@ -223,6 +265,61 @@ class _SubscriptionPanelState extends State<SubscriptionPanel> {
     );
   }
 
+  /// The family-plan buyer's code for the second person — tap to copy or
+  /// share it again.
+  Widget _familyCodeCard(BuildContext context, FamilyCode code) {
+    final colors = context.colors;
+    final active = code.status == FamilyCodeStatus.active;
+    final status = switch (code.status) {
+      FamilyCodeStatus.active => 'status_active'.tr(),
+      FamilyCodeStatus.redeemed =>
+        code.redeemedBy?.trim().isNotEmpty == true
+            ? 'family_code_redeemed_by'.tr(
+                namedArgs: {'name': code.redeemedBy!.trim()},
+              )
+            : 'family_code_redeemed'.tr(),
+      FamilyCodeStatus.expired => 'family_code_expired'.tr(),
+    };
+    return GestureDetector(
+      onTap: () => FamilyCodeSheet.show(context),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: active ? colors.paleGreen : colors.strokeSoft,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  'family_code_card'.tr().text(12, 16, 500).c(colors.textSub),
+                  const SizedBox(height: 4),
+                  code.code
+                      .text(16, 20, 700)
+                      .c(active ? colors.textStrong : colors.textSub),
+                  const SizedBox(height: 2),
+                  status
+                      .text(12, 16, 500)
+                      .c(active ? colors.accentSub : colors.textSub),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: colors.iconSoft,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _note(BuildContext context, String text) {
     final colors = context.colors;
     return Row(
@@ -303,9 +400,13 @@ class _SubscriptionPanelState extends State<SubscriptionPanel> {
         return 'sub_source_referral'.tr();
       case 'admin':
         return 'sub_source_gift'.tr();
+      case 'family':
+        return 'sub_source_family'.tr();
     }
     final months = sub.durationInMonths;
-    final plan = months == null
+    final plan = sub.isFamily
+        ? 'plan_family'.tr()
+        : months == null
         ? 'plan_premium'.tr()
         : months == 1
         ? 'plan_monthly'.tr()

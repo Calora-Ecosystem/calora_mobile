@@ -244,11 +244,24 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     }
   }
 
+  /// Picture of the food's category ("Quyuq ovqatlar", "Suyuq ovqatlar"…),
+  /// or null when the category is unknown or the categories aren't loaded.
+  String? _categoryCover(int? categoryId) {
+    if (categoryId == null || categoryId <= 0) return null;
+    for (final category in state.mealCategories) {
+      if (category.id == categoryId && category.imageUrl.isNotEmpty) {
+        return category.imageUrl;
+      }
+    }
+    return null;
+  }
+
   /// Creates a food from explicit (user-edited) values and logs it to the
   /// menu. Used when the user corrects AI scan/voice results before adding.
   ///
-  /// [coverUrl] is the persisted photo of the scanned dish; when null (e.g.
-  /// the voice flow) the neutral abstract placeholder is used instead.
+  /// [coverUrl] is the persisted photo of the scanned dish; when null (the
+  /// voice flow, or a failed upload) the dish gets its category's picture,
+  /// and only an uncategorised one falls back to the abstract placeholder.
   Future<bool> addCustomFoodAndMenu({
     required String name,
     required int calories,
@@ -269,7 +282,7 @@ class AddMealsManager extends Manager<AddMealsState, AddMealsEffect> {
     final request = FoodRequest(
       categoryId: categoryId,
       name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
-      coverUrl: coverUrl ?? abstractImageUrl,
+      coverUrl: coverUrl ?? _categoryCover(categoryId) ?? abstractImageUrl,
       metrics: [
         Metric(userId: 0, metric: MetricType.kcal.name, value: calories),
         Metric(userId: 0, metric: MetricType.protein.name, value: protein),

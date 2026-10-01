@@ -13,6 +13,8 @@ import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/sheets/default_bottom_sheet.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/premium/family/family_code_sheet.dart';
+import 'package:calora/presentation/premium/family/family_redeem_sheet.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
 import 'package:calora/widgets/premium/promo_code_widget.dart';
@@ -24,7 +26,21 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl, LaunchMode;
 
 class PremiumSheet
     extends Managed<PremiumManager, PremiumState, PremiumEffect> {
-  PremiumSheet({super.key});
+  /// Sells the family plan (two people) instead of the regular plans; once
+  /// paid, the buyer gets the code for the second person.
+  final bool family;
+
+  /// The package picked on the tariffs page, selected once plans load.
+  final int? initialPlanId;
+
+  PremiumSheet({super.key, this.family = false, this.initialPlanId});
+
+  @override
+  void init(BuildContext context, PremiumManager manager) {
+    super.init(context, manager);
+    manager.preferPlan(initialPlanId);
+    if (family) manager.useFamilyPlan();
+  }
 
   @override
   void onFocusGained(BuildContext context, PremiumManager manager) {
@@ -46,9 +62,18 @@ class PremiumSheet
           CustomSnackBar.show(context, Strings.invalidPromoCode),
       subscriptionSuccess: () async {
         await PremiumConfettiOverlay.show(context);
+        if (!context.mounted) return;
         CustomSnackBar.showSuccess(context, Strings.subscriptionSuccess);
+        // The second person's code is the point of the family plan — hand
+        // it over before leaving (Profile → Subscription keeps it too).
+        if (manager.state.isFamily) {
+          await FamilyCodeSheet.show(context, waitForNew: true);
+          if (!context.mounted) return;
+        }
         context.router.replaceAll([DashboardRoute()]);
       },
+      familyCodeRedeemed: (ownerName) =>
+          FamilyRedeemSheet.celebrate(context, ownerName),
     );
   }
 
@@ -65,6 +90,8 @@ class PremiumSheet
           child:
               (state.isPaymentPending
                       ? Strings.purchaseIsPending
+                      : state.isFamily
+                      ? 'family_sheet_title'.tr()
                       : Strings.chooseRightPackage)
                   .text(20, 24, 600)
                   .c(context.colors.textPrimary),
@@ -148,6 +175,10 @@ class PremiumSheet
                           ),
                       ],
                     ),
+                    if (_familyUnavailable(state)) ...[
+                      const SizedBox(height: 12),
+                      _familyUnavailableNote(context, state),
+                    ],
                     // Promo code is visible for EVERYONE — never gate it
                     // on region/IP: a VPN flips isUzbekistan to false and
                     // used to hide the field from legitimate users.
@@ -283,6 +314,7 @@ class PremiumSheet
                               ((state.selectedPlan?.isFree ?? false) ||
                                   state.selectedPaymentMethod != null ||
                                   !state.isUzbekistan) &&
+                              !_familyUnavailable(state) &&
                               !state.isRestoringPurchase,
                           loading: state.isOrderingSubscription,
                           onPressed: () => manager.orderSubscription(),
@@ -309,6 +341,40 @@ class PremiumSheet
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// The family plan is sold through Payme / Click only (no store product),
+  /// and may not be set up on the backend yet. Keyed on the country rather
+  /// than on an empty method list, which is also empty until it resolves.
+  bool _familyUnavailable(PremiumState state) =>
+      state.isFamily &&
+      !state.isGettingPremiumPlans &&
+      !state.isGettingOrders &&
+      (state.plans.isEmpty || (!state.isUzbekistan && !kDebugMode));
+
+  Widget _familyUnavailableNote(BuildContext context, PremiumState state) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.backgroundElevation,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline_rounded, color: colors.textSub, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: (state.plans.isEmpty
+                    ? 'tf_family_soon'
+                    : 'family_store_unavailable')
+                .tr()
+                .text(13, 18, 500)
+                .c(colors.textStrong),
+          ),
+        ],
       ),
     );
   }

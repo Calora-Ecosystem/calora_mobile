@@ -67,22 +67,9 @@ class CaloriesRepoImpl extends CaloriesRepo {
   @override
   Future<FoodModel> fetchFoodById(int id) async {
     final response = await _api.fetchFoodById(id);
-    final data = response.data['content'];
-
-    return FoodModel(
-      id: data['id'],
-      name: data['name'],
-      description: data['description'],
-      categoryId: data['categoryId'],
-      categoryName: data['categoryName'],
-      coverUrl: data['coverUrl'],
-      metrics: (data['metrics'] as List)
-          .map((e) => Metric.fromJson(e))
-          .toList(),
-      isUserFood: data['isUserFood'] ?? false,
-      isFavourite: data['isFavourite'] ?? false,
-      userId: data['userId'],
-    );
+    // Same null-safe parsing as the lists — a user's food may have no
+    // category or cover.
+    return FoodModel.fromJson(response.data['content'] as Map<String, dynamic>);
   }
 
   @override

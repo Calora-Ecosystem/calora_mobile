@@ -19,6 +19,10 @@ sealed class PremiumPlanModel with _$PremiumPlanModel {
     /// (Click / Payme only — store prices are set by Apple / Google).
     int? referralDiscountPercent,
     int? discountedFee,
+
+    /// Family plan (two people): the buyer also gets a Premium code for the
+    /// second person. Listed only by `?family=true`.
+    bool? isFamily,
   }) = _PremiumPlanModel;
 
   factory PremiumPlanModel.fromJson(Map<String, dynamic> json) =>

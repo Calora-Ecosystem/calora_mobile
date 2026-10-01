@@ -11,7 +11,7 @@ class MySubscription {
   /// happen in the store.
   final bool managedByStore;
 
-  /// Payment, Admin, Coins or Referral — where the Premium came from.
+  /// Payment, Admin, Coins, Referral or Family — where the Premium came from.
   final String? source;
   final DateTime? startsAt;
   final DateTime? endsAt;
@@ -20,6 +20,9 @@ class MySubscription {
   /// Click, Payme or Iap for the last confirmed payment.
   final String? provider;
   final int? durationInMonths;
+
+  /// The last plan bought is the family plan (codes: `billing/family/codes`).
+  final bool isFamily;
   final bool autoRenew;
   final DateTime? nextPaymentAt;
 
@@ -33,6 +36,7 @@ class MySubscription {
     this.daysLeft = 0,
     this.provider,
     this.durationInMonths,
+    this.isFamily = false,
     this.autoRenew = false,
     this.nextPaymentAt,
   });
@@ -51,6 +55,7 @@ class MySubscription {
     daysLeft: (json['daysLeft'] as num?)?.toInt() ?? 0,
     provider: json['provider'] as String?,
     durationInMonths: (json['durationInMonths'] as num?)?.toInt(),
+    isFamily: json['isFamily'] as bool? ?? false,
     autoRenew: json['autoRenew'] as bool? ?? false,
     nextPaymentAt: DateTime.tryParse(json['nextPaymentAt'] as String? ?? ''),
   );

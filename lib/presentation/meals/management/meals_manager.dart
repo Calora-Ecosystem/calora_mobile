@@ -72,7 +72,8 @@ class MealsManager extends Manager<MealsState, MealsEffect> {
     final userId = await profileStore.getUserId() ?? 0;
 
     final request = FoodRequest(
-      categoryId: item.categoryId,
+      // The diary reports an uncategorised food as 0, which isn't a category.
+      categoryId: (item.categoryId ?? 0) > 0 ? item.categoryId : null,
       name: FoodName(uz: name, ru: name, eng: name, cyrl: name),
       coverUrl: item.coverUrl ?? abstractImageUrl,
       metrics: [

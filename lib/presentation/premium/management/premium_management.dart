@@ -39,6 +39,10 @@ abstract class PremiumState with _$PremiumState {
     /// First-purchase discount (%) for a user who joined with a friend's
     /// code. Already applied to [PlanModel.price] on the Payme / Click flow.
     @Default(0) int referralDiscountPercent,
+
+    /// The sheet sells the family plan (two people) instead of the regular
+    /// ones. Payme / Click only — the stores have no family product.
+    @Default(false) bool isFamily,
   }) = _PremiumState;
 
   /// Whether the active payment method is store billing (Apple / Google)
@@ -65,6 +69,10 @@ sealed class PremiumEffect with _$PremiumEffect {
   const factory PremiumEffect.invalidPromoCode() = _InvalidPromoCode;
 
   const factory PremiumEffect.subscriptionSuccess() = _SubscriptionSuccess;
+
+  /// A family code typed into the promo field was redeemed — Premium is on.
+  const factory PremiumEffect.familyCodeRedeemed(String? ownerName) =
+      _FamilyCodeRedeemed;
 }
 
 @immutable

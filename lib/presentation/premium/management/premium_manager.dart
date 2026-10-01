@@ -10,8 +10,10 @@ import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
+import 'package:calora/presentation/premium/family/family_code_error.dart';
 import 'package:calora/presentation/premium/management/premium_management.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
@@ -67,10 +69,56 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     getMyOrders();
   }
 
+  /// Package to preselect (picked on the tariffs page) instead of the
+  /// "best offer" one.
+  int? _preferredPlanId;
+
+  void preferPlan(int? planId) {
+    _preferredPlanId = planId;
+    final match = state.plans.firstWhereOrNull((plan) => plan.id == planId);
+    if (match != null) emit(state.copyWith(selectedPlan: match));
+  }
+
+  /// Switches the sheet to the family plan (two people). Called right after
+  /// the manager is created, so the regular plans requested by `_init` are
+  /// dropped when they land (see [getPremiumPlans]).
+  void useFamilyPlan() {
+    if (state.isFamily) return;
+    emit(
+      state.copyWith(
+        isFamily: true,
+        plans: const [],
+        selectedPlan: null,
+        paymentMethods: _withoutStore(state.paymentMethods),
+        selectedPaymentMethod: state.selectedPaymentMethod?.code == 'Iap'
+            ? null
+            : state.selectedPaymentMethod,
+      ),
+    );
+    getPremiumPlans();
+  }
+
+  /// The stores have no family product (and the backend refuses an IAP
+  /// family order), so the family plan is sold through Payme / Click only.
+  List<PaymentMethod> _withoutStore(List<PaymentMethod> methods) =>
+      methods.where((method) => method.code != 'Iap').toList();
+
   void _applyIsUzbekistan(bool isUzbekistan) {
     final iap = PaymentMethod(icon: Assets.icons.apple, code: 'Iap');
     final payme = PaymentMethod(icon: Assets.icons.payme, code: 'Payme');
     final click = PaymentMethod(icon: Assets.icons.click, code: 'Click');
+    if (state.isFamily) {
+      emit(
+        state.copyWith(
+          isUzbekistan: isUzbekistan,
+          paymentMethods: isUzbekistan || kDebugMode ? [payme, click] : [],
+          selectedPaymentMethod: state.selectedPaymentMethod?.code == 'Iap'
+              ? null
+              : state.selectedPaymentMethod,
+        ),
+      );
+      return;
+    }
     if (kDebugMode) {
       emit(
         state.copyWith(
@@ -99,6 +147,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   }
 
   Future<void> _loadIapPrices() async {
+    if (state.isFamily) return;
     if (_iapPricesRequested) return;
     if (state.plans.isEmpty) return;
     if (!state.paymentMethods.any((method) => method.code == 'Iap')) return;
@@ -189,11 +238,19 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     );
   }
 
-  Future<void> getPremiumPlans() async =>
-      await _premiumRepo.getPremiumPlans().handle(
+  Future<void> getPremiumPlans() async {
+    final family = state.isFamily;
+    await _premiumRepo.getPremiumPlans(family: family).handle(
         onStart: () => emit(state.copyWith(isGettingPremiumPlans: true)),
         onData: (data) {
-          final plans = data.map((e) {
+          // The sheet switched between regular and family meanwhile.
+          if (family != state.isFamily) return;
+          // A backend that ignores `family=true` returns the regular list —
+          // never sell one of those as the family plan.
+          final packages = family
+              ? data.where((e) => e.isFamily ?? false).toList()
+              : data;
+          final plans = packages.map((e) {
             // Referral discount: the backend charges `discountedFee` on
             // Payme / Click, so that is the price shown; the full fee is
             // crossed out. IAP ignores it (store prices come from Apple / Google).
@@ -203,6 +260,16 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
             final originalFee = discounted
                 ? max(e.originalFee ?? 0, fee)
                 : e.originalFee ?? 0;
+            if (e.isFamily ?? false) {
+              return PlanModel(
+                id: e.id ?? 0,
+                title: 'family_plan_title'.tr(),
+                price: price,
+                originalFee: originalFee,
+                packageMonth: e.duration ?? 0,
+                isMostPopular: e.isPopular ?? false,
+              );
+            }
             if (e.duration == 1) {
               return PlanModel(
                 id: e.id ?? 0,
@@ -222,15 +289,19 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
               isMostPopular: e.isPopular ?? false,
             );
           }).toList();
-          final referralDiscountPercent = data
+          final referralDiscountPercent = packages
               .map((e) => e.referralDiscountPercent ?? 0)
               .fold(0, max);
 
-          PlanModel? initialPlan;
-          try {
-            initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
-          } catch (e) {
-            initialPlan = plans.isNotEmpty ? plans.first : null;
+          PlanModel? initialPlan = plans.firstWhereOrNull(
+            (plan) => plan.id == _preferredPlanId,
+          );
+          if (initialPlan == null) {
+            try {
+              initialPlan = plans.firstWhere((plan) => plan.isMostPopular);
+            } catch (e) {
+              initialPlan = plans.isNotEmpty ? plans.first : null;
+            }
           }
           emit(
             state.copyWith(
@@ -244,8 +315,12 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
           _ensureSelectedPlanIsPurchasable();
           _logPaywallViewed();
         },
-        onError: (error) => emit(state.copyWith(isGettingPremiumPlans: false)),
+        onError: (error) {
+          if (family != state.isFamily) return;
+          emit(state.copyWith(isGettingPremiumPlans: false));
+        },
       );
+  }
 
   Future<void> getMyOrders() async => await _premiumRepo.getMyOrders().handle(
     onStart: () => emit(state.copyWith(isGettingOrders: true)),
@@ -305,6 +380,12 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   Future<void> getPromoCodeValue(String code) async {
     if (code.trim().isEmpty) return restoreOriginalPrices();
 
+    // A family-plan code isn't a discount: it turns Premium on outright.
+    // People type whatever code they got into "Promo code", so accept it here.
+    if (code.trim().toUpperCase().startsWith(familyCodePrefix)) {
+      return _redeemFamilyCode(code.trim());
+    }
+
     await _premiumRepo
         .getPromoCodeAmount(code: code)
         .handle(
@@ -360,6 +441,25 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
           },
           onError: (_) => restoreOriginalPrices(),
         );
+  }
+
+  static const String familyCodePrefix = 'FAMILY-';
+
+  Future<void> _redeemFamilyCode(String code) async {
+    emit(state.copyWith(isGettingPromoCodeValue: true));
+    try {
+      final result = await _premiumRepo.redeemFamilyCode(code);
+      if (result.requiresTokenRefresh) {
+        await getIt<TokenInterceptor>().refreshAndCheckPremium();
+      }
+      if (isClosed) return;
+      emit(state.copyWith(isGettingPromoCodeValue: false));
+      publish(PremiumEffect.familyCodeRedeemed(result.ownerName));
+    } catch (e) {
+      if (isClosed) return;
+      emit(state.copyWith(isGettingPromoCodeValue: false));
+      publish(PremiumEffect.openPaymentUrlFailure(familyCodeErrorText(e)));
+    }
   }
 
   Future<void> orderSubscription({bool? restore}) async {

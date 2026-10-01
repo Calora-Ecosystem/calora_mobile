@@ -1,4 +1,5 @@
 import 'package:calora/data/api/premium_api.dart';
+import 'package:calora/domain/model/premium/family_code.dart';
 import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
@@ -42,8 +43,8 @@ class PremiumRepoImpl implements PremiumRepo {
   }
 
   @override
-  Future<List<PremiumPlanModel>> getPremiumPlans() async =>
-      await _api.getPremiumPlans();
+  Future<List<PremiumPlanModel>> getPremiumPlans({bool family = false}) async =>
+      await _api.getPremiumPlans(family: family);
 
   @override
   Future<MySubscription> getMySubscription() => _api.getMySubscription();
@@ -51,4 +52,11 @@ class PremiumRepoImpl implements PremiumRepo {
   @override
   Future<PromoCodeModel> getPromoCodeAmount({required String code}) async =>
       await _api.getPromoCodeAmount(code: code);
+
+  @override
+  Future<List<FamilyCode>> getFamilyCodes() => _api.getFamilyCodes();
+
+  @override
+  Future<FamilyRedeemResult> redeemFamilyCode(String code) =>
+      _api.redeemFamilyCode(code);
 }
