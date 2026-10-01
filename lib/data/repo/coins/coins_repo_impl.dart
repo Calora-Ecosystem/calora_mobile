@@ -12,8 +12,14 @@ class CoinsRepoImpl implements CoinsRepo {
 
   CoinsRepoImpl(this._api);
 
+  /// Also keeps the app-wide [stepsPerCoin] in step with the server rule, so
+  /// the step leaderboard's coin view uses the same rate as the wallet.
   @override
-  Future<Wallet> getWallet() => _api.getWallet();
+  Future<Wallet> getWallet() async {
+    final wallet = await _api.getWallet();
+    if (wallet.stepsPerCoin > 0) stepsPerCoin = wallet.stepsPerCoin;
+    return wallet;
+  }
 
   @override
   Future<List<CoinTransaction>> getTransactions() => _api.getTransactions();

@@ -19,8 +19,10 @@ abstract class UserStatRequest with _$UserStatRequest {
       _$UserStatRequestFromJson(json);
 }
 
-/// Steps needed to earn one coin.
-const int stepsPerCoin = 1000;
+/// Steps needed to earn one coin. The admin sets it on the dashboard, so it is
+/// refreshed from every `GET wallet` response ([CoinsRepo.getWallet]); 1000
+/// until the wallet has been read once.
+int stepsPerCoin = 1000;
 
 extension UserStatExtension on UserStatRequest {
   String getInitials() {
@@ -32,8 +34,8 @@ extension UserStatExtension on UserStatRequest {
 
   String get prettySteps => stepCount.toPrettyFormat();
 
-  /// Coins earned from steps: one whole coin per 1000 steps.
-  int get coins => stepCount ~/ stepsPerCoin;
+  /// Coins earned from steps: one whole coin per [stepsPerCoin] steps.
+  int get coins => stepsPerCoin > 0 ? stepCount ~/ stepsPerCoin : 0;
 
   String get prettyCoins => coins.toPrettyFormat();
 

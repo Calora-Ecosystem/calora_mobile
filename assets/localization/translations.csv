@@ -787,6 +787,7 @@ mi_premium_75,Premium 75 days,Premium 75 kun,Premium 75 дней
 mi_premium_75_sub,Great value,Foydali tanlov,Выгодный выбор
 mi_premium_120,Premium 120 days,Premium 120 kun,Premium 120 дней
 mi_premium_120_sub,Best value,Eng tejamkor,Самый выгодный
+mi_premium_days,Premium {days} days,Premium {days} kun,Premium {days} дней
 tariff_confirm_title,Get Premium,Premium olish,Получить Premium
 tariff_confirm_msg,{days} days of Premium for {coins} coins. Continue?,{coins} coin evaziga {days} kunlik Premium. Davom etasizmi?,{days} дней Premium за {coins} монет. Продолжить?
 tariff_success_title,Premium is on! 🎉,Premium faollashdi! 🎉,Premium активирован! 🎉

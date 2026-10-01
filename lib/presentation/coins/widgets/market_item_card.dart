@@ -12,6 +12,16 @@ class MarketItemCard extends StatelessWidget {
   final MarketItem item;
   final VoidCallback onBuy;
 
+  /// Tariffs are created on the admin dashboard with a `mi_premium_<days>` key;
+  /// durations the app has no string for fall back to a generic "Premium N days".
+  String _title() {
+    if (item.title.trExists()) return item.title.tr();
+    if (item.rewardType == MarketRewardType.premiumDays && item.rewardValue > 0) {
+      return 'mi_premium_days'.tr(namedArgs: {'days': '${item.rewardValue}'});
+    }
+    return item.title;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -40,7 +50,7 @@ class MarketItemCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            item.title.tr(),
+            _title(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(

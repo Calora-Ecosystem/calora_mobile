@@ -9,7 +9,8 @@ import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
 
 /// Drives the wallet and the marketplace against the `wallet` API. Coins are
-/// earned on the server from the user's steps (1000 steps = 1 coin), so the
+/// earned on the server from the user's steps (N steps = 1 coin, N set on the
+/// admin dashboard and returned by `GET wallet`), so the
 /// app only reads the balance and spends it. Each page gets its own manager;
 /// they stay in sync because every screen re-reads the server ([refresh]).
 @injectable

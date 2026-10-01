@@ -16,7 +16,8 @@ class LeaderboardSection extends StatelessWidget {
   final PaginationService<UserStatRequest> paginationService;
 
   /// Same users in the same order as the step board, but each row shows the
-  /// coins earned from those steps (1 coin per 1000 steps).
+  /// coins earned from those steps (1 coin per [stepsPerCoin] steps — the
+  /// server rule, refreshed when the coin board is opened).
   final bool byCoins;
 
   const LeaderboardSection({super.key, required this.paginationService, this.byCoins = false});

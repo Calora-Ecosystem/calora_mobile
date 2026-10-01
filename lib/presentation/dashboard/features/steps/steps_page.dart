@@ -15,6 +15,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
+import 'package:calora/domain/repo/coins/coins_repo.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
@@ -498,6 +499,23 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
   /// (false). Local to the tab — it's a view switch, not app state.
   bool _byCoins = false;
 
+  /// The coin board divides steps by the server's steps-per-coin rule; it is
+  /// read once when the board is first opened (the wallet may not have been
+  /// visited yet in this session).
+  bool _rateSynced = false;
+
+  Future<void> _showCoinBoard() async {
+    setState(() => _byCoins = true);
+    if (_rateSynced) return;
+    _rateSynced = true;
+    try {
+      await getIt<CoinsRepo>().getWallet();
+      if (mounted) setState(() {});
+    } catch (_) {
+      _rateSynced = false;
+    }
+  }
+
   @override
   bool get wantKeepAlive => true;
 
@@ -540,7 +558,7 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
       child: Row(
         children: [
           _rankTab(context, label: 'rank_by_steps'.tr(), selected: !_byCoins, onTap: () => setState(() => _byCoins = false)),
-          _rankTab(context, label: 'rank_by_coins'.tr(), selected: _byCoins, onTap: () => setState(() => _byCoins = true)),
+          _rankTab(context, label: 'rank_by_coins'.tr(), selected: _byCoins, onTap: _showCoinBoard),
         ],
       ),
     );
