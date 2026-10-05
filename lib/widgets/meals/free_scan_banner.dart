@@ -1,26 +1,17 @@
 import 'dart:math' as math;
 
-import 'package:calora/common/base/base_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/fonts.gen.dart';
 import 'package:calora/common/service/ai_quota_service.dart';
-import 'package:calora/data/store/common/common_store.dart';
+import 'package:calora/domain/model/calories/ai_quota.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-/// Card above the add-food actions for non-premium users: how many free
-/// recognitions (photo scan + voice, one shared pool) are left, as a ring and
-/// a sentence. When they run out it says so plainly and offers Premium —
-/// adding food by hand stays free, so it never reads as a dead end.
-///
-/// Reads [CommonStore.freeAiScansUsed] reactively so the count drops right
-/// after a successful scan or voice add.
 class FreeScanBanner extends StatefulWidget {
   const FreeScanBanner({super.key, required this.onTap});
 
-  /// Opens the paywall.
   final VoidCallback onTap;
 
   @override
@@ -28,38 +19,29 @@ class FreeScanBanner extends StatefulWidget {
 }
 
 class _FreeScanBannerState extends State<FreeScanBanner> {
-  final _store = getIt<CommonStore>();
+  final _service = getIt<AiQuotaService>();
+  late final Stream<AiQuota> _quota = _service.watch();
 
   @override
   void initState() {
     super.initState();
-    // Sync the cached count with the server; the streams below pick it up.
-    getIt<AiQuotaService>().refresh();
-  }
-
-  Stream<int> _watch(BaseStore<int> store) async* {
-    yield await store();
-    yield* store.watch();
+    _service.refresh();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<int>(
-      stream: _watch(_store.freeAiScanLimit),
-      initialData: kFreeAiScanLimit,
-      builder: (context, limitSnapshot) {
-        final limit = limitSnapshot.data ?? kFreeAiScanLimit;
-        return StreamBuilder<int>(
-          stream: _watch(_store.freeAiScansUsed),
-          initialData: 0,
-          builder: (context, snapshot) {
-            final used = (snapshot.data ?? 0).clamp(0, limit);
-            return FreeScanCard(
-              remaining: limit - used,
-              limit: limit,
-              onTap: widget.onTap,
-            );
-          },
+    return StreamBuilder<AiQuota>(
+      stream: _quota,
+      builder: (context, snapshot) {
+        final quota = snapshot.data;
+        if (quota == null || quota.isUnlimited) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: FreeScanCard(
+            remaining: quota.shownRemaining,
+            limit: quota.limit,
+            onTap: widget.onTap,
+          ),
         );
       },
     );

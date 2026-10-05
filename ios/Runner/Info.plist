@@ -96,8 +96,6 @@
         </array>
       </dict>
     </array>
-    <!-- Facebook / Meta SDK credentials (from the Meta App Dashboard →
-         Settings → Basic). The URL scheme above must stay "fb" + FacebookAppID. -->
     <key>FacebookAppID</key>
     <string>27478591275141844</string>
     <key>FacebookClientToken</key>

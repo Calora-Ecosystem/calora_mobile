@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/premium/family_code.dart';
+import 'package:calora/domain/model/premium/family_coupon.dart';
 import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
@@ -30,4 +31,6 @@ abstract class PremiumRepo {
 
   /// Family plan: the second person redeems the code and gets Premium.
   Future<FamilyRedeemResult> redeemFamilyCode(String code);
+
+  Future<List<FamilyCoupon>> getMyCoupons();
 }

@@ -34,13 +34,17 @@ class FamilyCodeSheet extends StatefulWidget {
   /// Just paid: the backend issues the code when the payment is accepted,
   /// which can trail the app by a moment — poll briefly before giving up.
   final bool waitForNew;
+  final String? code;
 
-  const FamilyCodeSheet({super.key, this.waitForNew = false});
+  const FamilyCodeSheet({super.key, this.waitForNew = false, this.code});
 
-  static Future<void> show(BuildContext context, {bool waitForNew = false}) =>
-      context.showAppBottomSheet(
-        child: FamilyCodeSheet(waitForNew: waitForNew),
-      );
+  static Future<void> show(
+    BuildContext context, {
+    bool waitForNew = false,
+    String? code,
+  }) => context.showAppBottomSheet(
+    child: FamilyCodeSheet(waitForNew: waitForNew, code: code),
+  );
 
   @override
   State<FamilyCodeSheet> createState() => _FamilyCodeSheetState();
@@ -127,6 +131,9 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
   /// one, so a redeemed or expired code still explains itself. Right after
   /// paying only a fresh, unused code counts.
   FamilyCode? _pick(List<FamilyCode> codes) {
+    for (final code in codes) {
+      if (code.code == widget.code) return code;
+    }
     for (final code in codes) {
       if (code.status == FamilyCodeStatus.active) return code;
     }

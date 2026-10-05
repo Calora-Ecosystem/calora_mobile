@@ -1,4 +1,5 @@
 import 'package:calora/domain/model/premium/family_code.dart';
+import 'package:calora/domain/model/premium/family_coupon.dart';
 import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
@@ -19,7 +20,12 @@ class PremiumApi {
     required int orderMonth,
     int? couponId,
   }) async {
-    final data = {'provider': provider, 'plan': plan, 'planExtraId': orderMonth, 'couponId': couponId};
+    final data = {
+      'provider': provider,
+      'plan': plan,
+      'planExtraId': orderMonth,
+      'couponId': couponId,
+    };
     final response = await _dio.post('billing/orders/subscription', data: data);
     final json = (response.data as Map<String, dynamic>)['content'];
     return SubscriptionResponseModel.fromJson(json);
@@ -46,7 +52,8 @@ class PremiumApi {
   Future<MySubscription> getMySubscription() async {
     final response = await _dio.get('billing/subscription/my');
     return MySubscription.fromJson(
-      (response.data as Map<String, dynamic>)['content'] as Map<String, dynamic>,
+      (response.data as Map<String, dynamic>)['content']
+          as Map<String, dynamic>,
     );
   }
 
@@ -74,6 +81,16 @@ class PremiumApi {
         .toList();
   }
 
+  Future<List<FamilyCoupon>> getMyCoupons() async {
+    final response = await _dio.get<Map<String, dynamic>>('billing/coupons/my');
+    final content = response.data?['content'];
+    if (content is! List) return [];
+    return content
+        .whereType<Map<String, dynamic>>()
+        .map(FamilyCoupon.fromJson)
+        .toList();
+  }
+
   /// Redeems a family code — the current user gets Premium.
   Future<FamilyRedeemResult> redeemFamilyCode(String code) async {
     final response = await _dio.post(
@@ -81,13 +98,17 @@ class PremiumApi {
       data: {'code': code},
     );
     return FamilyRedeemResult.fromJson(
-      (response.data as Map<String, dynamic>)['content'] as Map<String, dynamic>,
+      (response.data as Map<String, dynamic>)['content']
+          as Map<String, dynamic>,
     );
   }
 
   Future<PromoCodeModel> getPromoCodeAmount({required String code}) async {
     try {
-      final response = await _dio.get('billing/coupons/check', queryParameters: {'code': code});
+      final response = await _dio.get(
+        'billing/coupons/check',
+        queryParameters: {'code': code},
+      );
       final data = response.data as Map<String, dynamic>;
       final content = data['content'] as Map<String, dynamic>?;
       if (content == null) return PromoCodeModel();

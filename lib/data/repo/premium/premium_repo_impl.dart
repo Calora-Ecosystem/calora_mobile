@@ -1,5 +1,6 @@
 import 'package:calora/data/api/premium_api.dart';
 import 'package:calora/domain/model/premium/family_code.dart';
+import 'package:calora/domain/model/premium/family_coupon.dart';
 import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
@@ -59,4 +60,7 @@ class PremiumRepoImpl implements PremiumRepo {
   @override
   Future<FamilyRedeemResult> redeemFamilyCode(String code) =>
       _api.redeemFamilyCode(code);
+
+  @override
+  Future<List<FamilyCoupon>> getMyCoupons() => _api.getMyCoupons();
 }

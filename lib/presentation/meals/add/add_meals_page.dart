@@ -13,10 +13,10 @@ import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/ai_quota_service.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/button/toggle_buttons.dart';
-import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/common/widgets/text_field/common_text_field.dart';
+import 'package:calora/domain/model/calories/ai_quota.dart';
 import 'package:calora/domain/model/calories/calories_data.dart';
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/meal/food_request/food_request.dart';
@@ -135,13 +135,11 @@ class AddMealsPage
                     controller: _searchController,
                   ),
                   if (state.activeTab != FoodTab.search) ...[
-                    if (!context.read<AppManager>().state.isUserPremium) ...[
-                      const SizedBox(height: 12),
+                    if (!context.read<AppManager>().state.isUserPremium)
                       FreeScanBanner(
                         onTap: () =>
                             context.router.push(const PremiumFeaturesRoute()),
                       ),
-                    ],
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -396,22 +394,17 @@ class AddMealsPage
     AddMealsManager manager,
   ) async {
     final bool isPremium = context.read<AppManager>().state.isUserPremium;
-    if (!await _guardAiUsage(context, isPremium)) return;
-    if (!context.mounted) return;
+    final quota = await _checkAiQuota(context, isPremium);
+    if (quota == null || !context.mounted) return;
 
-    // Non-premium users see how many free AI scans they have left right on the
-    // camera screen, so the 5-scan limit is obvious before they shoot.
-    String? creditText;
-    if (!isPremium) {
-      final store = getIt<CommonStore>();
-      final used = await store.freeAiScansUsed();
-      final limit = await store.freeAiScanLimit();
-      final remaining = (limit - used).clamp(0, limit);
-      creditText = 'camera_free_left'.tr(
-        namedArgs: {'count': '$remaining', 'limit': '$limit'},
-      );
-    }
-    if (!context.mounted) return;
+    final creditText = quota.isUnlimited
+        ? null
+        : 'camera_free_left'.tr(
+            namedArgs: {
+              'count': '${quota.shownRemaining}',
+              'limit': '${quota.limit}',
+            },
+          );
 
     final imagePath = await context.pushRoute<String>(
       UniversalCameraRoute(
@@ -447,13 +440,13 @@ class AddMealsPage
     if (context.mounted) {
       final scannedFoods = manager.state.scannedFoods;
       if (scannedFoods.isEmpty) {
-        if (await _openPaywallIfExhausted(context, isPremium)) return;
+        if (await _openPaywallIfExhausted(context, quota)) return;
         if (!context.mounted) return;
         CustomSnackBar.show(context, Strings.noFoodFoundInImage);
         return;
       }
       // The server counted it — refresh the banner.
-      if (!isPremium) unawaited(_refreshQuota());
+      if (!quota.isUnlimited) unawaited(_refreshQuota());
       openCreatorWithSpeech(
         context,
         manager,
@@ -469,8 +462,8 @@ class AddMealsPage
     AddMealsManager manager,
   ) async {
     final bool isPremium = context.read<AppManager>().state.isUserPremium;
-    if (!await _guardAiUsage(context, isPremium)) return;
-    if (!context.mounted) return;
+    final quota = await _checkAiQuota(context, isPremium);
+    if (quota == null || !context.mounted) return;
 
     context.showAppBottomSheet(
       child: ModernVoiceRecorder(
@@ -491,30 +484,25 @@ class AddMealsPage
           context.router.pop();
           final scannedFoods = manager.state.scannedFoodsByVoice;
           if (scannedFoods.isEmpty) {
-            if (await _openPaywallIfExhausted(context, isPremium)) return;
+            if (await _openPaywallIfExhausted(context, quota)) return;
             if (!context.mounted) return;
             CustomSnackBar.show(context, Strings.noFoodFoundInVoice);
             return;
           }
           // The server counted it — refresh the banner.
-          if (!isPremium) unawaited(_refreshQuota());
+          if (!quota.isUnlimited) unawaited(_refreshQuota());
           openCreatorWithSpeech(context, manager, scannedFoods);
         },
       ),
     );
   }
 
-  /// Gates the AI recognitions (photo scan + voice) for non-premium users.
-  /// Returns true when the flow may proceed; otherwise routes to the paywall
-  /// and returns false. Premium users always pass.
-  Future<bool> _guardAiUsage(BuildContext context, bool isPremium) async {
-    if (isPremium) return true;
+  Future<AiQuota?> _checkAiQuota(BuildContext context, bool isPremium) async {
+    if (isPremium) return AiQuota.premium;
     final quota = await getIt<AiQuotaService>().refresh();
-    if (!quota.canUse) {
-      if (context.mounted) _showFreeScansOver(context, quota.limit);
-      return false;
-    }
-    return true;
+    if (quota.canUse) return quota;
+    if (context.mounted) _showFreeScansOver(context, quota.limit);
+    return null;
   }
 
   /// Explains that the free recognitions are used up and offers Premium;
@@ -533,12 +521,12 @@ class AddMealsPage
   /// instead of "no food found". Returns true when the paywall was opened.
   Future<bool> _openPaywallIfExhausted(
     BuildContext context,
-    bool isPremium,
+    AiQuota quota,
   ) async {
-    if (isPremium) return false;
-    final quota = await getIt<AiQuotaService>().refresh();
-    if (quota.canUse || !context.mounted) return false;
-    _showFreeScansOver(context, quota.limit);
+    if (quota.isUnlimited) return false;
+    final fresh = await getIt<AiQuotaService>().refresh();
+    if (fresh.canUse || !context.mounted) return false;
+    _showFreeScansOver(context, fresh.limit);
     return true;
   }
 

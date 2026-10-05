@@ -1,32 +1,40 @@
-import 'dart:math';
-
+import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/calories/ai_quota.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
 import 'package:injectable/injectable.dart';
 
-/// Free AI recognition allowance. The backend enforces and counts it (only a
-/// successful recognition is counted); this service reads it and mirrors it
-/// into [CommonStore] so the add-food banner updates reactively.
 @lazySingleton
 class AiQuotaService {
+  AiQuotaService(this._repo, this._store, this._tokens);
+
   final CaloriesRepo _repo;
   final CommonStore _store;
+  final TokenInterceptor _tokens;
 
-  AiQuotaService(this._repo, this._store);
+  bool _premiumSyncAttempted = false;
 
-  /// Fetches the quota from the server. Offline, falls back to the last
-  /// cached values so the UI still shows something sensible.
+  Stream<AiQuota> watch() async* {
+    yield await _store.aiQuota();
+    yield* _store.aiQuota.watch();
+  }
+
   Future<AiQuota> refresh() async {
+    final AiQuota quota;
     try {
-      final quota = await _repo.getAiQuota();
-      await _store.freeAiScansUsed.set(quota.used);
-      await _store.freeAiScanLimit.set(quota.limit);
-      return quota;
+      quota = await _repo.getAiQuota();
     } catch (_) {
-      final used = await _store.freeAiScansUsed();
-      final limit = await _store.freeAiScanLimit();
-      return AiQuota(limit: limit, used: used, remaining: max(0, limit - used));
+      return _store.aiQuota();
     }
+    await _store.aiQuota.set(quota);
+    await _syncPremium(quota);
+    return quota;
+  }
+
+  Future<void> _syncPremium(AiQuota quota) async {
+    if (!quota.isPremium || _premiumSyncAttempted) return;
+    if (await _store.isUserPremium()) return;
+    _premiumSyncAttempted = true;
+    await _tokens.refreshAndCheckPremium();
   }
 }

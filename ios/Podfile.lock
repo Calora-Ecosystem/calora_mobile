@@ -1,0 +1,52 @@
+PODS:
+  - country_detector (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - health (13.3.1):
+    - Flutter
+  - open_filex (0.0.2):
+    - Flutter
+  - pedometer_2 (0.0.1):
+    - Flutter
+  - sign_in_with_apple (0.0.1):
+    - Flutter
+  - workmanager_apple (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - country_detector (from `.symlinks/plugins/country_detector/ios`)
+  - Flutter (from `Flutter`)
+  - health (from `.symlinks/plugins/health/ios`)
+  - open_filex (from `.symlinks/plugins/open_filex/ios`)
+  - pedometer_2 (from `.symlinks/plugins/pedometer_2/ios`)
+  - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
+  - workmanager_apple (from `.symlinks/plugins/workmanager_apple/ios`)
+
+EXTERNAL SOURCES:
+  country_detector:
+    :path: ".symlinks/plugins/country_detector/ios"
+  Flutter:
+    :path: Flutter
+  health:
+    :path: ".symlinks/plugins/health/ios"
+  open_filex:
+    :path: ".symlinks/plugins/open_filex/ios"
+  pedometer_2:
+    :path: ".symlinks/plugins/pedometer_2/ios"
+  sign_in_with_apple:
+    :path: ".symlinks/plugins/sign_in_with_apple/ios"
+  workmanager_apple:
+    :path: ".symlinks/plugins/workmanager_apple/ios"
+
+SPEC CHECKSUMS:
+  country_detector: 629668b63b76c2e299483f984c0f7b42540bb4b8
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  health: c1dfe8bc28ccd5998a32bdd0963943bfe9ac8320
+  open_filex: 6e26e659846ec990262224a12ef1c528bb4edbe4
+  pedometer_2: b116b6b20b3d04612f28b9756b3a9feb60bba35b
+  sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
+  workmanager_apple: 7bac258335c310689a641e2d66e88d4845d372e9
+
+PODFILE CHECKSUM: a9b054bad13d8abc452fc085336dfdaabbc878c4
+
+COCOAPODS: 1.16.2
