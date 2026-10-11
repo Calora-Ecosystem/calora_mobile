@@ -12,6 +12,7 @@ import 'package:calora/common/widgets/containers/bottom_box.dart';
 import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/sheets/default_bottom_sheet.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
+import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/premium/family/family_code_sheet.dart';
 import 'package:calora/presentation/premium/family/family_redeem_sheet.dart';
@@ -26,20 +27,15 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl, LaunchMode;
 
 class PremiumSheet
     extends Managed<PremiumManager, PremiumState, PremiumEffect> {
-  /// Sells the family plan (two people) instead of the regular plans; once
-  /// paid, the buyer gets the code for the second person.
-  final bool family;
-
-  /// The package picked on the tariffs page, selected once plans load.
+  final List<PremiumPlanModel> packages;
   final int? initialPlanId;
 
-  PremiumSheet({super.key, this.family = false, this.initialPlanId});
+  const PremiumSheet({super.key, required this.packages, this.initialPlanId});
 
   @override
   void init(BuildContext context, PremiumManager manager) {
     super.init(context, manager);
-    manager.preferPlan(initialPlanId);
-    if (family) manager.useFamilyPlan();
+    manager.showPlans(packages, selectedId: initialPlanId);
   }
 
   @override
@@ -67,7 +63,12 @@ class PremiumSheet
         // The second person's code is the point of the family plan — hand
         // it over before leaving (Profile → Subscription keeps it too).
         if (manager.state.isFamily) {
-          await FamilyCodeSheet.show(context, waitForNew: true);
+          await FamilyCodeSheet.show(
+            context,
+            waitForNew: true,
+            coupon: manager.issuedFamilyCoupon,
+            months: manager.state.selectedPlan?.packageMonth ?? 1,
+          );
           if (!context.mounted) return;
         }
         context.router.replaceAll([DashboardRoute()]);
@@ -112,15 +113,11 @@ class PremiumSheet
                       children: [
                         Column(
                           children: List.generate(
-                            state.isGettingOrders ||
-                                    state.isGettingPremiumPlans ||
-                                    (state.isIap && state.isLoadingIapPrices)
-                                ? 3
+                            _plansLoading(state)
+                                ? state.plans.length.clamp(1, 3)
                                 : state.purchasablePlans.length,
                             (index) {
-                              if (state.isGettingOrders ||
-                                  state.isGettingPremiumPlans ||
-                                  state.isLoadingIapPrices) {
+                              if (_plansLoading(state)) {
                                 return ShimmerWrapper(
                                   loading: true,
                                   type: ShimmerType.backgroundElevation,
@@ -182,8 +179,7 @@ class PremiumSheet
                     // Promo code is visible for EVERYONE — never gate it
                     // on region/IP: a VPN flips isUzbekistan to false and
                     // used to hide the field from legitimate users.
-                    if (state.referralDiscountPercent > 0 &&
-                        !state.isIap) ...[
+                    if (state.referralDiscountPercent > 0 && !state.isIap) ...[
                       const SizedBox(height: 12),
                       _referralDiscountBanner(
                         context,
@@ -348,9 +344,11 @@ class PremiumSheet
   /// The family plan is sold through Payme / Click only (no store product),
   /// and may not be set up on the backend yet. Keyed on the country rather
   /// than on an empty method list, which is also empty until it resolves.
+  bool _plansLoading(PremiumState state) =>
+      state.isGettingOrders || (state.isIap && state.isLoadingIapPrices);
+
   bool _familyUnavailable(PremiumState state) =>
       state.isFamily &&
-      !state.isGettingPremiumPlans &&
       !state.isGettingOrders &&
       (state.plans.isEmpty || (!state.isUzbekistan && !kDebugMode));
 
@@ -367,12 +365,13 @@ class PremiumSheet
           Icon(Icons.info_outline_rounded, color: colors.textSub, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: (state.plans.isEmpty
-                    ? 'tf_family_soon'
-                    : 'family_store_unavailable')
-                .tr()
-                .text(13, 18, 500)
-                .c(colors.textStrong),
+            child:
+                (state.plans.isEmpty
+                        ? 'tf_family_soon'
+                        : 'family_store_unavailable')
+                    .tr()
+                    .text(13, 18, 500)
+                    .c(colors.textStrong),
           ),
         ],
       ),

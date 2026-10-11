@@ -15,3 +15,7 @@ sealed class PromoCodeModel with _$PromoCodeModel {
   factory PromoCodeModel.fromJson(Map<String, dynamic> json) =>
       _$PromoCodeModelFromJson(json);
 }
+
+extension PromoCodeSum on PromoCodeModel {
+  int get sum => (amount ?? 0) ~/ 100;
+}

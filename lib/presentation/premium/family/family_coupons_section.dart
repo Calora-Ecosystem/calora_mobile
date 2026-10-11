@@ -78,7 +78,7 @@ class _CouponTile extends StatelessWidget {
 
     return InkWell(
       onTap: active
-          ? () => FamilyCodeSheet.show(context, code: coupon.code)
+          ? () => FamilyCodeSheet.show(context, coupon: coupon)
           : null,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 12, 14),

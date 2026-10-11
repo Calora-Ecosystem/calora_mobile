@@ -1,34 +1,20 @@
 enum SubscriptionPlanType {
-  free,
-  premium,
-  pro
-  ;
+  free('Free'),
+  premium('Premium'),
+  family('Family'),
+  pro('Pro');
 
-  bool get isFree => this == SubscriptionPlanType.free;
-  bool get isPremium => this == SubscriptionPlanType.premium;
-  bool get isPro => this == SubscriptionPlanType.pro;
+  const SubscriptionPlanType(this.apiName);
 
-  static SubscriptionPlanType fromApi(String? value) {
-    switch (value) {
-      case 'Free':
-        return SubscriptionPlanType.free;
-      case 'Premium':
-        return SubscriptionPlanType.premium;
-      case 'Pro':
-        return SubscriptionPlanType.pro;
-      default:
-        return SubscriptionPlanType.free;
-    }
-  }
+  final String apiName;
 
-  String toApi() {
-    switch (this) {
-      case SubscriptionPlanType.free:
-        return 'Free';
-      case SubscriptionPlanType.premium:
-        return 'Premium';
-      case SubscriptionPlanType.pro:
-        return 'Pro';
-    }
-  }
+  bool get isFree => this == free;
+  bool get isPremium => this == premium;
+  bool get isFamily => this == family;
+  bool get isPro => this == pro;
+
+  static SubscriptionPlanType fromApi(String? value) =>
+      values.firstWhere((type) => type.apiName == value, orElse: () => free);
+
+  String toApi() => apiName;
 }

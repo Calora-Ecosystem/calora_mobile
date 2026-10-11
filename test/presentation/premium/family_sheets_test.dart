@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:calora/common/gen/fonts.gen.dart';
 import 'package:calora/common/localization/safe_csv_asset_loader.dart';
 import 'package:calora/domain/model/premium/family_code.dart';
+import 'package:calora/domain/model/premium/family_coupon.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/app/theme/colors.dart';
 import 'package:calora/presentation/premium/family/family_code_sheet.dart';
@@ -110,8 +111,12 @@ void main() {
 
   for (final locale in ['uz_UZ', 'ru_RU']) {
     testWidgets('code sheet shows an active code ($locale)', (tester) async {
-      repo.codes = [
-        FamilyCode(code: 'FAMILY-AB12CD', expireAt: DateTime(2026, 10, 31)),
+      repo.coupons = [
+        FamilyCoupon(
+          id: 1,
+          code: 'FAMILY-AB12CD',
+          expireAt: DateTime(2026, 10, 31),
+        ),
       ];
       final semantics = tester.ensureSemantics();
       await pump(tester, locale, const FamilyCodeSheet());
@@ -141,8 +146,12 @@ void main() {
     testWidgets('code sheet without motion is final at once ($locale)', (
       tester,
     ) async {
-      repo.codes = [
-        FamilyCode(code: 'FAMILY-AB12CD', expireAt: DateTime(2026, 10, 31)),
+      repo.coupons = [
+        FamilyCoupon(
+          id: 1,
+          code: 'FAMILY-AB12CD',
+          expireAt: DateTime(2026, 10, 31),
+        ),
       ];
       final semantics = tester.ensureSemantics();
       await pump(tester, locale, const FamilyCodeSheet(), reduceMotion: true);
@@ -155,11 +164,12 @@ void main() {
     });
 
     testWidgets('code sheet shows who redeemed it ($locale)', (tester) async {
-      repo.codes = [
-        const FamilyCode(
+      repo.coupons = [
+        const FamilyCoupon(
+          id: 1,
           code: 'FAMILY-AB12CD',
           status: FamilyCodeStatus.redeemed,
-          redeemedBy: 'Vali',
+          usedByUsers: [CouponUser(userId: 5, name: 'Vali')],
         ),
       ];
       await pump(tester, locale, const FamilyCodeSheet());
@@ -169,6 +179,29 @@ void main() {
       expect(find.textContaining('Vali'), findsOneWidget);
       // Nothing left to share once it's used.
       expect(find.text(tr(locale, 'family_code_copy')), findsNothing);
+    });
+
+    testWidgets('a coupon from the list opens without a request ($locale)', (
+      tester,
+    ) async {
+      repo.couponCalls = 0;
+      final semantics = tester.ensureSemantics();
+      await pump(
+        tester,
+        locale,
+        FamilyCodeSheet(
+          coupon: FamilyCoupon(
+            id: 9,
+            code: 'FAMILY-LIST99',
+            expireAt: DateTime(2026, 10, 31),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 3));
+      expect(tester.takeException(), isNull);
+      expect(find.bySemanticsLabel('FAMILY-LIST99'), findsOneWidget);
+      expect(repo.couponCalls, 0);
+      semantics.dispose();
     });
 
     testWidgets('redeem sheet explains a used code ($locale)', (tester) async {
@@ -191,12 +224,16 @@ void main() {
 }
 
 class _FakePremiumRepo implements PremiumRepo {
-  List<FamilyCode> codes = const [];
+  List<FamilyCoupon> coupons = const [];
   String? redeemError;
   String? redeemedCode;
+  int couponCalls = 0;
 
   @override
-  Future<List<FamilyCode>> getFamilyCodes() async => codes;
+  Future<List<FamilyCoupon>> getMyCoupons() async {
+    couponCalls++;
+    return coupons;
+  }
 
   @override
   Future<FamilyRedeemResult> redeemFamilyCode(String code) async {

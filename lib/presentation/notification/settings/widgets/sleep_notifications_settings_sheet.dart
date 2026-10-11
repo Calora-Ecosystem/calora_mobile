@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
-import 'package:calora/common/enums/menu_type_enum.dart';
 import 'package:calora/common/enums/notification_setting_type.dart';
 import 'package:calora/common/enums/reminder_types_enum.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -64,7 +63,6 @@ class _SleepNotificationSettingsSheetState
                       title: Strings.bedtimeReminder,
                       typeEnum: ReminderTypesEnum.sleep,
                       settingType: ReminderSettingTypeEnum.sleep,
-                      menuEnum: MenuTypeEnum.breakfast,
                       state: state,
                       manager: widget.manager,
                     ),

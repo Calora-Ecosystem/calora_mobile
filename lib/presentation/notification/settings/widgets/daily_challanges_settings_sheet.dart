@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/base/manager_builder.dart';
-import 'package:calora/common/enums/menu_type_enum.dart';
 import 'package:calora/common/enums/notification_setting_type.dart';
 import 'package:calora/common/enums/reminder_types_enum.dart';
 import 'package:calora/common/gen/strings.dart';
@@ -20,10 +19,12 @@ class DailyChallengesNotificationSettingsSheet extends StatefulWidget {
   });
 
   @override
-  State<DailyChallengesNotificationSettingsSheet> createState() => _DailyChallengesNotificationSettingsSheetState();
+  State<DailyChallengesNotificationSettingsSheet> createState() =>
+      _DailyChallengesNotificationSettingsSheetState();
 }
 
-class _DailyChallengesNotificationSettingsSheetState extends State<DailyChallengesNotificationSettingsSheet> {
+class _DailyChallengesNotificationSettingsSheetState
+    extends State<DailyChallengesNotificationSettingsSheet> {
   late Map<ReminderTypesEnum, ReminderRequest> _originalReminders;
   bool _isSaved = false;
 
@@ -43,7 +44,10 @@ class _DailyChallengesNotificationSettingsSheetState extends State<DailyChalleng
 
   @override
   Widget build(BuildContext context) {
-    return ManagerBuilder<NotificationSettingsState, NotificationSettingsEffect>(
+    return ManagerBuilder<
+      NotificationSettingsState,
+      NotificationSettingsEffect
+    >(
       manager: widget.manager,
       properties: (state) => [state.reminders, state.isSaving],
       builder: (context, state) {
@@ -62,7 +66,6 @@ class _DailyChallengesNotificationSettingsSheetState extends State<DailyChalleng
                       title: Strings.reminderOfDailyChallangeTimes,
                       typeEnum: ReminderTypesEnum.dailyChallenge,
                       settingType: ReminderSettingTypeEnum.dailyChallenge,
-                      menuEnum: MenuTypeEnum.breakfast,
                       state: state,
                       manager: widget.manager,
                     ),
@@ -79,7 +82,8 @@ class _DailyChallengesNotificationSettingsSheetState extends State<DailyChalleng
                   _isSaved = true;
                   await widget.manager.saveSingleReminderChange(
                     type: ReminderTypesEnum.dailyChallenge,
-                    originalRequest: _originalReminders[ReminderTypesEnum.dailyChallenge],
+                    originalRequest:
+                        _originalReminders[ReminderTypesEnum.dailyChallenge],
                   );
                   if (context.mounted) context.router.maybePop();
                 },

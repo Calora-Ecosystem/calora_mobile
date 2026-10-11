@@ -17,57 +17,41 @@ class NotificationSettingsManager
     extends Manager<NotificationSettingsState, NotificationSettingsEffect> {
   final NotificationRepo _notificationRepo;
 
-  NotificationSettingsManager(this._notificationRepo) : super(const NotificationSettingsState()) {
+  NotificationSettingsManager(this._notificationRepo)
+    : super(const NotificationSettingsState()) {
     getReminders();
   }
 
-  Future<void> getReminders() async => await _notificationRepo.getReminders().handle(
-    onStart: () => emit(state.copyWith(loading: true)),
-    onData: (data) {
-      final Map<ReminderTypesEnum, ReminderRequest> newRemindersMap = {};
-      for (final request in data) {
-        if (request.type != null &&
-            (request.menu != null || request.type == ReminderSettingTypeEnum.water.toApi)) {
-          final settingType = ReminderSettingTypeEnum.fromApi(request.type);
-          final menuType = MenuTypeEnum.fromApi(request.menu);
-          final reminderType = ReminderTypesEnum.fromReminderSettings(
-            menu: menuType,
-            type: settingType,
+  Future<void> getReminders() async =>
+      await _notificationRepo.getReminders().handle(
+        onStart: () => emit(state.copyWith(loading: true)),
+        onData: (data) {
+          final Map<ReminderTypesEnum, ReminderRequest> newRemindersMap = {};
+          for (final request in data) {
+            final reminderType = _getReminderTypeFromRequest(request);
+            if (reminderType != ReminderTypesEnum.none)
+              newRemindersMap[reminderType] = request;
+          }
+          log('REMOTE REMINDERS $newRemindersMap');
+          emit(
+            state.copyWith(
+              remoteReminders: data,
+              reminders: newRemindersMap,
+              loading: false,
+            ),
           );
-          if (reminderType != ReminderTypesEnum.none) newRemindersMap[reminderType] = request;
-        }
-      }
-      log('REMOTE REMINDERS $newRemindersMap');
-      emit(state.copyWith(remoteReminders: data, reminders: newRemindersMap, loading: false));
-    },
-    onDone: () => emit(state.copyWith(loading: false)),
-  );
-
-  Future<void> _persistReminders(
-    Iterable<ReminderRequest> remindersToPersist,
-    List<Future<MapEntry<ReminderTypesEnum, ReminderRequest>>> updateFutures,
-  ) async {
-    final futures = <Future>[];
-
-    for (final reminder in remindersToPersist) {
-      String? formattedTime = reminder.time;
-      if (formattedTime != null && formattedTime.length == 5) formattedTime += ':00';
-
-      final requestToSend = reminder.copyWith(time: formattedTime);
-      updateFutures.add(
-        _notificationRepo.updateReminder(requestToSend).then((updatedReminder) {
-          return MapEntry(_getReminderTypeFromRequest(updatedReminder), updatedReminder);
-        }),
+        },
+        onDone: () => emit(state.copyWith(loading: false)),
       );
-    }
-
-    if (futures.isNotEmpty) await Future.wait(futures);
-  }
 
   ReminderTypesEnum _getReminderTypeFromRequest(ReminderRequest request) {
     final settingType = ReminderSettingTypeEnum.fromApi(request.type);
-    final menuType = MenuTypeEnum.fromApi(request.menu);
-    return ReminderTypesEnum.fromReminderSettings(menu: menuType, type: settingType);
+    if (settingType.isFood && request.menu == null)
+      return ReminderTypesEnum.none;
+    return ReminderTypesEnum.fromReminderSettings(
+      menu: MenuTypeEnum.fromApi(request.menu),
+      type: settingType,
+    );
   }
 
   Future<void> saveAllReminderChanges({
@@ -76,7 +60,8 @@ class NotificationSettingsManager
     emit(state.copyWith(isSaving: true));
 
     final currentReminders = state.reminders;
-    final List<Future<MapEntry<ReminderTypesEnum, ReminderRequest>>> updateFutures = [];
+    final List<Future<MapEntry<ReminderTypesEnum, ReminderRequest>>>
+    updateFutures = [];
     final List<Future<ReminderTypesEnum>> deleteFutures = [];
 
     bool hasChanges = false;
@@ -85,12 +70,16 @@ class NotificationSettingsManager
       final key = entry.key;
       final currentReminder = entry.value;
 
-      if (!originalReminders.containsKey(key) || originalReminders[key] != currentReminder) {
+      if (!originalReminders.containsKey(key) ||
+          originalReminders[key] != currentReminder) {
         String? formattedTime = currentReminder.time;
-        if (formattedTime != null && formattedTime.length == 5) formattedTime += ':00';
+        if (formattedTime != null && formattedTime.length == 5)
+          formattedTime += ':00';
         final requestToSend = currentReminder.copyWith(time: formattedTime);
         updateFutures.add(
-          _notificationRepo.updateReminder(requestToSend).then((updatedReminder) {
+          _notificationRepo.updateReminder(requestToSend).then((
+            updatedReminder,
+          ) {
             return MapEntry(key, updatedReminder);
           }),
         );
@@ -105,7 +94,9 @@ class NotificationSettingsManager
       if (!currentReminders.containsKey(key)) {
         if (originalReminder.id != null) {
           deleteFutures.add(
-            _notificationRepo.deleteReminder(originalReminder.id!).then((_) => key),
+            _notificationRepo
+                .deleteReminder(originalReminder.id!)
+                .then((_) => key),
           );
           hasChanges = true;
         }
@@ -119,14 +110,20 @@ class NotificationSettingsManager
           ? await Future.wait(deleteFutures)
           : [];
 
-      final finalReminders = Map<ReminderTypesEnum, ReminderRequest>.from(currentReminders);
+      final finalReminders = Map<ReminderTypesEnum, ReminderRequest>.from(
+        currentReminders,
+      );
 
-      for (final entry in updatedEntries) finalReminders[entry.key] = entry.value;
+      for (final entry in updatedEntries)
+        finalReminders[entry.key] = entry.value;
 
       for (final key in deletedKeys) finalReminders.remove(key);
 
       emit(
-        state.copyWith(reminders: finalReminders, remoteReminders: finalReminders.values.toList()),
+        state.copyWith(
+          reminders: finalReminders,
+          remoteReminders: finalReminders.values.toList(),
+        ),
       );
       if (hasChanges) {
         getIt<Display>().success(Strings.reminderChangedSuccessfully);
@@ -152,16 +149,16 @@ class NotificationSettingsManager
       if (currentReminder != null) {
         if (originalRequest == null || originalRequest != currentReminder) {
           String? formattedTime = currentReminder.time;
-          if (formattedTime != null && formattedTime.length == 5) formattedTime += ':00';
+          if (formattedTime != null && formattedTime.length == 5)
+            formattedTime += ':00';
           final requestToSend = currentReminder.copyWith(time: formattedTime);
           futures.add(
-            _notificationRepo.updateReminder(requestToSend).then((updatedReminder) {
+            _notificationRepo.updateReminder(requestToSend).then((
+              updatedReminder,
+            ) {
               emit(
                 state.copyWith(
-                  reminders: {
-                    ...state.reminders,
-                    type: updatedReminder,
-                  },
+                  reminders: {...state.reminders, type: updatedReminder},
                 ),
               );
               return updatedReminder;
@@ -181,10 +178,7 @@ class NotificationSettingsManager
       if (originalRequest != null) {
         emit(
           state.copyWith(
-            reminders: {
-              ...state.reminders,
-              type: originalRequest,
-            },
+            reminders: {...state.reminders, type: originalRequest},
           ),
         );
       } else {
@@ -201,7 +195,9 @@ class NotificationSettingsManager
   }
 
   void removeReminder(ReminderTypesEnum type) {
-    final newReminders = Map<ReminderTypesEnum, ReminderRequest>.from(state.reminders);
+    final newReminders = Map<ReminderTypesEnum, ReminderRequest>.from(
+      state.reminders,
+    );
     newReminders.remove(type);
     emit(state.copyWith(reminders: newReminders));
     log('REMOVED: ${state.reminders}');

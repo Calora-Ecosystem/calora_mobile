@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/common/gen/fonts.gen.dart';
 import 'package:calora/common/localization/safe_csv_asset_loader.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
@@ -15,9 +16,8 @@ import 'package:get_it/get_it.dart';
 // ignore: depend_on_referenced_packages
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Lays the tariffs page out on a small phone with the real Uzbek / Russian
-/// strings and walks every plan — any overflow fails the test. Prices come
-/// from the (fake) backend packages the dashboard manages.
+import '../../fixtures/premium_plans.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -25,13 +25,8 @@ void main() {
   final repo = _FakePremiumRepo();
 
   setUp(() {
-    repo.regular = const [
-      PremiumPlanModel(id: 1, duration: 1, fee: 49000, isActive: true),
-      PremiumPlanModel(id: 2, duration: 12, fee: 399000, isActive: true),
-    ];
-    repo.family = const [
-      PremiumPlanModel(id: 3, duration: 1, fee: 70000, isFamily: true),
-    ];
+    repo.plans = PremiumPlanModel.listFromJson(backendPlans);
+    repo.calls = 0;
   });
 
   setUpAll(() async {
@@ -110,14 +105,16 @@ void main() {
       await pump(tester, locale);
       await shot(tester, '${locale}_yearly');
 
-      // Family: two people for 70 000 instead of 98 000.
-      final family = find.text(locale == 'uz_UZ' ? 'Oila' : 'Семейный');
+      final family = find.text(
+        locale == 'uz_UZ'
+            ? 'Ikki kishi uchun bitta obuna'
+            : 'Одна подписка на двоих',
+      );
       await tester.ensureVisible(family);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       await tester.tap(family);
       await tester.pump();
-      // The family price story runs ~1.7 s once it is on screen.
       await tester.pump(const Duration(seconds: 2));
       expect(find.textContaining('70 000'), findsWidgets);
       expect(find.textContaining('98 000'), findsWidgets);
@@ -134,13 +131,26 @@ void main() {
     });
   }
 
+  testWidgets('groups the backend list into Premium and Family', (
+    tester,
+  ) async {
+    await pump(tester, 'uz_UZ');
+    expect(tester.takeException(), isNull);
+    expect(repo.calls, 1);
+    expect(find.text('Premium'), findsOneWidget);
+    expect(find.text('Oila'), findsOneWidget);
+    expect(find.text('Cheksiz AI skanlar'), findsOneWidget);
+    expect(find.byKey(const ValueKey(399000)), findsOneWidget);
+    expect(find.byKey(const ValueKey(49000)), findsOneWidget);
+    expect(find.byKey(const ValueKey(70000)), findsOneWidget);
+    expect(find.byKey(const ValueKey(0)), findsNothing);
+  });
+
   testWidgets('prices follow the dashboard packages', (tester) async {
-    repo.regular = const [
-      PremiumPlanModel(id: 1, duration: 1, fee: 55000),
+    repo.plans = const [
+      PremiumPlanModel(id: 1, fee: 55000),
       PremiumPlanModel(id: 2, duration: 12, fee: 450000),
-    ];
-    repo.family = const [
-      PremiumPlanModel(id: 3, duration: 1, fee: 80000, isFamily: true),
+      PremiumPlanModel(id: 3, type: SubscriptionPlanType.family, fee: 80000),
     ];
     await pump(tester, 'uz_UZ');
     expect(tester.takeException(), isNull);
@@ -150,31 +160,34 @@ void main() {
     expect(find.textContaining('49 000'), findsNothing);
   });
 
-  testWidgets('no family package → no family row', (tester) async {
-    repo.family = const [];
+  testWidgets('no family package → no family group', (tester) async {
+    repo.plans = repo.plans.where((plan) => !plan.isFamily).toList();
     await pump(tester, 'uz_UZ');
     expect(tester.takeException(), isNull);
     expect(find.text('Oila'), findsNothing);
     expect(find.textContaining('399 000'), findsWidgets);
   });
 
-  testWidgets('a backend without the family flag never shows a family row', (
+  testWidgets('only Free on the backend → retry instead of a price', (
     tester,
   ) async {
-    // An old backend ignores `family=true` and returns the regular list.
-    repo.family = repo.regular;
+    repo.plans = repo.plans.where((plan) => plan.type.isFree).toList();
     await pump(tester, 'uz_UZ');
-    expect(find.text('Oila'), findsNothing);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Premium'), findsNothing);
+    expect(find.byType(TextButton), findsWidgets);
   });
 }
 
 class _FakePremiumRepo implements PremiumRepo {
-  List<PremiumPlanModel> regular = const [];
-  List<PremiumPlanModel> family = const [];
+  List<PremiumPlanModel> plans = const [];
+  int calls = 0;
 
   @override
-  Future<List<PremiumPlanModel>> getPremiumPlans({bool family = false}) async =>
-      family ? this.family : regular;
+  Future<List<PremiumPlanModel>> getPremiumPlans() async {
+    calls++;
+    return plans;
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

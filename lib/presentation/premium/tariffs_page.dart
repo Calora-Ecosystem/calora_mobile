@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
+import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/common/extensions/number_extension/number_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/fonts.gen.dart';
@@ -14,26 +15,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum _Tariff { yearly, monthly, family }
-
-/// Tariff picker: yearly, monthly and family (two people, one subscription).
-///
-/// A plain, list-style plan chooser: one row per plan with the price where
-/// the eye expects it, the family options unfolding only when that plan is
-/// picked, and a single summary of what is paid today above the button.
-///
-/// Every price comes from the backend packages the admin manages in the
-/// dashboard: the regular 1- and 12-month packages and the family package.
-/// A package that isn't set up (or is switched off) simply isn't shown.
-/// "Continue" opens the real [PremiumSheet] with the chosen package already
-/// selected; after paying for the family plan the buyer gets a Premium code
-/// for the second person, who redeems it from the link at the bottom
-/// ([FamilyRedeemSheet]).
 @RoutePage()
 class TariffsPage extends StatefulWidget {
   const TariffsPage({super.key});
 
-  /// The family plan is for two people (the buyer plus one code).
   static const familySize = 2;
 
   @override
@@ -42,82 +27,21 @@ class TariffsPage extends StatefulWidget {
 
 class _TariffsPageState extends State<TariffsPage>
     with SingleTickerProviderStateMixin {
-  _Tariff _selected = _Tariff.yearly;
-
-  List<PremiumPlanModel> _regular = const [];
-  PremiumPlanModel? _familyPlan;
+  List<PlanGroup> _groups = const [];
+  PremiumPlanModel? _selected;
   bool _loading = true;
   bool _failed = false;
+
+  late final AnimationController _intro = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
 
   @override
   void initState() {
     super.initState();
     _load();
   }
-
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _failed = false;
-    });
-    try {
-      final repo = getIt<PremiumRepo>();
-      final results = await Future.wait([
-        repo.getPremiumPlans(),
-        repo.getPremiumPlans(family: true),
-      ]);
-      if (!mounted) return;
-      setState(() {
-        _regular = results[0];
-        // A backend that doesn't know `family=true` answers with the regular
-        // list — never sell one of those as the family plan.
-        _familyPlan = results[1].firstWhereOrNull((p) => p.isFamily ?? false);
-        _loading = false;
-        final available = _available;
-        if (!available.contains(_selected) && available.isNotEmpty) {
-          _selected = available.first;
-        }
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _failed = true;
-        });
-      }
-    }
-  }
-
-  PremiumPlanModel? _regularFor(int months) =>
-      _regular.firstWhereOrNull((p) => p.duration == months);
-
-  PremiumPlanModel? get _monthly => _regularFor(1);
-  PremiumPlanModel? get _yearly => _regularFor(12);
-
-  PremiumPlanModel? _planOf(_Tariff tariff) => switch (tariff) {
-    _Tariff.yearly => _yearly,
-    _Tariff.monthly => _monthly,
-    _Tariff.family => _familyPlan,
-  };
-
-  /// Tariffs with a backend package, in page order.
-  List<_Tariff> get _available =>
-      _Tariff.values.where((t) => _planOf(t) != null).toList();
-
-  /// What the sheet will charge on Payme / Click: the referral price when
-  /// the user has that discount, otherwise the package fee.
-  static int _priceOf(PremiumPlanModel plan) {
-    final fee = plan.fee ?? 0;
-    return (plan.referralDiscountPercent ?? 0) > 0
-        ? plan.discountedFee ?? fee
-        : fee;
-  }
-
-  /// Drives the staggered entrance of the page blocks ([_Reveal]).
-  late final AnimationController _intro = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  );
 
   @override
   void didChangeDependencies() {
@@ -135,31 +59,56 @@ class _TariffsPageState extends State<TariffsPage>
     super.dispose();
   }
 
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _failed = false;
+    });
+    try {
+      final plans = await getIt<PremiumRepo>().getPremiumPlans();
+      if (!mounted) return;
+      final groups = PlanGroup.of(plans);
+      setState(() {
+        _groups = groups;
+        _selected = _initialSelection(groups);
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _failed = true;
+      });
+    }
+  }
+
+  PremiumPlanModel? _initialSelection(List<PlanGroup> groups) {
+    final packages = groups.expand((group) => group.packages);
+    return packages.firstWhereOrNull((p) => p.id == _selected?.id) ??
+        packages.firstWhereOrNull((p) => p.isPopular) ??
+        packages.firstOrNull;
+  }
+
+  PlanGroup? _group(SubscriptionPlanType type) =>
+      _groups.firstWhereOrNull((group) => group.type == type);
+
+  PremiumPlanModel? get _premiumMonthly =>
+      _group(SubscriptionPlanType.premium)?.byDuration(1);
+
+  int? _struckPrice(PlanGroup group, PremiumPlanModel package) {
+    final people = group.isFamily ? TariffsPage.familySize : 1;
+    final separately = (_premiumMonthly?.fee ?? 0) * package.duration * people;
+    final struck = [package.originalFee, package.fee, separately].max;
+    return struck > package.price ? struck : null;
+  }
+
   Widget _reveal(int index, Widget child) =>
       _Reveal(animation: _intro, index: index, child: child);
 
-  PremiumPlanModel? get _selectedPlan => _loading ? null : _planOf(_selected);
-
-  int get _price {
-    final plan = _selectedPlan;
-    return plan == null ? 0 : _priceOf(plan);
-  }
-
-  /// Saving of the yearly package against twelve monthly ones, or null when
-  /// either package is missing or nothing is saved.
-  int? get _yearlySavePercent {
-    final monthly = _monthly, yearly = _yearly;
-    if (monthly == null || yearly == null) return null;
-    final full = _priceOf(monthly) * 12;
-    if (full <= 0) return null;
-    final percent = (100 - _priceOf(yearly) * 100 / full).round();
-    return percent > 0 ? percent : null;
-  }
-
   void _continue() {
-    final plan = _selectedPlan;
-    if (plan == null) return;
-    final family = _selected == _Tariff.family;
+    final selected = _selected;
+    final group = selected == null ? null : _group(selected.type);
+    if (selected == null || group == null) return;
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -167,7 +116,8 @@ class _TariffsPageState extends State<TariffsPage>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => PremiumSheet(family: family, initialPlanId: plan.id),
+      builder: (_) =>
+          PremiumSheet(packages: group.packages, initialPlanId: selected.id),
     );
   }
 
@@ -201,16 +151,16 @@ class _TariffsPageState extends State<TariffsPage>
                 const SizedBox(height: 24),
                 if (_loading)
                   _reveal(2, const _PlanSkeleton())
-                else if (_failed || _available.isEmpty)
+                else if (_failed || _groups.isEmpty)
                   _reveal(2, _loadFailed(context))
                 else
-                  ..._planTiles(context),
+                  ..._groupSections(),
                 const SizedBox(height: 28),
-                _reveal(5, _included(context)),
+                _reveal(6, _included(context)),
                 const SizedBox(height: 20),
-                _reveal(6, _assurances(context)),
+                _reveal(7, _assurances(context)),
                 const SizedBox(height: 8),
-                _reveal(7, _familyCodeLink(context)),
+                _reveal(8, _familyCodeLink(context)),
               ],
             ),
           ),
@@ -220,58 +170,85 @@ class _TariffsPageState extends State<TariffsPage>
     );
   }
 
-  /// One row per backend package, spaced like the rest of the list.
-  List<Widget> _planTiles(BuildContext context) {
-    final monthly = _monthly, yearly = _yearly, family = _familyPlan;
-    final savePercent = _yearlySavePercent;
-    final tiles = <Widget>[
-      if (yearly != null)
-        _PlanTile(
-          selected: _selected == _Tariff.yearly,
-          onTap: () => setState(() => _selected = _Tariff.yearly),
-          title: 'tf_yearly'.tr(),
-          tag: savePercent == null
-              ? null
-              : 'tf_best_value'.tr(namedArgs: {'percent': '$savePercent'}),
-          tagFilled: true,
-          subtitle: 'tf_yearly_sub'.tr(
-            namedArgs: {
-              // Non-breaking separator keeps "33 250" on one line.
-              'price': (_priceOf(yearly) / 12).formatPrice(separator: ' '),
-            },
-          ),
-          price: _priceOf(yearly),
-          period: 'tf_per_year'.tr(),
-          struckPrice: savePercent == null ? null : _priceOf(monthly!) * 12,
-        ),
-      if (monthly != null)
-        _PlanTile(
-          selected: _selected == _Tariff.monthly,
-          onTap: () => setState(() => _selected = _Tariff.monthly),
-          title: 'tf_monthly'.tr(),
-          subtitle: 'tf_monthly_sub'.tr(),
-          price: _priceOf(monthly),
-          period: 'tf_per_month'.tr(),
-        ),
-      if (family != null)
-        _FamilyCard(
-          selected: _selected == _Tariff.family,
-          onTap: () => setState(() => _selected = _Tariff.family),
-          price: _priceOf(family),
-          months: family.duration ?? 1,
-          singleMonthly: monthly == null ? null : _priceOf(monthly),
-        ),
-    ];
+  List<Widget> _groupSections() {
+    var index = 2;
     return [
-      for (final (i, tile) in tiles.indexed) ...[
-        if (i > 0) const SizedBox(height: 12),
-        _reveal(2 + i, tile),
+      for (final (i, group) in _groups.indexed) ...[
+        if (i > 0) const SizedBox(height: 28),
+        _reveal(index++, _GroupHeader(group: group)),
+        const SizedBox(height: 12),
+        for (final (j, package) in group.packages.indexed) ...[
+          if (j > 0) const SizedBox(height: 12),
+          _reveal(index++, _tile(group, package)),
+        ],
       ],
     ];
   }
 
-  /// No package could be loaded — say so and offer a retry instead of
-  /// showing a price that may not be the real one.
+  Widget _tile(PlanGroup group, PremiumPlanModel package) {
+    final months = package.duration;
+    final selected = _selected?.id == package.id;
+    final struck = _struckPrice(group, package);
+    final save = struck == null
+        ? 0
+        : (100 - package.price * 100 / struck).round();
+    final familyMonthly = (package.price / months).round();
+    final footer = switch (_premiumMonthly?.price) {
+      final single?
+          when group.isFamily &&
+              familyMonthly < single * TariffsPage.familySize =>
+        _FamilyPriceCompare(
+          active: selected,
+          single: single,
+          family: familyMonthly,
+        ),
+      _ => null,
+    };
+
+    return _PlanTile(
+      selected: selected,
+      onTap: () => setState(() => _selected = package),
+      title: _durationTitle(months),
+      subtitle: switch ((months, group.isFamily)) {
+        (1, true) => 'tf_family_sub'.tr(),
+        (1, false) => 'tf_monthly_sub'.tr(),
+        _ => 'tf_yearly_sub'.tr(
+          namedArgs: {
+            'price': (package.price / months).formatPrice(separator: ' '),
+          },
+        ),
+      },
+      tag: save > 0
+          ? 'tf_best_value'.tr(namedArgs: {'percent': '$save'})
+          : null,
+      tagFilled: package.isPopular,
+      price: package.price,
+      period: _period(months),
+      struckPrice: struck,
+      features: package.features.map(_featureLabel).nonNulls.toList(),
+      footer: footer,
+      expanded: group.isFamily ? const _FamilySteps() : null,
+    );
+  }
+
+  static String _durationTitle(int months) => switch (months) {
+    1 => 'tf_monthly'.tr(),
+    12 => 'tf_yearly'.tr(),
+    _ => 'plan_n_months'.tr(namedArgs: {'count': '$months'}),
+  };
+
+  static String _period(int months) => switch (months) {
+    1 => 'tf_per_month'.tr(),
+    12 => 'tf_per_year'.tr(),
+    _ => 'plan_n_months'.tr(namedArgs: {'count': '$months'}),
+  };
+
+  static String? _featureLabel(PlanFeature feature) =>
+      switch ((feature.key, feature.value.toLowerCase())) {
+        ('AiScans', 'unlimited') => 'premium_feat_scans'.tr(),
+        _ => null,
+      };
+
   Widget _loadFailed(BuildContext context) {
     final colors = context.colors;
     return Container(
@@ -396,7 +373,6 @@ class _TariffsPageState extends State<TariffsPage>
     );
   }
 
-  /// For the second person of a family plan: they got a code, not a bill.
   Widget _familyCodeLink(BuildContext context) {
     final colors = context.colors;
     return Center(
@@ -409,6 +385,12 @@ class _TariffsPageState extends State<TariffsPage>
 
   Widget _bottomBar(BuildContext context) {
     final colors = context.colors;
+    final selected = _loading ? null : _selected;
+    final billed = switch (selected?.duration) {
+      1 => 'tf_billed_monthly',
+      12 => 'tf_billed_yearly',
+      _ => null,
+    };
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.white,
@@ -424,7 +406,7 @@ class _TariffsPageState extends State<TariffsPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_selectedPlan != null)
+            if (selected != null)
               Row(
                 children: [
                   Expanded(
@@ -434,7 +416,7 @@ class _TariffsPageState extends State<TariffsPage>
                         .c(colors.textSub),
                   ),
                   _CountingPrice(
-                    value: _price,
+                    value: selected.price,
                     suffix: 'tf_sum'.tr(),
                     style: TextStyle(
                       fontFamily: FontFamily.inter,
@@ -451,7 +433,7 @@ class _TariffsPageState extends State<TariffsPage>
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: _selectedPlan == null ? null : _continue,
+                onPressed: selected == null ? null : _continue,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.accentSub,
                   foregroundColor: colors.white,
@@ -463,21 +445,20 @@ class _TariffsPageState extends State<TariffsPage>
                 child: 'tf_continue'.tr().text(16, 20, 600).c(colors.white),
               ),
             ),
-            const SizedBox(height: 8),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: KeyedSubtree(
-                key: ValueKey(_selected == _Tariff.yearly),
-                child:
-                    (_selected == _Tariff.yearly
-                            ? 'tf_billed_yearly'
-                            : 'tf_billed_monthly')
-                        .tr()
-                        .text(11, 14, 400)
-                        .c(colors.textSub)
-                        .auto(minSize: 9),
+            if (billed != null) ...[
+              const SizedBox(height: 8),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: KeyedSubtree(
+                  key: ValueKey(billed),
+                  child: billed
+                      .tr()
+                      .text(11, 14, 400)
+                      .c(colors.textSub)
+                      .auto(minSize: 9),
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -485,19 +466,98 @@ class _TariffsPageState extends State<TariffsPage>
   }
 }
 
-/// One plan row: radio, name (+ optional tag) and a one-line explanation on
-/// the left, price and billing period on the right.
-class _PlanTile extends StatelessWidget {
-  final bool selected;
-  final VoidCallback onTap;
-  final String title;
-  final String subtitle;
-  final String? tag;
-  final bool tagFilled;
-  final int price;
-  final String period;
-  final int? struckPrice;
+class _GroupHeader extends StatelessWidget {
+  const _GroupHeader({required this.group});
 
+  final PlanGroup group;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final family = group.isFamily;
+    return Row(
+      children: [
+        _People(count: family ? TariffsPage.familySize : 1),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Row(
+            children: [
+              Flexible(
+                child: (family ? 'tf_family' : 'plan_premium')
+                    .tr()
+                    .text(18, 24, 700)
+                    .c(colors.textStrong)
+                    .copyWith(maxLines: 1),
+              ),
+              if (family) ...[
+                const SizedBox(width: 8),
+                _Tag(text: 'tf_new'.tr(), filled: false),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: colors.softGray,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: (family ? 'tf_two_people' : 'tf_one_person')
+              .tr()
+              .text(12, 16, 600)
+              .c(colors.textSub),
+        ),
+      ],
+    );
+  }
+}
+
+class _People extends StatelessWidget {
+  const _People({required this.count});
+
+  final int count;
+
+  static const double _size = 26;
+  static const double _ring = 2;
+  static const double _step = 16;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final palette = [
+      (colors.accentSub, colors.white),
+      (PersonAvatar.partnerBackground, PersonAvatar.partnerForeground),
+    ];
+    const outer = _size + _ring * 2;
+    return SizedBox(
+      width: outer + _step * (count - 1),
+      height: outer,
+      child: Stack(
+        children: [
+          for (var i = 0; i < count; i++)
+            Positioned(
+              left: _step * i,
+              child: Container(
+                padding: const EdgeInsets.all(_ring),
+                decoration: BoxDecoration(
+                  color: colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: PersonAvatar(
+                  size: _size,
+                  background: palette[i % palette.length].$1,
+                  foreground: palette[i % palette.length].$2,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanTile extends StatelessWidget {
   const _PlanTile({
     required this.selected,
     required this.onTap,
@@ -508,108 +568,29 @@ class _PlanTile extends StatelessWidget {
     required this.price,
     required this.period,
     this.struckPrice,
+    this.features = const [],
+    this.footer,
+    this.expanded,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return _Pressable(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-        decoration: BoxDecoration(
-          color: selected
-              ? colors.accentGreenWhite.withValues(alpha: 0.55)
-              : colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? colors.accentSub : colors.strokeSoft,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 1),
-                  child: _Radio(selected: selected),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          title.text(16, 22, 600).c(colors.textStrong),
-                          if (tag != null) _Tag(text: tag!, filled: tagFilled),
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      subtitle
-                          .text(13, 18, 400)
-                          .c(colors.textSub)
-                          .copyWith(maxLines: 2),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                _Price(price: price, period: period, struck: struckPrice),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Family plan: one subscription for two people.
-///
-/// The pitch is the price, so the card shows it per person instead of in
-/// words — two separate plans above one shared plan ([_FamilyPriceCompare]).
-/// Once picked, it unfolds three short steps explaining how the second
-/// person joins.
-class _FamilyCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
-
-  /// Family package price for [months] (from the dashboard).
+  final String title;
+  final String subtitle;
+  final String? tag;
+  final bool tagFilled;
   final int price;
-  final int months;
-
-  /// Regular monthly price — what each person would pay alone. Null without
-  /// a monthly package, and then there is nothing to compare against.
-  final int? singleMonthly;
-
-  const _FamilyCard({
-    required this.selected,
-    required this.onTap,
-    required this.price,
-    required this.months,
-    required this.singleMonthly,
-  });
+  final String period;
+  final int? struckPrice;
+  final List<String> features;
+  final Widget? footer;
+  final Widget? expanded;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final familyMonthly = (price / months).round();
-    final single = singleMonthly;
-    // The comparison only argues for the family plan when it does save.
-    final compare =
-        single != null && familyMonthly < single * TariffsPage.familySize;
-    final period = switch (months) {
-      1 => 'tf_per_month'.tr(),
-      12 => 'tf_per_year'.tr(),
-      _ => 'plan_n_months'.tr(namedArgs: {'count': '$months'}),
-    };
-
+    final footer = this.footer;
+    final expanded = this.expanded;
     return _Pressable(
       onTap: onTap,
       child: AnimatedContainer(
@@ -645,45 +626,56 @@ class _FamilyCard extends StatelessWidget {
                         runSpacing: 4,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          'tf_family'
-                              .tr()
-                              .text(16, 22, 600)
-                              .c(colors.textStrong),
-                          _Tag(text: 'tf_new'.tr(), filled: false),
+                          title.text(16, 22, 600).c(colors.textStrong),
+                          if (tag case final tag?)
+                            _Tag(text: tag, filled: tagFilled),
                         ],
                       ),
                       const SizedBox(height: 3),
-                      'tf_family_sub'
-                          .tr()
+                      subtitle
                           .text(13, 18, 400)
                           .c(colors.textSub)
                           .copyWith(maxLines: 2),
+                      for (final feature in features)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle_rounded,
+                                size: 14,
+                                color: colors.accentSub,
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: feature
+                                    .text(12, 16, 600)
+                                    .c(colors.textPrimary)
+                                    .copyWith(maxLines: 1),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 12),
-                _Price(price: price, period: period),
+                _Price(price: price, period: period, struck: struckPrice),
               ],
             ),
-            if (compare) ...[
-              const SizedBox(height: 16),
-              _FamilyPriceCompare(
-                active: selected,
-                single: single,
-                family: familyMonthly,
+            if (footer != null) ...[const SizedBox(height: 16), footer],
+            if (expanded != null)
+              AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.topCenter,
+                child: selected
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: expanded,
+                      )
+                    : const SizedBox(width: double.infinity),
               ),
-            ],
-            AnimatedSize(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              alignment: Alignment.topCenter,
-              child: selected
-                  ? const Padding(
-                      padding: EdgeInsets.only(top: 16),
-                      child: _FamilySteps(),
-                    )
-                  : const SizedBox(width: double.infinity),
-            ),
           ],
         ),
       ),
@@ -691,34 +683,16 @@ class _FamilyCard extends StatelessWidget {
   }
 }
 
-/// Per-person price, drawn rather than described.
-///
-/// Top row: two people, each in their own box with the regular monthly
-/// price — two separate subscriptions. Bottom row: the same two people
-/// inside ONE box at half the family price each — one shared subscription.
-/// Both rows share the same column geometry, so each person's price drop
-/// reads straight down the column. All amounts are per month and come from
-/// the backend packages.
-///
-/// Plays once, the first time it is (almost) fully on screen (or when the family plan
-/// is picked): the separate plans settle in, the two people move together
-/// into the shared box while their price counts down to their share, and
-/// the monthly saving lands last.
 class _FamilyPriceCompare extends StatefulWidget {
-  /// The family plan is selected — starts the story if it hasn't run yet.
-  final bool active;
-
-  /// Regular monthly price for one person.
-  final int single;
-
-  /// Family price per month, for both people together.
-  final int family;
-
   const _FamilyPriceCompare({
     required this.active,
     required this.single,
     required this.family,
   });
+
+  final bool active;
+  final int single;
+  final int family;
 
   @override
   State<_FamilyPriceCompare> createState() => _FamilyPriceCompareState();
@@ -760,8 +734,6 @@ class _FamilyPriceCompareState extends State<_FamilyPriceCompare>
     if (widget.active && !old.active) _start();
   }
 
-  /// Scroll notifications arrive before the new layout, so measure on the
-  /// next frame, once positions are current.
   void _queueCheck() {
     if (_started || _checkQueued) return;
     _checkQueued = true;
@@ -797,11 +769,9 @@ class _FamilyPriceCompareState extends State<_FamilyPriceCompare>
     super.dispose();
   }
 
-  /// Progress of one beat of the story, 0 → 1.
   double _beat(double from, double to) =>
       Interval(from, to, curve: Curves.easeOutCubic).transform(_story.value);
 
-  /// Counting prices move in 500-sum steps so digits don't flicker.
   static int _stepped(double value) => (value / 500).round() * 500;
 
   static Widget _rise(double t, Widget child, {double dy = 8}) => Opacity(
@@ -852,7 +822,6 @@ class _FamilyPriceCompareState extends State<_FamilyPriceCompare>
         final price = _stepped(single + (each - single) * count);
         final saving = _stepped((separate - family) * saveIn);
 
-        // Each person starts a little apart and slides into the shared box.
         Widget joining(Widget child, {required bool fromLeft}) => Opacity(
           opacity: join,
           child: Transform.translate(
@@ -958,23 +927,18 @@ class _FamilyPriceCompareState extends State<_FamilyPriceCompare>
   }
 }
 
-/// One person in the comparison: avatar, who it is, what they pay a month.
 class _PersonPrice extends StatelessWidget {
-  final String name;
-  final int price;
-
-  /// Separate-plan row: greyed out, it is the option being argued against.
-  final bool muted;
-
-  /// The person you add — a warm tint so the pair reads as two people.
-  final bool second;
-
   const _PersonPrice({
     required this.name,
     required this.price,
     this.muted = false,
     this.second = false,
   });
+
+  final String name;
+  final int price;
+  final bool muted;
+  final bool second;
 
   @override
   Widget build(BuildContext context) {
@@ -1015,33 +979,38 @@ class _PersonPrice extends StatelessWidget {
   }
 }
 
-/// Plan rows while the backend packages load.
 class _PlanSkeleton extends StatelessWidget {
   const _PlanSkeleton();
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    Widget row(double height) => Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: colors.softGray,
-        borderRadius: BorderRadius.circular(16),
-      ),
-    );
+    Widget block(double height, {double? width, double radius = 16}) =>
+        Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: colors.softGray,
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        );
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        row(78),
+        block(26, width: 140, radius: 13),
         const SizedBox(height: 12),
-        row(78),
+        block(78),
         const SizedBox(height: 12),
-        row(150),
+        block(78),
+        const SizedBox(height: 28),
+        block(26, width: 120, radius: 13),
+        const SizedBox(height: 12),
+        block(150),
       ],
     );
   }
 }
 
-/// How the second person gets in — shown once the family plan is picked.
 class _FamilySteps extends StatelessWidget {
   const _FamilySteps();
 
@@ -1054,7 +1023,7 @@ class _FamilySteps extends StatelessWidget {
       children: [
         'tf_family_how'.tr().text(13, 18, 600).c(colors.textStrong),
         const SizedBox(height: 10),
-        for (var i = 0; i < steps.length; i++)
+        for (final (i, step) in steps.indexed)
           Padding(
             padding: EdgeInsets.only(bottom: i == steps.length - 1 ? 0 : 8),
             child: Row(
@@ -1073,7 +1042,7 @@ class _FamilySteps extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: steps[i].tr().text(13, 19, 400).c(colors.textPrimary),
+                  child: step.tr().text(13, 19, 400).c(colors.textPrimary),
                 ),
               ],
             ),
@@ -1083,18 +1052,16 @@ class _FamilySteps extends StatelessWidget {
   }
 }
 
-/// Page entrance: each block fades in and rises a few pixels, one after
-/// another, off a single controller owned by the page.
 class _Reveal extends StatelessWidget {
-  final Animation<double> animation;
-  final int index;
-  final Widget child;
-
   const _Reveal({
     required this.animation,
     required this.index,
     required this.child,
   });
+
+  final Animation<double> animation;
+  final int index;
+  final Widget child;
 
   static const double _stagger = 0.07;
   static const double _span = 0.5;
@@ -1120,13 +1087,11 @@ class _Reveal extends StatelessWidget {
   }
 }
 
-/// Tap target that gives way slightly under the finger, with a selection
-/// tick — plan rows feel like physical options rather than flat links.
 class _Pressable extends StatefulWidget {
+  const _Pressable({required this.onTap, required this.child});
+
   final VoidCallback onTap;
   final Widget child;
-
-  const _Pressable({required this.onTap, required this.child});
 
   @override
   State<_Pressable> createState() => _PressableState();
@@ -1160,18 +1125,16 @@ class _PressableState extends State<_Pressable> {
   }
 }
 
-/// A price that counts to its new value instead of jumping, in 500-sum steps
-/// with tabular digits so the width stays put while it moves.
 class _CountingPrice extends StatelessWidget {
-  final int value;
-  final String suffix;
-  final TextStyle style;
-
   const _CountingPrice({
     required this.value,
     required this.suffix,
     required this.style,
   });
+
+  final int value;
+  final String suffix;
+  final TextStyle style;
 
   @override
   Widget build(BuildContext context) {
@@ -1191,15 +1154,16 @@ class _CountingPrice extends StatelessWidget {
 }
 
 class _Price extends StatelessWidget {
+  const _Price({required this.price, required this.period, this.struck});
+
   final int price;
   final String period;
   final int? struck;
 
-  const _Price({required this.price, required this.period, this.struck});
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final struck = this.struck;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -1215,7 +1179,7 @@ class _Price extends StatelessWidget {
         if (struck != null) ...[
           const SizedBox(height: 2),
           Text(
-            '${struck!.formatPrice()} ${'tf_sum'.tr()}',
+            '${struck.formatPrice()} ${'tf_sum'.tr()}',
             style: TextStyle(
               color: colors.textSub,
               decoration: TextDecoration.lineThrough,
@@ -1233,9 +1197,9 @@ class _Price extends StatelessWidget {
 }
 
 class _Radio extends StatelessWidget {
-  final bool selected;
-
   const _Radio({required this.selected});
+
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -1256,12 +1220,11 @@ class _Radio extends StatelessWidget {
   }
 }
 
-/// Small inline label next to a plan name ("Best value · −32%", "New").
 class _Tag extends StatelessWidget {
+  const _Tag({required this.text, required this.filled});
+
   final String text;
   final bool filled;
-
-  const _Tag({required this.text, required this.filled});
 
   @override
   Widget build(BuildContext context) {

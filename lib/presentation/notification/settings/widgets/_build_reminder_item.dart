@@ -37,7 +37,7 @@ Widget buildReminderItem({
             id: reminder?.id,
             time: newTime,
             type: settingType.toApi,
-            menu: menuEnum?.toApi,
+            menu: settingType.isFood ? menuEnum?.toApi : null,
           ),
         );
       } else {

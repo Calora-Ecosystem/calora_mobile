@@ -134,7 +134,7 @@ class CourseQuestionsManager
   Future<void> updateNotification(String time) async {
     try {
       await _notificationRepo.updateReminder(
-        ReminderRequest(menu: 'Breakfast', time: time, type: 'DailyChallenge'),
+        ReminderRequest(time: time, type: 'DailyChallenge'),
       );
     } catch (e) {
       log(

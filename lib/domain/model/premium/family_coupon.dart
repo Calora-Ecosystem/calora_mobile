@@ -42,11 +42,17 @@ class FamilyCoupon {
     final expireAt = _date(json['expireAt']);
     final usedAt = _date(json['usedAt']);
     final usedByUsers = switch (json['usedByUsers']) {
-      final List<dynamic> users =>
+      final List<dynamic> users when users.isNotEmpty =>
         users
             .whereType<Map<String, dynamic>>()
             .map(CouponUser.fromJson)
             .toList(),
+      _ when json['usedByUserId'] is num || json['usedByName'] is String => [
+        CouponUser(
+          userId: (json['usedByUserId'] as num?)?.toInt() ?? 0,
+          name: (json['usedByName'] as String?)?.trim() ?? '',
+        ),
+      ],
       _ => const <CouponUser>[],
     };
     return FamilyCoupon(
@@ -72,6 +78,12 @@ class FamilyCoupon {
       usedAt: usedAt,
       usedByUsers: usedByUsers,
     );
+  }
+
+  String? get redeemedBy {
+    final user = usedByUsers.firstOrNull;
+    if (user == null) return null;
+    return user.name.isNotEmpty ? user.name : user.phone;
   }
 
   static DateTime? _date(Object? value) =>

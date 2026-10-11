@@ -8,8 +8,10 @@ import 'package:calora/common/util/share_origin.dart';
 import 'package:calora/common/widgets/button/button.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/premium/family_code.dart';
+import 'package:calora/domain/model/premium/family_coupon.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/premium/family/management/family_coupons_manager.dart';
 import 'package:calora/presentation/premium/family/person_avatar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +21,6 @@ import 'package:share_plus/share_plus.dart';
 /// App download link appended to the family invite.
 const String _appLink = 'https://calora.uz/get-app?utm_source=family_plan';
 
-/// How long a fresh code stays redeemable when the dates don't tell
-/// (mirrors the backend's `FamilyService.RedeemWindowDays`).
 const int _redeemWindowDays = 30;
 
 /// Family plan: the code the buyer sends to the second person.
@@ -34,16 +34,27 @@ class FamilyCodeSheet extends StatefulWidget {
   /// Just paid: the backend issues the code when the payment is accepted,
   /// which can trail the app by a moment — poll briefly before giving up.
   final bool waitForNew;
-  final String? code;
+  final FamilyCoupon? coupon;
+  final int months;
 
-  const FamilyCodeSheet({super.key, this.waitForNew = false, this.code});
+  const FamilyCodeSheet({
+    super.key,
+    this.waitForNew = false,
+    this.coupon,
+    this.months = 1,
+  });
 
   static Future<void> show(
     BuildContext context, {
     bool waitForNew = false,
-    String? code,
+    FamilyCoupon? coupon,
+    int months = 1,
   }) => context.showAppBottomSheet(
-    child: FamilyCodeSheet(waitForNew: waitForNew, code: code),
+    child: FamilyCodeSheet(
+      waitForNew: waitForNew,
+      coupon: coupon,
+      months: months,
+    ),
   );
 
   @override
@@ -68,7 +79,7 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
     duration: const Duration(milliseconds: 1900),
   );
 
-  FamilyCode? _code;
+  late FamilyCoupon? _code = widget.coupon;
   bool _loading = true;
   bool _copied = false;
   Timer? _copiedTimer;
@@ -78,7 +89,11 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
   @override
   void initState() {
     super.initState();
-    _load();
+    if (_code == null) {
+      _load();
+    } else {
+      _loading = false;
+    }
   }
 
   @override
@@ -86,8 +101,10 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
     super.didChangeDependencies();
     if (_reduceMotion) {
       _intro.value = 1;
+      if (!_loading) _reveal.value = 1;
     } else if (_intro.isDismissed) {
       _intro.forward();
+      if (!_loading) _reveal.forward();
     }
   }
 
@@ -102,12 +119,10 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
   Future<void> _load() async {
     final repo = getIt<PremiumRepo>();
     for (var attempt = 0; ; attempt++) {
-      FamilyCode? code;
+      FamilyCoupon? code;
       try {
-        code = _pick(await repo.getFamilyCodes());
-      } catch (_) {
-        // Shown as "being prepared" below; Profile → Subscription has it later.
-      }
+        code = _pick(await repo.getMyCoupons());
+      } catch (_) {}
       final lastTry = !widget.waitForNew || attempt >= _retries;
       if (code != null || lastTry) {
         if (!mounted) return;
@@ -127,17 +142,13 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
     }
   }
 
-  /// The newest unused code; otherwise (when just looking it up) the newest
-  /// one, so a redeemed or expired code still explains itself. Right after
-  /// paying only a fresh, unused code counts.
-  FamilyCode? _pick(List<FamilyCode> codes) {
-    for (final code in codes) {
-      if (code.code == widget.code) return code;
-    }
-    for (final code in codes) {
-      if (code.status == FamilyCodeStatus.active) return code;
-    }
-    return codes.isNotEmpty && !widget.waitForNew ? codes.first : null;
+  FamilyCoupon? _pick(List<FamilyCoupon> coupons) {
+    final sorted = FamilyCouponsManager.sorted(coupons);
+    final first = sorted.firstOrNull;
+    if (first == null) return null;
+    return first.status == FamilyCodeStatus.active || !widget.waitForNew
+        ? first
+        : null;
   }
 
   void _copy() {
@@ -161,7 +172,7 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
           text: 'family_code_share_text'.tr(
             namedArgs: {
               'code': code.code,
-              'months': '${code.months}',
+              'months': '${widget.months}',
               'link': _appLink,
             },
           ),
@@ -229,7 +240,7 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
               _rise(
                 _beat(_intro, 0.2, 0.55),
                 'family_code_subtitle'
-                    .tr(namedArgs: {'months': '${code?.months ?? 1}'})
+                    .tr(namedArgs: {'months': '${widget.months}'})
                     .text(14, 20, 400)
                     .c(colors.textSub)
                     .copyWith(textAlign: TextAlign.center),
@@ -245,6 +256,7 @@ class _FamilyCodeSheetState extends State<FamilyCodeSheet>
                   dy: 22,
                   _CodeTicket(
                     code: code,
+                    months: widget.months,
                     decode: _beat(_reveal, 0.18, 0.62, curve: Curves.linear),
                     shine: _beat(_reveal, 0.6, 0.9, curve: Curves.easeInOut),
                     copied: _copied,
@@ -611,7 +623,8 @@ class _ArcPainter extends CustomPainter {
 /// letter by letter, then a single highlight sweeps across. Tap anywhere to
 /// copy; the chip confirms it in place.
 class _CodeTicket extends StatelessWidget {
-  final FamilyCode code;
+  final FamilyCoupon code;
+  final int months;
   final double decode;
   final double shine;
   final bool copied;
@@ -619,6 +632,7 @@ class _CodeTicket extends StatelessWidget {
 
   const _CodeTicket({
     required this.code,
+    required this.months,
     required this.decode,
     required this.shine,
     required this.copied,
@@ -672,7 +686,7 @@ class _CodeTicket extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: 'family_code_ticket_label'
-                              .tr(namedArgs: {'months': '${code.months}'})
+                              .tr(namedArgs: {'months': '$months'})
                               .toUpperCase()
                               .text(12, 16, 700)
                               .c(colors.white)
@@ -941,7 +955,7 @@ class _CopyChip extends StatelessWidget {
 /// Active: days left to activate and a bar of the window that's left.
 /// Redeemed: who activated it. Expired: says so.
 class _StatusLine extends StatelessWidget {
-  final FamilyCode code;
+  final FamilyCoupon code;
   final double fill;
 
   const _StatusLine({required this.code, required this.fill});

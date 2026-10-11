@@ -1,6 +1,7 @@
 import 'package:calora/domain/model/meal/food/food_models.dart';
 import 'package:calora/domain/model/pagination/paginated_response.dart';
 import 'package:calora/domain/model/premium/family_code.dart';
+import 'package:calora/domain/model/premium/family_coupon.dart';
 import 'package:calora/domain/model/premium/my_subscription.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,69 +32,91 @@ void main() {
     });
 
     test('one uncategorised food no longer breaks the page', () {
-      final page = PaginatedResponse<FoodModel>.fromJson(
-        {
-          'content': [
-            ownFood,
-            {
-              'id': 7,
-              'name': 'Osh',
-              'categoryId': 3,
-              'coverUrl': 'images/osh.png',
-              'metrics': <Object>[],
-            },
-          ],
-          'total': 2,
-        },
-        (json) => FoodModel.fromJson(json as Map<String, dynamic>),
-      );
+      final page = PaginatedResponse<FoodModel>.fromJson({
+        'content': [
+          ownFood,
+          {
+            'id': 7,
+            'name': 'Osh',
+            'categoryId': 3,
+            'coverUrl': 'images/osh.png',
+            'metrics': <Object>[],
+          },
+        ],
+        'total': 2,
+      }, (json) => FoodModel.fromJson(json as Map<String, dynamic>));
       expect(page.content!.map((f) => f.name), ['Uy salati', 'Osh']);
       expect(page.content!.last.categoryId, 3);
     });
   });
 
   group('family plan', () {
-    test('FamilyCode parses every status', () {
-      FamilyCode parse(String status) => FamilyCode.fromJson({
+    test('coupons/my parses every status and who used it', () {
+      FamilyCoupon parse(
+        String status, {
+        Map<String, dynamic> extra = const {},
+      }) => FamilyCoupon.fromJson({
+        'id': 7,
         'code': 'FAMILY-AB12CD',
-        'months': 1,
+        'amount': 4900000,
+        'isActive': true,
+        'expireAt': '2026-10-31T12:00:00Z',
+        'createdAt': '2026-10-01T12:00:00Z',
         'status': status,
-        'expireAt': '2026-10-31T12:00:00',
-        'redeemedBy': status == 'Redeemed' ? 'Vali' : null,
+        ...extra,
       });
 
       expect(parse('Active').status, FamilyCodeStatus.active);
-      expect(parse('Redeemed').status, FamilyCodeStatus.redeemed);
-      expect(parse('Redeemed').redeemedBy, 'Vali');
       expect(parse('Expired').status, FamilyCodeStatus.expired);
-      expect(parse('Active').expireAt, DateTime(2026, 10, 31, 12));
+      final viaList = parse(
+        'Redeemed',
+        extra: {
+          'usedByUsers': [
+            {'userId': 5, 'name': 'Vali', 'phone': '998901234567'},
+          ],
+        },
+      );
+      expect(viaList.status, FamilyCodeStatus.redeemed);
+      expect(viaList.redeemedBy, 'Vali');
+      final viaFields = parse(
+        'Redeemed',
+        extra: {
+          'usedByUsers': <Object>[],
+          'usedByUserId': 5,
+          'usedByName': 'Vali',
+        },
+      );
+      expect(viaFields.usedByUsers.single.userId, 5);
+      expect(viaFields.redeemedBy, 'Vali');
+      expect(parse('Active').redeemedBy, isNull);
+      expect(
+        parse('Active').expireAt,
+        DateTime.utc(2026, 10, 31, 12).toLocal(),
+      );
     });
 
-    test('redeem result asks for a token refresh by default', () {
-      final result = FamilyRedeemResult.fromJson({
-        'ownerName': 'Ali',
-        'months': 1,
-        'endsAt': '2026-11-01T10:00:00',
-      });
-      expect(result.ownerName, 'Ali');
-      expect(result.requiresTokenRefresh, isTrue);
+    test('family codes are told apart from other promo codes', () {
+      expect(isFamilyCode('FAMILY-AB12CD'), isTrue);
+      expect(isFamilyCode(' family-ab12cd '), isTrue);
+      expect(isFamilyCode('FAMILYAB12'), isTrue);
+      expect(isFamilyCode('SALE50'), isFalse);
     });
 
-    test('a family payment is done once a new active code appears', () {
-      const old = FamilyCode(code: 'FAMILY-OLD111');
-      const fresh = FamilyCode(code: 'FAMILY-NEW222');
-      const used = FamilyCode(
+    test('a family payment is done once a new active coupon appears', () {
+      const old = FamilyCoupon(id: 1, code: 'FAMILY-OLD111');
+      const fresh = FamilyCoupon(id: 2, code: 'FAMILY-NEW222');
+      const used = FamilyCoupon(
+        id: 3,
         code: 'FAMILY-USE333',
         status: FamilyCodeStatus.redeemed,
       );
-      // A Premium user's old unused code from last month isn't proof.
-      expect(PremiumManager.familyCodeIssued({'FAMILY-OLD111'}, [old]), isFalse);
+      expect(PremiumManager.newFamilyCoupon({'FAMILY-OLD111'}, [old]), isNull);
       expect(
-        PremiumManager.familyCodeIssued({'FAMILY-OLD111'}, [fresh, old]),
-        isTrue,
+        PremiumManager.newFamilyCoupon({'FAMILY-OLD111'}, [fresh, old]),
+        fresh,
       );
-      expect(PremiumManager.familyCodeIssued({}, [fresh]), isTrue);
-      expect(PremiumManager.familyCodeIssued({}, [used]), isFalse);
+      expect(PremiumManager.newFamilyCoupon({}, [fresh]), fresh);
+      expect(PremiumManager.newFamilyCoupon({}, [used]), isNull);
     });
 
     test('subscription/my reports the family plan', () {

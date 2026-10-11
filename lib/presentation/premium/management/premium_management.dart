@@ -19,7 +19,6 @@ abstract class PremiumState with _$PremiumState {
     @Default(false) bool isRestoringPurchase,
     @Default(false) bool isDeletingOrder,
     @Default(false) bool isGettingPaymentLink,
-    @Default(false) bool isGettingPremiumPlans,
     @Default(false) bool isGettingPromoCodeValue,
     @Default(false) bool isPaymentPending,
     @Default(true) bool isUzbekistan,
@@ -40,8 +39,6 @@ abstract class PremiumState with _$PremiumState {
     /// code. Already applied to [PlanModel.price] on the Payme / Click flow.
     @Default(0) int referralDiscountPercent,
 
-    /// The sheet sells the family plan (two people) instead of the regular
-    /// ones. Payme / Click only — the stores have no family product.
     @Default(false) bool isFamily,
   }) = _PremiumState;
 

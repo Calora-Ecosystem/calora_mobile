@@ -1,3 +1,4 @@
+import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/data/api/premium_api.dart';
 import 'package:calora/domain/model/premium/family_code.dart';
 import 'package:calora/domain/model/premium/family_coupon.dart';
@@ -7,6 +8,7 @@ import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
 import 'package:calora/domain/model/premium/subscription_response_model.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
@@ -44,8 +46,7 @@ class PremiumRepoImpl implements PremiumRepo {
   }
 
   @override
-  Future<List<PremiumPlanModel>> getPremiumPlans({bool family = false}) async =>
-      await _api.getPremiumPlans(family: family);
+  Future<List<PremiumPlanModel>> getPremiumPlans() => _api.getPremiumPlans();
 
   @override
   Future<MySubscription> getMySubscription() => _api.getMySubscription();
@@ -55,11 +56,54 @@ class PremiumRepoImpl implements PremiumRepo {
       await _api.getPromoCodeAmount(code: code);
 
   @override
-  Future<List<FamilyCode>> getFamilyCodes() => _api.getFamilyCodes();
+  Future<FamilyRedeemResult> redeemFamilyCode(String code) async {
+    final coupon = await _api.getPromoCodeAmount(code: code.trim());
+    final couponId = coupon.id;
+    if (couponId == null) {
+      throw const FamilyCodeException(FamilyCodeException.notFound);
+    }
+    final expireAt = DateTime.tryParse(coupon.expireAt ?? '');
+    if (expireAt != null && expireAt.isBefore(DateTime.now())) {
+      throw const FamilyCodeException(FamilyCodeException.expired);
+    }
+    if (coupon.isActive == false) {
+      throw const FamilyCodeException(FamilyCodeException.used);
+    }
+    if (await _isOwnCoupon(code)) {
+      throw const FamilyCodeException(FamilyCodeException.self);
+    }
 
-  @override
-  Future<FamilyRedeemResult> redeemFamilyCode(String code) =>
-      _api.redeemFamilyCode(code);
+    final premium = PlanGroup.of(
+      await _api.getPremiumPlans(),
+    ).firstWhereOrNull((group) => group.type.isPremium);
+    final package = premium?.packages.firstWhereOrNull(
+      (package) => package.price <= coupon.sum,
+    );
+    if (package == null) {
+      throw const FamilyCodeException(FamilyCodeException.notCovered);
+    }
+
+    final order = await _api.orderSubscription(
+      provider: 'Payme',
+      plan: SubscriptionPlanType.premium.toApi(),
+      orderMonth: package.id,
+      couponId: couponId,
+    );
+    if (order.paymentRequired ?? true) {
+      throw const FamilyCodeException(FamilyCodeException.notCovered);
+    }
+    return FamilyRedeemResult(months: package.duration);
+  }
+
+  Future<bool> _isOwnCoupon(String code) async {
+    try {
+      final own = await _api.getMyCoupons();
+      final normalized = code.trim().toUpperCase();
+      return own.any((coupon) => coupon.code.toUpperCase() == normalized);
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<List<FamilyCoupon>> getMyCoupons() => _api.getMyCoupons();

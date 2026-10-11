@@ -20,14 +20,11 @@ abstract class PremiumRepo {
 
   Future<List<MySubscriptionOrderModel>> getMyOrders();
 
-  Future<List<PremiumPlanModel>> getPremiumPlans({bool family = false});
+  Future<List<PremiumPlanModel>> getPremiumPlans();
 
   Future<MySubscription> getMySubscription();
 
   Future<PromoCodeModel> getPromoCodeAmount({required String code});
-
-  /// Family plan: codes the buyer got for the second person, newest first.
-  Future<List<FamilyCode>> getFamilyCodes();
 
   /// Family plan: the second person redeems the code and gets Premium.
   Future<FamilyRedeemResult> redeemFamilyCode(String code);
