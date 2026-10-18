@@ -3,6 +3,7 @@ import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/api_error_extension.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
+import 'package:calora/common/util/invite_share_text.dart';
 import 'package:calora/common/util/share_origin.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/referral/referral_info.dart';
@@ -13,10 +14,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
-
-/// App download link appended to every invite message.
-const String _appLink =
-    'https://calora.uz/get-app?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAdGRleAUgr35wZG9mAmZkaWQWUO_31iVOcBg-gWrPQuL6s370ESIfzWV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp-RykBP5lisCPJ-X3snDgwSdcroKjwcpCcZ_RnSyX9FvyV-n1iHvtG_wxDmN_aem_dKS_Q99npN7Yml6Ale4vNg';
 
 /// Referral screen — share an invite code; every [ReferralInfo.friendsGoal]
 /// friends who confirm it and start using the app earn
@@ -458,7 +455,7 @@ class _ReferralPageState extends State<ReferralPage>
                     color: colors.textStrong,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'CALORA-XXXXXX',
+                    hintText: 'CALORAXXXXXX',
                     isDense: true,
                     filled: true,
                     fillColor: colors.backgroundElevation,
@@ -738,12 +735,9 @@ class _ReferralPageState extends State<ReferralPage>
       setState(() => _code = code);
       await SharePlus.instance.share(
         ShareParams(
-          text: 'referral_share_text'.tr(
-            namedArgs: {
-              'code': code,
-              'percent': '${_info?.discountPercent ?? 10}',
-              'link': _appLink,
-            },
+          text: referralShareText(
+            code: code,
+            percent: _info?.discountPercent ?? 10,
           ),
           sharePositionOrigin: shareOrigin(
             _shareButtonKey.currentContext ?? context,

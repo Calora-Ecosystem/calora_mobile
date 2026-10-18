@@ -744,7 +744,7 @@ referral_step_2,Your friend enters it in the app,Doʻstingiz uni ilovada kiritad
 referral_step_3,{friends} active friends — {period} of Premium for you,{friends} ta faol doʻst — sizga {period} Premium,{friends} активных друзей — вам {period} Premium
 referral_invited,Joined,Qoʻshildi,Пришли
 referral_earned,Earned,Ishlab topildi,Заработано
-referral_share_text,Join me on Calora 🍏 Enter my code {code} in “Invite friends” and get {percent}% off Premium. Download: {link},Calora’da men bilan birga boʻling 🍏 Ilovadagi “Doʻstni taklif qilish” boʻlimiga {code} kodimni kiriting va Premiumga {percent}% chegirma oling. Yuklab olish: {link},Присоединяйся ко мне в Calora 🍏 Введи мой код {code} в разделе «Пригласить друзей» и получи скидку {percent}% на Premium. Скачать: {link}
+referral_share_text,Join me on Calora 🍏 Enter my code {code} in “Invite friends” and get {percent}% off Premium. Download: {link},Caloraʼda men bilan birga boʻling 🍏 Ilovadagi “Doʻstni taklif qilish” boʻlimiga {code} kodimni kiriting va Premiumga {percent}% chegirma oling. Yuklab olish: {link},Присоединяйся ко мне в Calora 🍏 Введи мой код {code} в разделе «Пригласить друзей» и получи скидку {percent}% на Premium. Скачать: {link}
 referral_success,🎉 Friend joined! +{coins} coins (total: {total}),🎉 Doʻstingiz qoʻshildi! +{coins} coin oldingiz (jami: {total}),🎉 Друг присоединился! +{coins} монет (всего: {total})
 referral_step_4,Your friend gets {percent}% off Premium,Doʻstingizga Premiumga {percent}% chegirma,Другу скидка {percent}% на Premium
 referral_active,Active,Faol,Активны

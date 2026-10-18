@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/util/invite_share_text.dart';
 import 'package:calora/common/util/share_origin.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/group/step_group.dart';
@@ -18,9 +19,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 import 'package:share_plus/share_plus.dart';
-
-/// Where an invited friend downloads the app (store redirect on calora.uz).
-const String _appLink = 'https://calora.uz/get-app?utm_source=step_challenge';
 
 @RoutePage()
 class GroupDetailPage
@@ -296,11 +294,10 @@ class GroupDetailPage
     try {
       await SharePlus.instance.share(
         ShareParams(
-          text: [
-            'share_group_invite'.tr(namedArgs: {'name': group.name}),
-            'share_group_code'.tr(namedArgs: {'code': group.inviteCode}),
-            'share_app_download'.tr(namedArgs: {'link': _appLink}),
-          ].join('\n\n'),
+          text: groupInviteShareText(
+            groupName: group.name,
+            code: group.inviteCode,
+          ),
           sharePositionOrigin: shareOrigin(context),
         ),
       );

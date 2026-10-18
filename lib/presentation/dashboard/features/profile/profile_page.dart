@@ -20,6 +20,7 @@ import 'package:calora/widgets/profile_cards/bmi_card/bmi_card.dart';
 import 'package:calora/widgets/profile_cards/profile_card.dart';
 import 'package:calora/widgets/profile_cards/settings_card.dart'
     show SettingsCard;
+import 'package:calora/widgets/profile_cards/share_app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -100,6 +101,8 @@ class ProfilePage extends Managed<ProfileManager, ProfileState, ProfileEffect> {
                         onAboutTap: () => _showAboutBottomSheet(context),
                         onHelpTap: () => _showHelpBottomSheet(context),
                       ),
+                      const SizedBox(height: 16),
+                      const ShareAppCard(),
                       const SizedBox(height: 16),
                       PremiumEntryCard(),
                     ],

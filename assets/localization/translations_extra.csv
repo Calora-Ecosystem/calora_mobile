@@ -68,3 +68,4 @@ steps_syncfix_body,"Health Connect is connected, but {app} isn't sharing steps w
 steps_syncfix_open,Open {app},{app}ni ochish,Открыть {app}
 steps_ios_body,"Calora reads your steps from Apple Health. If they don't update, open Settings → Health → Data Access & Devices → Calora and turn on Steps.","Calora qadamlarni Apple Healthdan oladi. Agar ular yangilanmasa, Sozlamalar → Salomatlik → Maʼlumotlarga kirish va qurilmalar → Calora boʻlimida «Qadamlar»ni yoqing.","Calora берёт шаги из Apple Health. Если они не обновляются, откройте Настройки → Здоровье → Доступ к данным и устройства → Calora и включите «Шаги»."
 steps_locale_code,en,uz,ru
+share_app_title,Share the app,Ilovani ulashish,Поделиться приложением
