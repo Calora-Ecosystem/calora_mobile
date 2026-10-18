@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:calora/common/base/profile_store.dart';
+import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/service/facebook_analytics_service.dart';
+import 'package:calora/common/service/step_counter_service.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/repo/profile/profile_repo.dart';
@@ -19,22 +21,6 @@ class ProfileDetailManager
   ProfileDetailManager(this._repo, this.authStore, this._commonStore)
     : super(const ProfileDetailState());
 
-  void onAppleHealthTap() {
-    emit(state.copyWith(isAppleHealthSelected: true));
-  }
-
-  void onSamsungHealthTap() {
-    emit(state.copyWith(isSamsungHealthSelected: true));
-  }
-
-  void onGarminTap() {
-    emit(state.copyWith(isGarminSelected: true));
-  }
-
-  void onGoogleFitTap() {
-    emit(state.copyWith(isGoogleFitSelected: true));
-  }
-
   void logOutDialog() {
     publish(ProfileDetailEffect.showDialog());
   }
@@ -47,6 +33,7 @@ class ProfileDetailManager
         authStore.token.set(null);
         _commonStore.isQuestionaryFinished.set(false);
         unawaited(FacebookAnalyticsService.instance.clearUser());
+        unawaited(getIt<StepCounterService>().stop());
       },
       onError: (e) {},
     );
@@ -65,6 +52,7 @@ class ProfileDetailManager
       authStore.token.set(null);
       _commonStore.isQuestionaryFinished.set(false);
       unawaited(FacebookAnalyticsService.instance.clearUser());
+      unawaited(getIt<StepCounterService>().stop());
       publish(ProfileDetailEffect.accountDeleted());
     } catch (_) {
       publish(ProfileDetailEffect.deleteAccountFailed());

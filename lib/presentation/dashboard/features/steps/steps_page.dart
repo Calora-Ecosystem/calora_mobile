@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -8,6 +9,7 @@ import 'package:calora/common/extensions/build_context_extensions.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/common/service/pagination_service.dart';
 import 'package:calora/common/service/pedometer_service.dart';
 import 'package:calora/common/widgets/feature_tour/feature_tour.dart';
@@ -15,8 +17,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:calora/common/widgets/loading/default_refresh_indicator.dart';
 import 'package:calora/domain/model/norms/norms.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
-import 'package:calora/domain/repo/coins/coins_repo.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/coins/widgets/coin_balance_chip.dart';
 import 'package:calora/presentation/common/action/actions_page.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:calora/presentation/dashboard/features/steps/features/edit/edit_step_goal_page.dart';
@@ -51,6 +53,7 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
   @override
   Future<void> init(context, manager) async {
+    unawaited(manager.refreshWallet());
     final dailyFuture = manager.fetchDataForPeriod(0, 0, showLoading: true);
     final weeklyFuture = manager.fetchDataForPeriod(1, 0, showLoading: true);
     final monthlyFuture = manager.fetchDataForPeriod(2, 0, showLoading: true);
@@ -61,7 +64,16 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
   }
 
   @override
-  void listener(BuildContext context, StepsManager manager, StepsEffect effect) {
+  void onFocusGained(BuildContext context, StepsManager manager) {
+    unawaited(manager.refreshWallet());
+  }
+
+  @override
+  void listener(
+    BuildContext context,
+    StepsManager manager,
+    StepsEffect effect,
+  ) {
     effect.whenOrNull(
       () => {},
       refreshPagination: (period) {
@@ -92,24 +104,32 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       tourId: 'tour_steps',
       steps: _stepsTourSteps(context),
       child: Scaffold(
-      backgroundColor: context.colors.softGray,
-      body: DefaultRefreshIndicator(
-        notificationPredicate: (notification) => notification.depth == 1,
-        edgeOffset: context.topPadding + kToolbarHeight,
-        onRefresh: () async => manager.fetchDataForPeriod(state.period, manager.currentOffset, showLoading: true),
-        child: _TabBarWrapper(
-          manager: manager,
-          state: state,
-          stepValue: stepValue,
-          pedometerService: pedometerService,
-          screenshotControllers: _screenshotControllers,
-          dailyShareAnchorKey: dailyShareAnchorKey,
-          weeklyShareAnchorKey: weeklyShareAnchorKey,
-          monthlyShareAnchorKey: monthlyShareAnchorKey,
-          onShowActionsSheet: () => _showActionsSheet(context, manager),
-          onShowEditStepGoalSheet: () => _showEditStepGoalSheet(context, manager),
+        backgroundColor: context.colors.softGray,
+        body: DefaultRefreshIndicator(
+          notificationPredicate: (notification) => notification.depth == 1,
+          edgeOffset: context.topPadding + kToolbarHeight,
+          onRefresh: () => Future.wait([
+            manager.fetchDataForPeriod(
+              state.period,
+              manager.currentOffset,
+              showLoading: true,
+            ),
+            manager.refreshWallet(),
+          ]),
+          child: _TabBarWrapper(
+            manager: manager,
+            state: state,
+            stepValue: stepValue,
+            pedometerService: pedometerService,
+            screenshotControllers: _screenshotControllers,
+            dailyShareAnchorKey: dailyShareAnchorKey,
+            weeklyShareAnchorKey: weeklyShareAnchorKey,
+            monthlyShareAnchorKey: monthlyShareAnchorKey,
+            onShowActionsSheet: () => _showActionsSheet(context, manager),
+            onShowEditStepGoalSheet: () =>
+                _showEditStepGoalSheet(context, manager),
+          ),
         ),
-      ),
       ),
     );
   }
@@ -125,7 +145,10 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         description: 'ft_steps_desc'.tr(),
         bullets: [
           FeatureTourBullet(mi(Icons.today_rounded), 'ft_steps_b1'.tr()),
-          FeatureTourBullet(mi(Icons.calendar_view_week_rounded), 'ft_steps_b2'.tr()),
+          FeatureTourBullet(
+            mi(Icons.calendar_view_week_rounded),
+            'ft_steps_b2'.tr(),
+          ),
         ],
       ),
     ];
@@ -169,7 +192,9 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
       backgroundColor: Colors.transparent,
       builder: (_) => EditStepGoalPage(
         initialValue: stepValue.toInt(),
-        onSave: (value) => manager.updateNorm(NormsRequest(metric: 'Step', value: value.toDouble())),
+        onSave: (value) => manager.updateNorm(
+          NormsRequest(metric: 'Step', value: value.toDouble()),
+        ),
       ),
     );
   }
@@ -201,8 +226,16 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
         return ActionsPage(
           onTapDelete:
               manager.state.period == 0 &&
-                  DateTime(fromDate.year, fromDate.month, fromDate.day).toIso8601String() ==
-                      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).toIso8601String()
+                  DateTime(
+                        fromDate.year,
+                        fromDate.month,
+                        fromDate.day,
+                      ).toIso8601String() ==
+                      DateTime(
+                        DateTime.now().year,
+                        DateTime.now().month,
+                        DateTime.now().day,
+                      ).toIso8601String()
               ? () {
                   sheetContext.router.maybePop();
                   _showConfirmDialog(context, manager);
@@ -211,7 +244,8 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
           onTapShare: () {
             sheetContext.router.maybePop();
             WidgetsBinding.instance.addPostFrameCallback((_) async {
-              final image = await _screenshotControllers[manager.state.period].capture();
+              final image = await _screenshotControllers[manager.state.period]
+                  .capture();
               if (image == null) return;
 
               GlobalKey shareAnchorKey;
@@ -231,11 +265,16 @@ class StepsPage extends Managed<StepsManager, StepsState, StepsEffect> {
 
               final Rect origin = _getWidgetRect(context, shareAnchorKey);
               final directory = await getTemporaryDirectory();
-              final imagePath = await File('${directory.path}/screenshot.png').create();
+              final imagePath = await File(
+                '${directory.path}/screenshot.png',
+              ).create();
               await imagePath.writeAsBytes(image);
 
               await SharePlus.instance.share(
-                ShareParams(files: [XFile(imagePath.path)], sharePositionOrigin: origin),
+                ShareParams(
+                  files: [XFile(imagePath.path)],
+                  sharePositionOrigin: origin,
+                ),
               );
             });
           },
@@ -277,13 +316,18 @@ class _TabBarWrapper extends StatefulWidget {
   State<_TabBarWrapper> createState() => _TabBarWrapperState();
 }
 
-class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProviderStateMixin {
+class _TabBarWrapperState extends State<_TabBarWrapper>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.state.period);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.state.period,
+    );
     _tabController.addListener(_handleTabChange);
   }
 
@@ -308,20 +352,34 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned.fill(child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill)),
+        Positioned.fill(
+          child: Image.asset(Assets.icons.background.path, fit: BoxFit.fill),
+        ),
         SafeArea(
           child: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 42, left: 20, right: 20),
-                child: Align(alignment: Alignment.centerLeft, child: Strings.steps.text(32, 36, 700)),
+                child: Row(
+                  children: [
+                    Expanded(child: Strings.steps.text(32, 36, 700)),
+                    const SizedBox(width: 12),
+                    CoinBalanceChip(
+                      balance: widget.state.coinBalance,
+                      onTap: () => context.router.push(WalletRoute()),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               Container(
                 key: TourAnchors.stepsPeriod,
                 height: 40,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 child: TabBar(
                   controller: _tabController,
                   indicatorPadding: const EdgeInsets.all(2),
@@ -336,11 +394,17 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
                   // One line, shrunk if needed — a long label (e.g. Russian)
                   // must never wrap mid-word inside the 40px segment.
                   tabs: [
-                    for (final label in [Strings.daily, Strings.weekly, Strings.monthly])
+                    for (final label in [
+                      Strings.daily,
+                      Strings.weekly,
+                      Strings.monthly,
+                    ])
                       Tab(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: label.text(14, 18, 500).copyWith(maxLines: 1, softWrap: false),
+                          child: label
+                              .text(14, 18, 500)
+                              .copyWith(maxLines: 1, softWrap: false),
                         ),
                       ),
                   ],
@@ -350,7 +414,11 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
-                  children: [_buildDailyTab(), _buildWeeklyTab(), _buildMonthlyTab()],
+                  children: [
+                    _buildDailyTab(),
+                    _buildWeeklyTab(),
+                    _buildMonthlyTab(),
+                  ],
                 ),
               ),
             ],
@@ -363,9 +431,14 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
   Widget _buildDailyTab() {
     final isToday = widget.state.period == 0 && widget.state.dailyOffset == 0;
 
-    final shouldShowTodayInitialShimmer = isToday && !widget.state.hasLoadedTodayInitial && widget.state.isDailyLoading;
+    final shouldShowTodayInitialShimmer =
+        isToday &&
+        !widget.state.hasLoadedTodayInitial &&
+        widget.state.isDailyLoading;
 
-    final dailyLoading = isToday ? shouldShowTodayInitialShimmer : widget.state.isDailyLoading;
+    final dailyLoading = isToday
+        ? shouldShowTodayInitialShimmer
+        : widget.state.isDailyLoading;
 
     if (!isToday) {
       final currentSteps = widget.state.dailyDisplayStepCount;
@@ -430,7 +503,8 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
 
   Widget _buildWeeklyTab() {
     final weeklyLoading =
-        widget.state.isWeeklyLoading || (widget.state.period == 1 && widget.state.weeklySteps.isEmpty);
+        widget.state.isWeeklyLoading ||
+        (widget.state.period == 1 && widget.state.weeklySteps.isEmpty);
 
     return _KeepAliveTabContent(
       fitnessTrackWidget: Screenshot(
@@ -455,7 +529,8 @@ class _TabBarWrapperState extends State<_TabBarWrapper> with SingleTickerProvide
 
   Widget _buildMonthlyTab() {
     final monthlyLoading =
-        widget.state.isMonthlyLoading || (widget.state.period == 2 && widget.state.monthlySteps.isEmpty);
+        widget.state.isMonthlyLoading ||
+        (widget.state.period == 2 && widget.state.monthlySteps.isEmpty);
 
     return _KeepAliveTabContent(
       fitnessTrackWidget: Screenshot(
@@ -494,27 +569,11 @@ class _KeepAliveTabContent extends StatefulWidget {
   State<_KeepAliveTabContent> createState() => _KeepAliveTabContentState();
 }
 
-class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with AutomaticKeepAliveClientMixin {
+class _KeepAliveTabContentState extends State<_KeepAliveTabContent>
+    with AutomaticKeepAliveClientMixin {
   /// Whether the ranking below shows the coin board (true) or the step board
   /// (false). Local to the tab — it's a view switch, not app state.
   bool _byCoins = false;
-
-  /// The coin board divides steps by the server's steps-per-coin rule; it is
-  /// read once when the board is first opened (the wallet may not have been
-  /// visited yet in this session).
-  bool _rateSynced = false;
-
-  Future<void> _showCoinBoard() async {
-    setState(() => _byCoins = true);
-    if (_rateSynced) return;
-    _rateSynced = true;
-    try {
-      await getIt<CoinsRepo>().getWallet();
-      if (mounted) setState(() {});
-    } catch (_) {
-      _rateSynced = false;
-    }
-  }
 
   @override
   bool get wantKeepAlive => true;
@@ -524,7 +583,9 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
     super.build(context);
 
     return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: ClampingScrollPhysics(),
+      ),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -540,7 +601,10 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          sliver: LeaderboardSection(paginationService: widget.paginationService, byCoins: _byCoins),
+          sliver: LeaderboardSection(
+            paginationService: widget.paginationService,
+            byCoins: _byCoins,
+          ),
         ),
       ],
     );
@@ -557,8 +621,18 @@ class _KeepAliveTabContentState extends State<_KeepAliveTabContent> with Automat
       ),
       child: Row(
         children: [
-          _rankTab(context, label: 'rank_by_steps'.tr(), selected: !_byCoins, onTap: () => setState(() => _byCoins = false)),
-          _rankTab(context, label: 'rank_by_coins'.tr(), selected: _byCoins, onTap: _showCoinBoard),
+          _rankTab(
+            context,
+            label: 'rank_by_steps'.tr(),
+            selected: !_byCoins,
+            onTap: () => setState(() => _byCoins = false),
+          ),
+          _rankTab(
+            context,
+            label: 'rank_by_coins'.tr(),
+            selected: _byCoins,
+            onTap: () => setState(() => _byCoins = true),
+          ),
         ],
       ),
     );

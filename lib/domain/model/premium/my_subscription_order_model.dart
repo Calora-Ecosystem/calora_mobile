@@ -25,3 +25,42 @@ sealed class MySubscriptionOrderModel with _$MySubscriptionOrderModel {
         .toList();
   }
 }
+
+extension SubscriptionOrderStatus on MySubscriptionOrderModel {
+  static const _closed = {
+    'paid',
+    'completed',
+    'success',
+    'succeeded',
+    'cancelled',
+    'canceled',
+    'failed',
+    'expired',
+    'refunded',
+    'rejected',
+    'deleted',
+  };
+
+  String get _status => status?.trim().toLowerCase() ?? '';
+
+  bool get isPending => _status == 'pending';
+
+  bool get isOpen => !_closed.contains(_status);
+
+  DateTime? get createdAtTime => DateTime.tryParse(createdAt ?? '');
+}
+
+extension SubscriptionOrders on Iterable<MySubscriptionOrderModel> {
+  MySubscriptionOrderModel? get pending =>
+      where((order) => order.isPending).newest ??
+      where((order) => order.isOpen).newest;
+
+  MySubscriptionOrderModel? get newest =>
+      fold<MySubscriptionOrderModel?>(null, (newest, order) {
+        final time = order.createdAtTime;
+        final newestTime = newest?.createdAtTime;
+        if (newest == null) return order;
+        if (time == null || newestTime == null) return newest;
+        return time.isAfter(newestTime) ? order : newest;
+      });
+}

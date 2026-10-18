@@ -4,20 +4,20 @@ import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
-import 'package:calora/presentation/common/automatic_tracking/automatick_tracking.dart';
 import 'package:calora/presentation/common/confirm/confirm_page.dart';
 import 'package:calora/presentation/profile_details/management/profile_detail_management.dart';
 import 'package:calora/presentation/profile_details/management/profile_detail_manager.dart';
+import 'package:calora/presentation/step_sources/step_tracking_tile.dart';
 import 'package:calora/widgets/app_bar/custom_app_bar.dart';
 import 'package:calora/widgets/premium/premium_entry_card.dart';
 import 'package:calora/widgets/social_button/social_button.dart';
-import 'package:calora/widgets/svg_buttons_row/svg_buttons_row.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
 class ProfileDetailPage
-    extends Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
+    extends
+        Managed<ProfileDetailManager, ProfileDetailState, ProfileDetailEffect> {
   final String userId;
 
   const ProfileDetailPage({required this.userId, super.key});
@@ -49,9 +49,9 @@ class ProfileDetailPage
         ),
       ),
       accountDeleted: () => context.router.replaceAll([AuthRoute()]),
-      deleteAccountFailed: () => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(Strings.deleteAccountFailed)),
-      ),
+      deleteAccountFailed: () => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(Strings.deleteAccountFailed))),
     );
   }
 
@@ -97,54 +97,11 @@ class ProfileDetailPage
                 const SizedBox(height: 16),
                 PremiumEntryCard(),
                 const SizedBox(height: 8),
-                Strings.automaticTracking.text(16, 20, 500).c(context.colors.textStrong),
+                Strings.automaticTracking
+                    .text(16, 20, 500)
+                    .c(context.colors.textStrong),
                 const SizedBox(height: 8),
-                SvgButtonsRow(
-                  isAppleHealthSelected: state.isAppleHealthSelected,
-                  isSamsungHealthSelected: state.isSamsungHealthSelected,
-                  isGarminSelected: state.isGarminSelected,
-                  isGoogleFitSelected: state.isAppleHealthSelected,
-                  onGoogleFitTap: () {
-                    showAutomaticTrackingSheet(
-                      context,
-                      onConnectTap: () {
-                        manager.onGoogleFitTap();
-                      },
-                      secondAsset: Assets.images.googleFit.image(),
-                      title: 'Google Fit',
-                    );
-                  },
-                  onAppleHealthTap: () {
-                    showAutomaticTrackingSheet(
-                      context,
-                      onConnectTap: () {
-                        manager.onAppleHealthTap();
-                      },
-                      secondAsset: Assets.images.iosHealth.image(),
-                      title: 'Apple Health',
-                    );
-                  },
-                  onGarminTap: () {
-                    showAutomaticTrackingSheet(
-                      context,
-                      onConnectTap: () {
-                        manager.onGarminTap();
-                      },
-                      secondAsset: Assets.images.garmin.image(),
-                      title: 'Garmin',
-                    );
-                  },
-                  onSamsungHealthTap: () {
-                    showAutomaticTrackingSheet(
-                      context,
-                      onConnectTap: () {
-                        manager.onSamsungHealthTap();
-                      },
-                      secondAsset: Assets.images.health.image(),
-                      title: 'Samsung Health',
-                    );
-                  },
-                ),
+                const StepTrackingTile(),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () => manager.logOutDialog(),
@@ -159,14 +116,18 @@ class ProfileDetailPage
                       children: [
                         Assets.icons.logout.svg(),
                         const SizedBox(width: 8),
-                        Strings.logOut.text(14, 16, 600).c(context.colors.errorBase),
+                        Strings.logOut
+                            .text(14, 16, 600)
+                            .c(context.colors.errorBase),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 GestureDetector(
-                  onTap: state.isDeletingAccount ? null : () => manager.deleteAccountDialog(),
+                  onTap: state.isDeletingAccount
+                      ? null
+                      : () => manager.deleteAccountDialog(),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
@@ -183,7 +144,9 @@ class ProfileDetailPage
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         else
-                          Strings.deleteAccount.text(14, 16, 600).c(context.colors.errorBase),
+                          Strings.deleteAccount
+                              .text(14, 16, 600)
+                              .c(context.colors.errorBase),
                       ],
                     ),
                   ),

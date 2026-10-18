@@ -1,9 +1,14 @@
 import 'package:calora/common/enums/subscription_plan_type.dart';
+import 'package:calora/common/service/premium_service.dart';
+import 'package:calora/common/service/revenuecat_service.dart';
+import 'package:calora/domain/model/premium/my_subscription.dart';
+import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/subscription_response_model.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/domain/repo/premium/premium_repo.dart';
 import 'package:calora/presentation/premium/management/premium_manager.dart';
+import 'package:calora/widgets/premium/premium_entry_card.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fixtures/premium_plans.dart';
@@ -80,7 +85,12 @@ void main() {
 
     setUp(() {
       repo = _FakePremiumRepo();
-      manager = PremiumManager(repo, _FakeCommonRepo());
+      manager = PremiumManager(
+        repo,
+        _FakeCommonRepo(),
+        _FakePremiumService(),
+        _FakeRevenueCatService(),
+      );
     });
 
     tearDown(() => manager.close());
@@ -117,12 +127,79 @@ void main() {
       expect(repo.orderedPlan, 'Premium');
       expect(repo.orderedPackageId, 3);
     });
+
+    test('a paid order is not shown as a pending purchase', () async {
+      repo.orders = const [
+        MySubscriptionOrderModel(id: 1, status: 'Paid', provider: 'Click'),
+        MySubscriptionOrderModel(id: 2, status: 'Cancelled', provider: 'Payme'),
+      ];
+      await manager.getMyOrders();
+      expect(manager.state.isPaymentPending, isFalse);
+      expect(manager.state.pendingOrder, isNull);
+    });
+
+    test('cancelling deletes the pending order, not the first one', () async {
+      repo.orders = const [
+        MySubscriptionOrderModel(id: 1, status: 'Paid'),
+        MySubscriptionOrderModel(id: 2, status: 'Pending'),
+      ];
+      await manager.getMyOrders();
+      expect(manager.state.isPaymentPending, isTrue);
+
+      await manager.deleteOrder();
+      expect(repo.deletedOrderId, 2);
+      expect(manager.state.isPaymentPending, isFalse);
+    });
+  });
+
+  group('PremiumEntryCard', () {
+    test('advertises the cheapest month of the Premium packages', () {
+      const yearly = PremiumPlanModel(id: 4, duration: 12, fee: 199000);
+      const monthly = PremiumPlanModel(id: 3, fee: 49000);
+      expect(
+        PremiumEntryCard.cheapestPerMonth(const [monthly, yearly]),
+        yearly,
+      );
+      expect(PremiumEntryCard.cheapestPerMonth(const [monthly]), monthly);
+      expect(PremiumEntryCard.cheapestPerMonth(const []), isNull);
+      expect(PremiumEntryCard.cheapestPerMonth(null), isNull);
+    });
+  });
+
+  group('external payment', () {
+    final endsAt = DateTime(2026, 11);
+
+    test('a Premium user has paid once the end date moves forward', () {
+      final before = MySubscription(isPremium: true, endsAt: endsAt);
+      expect(
+        PremiumManager.isExtended(
+          before,
+          MySubscription(isPremium: true, endsAt: DateTime(2026, 12)),
+        ),
+        isTrue,
+      );
+      expect(PremiumManager.isExtended(before, before), isFalse);
+      expect(
+        PremiumManager.isExtended(before, const MySubscription()),
+        isFalse,
+      );
+    });
   });
 }
 
 class _FakePremiumRepo implements PremiumRepo {
   String? orderedPlan;
   int? orderedPackageId;
+  List<MySubscriptionOrderModel> orders = const [];
+  int? deletedOrderId;
+
+  @override
+  Future<List<MySubscriptionOrderModel>> getMyOrders() async => orders;
+
+  @override
+  Future<void> deleteOrder({required int orderId}) async {
+    deletedOrderId = orderId;
+  }
 
   @override
   Future<SubscriptionResponseModel> orderSubscription({
@@ -141,6 +218,16 @@ class _FakePremiumRepo implements PremiumRepo {
 }
 
 class _FakeCommonRepo implements CommonRepo {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakePremiumService implements PremiumService {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeRevenueCatService implements RevenueCatService {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

@@ -1,127 +1,86 @@
-// lib/presentation/dashboard/widgets/health_sync_fix_dialog.dart
-
-import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/extensions/text_extensions.dart';
+import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/presentation/step_sources/step_connect.dart';
+import 'package:calora_steps/calora_steps.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-/// Shown when Health permission is granted but Health Connect is
-/// reporting ~0 steps because the user's primary tracker (Samsung
-/// Health, Mi Fitness, …) hasn't been configured to sync into it.
-///
-/// Offers three actions: open the source app so the user can flip the
-/// sync toggle, fall back to the device pedometer, or dismiss for now.
 class HealthSyncFixDialog extends StatelessWidget {
-  final String detectedApp;
-  final VoidCallback onOpenSourceApp;
-  final VoidCallback onUseSensorInstead;
-  final VoidCallback onDismiss;
-
   const HealthSyncFixDialog({
     super.key,
-    required this.detectedApp,
-    required this.onOpenSourceApp,
-    required this.onUseSensorInstead,
-    required this.onDismiss,
+    required this.tracker,
+    required this.onOpenTracker,
   });
+
+  final TrackerAppStatus tracker;
+  final VoidCallback onOpenTracker;
 
   static Future<void> show({
     required BuildContext context,
-    required String detectedApp,
-    required VoidCallback onOpenSourceApp,
-    required VoidCallback onUseSensorInstead,
-    required VoidCallback onDismiss,
+    required TrackerAppStatus tracker,
+    required VoidCallback onOpenTracker,
   }) {
-    return showDialog(
+    return showDialog<void>(
       context: context,
-      barrierDismissible: false,
-      builder: (_) => HealthSyncFixDialog(
-        detectedApp: detectedApp,
-        onOpenSourceApp: onOpenSourceApp,
-        onUseSensorInstead: onUseSensorInstead,
-        onDismiss: onDismiss,
-      ),
+      builder: (_) =>
+          HealthSyncFixDialog(tracker: tracker, onOpenTracker: onOpenTracker),
     );
-  }
-
-  String get _sourceAppName {
-    switch (detectedApp) {
-      case 'samsung_health':
-        return 'Samsung Health';
-      case 'mi_fitness':
-        return 'Mi Fitness';
-      default:
-        return Strings.fallbackFitnessApp;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.sync_problem,
-              color: Colors.orange,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            Strings.syncFixTitle,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            Strings.syncFixBody(sourceApp: _sourceAppName),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                onOpenSourceApp();
-              },
-              icon: const Icon(Icons.open_in_new, size: 18),
-              label: Text(
-                Strings.syncFixOpenApp(sourceApp: _sourceAppName),
+    final app = tracker.name;
+    return Dialog(
+      backgroundColor: context.colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(child: TrackerLogo(id: tracker.id, size: 56)),
+            const SizedBox(height: 16),
+            'steps_syncfix_title'
+                .tr(namedArgs: {'app': app})
+                .text(18, 24, 700)
+                .c(context.colors.textStrong)
+                .copyWith(textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            'steps_syncfix_body'
+                .tr(namedArgs: {'app': app})
+                .text(14, 20, 400)
+                .c(context.colors.textSub)
+                .copyWith(textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: context.colors.accentGreenWhite,
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: trackerSetupHint(
+                tracker,
+              ).text(13, 19, 500).c(context.colors.textStrong),
             ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
+            const SizedBox(height: 20),
+            Button(
+              text: 'steps_syncfix_open'.tr(namedArgs: {'app': app}),
               onPressed: () {
-                Navigator.pop(context);
-                onUseSensorInstead();
+                Navigator.of(context).pop();
+                onOpenTracker();
               },
-              child: Text(Strings.syncFixUseSensor),
             ),
-          ),
-          const SizedBox(height: 4),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onDismiss();
-            },
-            child: Text(Strings.syncFixLater),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Button(
+              text: 'steps_action_done'.tr(),
+              type: ButtonType.secondary,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:auto_route/auto_route.dart';
@@ -15,13 +17,17 @@ import 'package:calora/presentation/dashboard/management/dashboard_manager.dart'
 import 'package:calora/presentation/dashboard/widgets/battery_optimization_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_connect_hint_dialog.dart';
 import 'package:calora/presentation/dashboard/widgets/health_sync_fix_dialog.dart';
+import 'package:calora/presentation/dashboard/widgets/step_tracker_connect_sheet.dart';
 import 'package:calora/presentation/report/weekly_report_story.dart';
+import 'package:calora_steps/calora_steps.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:management/management.dart';
 
 @RoutePage()
-class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardEffect> {
+class DashboardPage
+    extends Managed<DashboardManager, DashboardState, DashboardEffect> {
   const DashboardPage({super.key});
 
   @override
@@ -49,9 +55,11 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   ) async {
     try {
       await PermissionBootstrap.instance.ensureRequested();
-      // Activity permission is granted by now, so this won't re-prompt; it
-      // also starts the Health Connect permission flow when applicable.
       manager.initialize();
+      await manager.ready;
+      if (Platform.isAndroid && context.mounted) {
+        await _offerTrackerConnect(context, manager);
+      }
       if (context.mounted) await _promptBatteryWhitelist(context, manager);
     } finally {
       // Always unblock the tour, even if a prompt threw.
@@ -60,6 +68,43 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
     // Last week's report, once per week — after every first-run prompt so it
     // never stacks on a system dialog (skipped while the tour is pending).
     if (context.mounted) await WeeklyReportStory.maybeShow(context);
+  }
+
+  Future<void> _offerTrackerConnect(
+    BuildContext context,
+    DashboardManager manager,
+  ) async {
+    final trackerId = manager.takeTrackerOffer();
+    if (trackerId == null) return;
+    final accepted = await StepTrackerConnectSheet.show(
+      context,
+      tracker: manager.trackerById(trackerId),
+      availability: manager.stepStatus.healthConnect,
+    );
+    if (!accepted) {
+      await manager.onUserDeclinedHealthPermission();
+      return;
+    }
+    final outcome = await manager.onUserAcceptedHealthPermission();
+    if (outcome == null || !context.mounted) return;
+    final tracker = outcome.trackerNeedsSetup;
+    if (tracker != null) {
+      await HealthSyncFixDialog.show(
+        context: context,
+        tracker: tracker,
+        onOpenTracker: () => manager.onOpenHealthApp(tracker.id),
+      );
+      return;
+    }
+    final message = switch (outcome.result) {
+      HealthConnectConnectResult.connected => 'steps_connect_done'.tr(),
+      HealthConnectConnectResult.denied => 'steps_connect_denied'.tr(),
+      _ => null,
+    };
+    if (message == null) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   /// Battery-optimization whitelist prompt (Android, first run only) so the
@@ -75,24 +120,28 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
   }
 
   @override
-  void listener(BuildContext context, DashboardManager manager, DashboardEffect effect) {
+  void listener(
+    BuildContext context,
+    DashboardManager manager,
+    DashboardEffect effect,
+  ) {
     effect.when(
       forceLogout: () => context.router.replaceAll([AuthRoute()]),
       requestHealthPermission: (detectedApp) {
         HealthConnectHintDialog.show(
           context: context,
           detectedApp: detectedApp,
-          onAccept: () => manager.onUserAcceptedHealthPermission(),
+          onAccept: () => unawaited(manager.onUserAcceptedHealthPermission()),
           onDecline: () => manager.onUserDeclinedHealthPermission(),
         );
       },
       requestHealthSyncFix: (detectedApp) {
+        final tracker = manager.trackerById(detectedApp);
+        if (tracker == null) return;
         HealthSyncFixDialog.show(
           context: context,
-          detectedApp: detectedApp,
-          onOpenSourceApp: () => manager.onOpenHealthApp(detectedApp),
-          onUseSensorInstead: () => manager.onUseSensorInstead(),
-          onDismiss: () {},
+          tracker: tracker,
+          onOpenTracker: () => manager.onOpenHealthApp(detectedApp),
         );
       },
     );
@@ -104,116 +153,124 @@ class DashboardPage extends Managed<DashboardManager, DashboardState, DashboardE
       onVisible: () => _runFirstRunPermissionFlow(context, manager),
       child: LocaleScopedTabs(
         builder: (context, onTabsRouter) => AutoTabsScaffold(
-      routes: [HomeRoute(), CaloriesRoute(), CourseRoute(), StepsRoute(), ProfileRoute()],
-      bottomNavigationBuilder: (context, tabRouter) {
-        final tabsRouter = AutoTabsRouter.of(context);
-        onTabsRouter(tabsRouter);
-        return ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.colors.transparent,
-                border: Border(top: BorderSide(color: context.colors.strokeSoft)),
-              ),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  splashFactory: NoSplash.splashFactory,
-                  highlightColor: Colors.transparent,
-                ),
-                child: BottomNavigationBar(
-                  backgroundColor: context.colors.white,
-                  unselectedLabelStyle: TextStyle(
-                    fontSize: 10,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.textSub,
+          routes: [
+            HomeRoute(),
+            CaloriesRoute(),
+            CourseRoute(),
+            StepsRoute(),
+            ProfileRoute(),
+          ],
+          bottomNavigationBuilder: (context, tabRouter) {
+            final tabsRouter = AutoTabsRouter.of(context);
+            onTabsRouter(tabsRouter);
+            return ClipRRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: context.colors.transparent,
+                    border: Border(
+                      top: BorderSide(color: context.colors.strokeSoft),
+                    ),
                   ),
-                  selectedLabelStyle: TextStyle(
-                    fontSize: 10,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.accentSub,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      splashFactory: NoSplash.splashFactory,
+                      highlightColor: Colors.transparent,
+                    ),
+                    child: BottomNavigationBar(
+                      backgroundColor: context.colors.white,
+                      unselectedLabelStyle: TextStyle(
+                        fontSize: 10,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w500,
+                        color: context.colors.textSub,
+                      ),
+                      selectedLabelStyle: TextStyle(
+                        fontSize: 10,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w500,
+                        color: context.colors.accentSub,
+                      ),
+                      type: BottomNavigationBarType.fixed,
+                      items: [
+                        _buildBottomNavigationBarItem(
+                          icon: Assets.icons.icHome.svg(
+                            colorFilter: ColorFilter.mode(
+                              tabsRouter.activeIndex == 0
+                                  ? context.colors.accentSub
+                                  : context.colors.textSub,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          title: Strings.home,
+                        ),
+                        _buildBottomNavigationBarItem(
+                          icon: Assets.icons.icCalories.svg(
+                            colorFilter: ColorFilter.mode(
+                              tabsRouter.activeIndex == 1
+                                  ? context.colors.accentSub
+                                  : context.colors.textSub,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          title: Strings.calories,
+                        ),
+                        _buildBottomNavigationBarItem(
+                          icon: Assets.icons.icVideoPlayer.svg(
+                            colorFilter: ColorFilter.mode(
+                              tabsRouter.activeIndex == 2
+                                  ? context.colors.accentSub
+                                  : context.colors.textSub,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          title: Strings.course,
+                        ),
+                        _buildBottomNavigationBarItem(
+                          icon: Assets.icons.icFootwear.svg(
+                            colorFilter: ColorFilter.mode(
+                              tabsRouter.activeIndex == 3
+                                  ? context.colors.accentSub
+                                  : context.colors.textSub,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          title: Strings.steps,
+                        ),
+                        _buildBottomNavigationBarItem(
+                          icon: Assets.icons.icPersonNeutral.svg(
+                            colorFilter: ColorFilter.mode(
+                              tabsRouter.activeIndex == 4
+                                  ? context.colors.accentSub
+                                  : context.colors.textSub,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          title: Strings.profile,
+                        ),
+                      ],
+                      currentIndex: tabsRouter.activeIndex,
+                      selectedItemColor: context.colors.accentSub,
+                      unselectedItemColor: context.colors.iconSub,
+                      selectedFontSize: 10,
+                      onTap: (index) {
+                        tabsRouter.setActiveIndex(index);
+                        // Tab indexes match the `routes` list above:
+                        // 0 Home, 1 Calories, 2 Course, 3 Steps, 4 Profile.
+                        // Tapping Course should always trigger a re-fetch so
+                        // a freshly-changed app language reflects in the
+                        // server-localized course titles.
+                        if (index == 2) {
+                          getIt<CourseTabSignal>().fire();
+                        }
+                      },
+                    ),
                   ),
-                  type: BottomNavigationBarType.fixed,
-                  items: [
-                    _buildBottomNavigationBarItem(
-                      icon: Assets.icons.icHome.svg(
-                        colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 0
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      title: Strings.home,
-                    ),
-                    _buildBottomNavigationBarItem(
-                      icon: Assets.icons.icCalories.svg(
-                        colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 1
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      title: Strings.calories,
-                    ),
-                    _buildBottomNavigationBarItem(
-                      icon: Assets.icons.icVideoPlayer.svg(
-                        colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 2
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      title: Strings.course,
-                    ),
-                    _buildBottomNavigationBarItem(
-                      icon: Assets.icons.icFootwear.svg(
-                        colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 3
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      title: Strings.steps,
-                    ),
-                    _buildBottomNavigationBarItem(
-                      icon: Assets.icons.icPersonNeutral.svg(
-                        colorFilter: ColorFilter.mode(
-                          tabsRouter.activeIndex == 4
-                              ? context.colors.accentSub
-                              : context.colors.textSub,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      title: Strings.profile,
-                    ),
-                  ],
-                  currentIndex: tabsRouter.activeIndex,
-                  selectedItemColor: context.colors.accentSub,
-                  unselectedItemColor: context.colors.iconSub,
-                  selectedFontSize: 10,
-                  onTap: (index) {
-                    tabsRouter.setActiveIndex(index);
-                    // Tab indexes match the `routes` list above:
-                    // 0 Home, 1 Calories, 2 Course, 3 Steps, 4 Profile.
-                    // Tapping Course should always trigger a re-fetch so
-                    // a freshly-changed app language reflects in the
-                    // server-localized course titles.
-                    if (index == 2) {
-                      getIt<CourseTabSignal>().fire();
-                    }
-                  },
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          },
         ),
       ),
     );

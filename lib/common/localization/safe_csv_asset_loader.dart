@@ -19,20 +19,41 @@ import 'package:flutter/services.dart';
 /// and normalizes any Windows/CR line endings first, so parsing never depends
 /// on row ordering or the editor that last touched the file.
 class SafeCsvAssetLoader extends AssetLoader {
+  SafeCsvAssetLoader({
+    this.extraPath = 'assets/localization/translations_extra.csv',
+  });
+
+  final String? extraPath;
+
   CSVParser? _parser;
+  CSVParser? _extraParser;
+  bool _extraLoaded = false;
 
   @override
   Future<Map<String, dynamic>> load(String path, Locale locale) async {
-    if (_parser == null) {
-      final raw = await rootBundle.loadString(path);
-      final normalized = raw.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
-      _parser = CSVParser(
-        normalized,
-        fieldDelimiter: ',',
-        eol: '\n',
-        useAutodetect: false,
-      );
+    _parser ??= parserFor(await rootBundle.loadString(path));
+    if (!_extraLoaded) {
+      _extraLoaded = true;
+      final extra = extraPath;
+      if (extra != null) {
+        try {
+          _extraParser = parserFor(await rootBundle.loadString(extra));
+        } catch (_) {
+          _extraParser = null;
+        }
+      }
     }
-    return _parser!.getLanguageMap(locale.toString());
+    final key = locale.toString();
+    return {
+      ...?_extraParser?.getLanguageMap(key),
+      ..._parser!.getLanguageMap(key),
+    };
   }
+
+  static CSVParser parserFor(String raw) => CSVParser(
+    raw.replaceAll('\r\n', '\n').replaceAll('\r', '\n'),
+    fieldDelimiter: ',',
+    eol: '\n',
+    useAutodetect: false,
+  );
 }

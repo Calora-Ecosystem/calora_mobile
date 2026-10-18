@@ -12,9 +12,12 @@ abstract class StepsState with _$StepsState {
     @Default([]) List<StepsWithMetricsRequest> dailySteps,
     @Default([]) List<StepsWithMetricsRequest> weeklySteps,
     @Default([]) List<StepsWithMetricsRequest> monthlySteps,
-    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0)) MetricsRequest dailyMetrics,
-    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0)) MetricsRequest weeklyMetrics,
-    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0)) MetricsRequest monthlyMetrics,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0))
+    MetricsRequest dailyMetrics,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0))
+    MetricsRequest weeklyMetrics,
+    @Default(MetricsRequest(foots: 0, distance: 0, kcal: 0, duration: 0))
+    MetricsRequest monthlyMetrics,
     @Default([]) List<double> dailyPrimaryValues,
     @Default([]) List<double> weeklyPrimaryValues,
     @Default([]) List<double> monthlyPrimaryValues,
@@ -43,6 +46,7 @@ abstract class StepsState with _$StepsState {
     @Default(false) bool isWeeklyLoading,
     @Default(false) bool isMonthlyLoading,
     @Default(false) bool hasLoadedTodayInitial,
+    int? coinBalance,
   }) = _StepsState;
 
   const StepsState._();
@@ -77,5 +81,6 @@ abstract class StepsState with _$StepsState {
 @freezed
 class StepsEffect with _$StepsEffect {
   const factory StepsEffect() = _StepsEffect;
-  const factory StepsEffect.refreshPagination({required int period}) = _RefreshPagination;
+  const factory StepsEffect.refreshPagination({required int period}) =
+      _RefreshPagination;
 }

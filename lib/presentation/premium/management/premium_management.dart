@@ -53,6 +53,8 @@ abstract class PremiumState with _$PremiumState {
   List<PlanModel> get purchasablePlans => isIap
       ? plans.where((plan) => iapPrices.containsKey(plan.id)).toList()
       : plans;
+
+  MySubscriptionOrderModel? get pendingOrder => myOrders.pending;
 }
 
 @freezed

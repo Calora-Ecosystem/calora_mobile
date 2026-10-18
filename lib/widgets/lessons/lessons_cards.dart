@@ -5,10 +5,10 @@ import 'package:calora/common/widgets/loading/shimmer.dart';
 import 'package:calora/common/widgets/rating/rating_stars.dart';
 import 'package:calora/common/widgets/snack_bar/custom_snack_bar.dart';
 import 'package:calora/domain/model/workout/workout_request.dart';
-import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
 import 'package:calora/presentation/lessons/management/lessons_manager.dart';
 import 'package:calora/widgets/lessons/lesson_card.dart' show LessonCard;
+import 'package:calora/widgets/premium/premium_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
 
@@ -25,9 +25,9 @@ class LessonsCards extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final bool isUserPremium = context.read<AppManager>().state.isUserPremium;
+  Widget build(BuildContext context) => PremiumBuilder(builder: _buildList);
 
+  Widget _buildList(BuildContext context, bool isUserPremium) {
     final int itemCount = isLoading && workouts.isEmpty ? 5 : workouts.length;
 
     return ListView.separated(
@@ -35,9 +35,12 @@ class LessonsCards extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: itemCount,
       itemBuilder: (context, index) {
-        final int playableIndex = workouts.isNotEmpty ? nextPlayableIndex(workouts) : 0;
+        final int playableIndex = workouts.isNotEmpty
+            ? nextPlayableIndex(workouts)
+            : 0;
         final bool lockedByPremium = !isUserPremium && index >= 3;
-        final bool lockedByProgress = workouts.isNotEmpty && index > playableIndex;
+        final bool lockedByProgress =
+            workouts.isNotEmpty && index > playableIndex;
         final bool visualLocked = lockedByPremium;
 
         final WorkoutRequest workout = isLoading && workouts.isEmpty
@@ -73,19 +76,16 @@ class LessonsCards extends StatelessWidget {
                 return;
               }
               context.router
-                  .push(
-                    TasksRoute(level: level, workout: workout),
-                  )
+                  .push(TasksRoute(level: level, workout: workout))
                   .then((_) {
                     if (context.mounted) {
-                      context.read<LessonsManager>().getWorkout(workout.courseId);
+                      context.read<LessonsManager>().getWorkout(
+                        workout.courseId,
+                      );
                     }
                   });
             },
-            child: LessonCard(
-              isLocked: visualLocked,
-              workout: workout,
-            ),
+            child: LessonCard(isLocked: visualLocked, workout: workout),
           ),
         );
       },
@@ -96,7 +96,9 @@ class LessonsCards extends StatelessWidget {
   }
 
   int nextPlayableIndex(List<WorkoutRequest> workouts) {
-    final i = workouts.indexWhere((w) => !w.isDone && w.doneItems < w.totalItems);
+    final i = workouts.indexWhere(
+      (w) => !w.isDone && w.doneItems < w.totalItems,
+    );
     return i == -1 ? workouts.length - 1 : i;
   }
 

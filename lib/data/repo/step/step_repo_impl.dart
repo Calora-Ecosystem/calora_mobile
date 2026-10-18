@@ -1,8 +1,6 @@
 import 'dart:developer';
 
 import 'package:calora/common/base/step_ledger_db.dart';
-import 'package:calora/common/base/step_ledger_store.dart';
-import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/data/api/steps_api.dart';
 import 'package:calora/domain/model/dailies/steps_stat.dart';
 import 'package:calora/domain/model/norms/norms.dart';
@@ -10,6 +8,7 @@ import 'package:calora/domain/model/pagination/paginated_response.dart';
 import 'package:calora/domain/model/step/metrics_request.dart';
 import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
+import 'package:calora_steps/calora_steps.dart';
 import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import 'package:injectable/injectable.dart';
@@ -22,13 +21,14 @@ class StepRepoImpl extends StepRepo {
 
   bool _stepsAuthorized = false;
 
-  bool _extendedAuthorized = false;
+  static bool get _isAndroid => defaultTargetPlatform == TargetPlatform.android;
 
   StepRepoImpl(this._stepsApi) {
     _initHealth();
   }
 
   Future<void> _initHealth() async {
+    if (_isAndroid) return;
     try {
       if (!kIsWeb) {
         await _health.configure();
@@ -64,7 +64,41 @@ class StepRepoImpl extends StepRepo {
       to: to,
     );
 
+    if (_isAndroid) return _mergeWithDeviceHistory(response, from, to);
     return _mergeWithHealthHistory(response, from, to);
+  }
+
+  Future<List<StepsWithMetricsRequest>> _mergeWithDeviceHistory(
+    List<StepsWithMetricsRequest> backend,
+    DateTime from,
+    DateTime to,
+  ) async {
+    try {
+      final device = await CaloraSteps.history(days: 31);
+      if (device.isEmpty) return backend;
+      final first = _dayKeyOf(from);
+      final last = _dayKeyOf(to);
+      final byDay = <String, StepsWithMetricsRequest>{
+        for (final e in backend) _dayKeyOf(e.date): e,
+      };
+      device.forEach((key, steps) {
+        if (key.compareTo(first) < 0 || key.compareTo(last) > 0) return;
+        final existing = byDay[key];
+        if (steps > (existing?.value.toInt() ?? 0)) {
+          byDay[key] =
+              (existing ??
+                      StepsWithMetricsRequest(
+                        date: DateTime.parse(key),
+                        value: 0,
+                      ))
+                  .copyWith(value: steps.toDouble());
+        }
+      });
+      return byDay.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+    } catch (e) {
+      log('[Steps] device history merge failed, using backend only: $e');
+      return backend;
+    }
   }
 
   /// Merges the backend daily-step history with Health Connect's per-day
@@ -88,7 +122,11 @@ class StepRepoImpl extends StepRepo {
       final startDay = DateTime(from.year, from.month, from.day);
       final today = DateTime(now.year, now.month, now.day);
       final tomorrow = today.add(const Duration(days: 1));
-      var endExclusive = DateTime(to.year, to.month, to.day).add(const Duration(days: 1));
+      var endExclusive = DateTime(
+        to.year,
+        to.month,
+        to.day,
+      ).add(const Duration(days: 1));
       if (endExclusive.isAfter(tomorrow)) endExclusive = tomorrow; // no future
       if (!endExclusive.isAfter(startDay)) return backend;
 
@@ -129,9 +167,13 @@ class StepRepoImpl extends StepRepo {
         final existing = byDay[key];
         final backendVal = existing?.value.toInt() ?? 0;
         if (hc > backendVal) {
-          byDay[key] = (existing ??
-                  StepsWithMetricsRequest(date: DateTime.parse(key), value: 0))
-              .copyWith(value: hc.toDouble());
+          byDay[key] =
+              (existing ??
+                      StepsWithMetricsRequest(
+                        date: DateTime.parse(key),
+                        value: 0,
+                      ))
+                  .copyWith(value: hc.toDouble());
         }
       });
 
@@ -150,7 +192,10 @@ class StepRepoImpl extends StepRepo {
       '${d.day.toString().padLeft(2, '0')}';
 
   @override
-  Future<MetricsRequest> getUserMetrics({required String from, required String to}) async {
+  Future<MetricsRequest> getUserMetrics({
+    required String from,
+    required String to,
+  }) async {
     final response = await _stepsApi.getUserMetrics(from: from, to: to);
     return response;
   }
@@ -163,7 +208,12 @@ class StepRepoImpl extends StepRepo {
     int take = 20,
   }) async {
     final datePeriod = getDatePeriods(period, offset);
-    final response = await _stepsApi.getStats(datePeriod['from']!, datePeriod['to']!, skip, take);
+    final response = await _stepsApi.getStats(
+      datePeriod['from']!,
+      datePeriod['to']!,
+      skip,
+      take,
+    );
     return response;
   }
 
@@ -175,8 +225,7 @@ class StepRepoImpl extends StepRepo {
     required String metric,
     required int value,
     DateTime? date,
-  }) =>
-      _stepsApi.sendDailyData(metric: metric, value: value, date: date);
+  }) => _stepsApi.sendDailyData(metric: metric, value: value, date: date);
 
   @override
   Future<void> sendStepDataDateRange({
@@ -195,27 +244,26 @@ class StepRepoImpl extends StepRepo {
 
   @override
   Future<bool> ensureHealthAuthorized() async {
+    if (_isAndroid) return hasHealthPermission();
     if (await hasHealthPermission()) return true;
     return requestHealthPermission();
   }
 
   @override
   Future<bool> hasHealthPermission() async {
+    if (_isAndroid) {
+      return (await CaloraSteps.status()).healthConnectConnected;
+    }
     if (_stepsAuthorized) return true;
 
     try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        final status = await _health.getHealthConnectSdkStatus();
-        if (status != HealthConnectSdkStatus.sdkAvailable) {
-          log('[Health] Health Connect unavailable: $status');
-          return false;
-        }
-      }
-
       const types = [HealthDataType.STEPS];
       const permissions = [HealthDataAccess.READ];
 
-      final already = await _health.hasPermissions(types, permissions: permissions);
+      final already = await _health.hasPermissions(
+        types,
+        permissions: permissions,
+      );
       if (already == true) {
         _stepsAuthorized = true;
         return true;
@@ -229,21 +277,19 @@ class StepRepoImpl extends StepRepo {
 
   @override
   Future<bool> requestHealthPermission() async {
+    if (_isAndroid) {
+      final result = await CaloraSteps.connectHealthConnect();
+      return result == HealthConnectConnectResult.connected;
+    }
     try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        final status = await _health.getHealthConnectSdkStatus();
-        if (status != HealthConnectSdkStatus.sdkAvailable) {
-          log('[Health] Health Connect unavailable on request: $status');
-          return false;
-        }
-      }
-
       const types = [HealthDataType.STEPS];
       const permissions = [HealthDataAccess.READ];
 
-      final granted = await _health.requestAuthorization(types, permissions: permissions);
+      final granted = await _health.requestAuthorization(
+        types,
+        permissions: permissions,
+      );
       _stepsAuthorized = granted;
-      if (granted) await ensureBackgroundReadAuthorized();
       return granted;
     } catch (e) {
       log('[Health] requestHealthPermission error: $e');
@@ -251,42 +297,14 @@ class StepRepoImpl extends StepRepo {
     }
   }
 
-  /// Guards [ensureBackgroundReadAuthorized] against re-running its
-  /// channel round-trips on every health-mode activation in one process.
-  bool _bgReadChecked = false;
-
   @override
-  Future<void> ensureBackgroundReadAuthorized() async {
-    if (defaultTargetPlatform != TargetPlatform.android) return;
-    if (_bgReadChecked) return;
-    _bgReadChecked = true;
-
-    try {
-      // Older Health Connect builds don't have the feature — nothing to do.
-      if (!await _health.isHealthDataInBackgroundAvailable()) return;
-      if (await _health.isHealthDataInBackgroundAuthorized()) return;
-
-      // Prompt at most once per install: the request pops the system
-      // Health Connect dialog, and a user who declined shouldn't see it
-      // again on every launch. (Hive flag — main isolate only; in the
-      // background isolate the box isn't open and we bail above anyway
-      // because this method is only called from foreground paths.)
-      final flags = StepLedgerStore();
-      if (flags.isBgReadPromptShown()) return;
-      await flags.setBgReadPromptShown();
-
-      final ok = await _health.requestHealthDataInBackgroundAuthorization();
-      log('[Health] background-read authorization: $ok');
-    } catch (e) {
-      log('[Health] background-read authorization failed: $e');
-    }
-  }
+  Future<void> ensureBackgroundReadAuthorized() async {}
 
   @override
   Future<void> openHealthSettings() async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        await InstalledHealthAppsService.openHealthConnectSettings();
+      if (_isAndroid) {
+        await CaloraSteps.openHealthConnect();
       } else {
         await openAppSettings();
       }
@@ -295,29 +313,12 @@ class StepRepoImpl extends StepRepo {
     }
   }
 
-  Future<bool> _ensureExtendedAuthorized() async {
-    if (_extendedAuthorized) return true;
-    try {
-      const types = [HealthDataType.WEIGHT, HealthDataType.HEART_RATE];
-      final permissions = types.map((_) => HealthDataAccess.READ).toList();
-
-      final already = await _health.hasPermissions(types, permissions: permissions);
-      if (already == true) {
-        _extendedAuthorized = true;
-        return true;
-      }
-
-      final granted = await _health.requestAuthorization(types, permissions: permissions);
-      _extendedAuthorized = granted;
-      return granted;
-    } catch (e) {
-      log('[Health] _ensureExtendedAuthorized error: $e');
-      return false;
-    }
-  }
-
   @override
-  Future<void> sendHealthData({required DateTime from, required DateTime to}) async {
+  Future<void> sendHealthData({
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    if (_isAndroid) return;
     try {
       // iOS HealthKit hides read-permission status (Apple privacy
       // model), so `hasHealthPermission()` returns false on iOS even
@@ -342,7 +343,8 @@ class StepRepoImpl extends StepRepo {
       DateTime cursor = startDay;
       while (!cursor.isAfter(endDay)) {
         final dayStart = DateTime(cursor.year, cursor.month, cursor.day);
-        final isToday = dayStart.year == now.year &&
+        final isToday =
+            dayStart.year == now.year &&
             dayStart.month == now.month &&
             dayStart.day == now.day;
         // For today, use "now" as upper bound. For past days, use end-of-day.
@@ -354,10 +356,7 @@ class StepRepoImpl extends StepRepo {
           final value = await _stepsInInterval(dayStart, dayEnd);
           if (value > 0) {
             dailyTotals.add(
-              StepsWithMetricsRequest(
-                date: dayStart,
-                value: value.toDouble(),
-              ),
+              StepsWithMetricsRequest(date: dayStart, value: value.toDouble()),
             );
           }
         } catch (e) {
@@ -369,9 +368,11 @@ class StepRepoImpl extends StepRepo {
 
       if (dailyTotals.isNotEmpty) {
         await _stepsApi.sendStepDataDateRange(steps: dailyTotals);
-        log('[Health] Synced ${dailyTotals.length} days of history '
-            '(${dailyTotals.first.date.toIso8601String()} → '
-            '${dailyTotals.last.date.toIso8601String()}).');
+        log(
+          '[Health] Synced ${dailyTotals.length} days of history '
+          '(${dailyTotals.first.date.toIso8601String()} → '
+          '${dailyTotals.last.date.toIso8601String()}).',
+        );
       }
     } catch (e) {
       log('Error sending health data: $e');
@@ -382,15 +383,18 @@ class StepRepoImpl extends StepRepo {
   Future<List<StepsWithMetricsRequest>> getLast30DaysLocal() async {
     final days = await StepLedgerDb.instance.getLast30Days();
     return days
-        .map((e) => StepsWithMetricsRequest(
-              date: e.key,
-              value: e.value.toDouble(),
-            ))
+        .map(
+          (e) =>
+              StepsWithMetricsRequest(date: e.key, value: e.value.toDouble()),
+        )
         .toList();
   }
 
   @override
   Future<int> getTodayHealthSteps() async {
+    if (_isAndroid) {
+      return (await CaloraSteps.snapshot()).healthConnectSteps ?? 0;
+    }
     try {
       final authorized = await ensureHealthAuthorized();
       if (!authorized) return 0;
@@ -430,14 +434,17 @@ class StepRepoImpl extends StepRepo {
       final steps = await _health.getTotalStepsInInterval(start, cappedEnd);
       return steps ?? 0;
     } catch (e) {
-      log('[Health] getTotalStepsInInterval failed for '
-          '${start.toIso8601String()}–${cappedEnd.toIso8601String()}: $e');
+      log(
+        '[Health] getTotalStepsInInterval failed for '
+        '${start.toIso8601String()}–${cappedEnd.toIso8601String()}: $e',
+      );
       return 0;
     }
   }
 
   @override
   Future<int> getHealthStepsForDay(DateTime day) async {
+    if (_isAndroid) return _deviceStepsForDay(day);
     try {
       // iOS's HealthKit doesn't surface read-permission status, so
       // `ensureHealthAuthorized` is unreliable there. Skip the gate
@@ -460,12 +467,25 @@ class StepRepoImpl extends StepRepo {
     }
   }
 
+  Future<int> _deviceStepsForDay(DateTime day) async {
+    final key = _dayKeyOf(day);
+    final now = DateTime.now();
+    final daysBack = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).difference(DateTime(day.year, day.month, day.day)).inDays;
+    if (daysBack < 0 || daysBack > 34) return 0;
+    final history = await CaloraSteps.history(days: daysBack + 1);
+    return history[key] ?? 0;
+  }
+
   @override
   Future<bool> isHealthDataAvailable() async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        final status = await _health.getHealthConnectSdkStatus();
-        return status == HealthConnectSdkStatus.sdkAvailable;
+      if (_isAndroid) {
+        final status = await CaloraSteps.status();
+        return status.healthConnect == HealthConnectAvailability.available;
       }
       return defaultTargetPlatform == TargetPlatform.iOS;
     } catch (e) {
@@ -479,25 +499,39 @@ class StepRepoImpl extends StepRepo {
   @override
   Future<List<NormsRequest>> getNorms() async => await _stepsApi.getNorms();
 
-  Map<String, DateTime> getDatePeriods(int period, int offset, {DateTime? now}) {
+  Map<String, DateTime> getDatePeriods(
+    int period,
+    int offset, {
+    DateTime? now,
+  }) {
     final currentTime = now ?? DateTime.now();
 
     late DateTime from;
     late DateTime to;
 
     if (period == 0) {
-      final today = DateTime(currentTime.year, currentTime.month, currentTime.day);
+      final today = DateTime(
+        currentTime.year,
+        currentTime.month,
+        currentTime.day,
+      );
       from = today.add(Duration(days: offset));
-      to = from.add(const Duration(days: 1)).subtract(const Duration(seconds: 1));
+      to = from
+          .add(const Duration(days: 1))
+          .subtract(const Duration(seconds: 1));
     } else if (period == 1) {
-      final startOfWeek = currentTime.subtract(Duration(days: currentTime.weekday - 1));
+      final startOfWeek = currentTime.subtract(
+        Duration(days: currentTime.weekday - 1),
+      );
       final weekStart = DateTime(
         startOfWeek.year,
         startOfWeek.month,
         startOfWeek.day,
       );
       from = weekStart.add(Duration(days: 7 * offset));
-      to = from.add(const Duration(days: 7)).subtract(const Duration(seconds: 1));
+      to = from
+          .add(const Duration(days: 7))
+          .subtract(const Duration(seconds: 1));
     } else {
       final startOfMonth = DateTime(currentTime.year, currentTime.month);
       from = DateTime(startOfMonth.year, startOfMonth.month + offset);

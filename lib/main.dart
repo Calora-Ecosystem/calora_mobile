@@ -14,6 +14,7 @@ import 'package:calora/common/router/initial_route_resolver.dart';
 import 'package:calora/common/service/background_steps_worker.dart';
 import 'package:calora/common/service/facebook_analytics_service.dart';
 import 'package:calora/common/service/notification_service.dart';
+import 'package:calora/common/service/premium_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/common/service/sentry_config.dart';
 import 'package:calora/domain/model/language/language.dart';
@@ -87,6 +88,7 @@ Future<void> main() async {
       await FacebookAnalyticsService.instance.init();
 
       final initialRoute = await getIt<InitialRouteResolver>().resolve();
+      getIt<PremiumService>().start();
 
       runApp(
         EasyLocalization(

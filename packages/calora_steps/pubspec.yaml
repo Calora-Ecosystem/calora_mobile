@@ -1,0 +1,23 @@
+name: calora_steps
+description: Calora's Android step tracking engine (sensor, Health Connect, Recording API, live notification).
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.2
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: ai.calora.steps
+        pluginClass: CaloraStepsPlugin

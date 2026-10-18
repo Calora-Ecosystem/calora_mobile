@@ -2,7 +2,7 @@ name: calora
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.25+96
+version: 1.0.26+97
 
 environment:
   sdk: ^3.9.2
@@ -24,6 +24,8 @@ dependencies:
   permission_handler: ^12.0.1
   easy_localization_generator:
     path: packages/easy_localization_generator
+  calora_steps:
+    path: packages/calora_steps
   easy_localization_loader: ^2.0.2
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0

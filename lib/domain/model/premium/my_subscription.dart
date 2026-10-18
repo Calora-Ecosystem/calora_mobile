@@ -1,3 +1,5 @@
+import 'package:calora/common/enums/subscription_plan_type.dart';
+
 /// The user's current plan (`GET billing/subscription/my`) for the
 /// Profile → Subscription panel.
 /// Free, active, or cancelled in the store (Premium kept until [MySubscription.endsAt]).
@@ -41,22 +43,27 @@ class MySubscription {
     this.nextPaymentAt,
   });
 
-  factory MySubscription.fromJson(Map<String, dynamic> json) => MySubscription(
-    isPremium: json['isPremium'] as bool? ?? false,
-    status: switch ((json['status'] as String?)?.toLowerCase()) {
-      'active' => SubscriptionStatus.active,
-      'cancelled' => SubscriptionStatus.cancelled,
-      _ => SubscriptionStatus.free,
-    },
-    managedByStore: json['managedByStore'] as bool? ?? false,
-    source: json['source'] as String?,
-    startsAt: DateTime.tryParse(json['startsAt'] as String? ?? ''),
-    endsAt: DateTime.tryParse(json['endsAt'] as String? ?? ''),
-    daysLeft: (json['daysLeft'] as num?)?.toInt() ?? 0,
-    provider: json['provider'] as String?,
-    durationInMonths: (json['durationInMonths'] as num?)?.toInt(),
-    isFamily: json['isFamily'] as bool? ?? false,
-    autoRenew: json['autoRenew'] as bool? ?? false,
-    nextPaymentAt: DateTime.tryParse(json['nextPaymentAt'] as String? ?? ''),
-  );
+  factory MySubscription.fromJson(Map<String, dynamic> json) {
+    final plan = SubscriptionPlanType.fromApi(json['plan'] as String?);
+    final isActive = json['isActive'] as bool? ?? false;
+    return MySubscription(
+      isPremium:
+          (json['isPremium'] as bool? ?? false) || (isActive && !plan.isFree),
+      status: switch ((json['status'] as String?)?.toLowerCase()) {
+        'active' => SubscriptionStatus.active,
+        'cancelled' => SubscriptionStatus.cancelled,
+        _ => SubscriptionStatus.free,
+      },
+      managedByStore: json['managedByStore'] as bool? ?? false,
+      source: json['source'] as String?,
+      startsAt: DateTime.tryParse(json['startsAt'] as String? ?? ''),
+      endsAt: DateTime.tryParse(json['endsAt'] as String? ?? ''),
+      daysLeft: (json['daysLeft'] as num?)?.toInt() ?? 0,
+      provider: json['provider'] as String?,
+      durationInMonths: (json['durationInMonths'] as num?)?.toInt(),
+      isFamily: json['isFamily'] as bool? ?? plan.isFamily,
+      autoRenew: json['autoRenew'] as bool? ?? false,
+      nextPaymentAt: DateTime.tryParse(json['nextPaymentAt'] as String? ?? ''),
+    );
+  }
 }

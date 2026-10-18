@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:calora/common/di/injection.dart';
-import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
+import 'package:calora/common/service/premium_service.dart';
 import 'package:calora/common/extensions/bottom_sheet.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/router/app_router.gr.dart';
@@ -74,9 +74,7 @@ class _FamilyRedeemSheetState extends State<FamilyRedeemSheet> {
     });
     try {
       final result = await getIt<PremiumRepo>().redeemFamilyCode(code);
-      if (result.requiresTokenRefresh) {
-        await getIt<TokenInterceptor>().refreshAndCheckPremium();
-      }
+      await getIt<PremiumService>().sync(force: true);
       if (mounted) Navigator.of(context).pop(result);
     } catch (e) {
       if (mounted) {

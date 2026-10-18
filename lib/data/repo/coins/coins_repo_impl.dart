@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:calora/data/api/coins_api.dart';
 import 'package:calora/domain/model/coins/coin_transaction.dart';
 import 'package:calora/domain/model/coins/market_item.dart';
@@ -6,11 +8,15 @@ import 'package:calora/domain/model/user/user_stat.dart';
 import 'package:calora/domain/repo/coins/coins_repo.dart';
 import 'package:injectable/injectable.dart';
 
-@Injectable(as: CoinsRepo)
+@LazySingleton(as: CoinsRepo)
 class CoinsRepoImpl implements CoinsRepo {
-  final CoinsApi _api;
-
   CoinsRepoImpl(this._api);
+
+  final CoinsApi _api;
+  final _walletChanges = StreamController<Wallet>.broadcast();
+
+  @override
+  Stream<Wallet> get walletChanges => _walletChanges.stream;
 
   /// Also keeps the app-wide [stepsPerCoin] in step with the server rule, so
   /// the step leaderboard's coin view uses the same rate as the wallet.
@@ -18,6 +24,7 @@ class CoinsRepoImpl implements CoinsRepo {
   Future<Wallet> getWallet() async {
     final wallet = await _api.getWallet();
     if (wallet.stepsPerCoin > 0) stepsPerCoin = wallet.stepsPerCoin;
+    _walletChanges.add(wallet);
     return wallet;
   }
 

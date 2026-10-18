@@ -1,17 +1,15 @@
-// lib/presentation/dashboard/management/dashboard_manager.dart
-
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:calora/common/base/step_ledger_store.dart';
-import 'package:calora/common/service/device_care_service.dart';
-import 'package:calora/common/service/foreground_service.dart';
-import 'package:calora/common/service/installed_health_apps_service.dart';
 import 'package:calora/common/service/step_counter_service.dart';
 import 'package:calora/data/store/auth/auth_store.dart';
 import 'package:calora/domain/repo/step/step_repo.dart';
 import 'package:calora/presentation/dashboard/management/dashboard_management.dart';
+import 'package:calora/presentation/step_sources/step_connect.dart';
+import 'package:calora_steps/calora_steps.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:management/management.dart';
@@ -26,14 +24,30 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   final StepLedgerStore _ledger = StepLedgerStore();
 
   StreamSubscription<int>? _stepsSub;
-  StreamSubscription<StepCounterEvent>? _stepEventsSub;
   StreamSubscription<void>? _forceLogoutSub;
 
   bool _initialized = false;
   Future<void>? _initFuture;
+  StepTrackingStatus _stepStatus = StepTrackingStatus.unknown;
+  bool _awaitingHealthConnectInstall = false;
+  String? _offeredTrackerId;
+  String? _pendingTrackerOffer;
 
   DashboardManager(this._stepRepo, this._stepCounter, this._authStore)
-      : super(const DashboardState());
+    : super(const DashboardState());
+
+  StepTrackingStatus get stepStatus => _stepStatus;
+
+  Future<void> get ready => _initFuture ?? Future.value();
+
+  String? takeTrackerOffer() {
+    final offer = _pendingTrackerOffer;
+    _pendingTrackerOffer = null;
+    return offer;
+  }
+
+  TrackerAppStatus? trackerById(String id) =>
+      _stepStatus.trackers.firstWhereOrNull((t) => t.id == id);
 
   @override
   void initialize() {
@@ -49,12 +63,10 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
       _forceLogoutSub?.cancel();
       _forceLogoutSub = _authStore.onForceLogout.listen((_) async {
         await _stepCounter.stop();
-        await StepsForegroundService.instance.stop();
         publish(const DashboardEffect.forceLogout());
       });
 
       _listenToStepCounter();
-      _listenToStepEvents();
       await _decideStepCounterStart();
     } catch (e, s) {
       log('DashboardManager init error: $e', stackTrace: s);
@@ -70,55 +82,13 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     });
   }
 
-  void _listenToStepEvents() {
-    _stepEventsSub?.cancel();
-    _stepEventsSub = _stepCounter.events.listen((event) {
-      switch (event) {
-        case HealthDataNotSyncing():
-          publish(DashboardEffect.requestHealthSyncFix(
-            detectedApp: event.detectedApp,
-          ));
-      }
-    });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Stuck-Health dialog actions (called from the UI)
-  // ─────────────────────────────────────────────────────────────────────
-
-  Future<void> onOpenHealthApp(String detectedApp) async {
-    // Deep-link straight to the Health Connect screen where the user
-    // manages this tracker's data sharing, so they can flip "Allow all"
-    // for Samsung Health / Google Fit and start writing Steps into
-    // Health Connect. Falls back to Health Connect's main settings
-    // natively when the tracker is unknown.
-    await DeviceCareService.openHealthConnectAppPermissions(detectedApp: detectedApp);
-    await _ledger.setUserOpenedHealthApp(true);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Battery-optimization whitelist prompt (background reliability)
-  // ─────────────────────────────────────────────────────────────────────
-
-  /// True when we should show the battery-whitelist dialog: Android, the
-  /// app isn't already exempt, and we haven't shown it before.
-  Future<bool> shouldPromptBatteryWhitelist() async {
-    if (!Platform.isAndroid) return false;
-    if (_ledger.isBatteryHintShown()) return false;
-    return !await DeviceCareService.isIgnoringBatteryOptimizations();
-  }
-
-  Future<void> markBatteryHintShown() => _ledger.setBatteryHintShown();
-
-  Future<void> onUseSensorInstead() async {
-    await _stepCounter.forcePedometer();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // Permission rationale flow (UI concern — kept here)
-  // ─────────────────────────────────────────────────────────────────────
-
   Future<void> _decideStepCounterStart() async {
+    if (Platform.isAndroid) {
+      await _stepCounter.start();
+      await _maybeOfferTrackerConnect();
+      return;
+    }
+
     final healthAvailable = await _stepRepo.isHealthDataAvailable();
     if (!healthAvailable) {
       await _stepCounter.start();
@@ -136,64 +106,115 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
     }
 
     if (_ledger.isHealthHintShown()) {
-      // Previously accepted — re-request silently in case it was revoked.
       unawaited(_stepRepo.requestHealthPermission());
       await _stepCounter.start();
       return;
     }
 
-    final detectedApp = Platform.isAndroid
-        ? (await InstalledHealthAppsService.detectPrimaryHealthApp() ?? 'unknown')
-        : 'ios';
-    publish(DashboardEffect.requestHealthPermission(detectedApp: detectedApp));
+    publish(const DashboardEffect.requestHealthPermission(detectedApp: 'ios'));
   }
 
-  /// User tapped "Yes" on the rationale dialog.
-  Future<void> onUserAcceptedHealthPermission() async {
+  Future<void> _maybeOfferTrackerConnect() async {
+    if (_ledger.isHealthHintShown() || _ledger.isHealthHintDismissed()) return;
+    _stepStatus = await CaloraSteps.status();
+    if (_stepStatus.healthConnectConnected) return;
+    if (_stepStatus.healthConnect == HealthConnectAvailability.unsupported) {
+      return;
+    }
+    final tracker = _stepStatus.trackers.firstOrNull;
+    if (tracker == null) return;
+    _offeredTrackerId = tracker.id;
+    _pendingTrackerOffer = tracker.id;
+  }
+
+  Future<StepConnectOutcome?> onUserAcceptedHealthPermission() async {
     await _ledger.setHealthHintShown();
+
+    if (Platform.isAndroid) return _connectHealthConnect(publishFix: false);
 
     final granted = await _stepRepo.requestHealthPermission();
     if (granted || Platform.isIOS) {
       await _stepCounter.start();
       await _stepCounter.retryHealth();
-      return;
+      return null;
     }
 
-    // Android denial — send user to device settings.
     await _ledger.setUserOpenedHealthApp(true);
     await _stepRepo.openHealthSettings();
     await _stepCounter.start();
+    return null;
   }
 
-  /// User tapped "No" on the rationale dialog.
   Future<void> onUserDeclinedHealthPermission() async {
     await _ledger.setHealthHintDismissed();
     await _stepCounter.start();
   }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // App lifecycle — re-check permission after user returns from settings
-  // ─────────────────────────────────────────────────────────────────────
+  Future<StepConnectOutcome> _connectHealthConnect({
+    required bool publishFix,
+  }) async {
+    final outcome = await linkHealthConnect(
+      _stepCounter,
+      trackerId: _offeredTrackerId,
+    );
+    _awaitingHealthConnectInstall =
+        outcome.result == HealthConnectConnectResult.storeOpened;
+    _stepStatus = await CaloraSteps.status();
+    final tracker = outcome.trackerNeedsSetup;
+    if (publishFix && tracker != null) {
+      publish(DashboardEffect.requestHealthSyncFix(detectedApp: tracker.id));
+    }
+    return outcome;
+  }
+
+  Future<void> onOpenHealthApp(String detectedApp) async {
+    final tracker = trackerById(detectedApp);
+    if (tracker == null) {
+      await CaloraSteps.openHealthConnect();
+    } else {
+      await CaloraSteps.openTracker(tracker.packageName);
+    }
+    await _ledger.setUserOpenedHealthApp(true);
+  }
+
+  Future<bool> shouldPromptBatteryWhitelist() async {
+    if (!Platform.isAndroid) return false;
+    if (_ledger.isBatteryHintShown()) return false;
+    final status = await CaloraSteps.status();
+    return !status.batteryUnrestricted;
+  }
+
+  Future<void> markBatteryHintShown() => _ledger.setBatteryHintShown();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
     if (lifecycleState != AppLifecycleState.resumed) return;
+
+    if (Platform.isAndroid) {
+      unawaited(_onAndroidResumed());
+      return;
+    }
 
     if (_ledger.didUserOpenHealthApp()) {
       unawaited(_recheckAfterUserReturn());
       return;
     }
 
-    // iOS-specific: HealthKit doesn't expose read-permission status,
-    // so we can't tell when the user fixes it in Settings on their
-    // own. Cheap workaround — every time the app comes to the
-    // foreground and we're not already on Health, ask the service to
-    // try again. `retryHealth` is a no-op if Health is already
-    // active, and silently bails if the probe still returns 0, so
-    // this is safe to fire on every resume.
-    if (Platform.isIOS && _stepCounter.source != StepSource.health) {
+    if (_stepCounter.source != StepSource.health) {
       unawaited(_stepCounter.retryHealth());
     }
+  }
+
+  Future<void> _onAndroidResumed() async {
+    await _stepCounter.refresh();
+    if (_ledger.didUserOpenHealthApp()) {
+      await _ledger.setUserOpenedHealthApp(false);
+    }
+    if (!_awaitingHealthConnectInstall) return;
+    final status = await CaloraSteps.status();
+    if (status.healthConnect != HealthConnectAvailability.available) return;
+    _awaitingHealthConnectInstall = false;
+    await _connectHealthConnect(publishFix: true);
   }
 
   Future<void> _recheckAfterUserReturn() async {
@@ -206,7 +227,6 @@ class DashboardManager extends Manager<DashboardState, DashboardEffect>
   Future<void> close() {
     WidgetsBinding.instance.removeObserver(this);
     _stepsSub?.cancel();
-    _stepEventsSub?.cancel();
     _forceLogoutSub?.cancel();
     return super.close();
   }

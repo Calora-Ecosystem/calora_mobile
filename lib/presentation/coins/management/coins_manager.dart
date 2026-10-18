@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
 import 'package:calora/common/extensions/api_error_extension.dart';
+import 'package:calora/common/service/premium_service.dart';
 import 'package:calora/domain/model/coins/market_item.dart';
 import 'package:calora/domain/repo/coins/coins_repo.dart';
 import 'package:calora/presentation/coins/management/coins_management.dart';
@@ -16,9 +16,9 @@ import 'package:management/management.dart';
 @injectable
 class CoinsManager extends Manager<CoinsState, CoinsEffect> {
   final CoinsRepo _repo;
-  final TokenInterceptor _tokenInterceptor;
+  final PremiumService _premium;
 
-  CoinsManager(this._repo, this._tokenInterceptor) : super(const CoinsState());
+  CoinsManager(this._repo, this._premium) : super(const CoinsState());
 
   @override
   void initialize() {
@@ -65,9 +65,7 @@ class CoinsManager extends Manager<CoinsState, CoinsEffect> {
     emit(state.copyWith(busy: true));
     try {
       final result = await _repo.purchase(item);
-      if (result.requiresTokenRefresh) {
-        await _tokenInterceptor.refreshAndCheckPremium();
-      }
+      if (result.requiresTokenRefresh) await _premium.sync(force: true);
       if (isClosed) return;
       emit(state.copyWith(busy: false));
       publish(CoinsEffect.purchased(item, result.code));

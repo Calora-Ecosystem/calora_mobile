@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
+import 'package:calora/common/service/step_counter_service.dart';
 import 'package:calora/domain/model/language/language.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
@@ -51,6 +54,7 @@ class LanguagePage extends StatelessWidget {
                 if (!context.mounted) return;
                 // Update EasyLocalization so Strings.* re-translate.
                 await context.setLocale(lang.locale);
+                unawaited(getIt<StepCounterService>().syncNotificationLabels());
                 if (context.mounted) Navigator.of(context).pop();
               },
             );

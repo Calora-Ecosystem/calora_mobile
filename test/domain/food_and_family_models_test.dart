@@ -130,5 +130,25 @@ void main() {
       expect(sub.isFamily, isTrue);
       expect(MySubscription.fromJson({}).isFamily, isFalse);
     });
+
+    test('subscription/my reads the plan field the backend sends', () {
+      final family = MySubscription.fromJson({
+        'plan': 'Family',
+        'isPremium': false,
+        'isActive': true,
+        'status': 'Active',
+      });
+      expect(family.isFamily, isTrue);
+      expect(family.isPremium, isTrue);
+
+      final free = MySubscription.fromJson({
+        'plan': 'Free',
+        'isPremium': false,
+        'isActive': false,
+        'status': 'Free',
+      });
+      expect(free.isPremium, isFalse);
+      expect(free.status, SubscriptionStatus.free);
+    });
   });
 }

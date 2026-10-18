@@ -265,7 +265,7 @@ class PremiumSheet
               child: state.isPaymentPending
                   ? Column(
                       children: [
-                        _legalLinks(context),
+                        _legalLinks(context, autoRenews: state.isIap),
                         const SizedBox(height: 12),
                         Button(
                           height: 40,
@@ -274,7 +274,7 @@ class PremiumSheet
                           loading: state.selectedPaymentMethod?.code == 'Iap'
                               ? state.isOrderingSubscription
                               : state.isGettingPaymentLink,
-                          onPressed: () => manager.getPaymentLink(),
+                          onPressed: manager.continuePurchase,
                         ),
                         if (state.selectedPaymentMethod?.code == 'Iap') ...[
                           const SizedBox(height: 12),
@@ -284,8 +284,7 @@ class PremiumSheet
                             type: ButtonType.secondary,
                             enabled: !state.isOrderingSubscription,
                             loading: state.isRestoringPurchase,
-                            onPressed: () =>
-                                manager.getPaymentLink(restore: true),
+                            onPressed: manager.restorePurchase,
                           ),
                         ],
                         const SizedBox(height: 12),
@@ -300,7 +299,7 @@ class PremiumSheet
                     )
                   : Column(
                       children: [
-                        _legalLinks(context),
+                        _legalLinks(context, autoRenews: state.isIap),
                         const SizedBox(height: 12),
                         Button(
                           height: 40,
@@ -313,7 +312,7 @@ class PremiumSheet
                               !_familyUnavailable(state) &&
                               !state.isRestoringPurchase,
                           loading: state.isOrderingSubscription,
-                          onPressed: () => manager.orderSubscription(),
+                          onPressed: manager.orderSubscription,
                         ),
                         if (state.selectedPaymentMethod?.code == 'Iap' &&
                             !(state.selectedPlan?.isFree ?? false)) ...[
@@ -328,8 +327,7 @@ class PremiumSheet
                                     !state.isUzbekistan) &&
                                 !state.isOrderingSubscription,
                             loading: state.isRestoringPurchase,
-                            onPressed: () =>
-                                manager.orderSubscription(restore: true),
+                            onPressed: manager.restorePurchase,
                           ),
                         ],
                       ],
@@ -552,7 +550,7 @@ class PremiumSheet
     );
   }
 
-  Widget _legalLinks(BuildContext context) {
+  Widget _legalLinks(BuildContext context, {required bool autoRenews}) {
     final disclaimerStyle = TextStyle(
       fontSize: 11,
       height: 14 / 11,
@@ -567,12 +565,14 @@ class PremiumSheet
     );
     return Column(
       children: [
-        Text(
-          'subscription_auto_renew_note'.tr(),
-          style: disclaimerStyle,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 6),
+        if (autoRenews) ...[
+          Text(
+            'subscription_auto_renew_note'.tr(),
+            style: disclaimerStyle,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+        ],
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,

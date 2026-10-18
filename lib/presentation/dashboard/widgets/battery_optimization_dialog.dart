@@ -1,15 +1,11 @@
-// lib/presentation/dashboard/widgets/battery_optimization_dialog.dart
-
+import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/strings.dart';
-import 'package:calora/common/service/device_care_service.dart';
+import 'package:calora/common/widgets/button/button.dart';
+import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora_steps/calora_steps.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-/// Asks the user to whitelist the app from battery optimization (and, on
-/// aggressive OEMs, enable Autostart / background activity) so the step
-/// foreground service isn't killed when the app is backgrounded.
-///
-/// Deep-links to the system / OEM screens via [DeviceCareService].
 class BatteryOptimizationDialog extends StatelessWidget {
   const BatteryOptimizationDialog({super.key});
 
@@ -23,69 +19,67 @@ class BatteryOptimizationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              shape: BoxShape.circle,
+    return Dialog(
+      backgroundColor: context.colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: context.colors.accentGreenWhite,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.battery_charging_full_rounded,
+                color: context.colors.accentSub,
+                size: 32,
+              ),
             ),
-            child: const Icon(
-              Icons.battery_saver,
-              color: Colors.green,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'battery_hint_title'.tr(),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'battery_hint_body'.tr(),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
+            const SizedBox(height: 16),
+            'battery_hint_title'
+                .tr()
+                .text(18, 24, 700)
+                .c(context.colors.textStrong)
+                .copyWith(textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            'battery_hint_body'
+                .tr()
+                .text(14, 20, 400)
+                .c(context.colors.textSub)
+                .copyWith(textAlign: TextAlign.center),
+            const SizedBox(height: 20),
+            Button(
+              text: 'battery_hint_allow'.tr(),
               onPressed: () {
                 Navigator.pop(context);
-                DeviceCareService.requestIgnoreBatteryOptimizations();
+                CaloraSteps.requestIgnoreBatteryOptimizations();
               },
-              icon: const Icon(Icons.battery_charging_full, size: 18),
-              label: Text('battery_hint_allow'.tr()),
             ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
+            const SizedBox(height: 8),
+            Button(
+              text: 'battery_hint_autostart'.tr(),
+              type: ButtonType.secondary,
               onPressed: () {
                 Navigator.pop(context);
-                DeviceCareService.openAutoStartSettings();
+                CaloraSteps.openAutoStart();
               },
-              icon: const Icon(Icons.settings_backup_restore, size: 18),
-              label: Text('battery_hint_autostart'.tr()),
             ),
-          ),
-          const SizedBox(height: 4),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(Strings.later),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Button(
+              text: Strings.later,
+              height: 44,
+              backgroundColor: Colors.transparent,
+              foregroundColor: context.colors.textSub,
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
       ),
     );
   }

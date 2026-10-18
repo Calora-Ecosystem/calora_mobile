@@ -7,7 +7,6 @@ import 'package:calora/common/base/profile_store.dart';
 import 'package:calora/common/di/injection.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/facebook_analytics_service.dart';
-import 'package:calora/common/service/foreground_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/common/service/step_counter_service.dart';
 import 'package:calora/domain/model/dailies/dailies_request.dart';
@@ -75,7 +74,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         );
       }
       final w = (profile.weight ?? 0).toDouble();
-      if (w > 0) StepsForegroundService.instance.setUserWeight(w);
+      if (w > 0) unawaited(_stepCounter.configure(weightKg: w));
     },
   );
 
@@ -221,6 +220,11 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
           },
           onData: (data) {
             emit(state.copyWith(metrics: data, isMetricsLoading: false));
+            if (isToday && data.foots > 0 && data.kcal > 0) {
+              unawaited(
+                _stepCounter.configure(kcalPerStep: data.kcal / data.foots),
+              );
+            }
           },
           onError: (_) => emit(state.copyWith(isMetricsLoading: false)),
           onDone: () => _metricsInFlight = false,
@@ -265,12 +269,7 @@ class HomeManager extends Manager<HomeState, HomeEffect> {
         );
 
         if (newTargetSteps > 0) {
-          StepsForegroundService.instance.setGoalSteps(newTargetSteps);
-          if (StepsForegroundService.instance.isRunning) {
-            unawaited(
-              StepsForegroundService.instance.updateGoal(newTargetSteps),
-            );
-          }
+          unawaited(_stepCounter.configure(goal: newTargetSteps));
         }
       },
       onError: (_) => emit(state.copyWith(isLoading: false)),

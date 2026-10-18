@@ -2,10 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.health.READ_STEPS" />
-    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
-    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
-    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
-    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -49,56 +45,30 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <intent-filter>
-                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-            </intent-filter>
         </activity>
 
         <activity
-            android:name="com.google.android.apps.healthdata.permissions.api.sdk.HealthConnectPermissionActivity"
-            android:exported="true" />
+            android:name=".HealthPrivacyActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity-alias
-            android:name=".HealthPermissionActivity"
+            android:name="ViewPermissionUsageActivity"
             android:exported="true"
-            android:targetActivity=".MainActivity"
-            tools:node="merge">
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE"
+            android:targetActivity=".HealthPrivacyActivity">
             <intent-filter>
-                <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
-
-        <service
-            android:name=".StepsFgService"
-            android:exported="false"
-            android:foregroundServiceType="health" />
-        <receiver
-            android:name=".MidnightResetReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".StepsBootReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
-            <intent-filter android:priority="1000">
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".StepsWatchdogReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="ai.calora.app.steps.WATCHDOG_KICK" />
-            </intent-filter>
-        </receiver>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -124,30 +94,8 @@
     </application>
 
     <queries>
-        <!-- Health Connect -->
         <package android:name="com.google.android.apps.healthdata" />
-        <package android:name="com.google.android.apps.healthdata.debug" />
 
-        <!-- ✅ Fitness app'lar shu yerga ko'chdi -->
-        <package android:name="com.sec.android.app.shealth" />
-        <package android:name="com.mi.health" />
-        <package android:name="com.xiaomi.hm.health" />
-
-        <!-- Health Connect intent'lari -->
-        <intent>
-            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-        </intent>
-
-        <intent>
-            <action android:name="androidx.health.platform.action.REQUEST_PERMISSIONS" />
-        </intent>
-
-        <intent>
-            <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
-            <data android:scheme="package" />
-        </intent>
-
-        <!-- Share intent'lari -->
         <intent>
             <action android:name="android.intent.action.SEND" />
             <data android:mimeType="text/plain" />

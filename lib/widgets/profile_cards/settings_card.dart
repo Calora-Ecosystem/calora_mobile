@@ -33,11 +33,8 @@ class SettingsCard extends StatelessWidget {
     required this.onHelpTap,
   });
 
-  /// The platform-specific name of the health data source surfaced to
-  /// the user, so HealthKit (iOS) / Health Connect (Android) integration
-  /// is clearly identified in the UI (App Store Review Guideline 2.5.1).
   String get _healthSourceName =>
-      Platform.isIOS ? 'Apple Health' : 'Health Connect';
+      Platform.isIOS ? 'Apple Health' : 'steps_sources_title'.tr();
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +79,9 @@ class SettingsCard extends StatelessWidget {
       },
       {
         'icon': Icon(
-          Icons.favorite_rounded,
+          Platform.isIOS
+              ? Icons.favorite_rounded
+              : Icons.directions_walk_rounded,
           size: 20,
           color: context.colors.accentSub,
         ),

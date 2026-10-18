@@ -1,14 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:calora/common/base/manager_builder.dart';
 import 'package:calora/common/extensions/text_extensions.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/router/app_router.gr.dart';
-import 'package:calora/presentation/app/app/management/app_management.dart';
-import 'package:calora/presentation/app/app/management/app_manager.dart';
 import 'package:calora/presentation/app/theme/theme_extensions.dart';
+import 'package:calora/widgets/premium/premium_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:management/management.dart';
 
 /// Compact page-header premium upsell used across Home / Calories / Course /
 /// Steps. It mirrors the profile [PremiumEntryCard] look — the brand
@@ -23,11 +20,9 @@ class PremiumPromoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ManagerBuilder<AppState, AppEffect>(
-      manager: context.read<AppManager>(),
-      properties: (state) => [state.isUserPremium],
-      builder: (context, state) {
-        if (state.isUserPremium) return const SizedBox.shrink();
+    return PremiumBuilder(
+      builder: (context, isPremium) {
+        if (isPremium) return const SizedBox.shrink();
         final colors = context.colors;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,

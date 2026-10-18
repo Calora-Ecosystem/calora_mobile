@@ -1,0 +1,70 @@
+str,en_US,uz_UZ,ru_RU
+steps_notif_channel,Steps,Qadamlar,Шаги
+steps_notif_title,{steps} steps,{steps} qadam,Шаги: {steps}
+steps_notif_goal,Goal: {goal},Maqsad: {goal},Цель: {goal}
+steps_notif_kcal,{kcal} kcal,{kcal} kkal,{kcal} ккал
+steps_notif_goal_reached,Goal reached!,Maqsad bajarildi!,Цель достигнута!
+steps_sources_title,Step tracking,Qadamlarni hisoblash,Подсчёт шагов
+steps_sources_today,Today,Bugun,Сегодня
+steps_sources_counting_ok,Steps are counted automatically,Qadamlar avtomatik hisoblanmoqda,Шаги считаются автоматически
+steps_sources_counting_problem,Steps are not being counted,Qadamlar hisoblanmayapti,Шаги не считаются
+steps_sources_merge_hint,"Calora combines the phone sensor and connected apps and shows the most complete number, so steps are never counted twice.","Calora telefon sensori va ulangan ilovalarni birlashtirib, eng toʻliq natijani koʻrsatadi. Qadamlar hech qachon ikki marta sanalmaydi.","Calora объединяет датчик телефона и подключённые приложения и показывает самое полное значение, поэтому шаги не считаются дважды."
+steps_sources_breakdown,Where today's steps come from,Bugungi qadamlar qayerdan olinmoqda,Откуда сегодняшние шаги
+steps_source_sensor,Phone sensor,Telefon sensori,Датчик телефона
+steps_source_hc,Health Connect,Health Connect,Health Connect
+steps_source_recording,Google Play services,Google Play xizmatlari,Сервисы Google Play
+steps_source_calora,Shown in Calora,Calorada koʻrsatiladi,Показано в Calora
+steps_sources_phone,This phone,Telefon,Телефон
+steps_sources_activity,Physical activity,Jismoniy faollik,Физическая активность
+steps_sources_activity_on,Allowed: the phone sensor counts your steps,Ruxsat berilgan: telefon sensori qadamlarni sanaydi,Разрешено: датчик телефона считает шаги
+steps_sources_activity_off,Allow it so Calora can count your steps,Calora qadamlarni sanashi uchun ruxsat bering,"Разрешите, чтобы Calora могла считать шаги"
+steps_sources_no_sensor,This phone has no step sensor. Connect a fitness app or a watch below.,Bu telefonda qadam sensori yoʻq. Quyida fitnes ilova yoki soatni ulang.,В этом телефоне нет датчика шагов. Подключите ниже фитнес-приложение или часы.
+steps_sources_background,Background work,Fonda ishlash,Работа в фоне
+steps_sources_background_on,Allowed: steps are counted even when the app is closed,Ruxsat berilgan: ilova yopiq boʻlsa ham qadamlar sanaladi,"Разрешено: шаги считаются, даже когда приложение закрыто"
+steps_sources_background_off,The system may stop step counting to save battery,Tizim batareyani tejash uchun qadam hisoblashni toʻxtatib qoʻyishi mumkin,Система может остановить подсчёт шагов ради экономии батареи
+steps_sources_autostart,Autostart,Avtomatik ishga tushish,Автозапуск
+steps_sources_autostart_hint,"On {brand} phones, also allow Calora to start automatically",{brand} telefonlarida Caloraga avtomatik ishga tushishga ham ruxsat bering,На телефонах {brand} также разрешите Calora автозапуск
+steps_sources_notification,Steps in notifications,Bildirishnomada qadamlar,Шаги в уведомлении
+steps_sources_notification_on,Your steps are shown in the notification panel,Qadamlaringiz bildirishnomalar panelida koʻrinadi,Ваши шаги видны в панели уведомлений
+steps_sources_notification_off,Turn on notifications to see steps without opening the app,Ilovani ochmasdan qadamlarni koʻrish uchun bildirishnomalarni yoqing,"Включите уведомления, чтобы видеть шаги, не открывая приложение"
+steps_sources_hc_desc,"Syncs steps from Samsung Health, Google Fit, Mi Fitness, watches and bands","Samsung Health, Google Fit, Mi Fitness, soat va bilaguzuklardan qadamlarni sinxronlaydi","Синхронизирует шаги из Samsung Health, Google Fit, Mi Fitness, часов и браслетов"
+steps_sources_hc_connected,Connected,Ulangan,Подключено
+steps_sources_hc_not_connected,Not connected,Ulanmagan,Не подключено
+steps_sources_hc_not_installed,Health Connect is not installed,Health Connect oʻrnatilmagan,Health Connect не установлен
+steps_sources_hc_update,Health Connect needs an update,Health Connectni yangilash kerak,Health Connect нужно обновить
+steps_sources_hc_unsupported,Not available on this phone,Bu telefonda mavjud emas,Недоступно на этом телефоне
+steps_sources_hc_today,Today in Health Connect: {steps},Bugun Health Connectda: {steps},Сегодня в Health Connect: {steps}
+steps_sources_hc_background_off,"Allow ""Access data in the background"" so steps stay in sync while the app is closed",Ilova yopiq boʻlganda ham sinxron boʻlishi uchun «Fonda maʼlumotlarga kirish»ga ruxsat bering,"Разрешите «Доступ к данным в фоне», чтобы шаги синхронизировались при закрытом приложении"
+steps_sources_apps_title,Fitness apps on this phone,Telefoningizdagi fitnes ilovalar,Фитнес-приложения на телефоне
+steps_sources_app_syncing,Syncing via Health Connect,Health Connect orqali sinxronlanmoqda,Синхронизируется через Health Connect
+steps_sources_app_not_syncing,Not sending steps to Health Connect yet,Hali Health Connectga qadam yubormayapti,Пока не передаёт шаги в Health Connect
+steps_sources_app_needs_hc,Connect Health Connect first to sync this app,Bu ilovani sinxronlash uchun avval Health Connectni ulang,"Чтобы синхронизировать это приложение, сначала подключите Health Connect"
+steps_sources_app_hint_generic,Open {app} → Settings → Health Connect and allow it to share Steps.,{app}ni oching → Sozlamalar → Health Connect boʻlimida «Qadamlar»ni ulashishga ruxsat bering.,Откройте {app} → Настройки → Health Connect и разрешите передачу шагов.
+steps_sources_app_hint_samsung,Open Samsung Health → ⋮ → Settings → Health Connect and allow Steps.,Samsung Healthni oching → ⋮ → Sozlamalar → Health Connect → «Qadamlar»ga ruxsat bering.,Откройте Samsung Health → ⋮ → Настройки → Health Connect и разрешите «Шаги».
+steps_sources_app_hint_fit,"Open Google Fit → Profile → ⚙ → turn on ""Sync Fit with Health Connect"".",Google Fitni oching → Profil → ⚙ → «Health Connect bilan sinxronlash»ni yoqing.,Откройте Google Fit → Профиль → ⚙ → включите «Синхронизация с Health Connect».
+steps_action_allow,Allow,Ruxsat berish,Разрешить
+steps_action_connect,Connect,Ulash,Подключить
+steps_action_install,Install,Oʻrnatish,Установить
+steps_action_update,Update,Yangilash,Обновить
+steps_action_open,Open,Ochish,Открыть
+steps_action_settings,Settings,Sozlamalar,Настройки
+steps_action_refresh,Refresh,Yangilash,Обновить
+steps_action_fix,Fix,Tuzatish,Исправить
+steps_action_done,Done,Tayyor,Готово
+steps_card_not_counting,Steps aren't being counted. Tap to fix,Qadamlar sanalmayapti. Tuzatish uchun bosing,"Шаги не считаются. Нажмите, чтобы исправить"
+steps_card_source_hc,via Health Connect,Health Connect orqali,через Health Connect
+steps_connect_title,Connect {app},{app}ni ulang,Подключите {app}
+steps_connect_body,Calora already counts steps with your phone. Connect {app} through Health Connect to add steps from your watch or band and see the same numbers in both apps.,Calora qadamlarni telefon orqali allaqachon hisoblayapti. Soat yoki bilaguzukdagi qadamlar ham qoʻshilishi va ikkala ilovada bir xil raqam koʻrinishi uchun {app}ni Health Connect orqali ulang.,"Calora уже считает шаги телефоном. Подключите {app} через Health Connect, чтобы добавить шаги с часов или браслета и видеть одинаковые цифры в обоих приложениях."
+steps_connect_body_generic,Calora already counts steps with your phone. Connect Health Connect to add steps from your watch or fitness app.,Calora qadamlarni telefon orqali allaqachon hisoblayapti. Soat yoki fitnes ilovadagi qadamlar ham qoʻshilishi uchun Health Connectni ulang.,"Calora уже считает шаги телефоном. Подключите Health Connect, чтобы добавить шаги с часов или из фитнес-приложения."
+steps_connect_benefit_watch,Steps from watches and bands,Soat va bilaguzuk qadamlari,Шаги с часов и браслетов
+steps_connect_benefit_sync,The same numbers as in {app},{app} bilan bir xil raqamlar,"Те же цифры, что и в {app}"
+steps_connect_benefit_safe,Steps are never counted twice,Qadamlar ikki marta sanalmaydi,Шаги не считаются дважды
+steps_connect_note,"Health Connect opens next. Allow ""Steps"" there.",Keyingi oynada Health Connect ochiladi. U yerda «Qadamlar»ga ruxsat bering.,Далее откроется Health Connect. Разрешите там «Шаги».
+steps_connect_install_note,Health Connect opens in Google Play. Install it and come back: Calora will finish the setup.,Health Connect Google Playda ochiladi. Uni oʻrnatib qayting: Calora sozlashni oʻzi yakunlaydi.,Health Connect откроется в Google Play. Установите его и вернитесь: Calora завершит настройку.
+steps_connect_denied,"Calora didn't get access. You can allow it any time in Profile → Step tracking.",Calora ruxsat olmadi. Istalgan vaqtda Profil → Qadamlarni hisoblash boʻlimida ruxsat berishingiz mumkin.,Доступ не предоставлен. Его можно дать в любой момент: Профиль → Подсчёт шагов.
+steps_connect_done,Connected! Steps from Health Connect will appear in a few minutes.,Ulandi! Health Connectdagi qadamlar bir necha daqiqada paydo boʻladi.,Подключено! Шаги из Health Connect появятся через несколько минут.
+steps_syncfix_title,One more step in {app},{app}da yana bitta qadam,Ещё один шаг в {app}
+steps_syncfix_body,"Health Connect is connected, but {app} isn't sharing steps with it yet.","Health Connect ulandi, lekin {app} hali unga qadamlarni bermayapti.","Health Connect подключён, но {app} пока не передаёт в него шаги."
+steps_syncfix_open,Open {app},{app}ni ochish,Открыть {app}
+steps_ios_body,"Calora reads your steps from Apple Health. If they don't update, open Settings → Health → Data Access & Devices → Calora and turn on Steps.","Calora qadamlarni Apple Healthdan oladi. Agar ular yangilanmasa, Sozlamalar → Salomatlik → Maʼlumotlarga kirish va qurilmalar → Calora boʻlimida «Qadamlar»ni yoqing.","Calora берёт шаги из Apple Health. Если они не обновляются, откройте Настройки → Здоровье → Доступ к данным и устройства → Calora и включите «Шаги»."
+steps_locale_code,en,uz,ru

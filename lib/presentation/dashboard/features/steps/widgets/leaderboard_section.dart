@@ -17,7 +17,7 @@ class LeaderboardSection extends StatelessWidget {
 
   /// Same users in the same order as the step board, but each row shows the
   /// coins earned from those steps (1 coin per [stepsPerCoin] steps — the
-  /// server rule, refreshed when the coin board is opened).
+  /// server rule, refreshed whenever the Steps page reads the wallet).
   final bool byCoins;
 
   const LeaderboardSection({super.key, required this.paginationService, this.byCoins = false});

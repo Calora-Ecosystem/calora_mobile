@@ -178,8 +178,7 @@ class RevenueCatService {
     if (kIsWeb) return false;
     try {
       await Purchases.invalidateCustomerInfoCache();
-      final customerInfo = await Purchases.getCustomerInfo();
-      return customerInfo.entitlements.all[_entitlementId]?.isActive == true;
+      return _isEntitled(await Purchases.getCustomerInfo());
     } catch (e, st) {
       getIt<Logger>().e('Entitlement check failed: $e', stackTrace: st);
       return false;
@@ -187,33 +186,54 @@ class RevenueCatService {
   }
 
   Future<void> login(ProfileRequest? user) async {
-    if (user == null) return;
-    await Purchases.logIn(user.userId!.toString());
+    final userId = user?.userId;
+    if (kIsWeb || user == null || userId == null) return;
+    await Purchases.logIn(userId.toString());
     await Purchases.setEmail(user.email ?? '');
     await Purchases.setDisplayName(user.name ?? '');
   }
 
-  Future<bool> purchase(
-    PlanModel plan, [
-    bool restore = false,
-    MySubscriptionOrderModel? order,
-  ]) async {
-    if (kIsWeb) {
-      throw IapException(Strings.errorViewMessage);
-    }
+  Future<void> _ensureSignedInUser() async {
+    final userId = (await _store.getProfile()).userId?.toString();
+    if (userId == null || await Purchases.appUserID == userId) return;
+    await Purchases.logIn(userId);
+  }
+
+  static bool _isEntitled(CustomerInfo customerInfo) =>
+      customerInfo.entitlements.all[_entitlementId]?.isActive ?? false;
+
+  static IapException _iapError(PlatformException error) =>
+      switch (PurchasesErrorHelper.getErrorCode(error)) {
+        PurchasesErrorCode.paymentPendingError => IapException(
+          Strings.purchaseIsPending,
+        ),
+        _ => IapException(Strings.errorViewMessage),
+      };
+
+  Future<bool> restore() async {
+    if (kIsWeb) throw IapException(Strings.errorViewMessage);
     try {
+      await _ensureSignedInUser();
+      final restored = _isEntitled(await Purchases.restorePurchases());
+      if (!restored) {
+        getIt<Display>().info(description: 'no_previous_purchase'.tr());
+      }
+      return restored;
+    } on PlatformException catch (e, st) {
+      getIt<Logger>().e('IAP restore failed: $e', stackTrace: st);
+      throw _iapError(e);
+    }
+  }
+
+  Future<bool> purchase(
+    PlanModel plan, {
+    MySubscriptionOrderModel? order,
+  }) async {
+    if (kIsWeb) throw IapException(Strings.errorViewMessage);
+    try {
+      await _ensureSignedInUser();
       await Purchases.setAttributes({'order_id': order?.id?.toString() ?? ''});
       await Purchases.syncAttributesAndOfferingsIfNeeded();
-
-      if (restore) {
-        final customerInfo = await Purchases.restorePurchases();
-        final isActive =
-            customerInfo.entitlements.all[_entitlementId]?.isActive == true;
-        if (!isActive) {
-          getIt<Display>().info(description: 'no_previous_purchase'.tr());
-        }
-        return isActive;
-      }
 
       final offering = await _currentOffering();
 
@@ -240,9 +260,7 @@ class RevenueCatService {
       }
 
       final result = await Purchases.purchase(PurchaseParams.package(package));
-      final isActive =
-          result.customerInfo.entitlements.all[_entitlementId]?.isActive ==
-          true;
+      final isActive = _isEntitled(result.customerInfo);
 
       if (isActive) _reportPurchaseToMeta(package, order);
 
@@ -253,7 +271,7 @@ class RevenueCatService {
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
         return false;
       }
-      throw IapException(Strings.errorViewMessage);
+      throw _iapError(e);
     }
   }
 

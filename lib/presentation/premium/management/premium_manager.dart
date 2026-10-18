@@ -1,15 +1,17 @@
-import 'dart:math';
 import 'dart:async';
+import 'dart:math';
 
 import 'package:calora/common/di/injection.dart';
-import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
 import 'package:calora/common/enums/subscription_plan_type.dart';
 import 'package:calora/common/gen/assets.gen.dart';
 import 'package:calora/common/gen/strings.dart';
 import 'package:calora/common/service/facebook_analytics_service.dart';
+import 'package:calora/common/service/premium_service.dart';
 import 'package:calora/common/service/revenuecat_service.dart';
 import 'package:calora/domain/model/premium/family_code.dart';
 import 'package:calora/domain/model/premium/family_coupon.dart';
+import 'package:calora/domain/model/premium/my_subscription.dart';
+import 'package:calora/domain/model/premium/my_subscription_order_model.dart';
 import 'package:calora/domain/model/premium/premium_plan_model.dart';
 import 'package:calora/domain/model/premium/promo_code_model.dart';
 import 'package:calora/domain/repo/common/common_repo.dart';
@@ -29,45 +31,48 @@ import 'package:url_launcher/url_launcher.dart';
 @injectable
 class PremiumManager extends Manager<PremiumState, PremiumEffect>
     with WidgetsBindingObserver {
-  final PremiumRepo _premiumRepo;
-  final CommonRepo _commonRepo;
-
-  StreamSubscription<bool>? _countrySubscription;
-
-  bool _awaitingExternalPayment = false;
-  bool _checkingExternalPayment = false;
-  Timer? _paymentPollTimer;
-  int _paymentPollTicks = 0;
-  static const Duration _paymentPollInterval = Duration(seconds: 5);
-  static const int _paymentPollMaxTicks = 24;
-
-  bool _awaitingOfferCode = false;
-
-  /// Family codes the user had before paying for the family plan. The
-  /// family payment counts as done when a code outside this set shows up —
-  /// "is the user Premium" can't tell, a Premium user may buy it too. Null
-  /// when not paying for the family plan (or the lookup failed).
-  Set<String>? _familyCodesBefore;
-
-  FamilyCoupon? issuedFamilyCoupon;
-
-  static const String _playRedeemUrl = 'https://play.google.com/redeem';
-
-  bool _iapPricesRequested = false;
-
-  final Map<int, StoreProduct> _iapProducts = {};
-  bool _paywallViewLogged = false;
-
-  PremiumManager(this._premiumRepo, this._commonRepo)
-    : super(const PremiumState()) {
+  PremiumManager(
+    this._premiumRepo,
+    this._commonRepo,
+    this._premium,
+    this._revenueCat,
+  ) : super(const PremiumState()) {
     WidgetsBinding.instance.addObserver(this);
   }
 
+  final PremiumRepo _premiumRepo;
+  final CommonRepo _commonRepo;
+  final PremiumService _premium;
+  final RevenueCatService _revenueCat;
+
+  static const _paymentPollInterval = Duration(seconds: 5);
+  static const _paymentPollTicks = 24;
+  static const _playRedeemUrl = 'https://play.google.com/redeem';
+  static const _metaContentType =
+      FacebookAnalyticsService.contentTypeSubscription;
+  static const _localCurrency = 'UZS';
+
+  StreamSubscription<bool>? _countrySubscription;
+  Timer? _paymentPollTimer;
+  bool _awaitingExternalPayment = false;
+  bool _checkingExternalPayment = false;
+  bool _awaitingOfferCode = false;
+  Set<String>? _familyCodesBefore;
+  MySubscription? _subscriptionBefore;
+  bool _iapPricesRequested = false;
+  final Map<int, StoreProduct> _iapProducts = {};
+  bool _paywallViewLogged = false;
+
+  FamilyCoupon? issuedFamilyCoupon;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
-    if (lifecycleState == AppLifecycleState.resumed &&
-        _awaitingExternalPayment) {
+    if (!_awaitingExternalPayment) return;
+    if (lifecycleState == AppLifecycleState.resumed) {
       unawaited(_checkExternalPayment());
+      _startPaymentPolling();
+    } else if (lifecycleState == AppLifecycleState.paused) {
+      _stopPaymentPolling();
     }
   }
 
@@ -170,7 +175,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     _iapPricesRequested = true;
 
     emit(state.copyWith(isLoadingIapPrices: true));
-    final products = await getIt<RevenueCatService>().planProducts(state.plans);
+    final products = await _revenueCat.planProducts(state.plans);
     _iapProducts
       ..clear()
       ..addAll(products);
@@ -216,19 +221,17 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
 
   Future<void> redeemOfferCode() async {
     try {
-      final presented = await getIt<RevenueCatService>()
-          .presentOfferCodeRedemption();
+      final presented = await _revenueCat.presentOfferCodeRedemption();
       _awaitingOfferCode = true;
-
       if (!presented) {
-        _openPaymentUrl(_playRedeemUrl);
+        await _openPaymentUrl(_playRedeemUrl);
         return;
       }
-
+      _subscriptionBefore = await _currentSubscription();
       _awaitingExternalPayment = true;
       _startPaymentPolling();
     } catch (e) {
-      publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
+      publish(PremiumEffect.openPaymentUrlFailure(_errorText(e)));
     }
   }
 
@@ -254,26 +257,19 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     );
   }
 
-  Future<void> getMyOrders() async => await _premiumRepo.getMyOrders().handle(
+  Future<void> getMyOrders() => _premiumRepo.getMyOrders().handle(
     onStart: () => emit(state.copyWith(isGettingOrders: true)),
-    onData: (data) {
-      final pendingOrder = data.isNotEmpty
-          ? data.firstWhere(
-              (e) => e.status?.trim().toLowerCase() == 'pending',
-              orElse: () => data.first,
-            )
-          : null;
-      final selectedMethod = pendingOrder != null
-          ? state.paymentMethods.firstWhereOrNull(
-              (m) => m.code == pendingOrder.provider,
-            )
-          : null;
+    onData: (orders) {
+      final pending = orders.pending;
+      final pendingMethod = state.paymentMethods.firstWhereOrNull(
+        (method) => method.code == pending?.provider,
+      );
       emit(
         state.copyWith(
           isGettingOrders: false,
-          myOrders: data,
-          isPaymentPending: pendingOrder != null,
-          selectedPaymentMethod: selectedMethod ?? state.selectedPaymentMethod,
+          myOrders: orders,
+          isPaymentPending: pending != null,
+          selectedPaymentMethod: pendingMethod ?? state.selectedPaymentMethod,
         ),
       );
     },
@@ -305,8 +301,6 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   Future<void> getPromoCodeValue(String code) async {
     if (code.trim().isEmpty) return restoreOriginalPrices();
 
-    // A family-plan code isn't a discount: it turns Premium on outright.
-    // People type whatever code they got into "Promo code", so accept it here.
     if (isFamilyCode(code)) {
       return _redeemFamilyCode(code.trim());
     }
@@ -366,9 +360,7 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     emit(state.copyWith(isGettingPromoCodeValue: true));
     try {
       final result = await _premiumRepo.redeemFamilyCode(code);
-      if (result.requiresTokenRefresh) {
-        await getIt<TokenInterceptor>().refreshAndCheckPremium();
-      }
+      await _premium.sync(force: true);
       if (isClosed) return;
       emit(state.copyWith(isGettingPromoCodeValue: false));
       publish(PremiumEffect.familyCodeRedeemed(result.ownerName));
@@ -379,142 +371,160 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     }
   }
 
-  Future<void> orderSubscription({bool? restore}) async {
-    final isRestore = restore ?? false;
-    final isIap = state.selectedPaymentMethod?.code == 'Iap';
+  Future<void> orderSubscription() async {
+    final plan = state.selectedPlan;
+    if (plan == null) return;
+    _logInitiateCheckout();
 
-    if (!isRestore) _logInitiateCheckout();
-
-    final isFreePlan = state.selectedPlan?.isFree ?? false;
-    final providerCode =
-        state.selectedPaymentMethod?.code ??
-        (isFreePlan && state.paymentMethods.isNotEmpty
-            ? state.paymentMethods.first.code
-            : '');
+    final method = state.selectedPaymentMethod;
+    final provider =
+        method?.code ??
+        (plan.isFree ? state.paymentMethods.firstOrNull?.code : null) ??
+        '';
 
     await _premiumRepo
         .orderSubscription(
-          provider: providerCode,
+          provider: provider,
           plan:
               (state.isFamily
                       ? SubscriptionPlanType.family
                       : SubscriptionPlanType.premium)
                   .toApi(),
-          orderMonth: state.selectedPlan?.id ?? -1,
+          orderMonth: plan.id,
           couponId: state.promoCodeValue?.id,
         )
         .handle(
-          onStart: () => emit(
-            state.copyWith(
-              isOrderingSubscription: !isRestore,
-              isRestoringPurchase: isRestore,
-            ),
-          ),
-          onData: (link) async {
-            emit(state.copyWith(paymentLink: link.paymentLink ?? ''));
-            if (link.paymentRequired ?? true) {
-              if (isIap) {
-                await _openIap(state.selectedPlan!, restore: isRestore);
-              } else {
-                emit(
-                  state.copyWith(
-                    isOrderingSubscription: false,
-                    isRestoringPurchase: false,
-                  ),
-                );
-                _openPaymentUrl(link.paymentLink ?? '');
-              }
-            } else {
-              emit(
-                state.copyWith(
-                  isOrderingSubscription: false,
-                  isRestoringPurchase: false,
-                ),
-              );
+          onStart: () => emit(state.copyWith(isOrderingSubscription: true)),
+          onData: (response) async {
+            emit(state.copyWith(paymentLink: response.paymentLink ?? ''));
+            if (!(response.paymentRequired ?? true)) {
+              await _premium.markPurchased();
+              emit(state.copyWith(isOrderingSubscription: false));
               publish(const PremiumEffect.subscriptionSuccess());
+              return;
             }
+            if (method?.code == 'Iap') {
+              await _openIap(plan);
+              return;
+            }
+            emit(state.copyWith(isOrderingSubscription: false));
+            await _openPaymentUrl(response.paymentLink ?? '');
           },
-          onError: (error) => emit(
-            state.copyWith(
-              isOrderingSubscription: false,
-              isRestoringPurchase: false,
-            ),
-          ),
+          onError: (_) => emit(state.copyWith(isOrderingSubscription: false)),
         );
   }
 
-  Future<void> deleteOrder() async => _premiumRepo
-      .deleteOrder(orderId: state.myOrders.first.id ?? -1)
-      .handle(
-        onStart: () => emit(state.copyWith(isDeletingOrder: true)),
-        onData: (_) {
-          _stopPaymentPolling();
-          emit(state.copyWith(isDeletingOrder: false, isPaymentPending: false));
-        },
-        onError: (_) => emit(state.copyWith(isDeletingOrder: false)),
-      );
-
-  Future<void> getPaymentLink({bool? restore}) async {
-    final isRestore = restore ?? false;
-    if (!isRestore) _logInitiateCheckout();
-    if (state.selectedPaymentMethod?.code == 'Iap') {
+  Future<void> continuePurchase() async {
+    _logInitiateCheckout();
+    if (state.isIap) {
       final plan = state.selectedPlan;
-      if (plan == null) return;
-      emit(
-        state.copyWith(
-          isOrderingSubscription: !isRestore,
-          isRestoringPurchase: isRestore,
-        ),
-      );
-      await _openIap(plan, restore: isRestore);
+      if (plan != null) await _openIap(plan);
       return;
     }
+
+    final orderId = state.pendingOrder?.id;
+    if (orderId == null) return;
     await _premiumRepo
-        .getPaymentLink(orderId: state.myOrders.first.id ?? -1)
+        .getPaymentLink(orderId: orderId)
         .handle(
           onStart: () => emit(state.copyWith(isGettingPaymentLink: true)),
           onData: (link) {
             emit(
               state.copyWith(isGettingPaymentLink: false, paymentLink: link),
             );
-            _openPaymentUrl(link);
+            unawaited(_openPaymentUrl(link));
           },
-          onError: (error) => emit(state.copyWith(isGettingPaymentLink: false)),
+          onError: (_) => emit(state.copyWith(isGettingPaymentLink: false)),
         );
   }
 
-  Future<void> _openPaymentUrl(String url) async {
+  Future<void> restorePurchase() async {
+    emit(state.copyWith(isRestoringPurchase: true));
     try {
-      final uri = Uri.parse(url);
-      _familyCodesBefore = state.isFamily ? await _familyCodesNow() : null;
-      if (await canLaunchUrl(uri)) {
-        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-          publish(
-            PremiumEffect.openPaymentUrlFailure(
-              Strings.couldNotLaunchPaymentUrl,
-            ),
-          );
-          return;
-        }
-        _awaitingExternalPayment = true;
-        _startPaymentPolling();
-      } else {
-        publish(
-          PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl),
-        );
-      }
+      if (!await _revenueCat.restore()) return;
+      await _premium.markPurchased();
+      publish(const PremiumEffect.subscriptionSuccess());
     } catch (e) {
-      publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
+      publish(PremiumEffect.openPaymentUrlFailure(_errorText(e)));
+    } finally {
+      emit(state.copyWith(isRestoringPurchase: false));
     }
   }
 
+  Future<void> deleteOrder() async {
+    final orderId = state.pendingOrder?.id;
+    if (orderId == null) return;
+    await _premiumRepo
+        .deleteOrder(orderId: orderId)
+        .handle(
+          onStart: () => emit(state.copyWith(isDeletingOrder: true)),
+          onData: (_) {
+            _finishExternalPayment();
+            final orders = state.myOrders
+                .where((order) => order.id != orderId)
+                .toList();
+            emit(
+              state.copyWith(
+                isDeletingOrder: false,
+                isPaymentPending: orders.pending != null,
+                myOrders: orders,
+              ),
+            );
+          },
+          onError: (_) => emit(state.copyWith(isDeletingOrder: false)),
+        );
+  }
+
+  Future<void> _openIap(PlanModel plan) async {
+    emit(state.copyWith(isOrderingSubscription: true));
+    try {
+      final order = (await _premiumRepo.getMyOrders()).pending;
+      if (!await _revenueCat.purchase(plan, order: order)) return;
+      await _premium.markPurchased();
+      publish(const PremiumEffect.subscriptionSuccess());
+    } catch (e) {
+      publish(PremiumEffect.openPaymentUrlFailure(_errorText(e)));
+    } finally {
+      emit(state.copyWith(isOrderingSubscription: false));
+    }
+  }
+
+  Future<void> _openPaymentUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme) {
+      publish(
+        PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl),
+      );
+      return;
+    }
+
+    if (state.isFamily) {
+      _familyCodesBefore = await _familyCodesNow();
+    } else {
+      _subscriptionBefore = await _currentSubscription();
+    }
+    var launched = false;
+    try {
+      launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e, st) {
+      getIt<Logger>().e('Payment URL launch failed: $e', stackTrace: st);
+    }
+    if (!launched) {
+      publish(
+        PremiumEffect.openPaymentUrlFailure(Strings.couldNotLaunchPaymentUrl),
+      );
+      return;
+    }
+
+    _awaitingExternalPayment = true;
+    _startPaymentPolling();
+  }
+
   void _startPaymentPolling() {
-    _paymentPollTicks = 0;
     _paymentPollTimer?.cancel();
-    _paymentPollTimer = Timer.periodic(_paymentPollInterval, (_) {
-      _paymentPollTicks++;
-      if (_paymentPollTicks > _paymentPollMaxTicks) {
-        _stopPaymentPolling();
+    _paymentPollTimer = Timer.periodic(_paymentPollInterval, (timer) {
+      if (timer.tick > _paymentPollTicks) {
+        timer.cancel();
         return;
       }
       unawaited(_checkExternalPayment());
@@ -524,8 +534,14 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   void _stopPaymentPolling() {
     _paymentPollTimer?.cancel();
     _paymentPollTimer = null;
+  }
+
+  void _finishExternalPayment() {
+    _stopPaymentPolling();
     _awaitingExternalPayment = false;
     _awaitingOfferCode = false;
+    _familyCodesBefore = null;
+    _subscriptionBefore = null;
   }
 
   Future<Set<String>?> _familyCodesNow() async {
@@ -535,6 +551,23 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     } catch (_) {
       return null;
     }
+  }
+
+  Future<MySubscription?> _currentSubscription() async {
+    try {
+      return await _premiumRepo.getMySubscription();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool isExtended(MySubscription before, MySubscription after) {
+    final beforeEnd = before.endsAt;
+    final afterEnd = after.endsAt;
+    return after.isPremium &&
+        beforeEnd != null &&
+        afterEnd != null &&
+        afterEnd.isAfter(beforeEnd);
   }
 
   static FamilyCoupon? newFamilyCoupon(
@@ -549,83 +582,51 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
   Future<void> _checkExternalPayment() async {
     if (!_awaitingExternalPayment || _checkingExternalPayment) return;
     _checkingExternalPayment = true;
-
     try {
-      final before = _familyCodesBefore;
-      if (state.isFamily && before != null) {
-        List<FamilyCoupon> coupons;
-        try {
-          coupons = await _premiumRepo.getMyCoupons();
-        } catch (_) {
-          return;
-        }
-        await getMyOrders();
-        final issued = newFamilyCoupon(before, coupons);
-        if (issued == null) return;
-        issuedFamilyCoupon = issued;
-        // The plan claim lives in the JWT — pick it up before celebrating.
-        await getIt<TokenInterceptor>().refreshAndCheckPremium();
-        _stopPaymentPolling();
-        _familyCodesBefore = null;
-        _logExternalPurchase();
-        publish(const PremiumEffect.subscriptionSuccess());
-        return;
-      }
-
-      if (_awaitingOfferCode &&
-          await getIt<RevenueCatService>().hasActiveEntitlement()) {
-        _stopPaymentPolling();
-        await getMyOrders();
-        publish(const PremiumEffect.subscriptionSuccess());
-        return;
-      }
-
-      final premium = await getIt<TokenInterceptor>().refreshAndCheckPremium();
-      await getMyOrders();
-
-      if (premium) {
-        _stopPaymentPolling();
-        _logExternalPurchase();
-        publish(const PremiumEffect.subscriptionSuccess());
-      }
+      if (!await _externalPaymentDone() || !_awaitingExternalPayment) return;
+      _finishExternalPayment();
+      _logExternalPurchase();
+      publish(const PremiumEffect.subscriptionSuccess());
     } finally {
       _checkingExternalPayment = false;
     }
   }
 
-  Future<void> _openIap(PlanModel plan, {bool restore = false}) async {
-    try {
-      final orders = await _premiumRepo.getMyOrders();
-      final pendingOrder = orders.isNotEmpty
-          ? orders.firstWhere(
-              (e) => e.status?.trim().toLowerCase() == 'pending',
-              orElse: () => orders.first,
-            )
-          : null;
-      final purchased = await getIt<RevenueCatService>().purchase(
-        plan,
-        restore,
-        pendingOrder,
-      );
-      if (purchased) {
-        publish(PremiumEffect.subscriptionSuccess());
-      }
-    } catch (e) {
-      publish(PremiumEffect.openPaymentUrlFailure(e.toString()));
-    } finally {
-      emit(
-        state.copyWith(
-          isOrderingSubscription: false,
-          isRestoringPurchase: false,
-        ),
-      );
+  Future<bool> _externalPaymentDone() async {
+    if (_awaitingOfferCode && await _revenueCat.hasActiveEntitlement()) {
+      await _premium.markPurchased();
+      return true;
     }
+
+    final before = _familyCodesBefore;
+    if (state.isFamily && before != null) {
+      final List<FamilyCoupon> coupons;
+      try {
+        coupons = await _premiumRepo.getMyCoupons();
+      } catch (_) {
+        return false;
+      }
+      final issued = newFamilyCoupon(before, coupons);
+      if (issued == null) return false;
+      issuedFamilyCoupon = issued;
+      await _premium.sync(force: true);
+      return true;
+    }
+
+    final subscriptionBefore = _subscriptionBefore;
+    if (subscriptionBefore == null || !subscriptionBefore.isPremium) {
+      return _premium.sync(force: true);
+    }
+    final subscription = await _currentSubscription();
+    if (subscription == null || !isExtended(subscriptionBefore, subscription)) {
+      return false;
+    }
+    await _premium.sync(force: true);
+    return true;
   }
 
-  static const String _metaContentType =
-      FacebookAnalyticsService.contentTypeSubscription;
-
-  static const String _localCurrency = 'UZS';
+  static String _errorText(Object error) =>
+      error is IapException ? error.message : Strings.errorViewMessage;
 
   (double, String)? _metaPriceFor(PlanModel plan) {
     if (state.isIap) {
@@ -678,7 +679,8 @@ class PremiumManager extends Manager<PremiumState, PremiumEffect>
     final plan = state.selectedPlan;
     if (plan == null) return;
 
-    final orderId = state.myOrders.firstOrNull?.id?.toString();
+    final orderId = (state.pendingOrder ?? state.myOrders.newest)?.id
+        ?.toString();
     if (orderId == null) return;
 
     final price = _metaPriceFor(plan);

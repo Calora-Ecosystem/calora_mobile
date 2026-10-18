@@ -1,4 +1,6 @@
-import 'package:calora/common/di/network/interceptor/token_interceptor.dart';
+import 'dart:async';
+
+import 'package:calora/common/service/premium_service.dart';
 import 'package:calora/data/store/common/common_store.dart';
 import 'package:calora/domain/model/calories/ai_quota.dart';
 import 'package:calora/domain/repo/calories/calories_repo.dart';
@@ -6,13 +8,11 @@ import 'package:injectable/injectable.dart';
 
 @lazySingleton
 class AiQuotaService {
-  AiQuotaService(this._repo, this._store, this._tokens);
+  AiQuotaService(this._repo, this._store, this._premium);
 
   final CaloriesRepo _repo;
   final CommonStore _store;
-  final TokenInterceptor _tokens;
-
-  bool _premiumSyncAttempted = false;
+  final PremiumService _premium;
 
   Stream<AiQuota> watch() async* {
     yield await _store.aiQuota();
@@ -27,14 +27,9 @@ class AiQuotaService {
       return _store.aiQuota();
     }
     await _store.aiQuota.set(quota);
-    await _syncPremium(quota);
+    if (quota.isPremium != await _store.isUserPremium()) {
+      unawaited(_premium.sync());
+    }
     return quota;
-  }
-
-  Future<void> _syncPremium(AiQuota quota) async {
-    if (!quota.isPremium || _premiumSyncAttempted) return;
-    if (await _store.isUserPremium()) return;
-    _premiumSyncAttempted = true;
-    await _tokens.refreshAndCheckPremium();
   }
 }

@@ -33,6 +33,7 @@ import 'package:calora/widgets/info/dish_info_page.dart';
 import 'package:calora/widgets/meals/free_scan_banner.dart';
 import 'package:calora/widgets/meals/meals_type_widget.dart';
 import 'package:calora/widgets/meals/paginated_food_grid.dart';
+import 'package:calora/widgets/premium/premium_builder.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:management/management.dart';
@@ -135,11 +136,15 @@ class AddMealsPage
                     controller: _searchController,
                   ),
                   if (state.activeTab != FoodTab.search) ...[
-                    if (!context.read<AppManager>().state.isUserPremium)
-                      FreeScanBanner(
-                        onTap: () =>
-                            context.router.push(const PremiumFeaturesRoute()),
-                      ),
+                    PremiumBuilder(
+                      builder: (context, isPremium) => isPremium
+                          ? const SizedBox.shrink()
+                          : FreeScanBanner(
+                              onTap: () => context.router.push(
+                                const PremiumFeaturesRoute(),
+                              ),
+                            ),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
